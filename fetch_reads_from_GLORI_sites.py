@@ -1,9 +1,14 @@
 import os
 HOME = os.path.expanduser('~')
+from glob import glob
 import pandas as pd
 import pysam
 from Bio import SeqIO
 from Bio.Seq import Seq
+from utils import med_mad, segment
+from ont_fast5_api.fast5_interface import get_fast5_file
+from extract_features import extract_features_from_read
+from cluster_features import cluster_features
 
 glori_file = os.path.join(HOME, 'Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv')
 df_glori = pd.read_csv(glori_file)
@@ -18,7 +23,18 @@ for record in SeqIO.parse(ref_file, 'fasta'):
 bam_file = os.path.join(HOME, 'Data/Isabel_IVT_Nanopore/HEK293A_wildtype/minimap/aligned_genome.bam.sorted')
 bam = pysam.AlignmentFile(bam_file, 'rb')
 
-# motifs = []
+fast5_dir = os.path.join(HOME, 'Data/Isabel_IVT_Nanopore/HEK293A_wildtype/fast5_filtered')
+id_signal = {}
+for f5_file in glob(os.path.join(fast5_dir, '*.fast5'), recursive=True):
+    f5 = get_fast5_file(f5_file, mode="r")
+    for read in f5.get_reads():
+        signal = read.get_raw_data(scale=True)
+        signal_start = 0
+        signal_end = len(signal)
+        med, mad = med_mad(signal[signal_start:signal_end])
+        signal = (signal[signal_start:signal_end] - med) / mad
+        id_signal[read] = signal
+
 for _, row in df_glori.iterrows():
     chr = row['Chr'].lstrip('chr')
 
@@ -40,6 +56,7 @@ for _, row in df_glori.iterrows():
     # for this_read in overlap_reads:
     #     print(str(this_read))
 
+    collected_features = {}
     for pileupcolumn in bam.pileup(chr, site, site+1, truncate=True, min_base_quality=0):
         if pileupcolumn.pos == site:
             # coverage = pileupcolumn.n
@@ -51,16 +68,21 @@ for _, row in df_glori.iterrows():
                 print('coverage = {}'.format(coverage))
                 valid_counts = 0
                 for pileupread in pileupcolumn.pileups:
+                    query_name = pileupread.alignment.query_name
                     # query_position = pileupread.query_position_or_next
                     query_position = pileupread.query_position
                     if query_position and pileupread.alignment.query_sequence[query_position]=='A':
                         valid_counts += 1
                         print('\tmotif in read {} = {}, pos {}'.format(
-                            pileupread.alignment.query_name,
+                            query_name,
                             pileupread.alignment.query_sequence[query_position-2:query_position+3],
                             query_position
                         ))
+                        this_read_features = extract_features_from_read(query_name, query_position)
+                        collected_features[query_name] = this_read_features
                 print('Valid reads = {}'.format(valid_counts))
+
+    outlier_ratio = cluster_features(collected_features)
 
     # if strand=='+':
     #     # print(ref_seq)
