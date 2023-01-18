@@ -74,16 +74,21 @@ for _, row in df_glori.iterrows():
                     query_position = pileupread.query_position
                     if query_position and pileupread.alignment.query_sequence[query_position]=='A':
                         valid_counts += 1
-                        print('\tmotif in read {} = {}, pos {}'.format(
-                            query_name,
-                            pileupread.alignment.query_sequence[query_position-2:query_position+3],
-                            query_position
-                        ))
-                        this_read_features = extract_features_from_signal(id_signal[query_name], query_position)
-                        collected_features[query_name] = this_read_features
+                        # print('\tmotif in read {} = {}, pos {}'.format(
+                        #     query_name,
+                        #     pileupread.alignment.query_sequence[query_position-2:query_position+3],
+                        #     query_position
+                        # ))
+                        if query_name in id_signal.keys():
+                            this_read_features = extract_features_from_signal(id_signal[query_name], query_position)
+                            print('{}, pos {}:'.format(query_name, query_position))
+                            print(this_read_features)
+                            collected_features[query_name] = this_read_features
+                        else:
+                            print('Query read not in fast5 directory!')
                 print('Valid reads = {}'.format(valid_counts))
 
-    outlier_ratio = cluster_features(collected_features)
+    # outlier_ratio = cluster_features(collected_features)
 
     # if strand=='+':
     #     # print(ref_seq)
