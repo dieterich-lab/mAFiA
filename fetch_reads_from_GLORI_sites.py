@@ -80,7 +80,8 @@ for _, row in df_glori.iterrows():
                         #     query_position
                         # ))
                         if query_name in id_signal.keys():
-                            this_read_features = extract_features_from_signal(id_signal[query_name], query_position)
+                            query_motif = pileupread.alignment.query_sequence[query_position-2:query_position+3]
+                            this_read_features = extract_features_from_signal(id_signal[query_name], query_position, query_motif)
                             print('{}, pos {}:'.format(query_name, query_position))
                             print(this_read_features)
                             collected_features[query_name] = this_read_features

@@ -30,7 +30,7 @@ def load_model(modelfile, config):
         sys.stderr.write("No model file specified!")
         sys.exit(1)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print("Using device:", device)
+    # print("Using device:", device)
     model = rodan(config=config).to(device)
     state_dict = torch.load(modelfile, map_location=device)["state_dict"]
     if "state_dict" in state_dict:
@@ -39,7 +39,7 @@ def load_model(modelfile, config):
         model.load_state_dict(torch.load(modelfile, map_location=device)["state_dict"])
     model.convlayers.conv21.register_forward_hook(get_activation('conv21'))
 
-    print(model)
+    # print(model)
     model.eval()
     torch.set_grad_enabled(False)
 
@@ -99,7 +99,7 @@ def extract_features_from_signal(signal, pos, check_motif):
     ### todo: check pred label ###
     pred_motif = pred_label[pos-2:pos+3]
     if pred_motif!=check_motif:
-        print('Error: Predicted motif different from given one!')
+        print('Error: Predicted motif {} different from given one {}!'.format(pred_motif, check_motif))
         return None
 
     return all_features[pos]
