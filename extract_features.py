@@ -93,8 +93,8 @@ def extract_features_from_signal(signal, pos, check_motif):
         this_feature = activation['conv21'].detach().cpu().numpy()[i, :, pred_locs]
         features.append(this_feature)
 
-    pred_label = ''.join(pred_labels)
-    all_features = np.vstack(features)
+    pred_label = ''.join(pred_labels)[::-1]
+    all_features = np.vstack(features)[::-1]
 
     ### todo: check pred label ###
     pred_motif = pred_label[pos-2:pos+3]

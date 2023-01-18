@@ -85,8 +85,8 @@ for _, row in df_glori.iterrows():
                             print('{}, pos {}:'.format(query_name, query_position))
                             print(this_read_features)
                             collected_features[query_name] = this_read_features
-                        else:
-                            print('Query read not in fast5 directory!')
+                        # else:
+                        #     print('Query read not in fast5 directory!')
                 print('Valid reads = {}'.format(valid_counts))
 
     # outlier_ratio = cluster_features(collected_features)
