@@ -21,10 +21,12 @@ for record in SeqIO.parse(ref_file, 'fasta'):
     if (record.id.isnumeric()) or (record.id in ['X', 'Y']):
         ref[record.id] = str(record.seq)
 
-bam_file = os.path.join(HOME, 'Data/Isabel_IVT_Nanopore/HEK293A_wildtype/minimap/aligned_genome.bam.sorted')
+# bam_file = os.path.join(HOME, 'Data/Isabel_IVT_Nanopore/HEK293A_wildtype/minimap/aligned_genome.bam.sorted')
+bam_file = os.path.join(HOME, 'inference/HEK293_IVT_2_q50_10M/epoch29_HEK293A_WT_aligned_to_genome.bam.sorted')
 bam = pysam.AlignmentFile(bam_file, 'rb')
 
-fast5_dir = os.path.join(HOME, 'Data/Isabel_IVT_Nanopore/HEK293A_wildtype/fast5_filtered')
+# fast5_dir = os.path.join(HOME, 'Data/Isabel_IVT_Nanopore/HEK293A_wildtype/fast5_filtered')
+fast5_dir = '/prj/Isabel_IVT_Nanopore/HEK293A_wildtype/Jessica_HEK293/HEK293A_2/20190409_1503_GA10000_FAK10978_2e75d7be/fast5_all'
 id_signal = {}
 for f5_file in tqdm(glob(os.path.join(fast5_dir, '*.fast5'), recursive=True)):
     f5 = get_fast5_file(f5_file, mode="r")
@@ -72,6 +74,10 @@ for _, row in df_glori.iterrows():
                     query_name = pileupread.alignment.query_name
                     # query_position = pileupread.query_position_or_next
                     query_position = pileupread.query_position
+                    if pileupread.alignment.flag==16:
+                        reverse_complement = True
+                    else:
+                        reverse_complement = False
                     if query_position and pileupread.alignment.query_sequence[query_position]=='A':
                         valid_counts += 1
                         # print('\tmotif in read {} = {}, pos {}'.format(
@@ -81,7 +87,7 @@ for _, row in df_glori.iterrows():
                         # ))
                         if query_name in id_signal.keys():
                             query_motif = pileupread.alignment.query_sequence[query_position-2:query_position+3]
-                            this_read_features = extract_features_from_signal(id_signal[query_name], query_position, query_motif)
+                            this_read_features = extract_features_from_signal(id_signal[query_name], query_position, query_motif, reverse_complement)
                             print('{}, pos {}:'.format(query_name, query_position))
                             print(this_read_features)
                             collected_features[query_name] = this_read_features
