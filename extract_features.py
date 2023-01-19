@@ -80,7 +80,7 @@ def ctcdecoder(logits, label, blank=False, beam_size=5, alphabet=alphabet, pre=N
             retstr.append("".join(cur))
     return ret, retstr
 
-def extract_features_from_signal(signal, pos, check_motif):
+def extract_features_from_signal(signal, pos, bam_motif):
     chunks = segment(signal, config.seqlen)
     model, device = load_model(model_path, config)
     event = torch.unsqueeze(torch.FloatTensor(chunks), 1).to(device, non_blocking=True)
@@ -99,8 +99,8 @@ def extract_features_from_signal(signal, pos, check_motif):
 
     ### todo: check pred label ###
     pred_motif = pred_label[pos-2:pos+3]
-    print('Predicted motif {}, aligned {}!'.format(pred_motif, check_motif))
-    if pred_motif!=check_motif:
+    # print('Predicted motif {}, aligned {}, matching {}'.format(pred_motif, bam_motif, pred_motif == bam_motif))
+    if pred_motif!=bam_motif:
         print('\n!!!!!!!!!!!!!!!!!!!Error: Predicted motif =/= aligned!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n')
         return None
 

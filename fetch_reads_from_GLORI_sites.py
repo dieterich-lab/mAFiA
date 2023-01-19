@@ -30,24 +30,25 @@ bam = pysam.AlignmentFile(bam_file, 'rb')
 fast5_dir = '/prj/Isabel_IVT_Nanopore/HEK293A_wildtype/Jessica_HEK293/HEK293A_2/20190409_1503_GA10000_FAK10978_2e75d7be/fast5_all'
 # id_signal = {}
 index_read_ids = {}
+print('Indexing read ids...')
 for f5_filepath in tqdm(glob(os.path.join(fast5_dir, '*.fast5'), recursive=True)):
     f5 = get_fast5_file(f5_filepath, mode="r")
     for read_id in f5.get_read_ids():
         index_read_ids[read_id] = f5_filepath
 
-### search by
+### search by GLORI sites ###
 for ind, row in tqdm(df_glori.iterrows()):
-    ### debug ###
-    row = df_glori.iloc[2746]
+    # ### debug ###
+    # ind = 2746
+    # row = df_glori.iloc[ind]
 
     chr = row['Chr'].lstrip('chr')
     strand = row['Strand']
     site = row['Sites'] - 1   # 0-based
     ratio = row['Ratio']
 
-    if not ((chr.isnumeric()) or (chr in ['X', 'Y']) or (strand=='+')):
-    # if not ((chr.isnumeric()) or (chr in ['X', 'Y'])):
-        continue
+    # if not ((chr.isnumeric()) or (chr in ['X', 'Y']) or (strand=='+')):
+    #     continue
 
     ref_motif = ref[chr][site-2:site+3]
     # if strand=='-':
