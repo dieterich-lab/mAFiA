@@ -80,7 +80,7 @@ def ctcdecoder(logits, label, blank=False, beam_size=5, alphabet=alphabet, pre=N
             retstr.append("".join(cur))
     return ret, retstr
 
-def extract_features_from_signal(signal, pos, check_motif, reverse_complement):
+def extract_features_from_signal(signal, pos, check_motif):
     chunks = segment(signal, config.seqlen)
     model, device = load_model(model_path, config)
     event = torch.unsqueeze(torch.FloatTensor(chunks), 1).to(device, non_blocking=True)
@@ -96,10 +96,6 @@ def extract_features_from_signal(signal, pos, check_motif, reverse_complement):
 
     pred_label = ''.join(pred_labels)[::-1]
     all_features = np.vstack(features)[::-1]
-
-    if reverse_complement:
-        pred_label = str(Seq(pred_label).reverse_complement())
-        all_features = all_features[::-1]
 
     ### todo: check pred label ###
     pred_motif = pred_label[pos-2:pos+3]

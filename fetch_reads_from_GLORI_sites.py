@@ -6,8 +6,8 @@ import pandas as pd
 import pysam
 from Bio import SeqIO
 from Bio.Seq import Seq
-from utils import med_mad
 from ont_fast5_api.fast5_interface import get_fast5_file
+from utils import get_norm_signal_from_read_id
 from extract_features import extract_features_from_signal
 from cluster_features import cluster_features
 
@@ -25,18 +25,15 @@ for record in SeqIO.parse(ref_file, 'fasta'):
 bam_file = os.path.join(HOME, 'inference/HEK293_IVT_2_q50_10M/epoch29_HEK293A_WT_aligned_to_genome.bam.sorted')
 bam = pysam.AlignmentFile(bam_file, 'rb')
 
+### index read ids ###
 # fast5_dir = os.path.join(HOME, 'Data/Isabel_IVT_Nanopore/HEK293A_wildtype/fast5_filtered')
 fast5_dir = '/prj/Isabel_IVT_Nanopore/HEK293A_wildtype/Jessica_HEK293/HEK293A_2/20190409_1503_GA10000_FAK10978_2e75d7be/fast5_all'
-id_signal = {}
-for f5_file in tqdm(glob(os.path.join(fast5_dir, '*.fast5'), recursive=True)):
-    f5 = get_fast5_file(f5_file, mode="r")
-    for read in f5.get_reads():
-        signal = read.get_raw_data(scale=True)
-        signal_start = 0
-        signal_end = len(signal)
-        med, mad = med_mad(signal[signal_start:signal_end])
-        signal = (signal[signal_start:signal_end] - med) / mad
-        id_signal[read.get_read_id()] = signal
+# id_signal = {}
+index_read_ids = {}
+for f5_filepath in tqdm(glob(os.path.join(fast5_dir, '*.fast5'), recursive=True)):
+    f5 = get_fast5_file(f5_filepath, mode="r")
+    for read_id in f5.get_read_ids():
+        index_read_ids[read_id] = f5_filepath
 
 for _, row in df_glori.iterrows():
     chr = row['Chr'].lstrip('chr')
@@ -65,35 +62,42 @@ for _, row in df_glori.iterrows():
             # coverage = pileupcolumn.n
             coverage = pileupcolumn.get_num_aligned()
             if coverage>100:
-                print('\nchr {}, pos {}, strand {}'.format(chr, pileupcolumn.pos, strand))
-                print('Reference motif = {}'.format(ref_motif))
-                print('Mod. ratio = {}'.format(ratio))
-                print('coverage = {}'.format(coverage))
                 valid_counts = 0
                 for pileupread in pileupcolumn.pileups:
                     query_name = pileupread.alignment.query_name
                     # query_position = pileupread.query_position_or_next
                     query_position = pileupread.query_position
-                    if pileupread.alignment.flag==16:
-                        reverse_complement = True
-                    else:
-                        reverse_complement = False
-                    if query_position and pileupread.alignment.query_sequence[query_position]=='A':
+                    flag = pileupread.alignment.flag
+                    if (flag!=1):
+                        continue
+                    # if flag==16:
+                    #     reverse_complement = True
+                    # else:
+                    #     reverse_complement = False
+                    if query_position and (query_name in index_read_ids.keys()) and (pileupread.alignment.query_sequence[query_position] == 'A'):
                         valid_counts += 1
                         # print('\tmotif in read {} = {}, pos {}'.format(
                         #     query_name,
                         #     pileupread.alignment.query_sequence[query_position-2:query_position+3],
                         #     query_position
                         # ))
-                        if query_name in id_signal.keys():
-                            query_motif = pileupread.alignment.query_sequence[query_position-2:query_position+3]
-                            this_read_features = extract_features_from_signal(id_signal[query_name], query_position, query_motif, reverse_complement)
-                            print('{}, pos {}:'.format(query_name, query_position))
-                            print(this_read_features)
+                        query_motif = pileupread.alignment.query_sequence[query_position-2:query_position+3]
+                        this_read_signal = get_norm_signal_from_read_id(query_name, index_read_ids)
+                        this_read_features = extract_features_from_signal(this_read_signal, query_position, query_motif)
+                        # print('{}, pos {}'.format(query_name, query_position))
+                        # print(this_read_features)
+                        if this_read_features is not None:
                             collected_features[query_name] = this_read_features
                         # else:
                         #     print('Query read not in fast5 directory!')
-                print('Valid reads = {}'.format(valid_counts))
+
+                if valid_counts>0:
+                    print('\nchr {}, pos {}, strand {}'.format(chr, pileupcolumn.pos, strand))
+                    print('Reference motif = {}'.format(ref_motif))
+                    print('Mod. ratio = {}'.format(ratio))
+                    print('coverage = {}'.format(coverage))
+                    print('Valid reads = {}'.format(valid_counts))
+                    print('{} features collected'.format(len(collected_features)))
 
     # outlier_ratio = cluster_features(collected_features)
 
