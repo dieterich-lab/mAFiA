@@ -9,6 +9,19 @@ import matplotlib.pyplot as plt
 
 img_out = os.path.join(HOME, 'img_out')
 
+def cluster_by_connected_components(vec_s, dim, threshold=0.5):
+    vec_i, vec_j = np.triu_indices(dim, k=1)
+    mask = (vec_s >= threshold)
+    sel_vec_i = vec_i[mask]
+    sel_vec_j = vec_j[mask]
+    sel_vec_w = vec_s[mask]
+    mat_w = coo_matrix((sel_vec_w, (sel_vec_i, sel_vec_j)), shape=(dim, dim))
+    n_components, labels = connected_components(csgraph=mat_w, directed=False, return_labels=True)
+    label_counts = Counter(labels).most_common()
+    outlier_ratio = (dim - label_counts[0][1]) / dim
+
+    return outlier_ratio
+
 def cluster_features(id_features):
     all_ids = []
     all_features = []
@@ -27,23 +40,10 @@ def cluster_features(id_features):
     num_features = len(all_features)
     vec_w = 1.0 - pdist(np.vstack(all_features), metric='cosine')
 
+    calc_ratio = cluster_by_connected_components(vec_w, num_features)
+    return calc_ratio
+
     # plt.figure(figsize=(8, 8))
     # plt.hist(vec_w, bins=50)
     # plt.savefig(os.path.join(img_out, 'hist_cosine_similarities.png'), bbox_inches='tight')
     # plt.close('all')
-
-    ### cluster by connected components ###
-    threshold = 0.5
-    vec_i, vec_j = np.triu_indices(num_features, k=1)
-    mask = (vec_w>=threshold)
-    sel_vec_i = vec_i[mask]
-    sel_vec_j = vec_j[mask]
-    sel_vec_w = vec_w[mask]
-
-    mat_w = coo_matrix((sel_vec_w, (sel_vec_i, sel_vec_j)), shape=(num_features, num_features))
-    n_components, labels = connected_components(csgraph=mat_w, directed=False, return_labels=True)
-
-    label_counts = Counter(labels).most_common()
-    outlier_ratio = (num_features - label_counts[0][1]) / num_features
-
-    return outlier_ratio

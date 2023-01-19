@@ -37,10 +37,6 @@ for f5_filepath in glob(os.path.join(fast5_dir, '*.fast5'), recursive=True):
 ### search by GLORI sites ###
 print('Going through GLORI m6A sites...')
 for ind, row in df_glori.iterrows():
-    # ### debug ###
-    # ind = 4682
-    # row = df_glori.iloc[ind]
-
     chr = row['Chr'].lstrip('chr')
     strand = row['Strand']
     site = row['Sites'] - 1   # 0-based
@@ -77,7 +73,7 @@ for ind, row in df_glori.iterrows():
                     print('Reference motif = {}'.format(ref_motif))
                     print('Mod. ratio = {}'.format(glori_ratio))
                     print('coverage = {}'.format(coverage))
-                    print('Valid reads = {}'.format(valid_counts))
+                    # print('Valid reads = {}'.format(valid_counts))
                     print('{} feature vectors collected'.format(len(site_features)))
                 else:
                     print('No valid reads!')
