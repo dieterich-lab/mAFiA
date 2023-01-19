@@ -37,18 +37,19 @@ for f5_filepath in tqdm(glob(os.path.join(fast5_dir, '*.fast5'), recursive=True)
         index_read_ids[read_id] = f5_filepath
 
 ### search by GLORI sites ###
+print('Going through GLORI m6A sites...')
 for ind, row in tqdm(df_glori.iterrows()):
     # ### debug ###
-    # ind = 2746
-    # row = df_glori.iloc[ind]
+    ind = 4682
+    row = df_glori.iloc[ind]
 
     chr = row['Chr'].lstrip('chr')
     strand = row['Strand']
     site = row['Sites'] - 1   # 0-based
     ratio = row['Ratio']
 
-    # if not ((chr.isnumeric()) or (chr in ['X', 'Y']) or (strand=='+')):
-    #     continue
+    if not ((chr.isnumeric()) or (chr in ['X', 'Y']) or (strand=='+')):
+        continue
 
     ref_motif = ref[chr][site-2:site+3]
     # if strand=='-':
@@ -65,7 +66,8 @@ for ind, row in tqdm(df_glori.iterrows()):
             coverage = pileupcolumn.get_num_aligned()
             if coverage>100:
                 valid_counts = 0
-                for pileupread in pileupcolumn.pileups:
+                print('\nCollecting features for site {}, chr{}, pos{}, strand{} ...'.format(ind, chr, pileupcolumn.pos, strand))
+                for pileupread in tqdm(pileupcolumn.pileups):
                     query_name = pileupread.alignment.query_name
                     # query_position = pileupread.query_position_or_next
                     query_position = pileupread.query_position
@@ -96,14 +98,15 @@ for ind, row in tqdm(df_glori.iterrows()):
                         #     print('Query read not in fast5 directory!')
 
                 if valid_counts>0:
-                    print('\nrow {}, chr {}, pos {}, strand {}'.format(ind, chr, pileupcolumn.pos, strand))
                     print('Reference motif = {}'.format(ref_motif))
                     print('Mod. ratio = {}'.format(ratio))
                     print('coverage = {}'.format(coverage))
                     print('Valid reads = {}'.format(valid_counts))
-                    print('{} features collected'.format(len(site_features)))
+                    print('{} feature vectors collected\n'.format(len(site_features)))
+                else:
+                    print('No valid reads!\n')
 
-    # outlier_ratio = cluster_features(collected_features)
+    outlier_ratio = cluster_features(site_features)
 
     # if strand=='+':
     #     # print(ref_seq)
