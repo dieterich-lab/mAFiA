@@ -99,8 +99,9 @@ def extract_features_from_signal(signal, pos, check_motif):
 
     ### todo: check pred label ###
     pred_motif = pred_label[pos-2:pos+3]
+    print('Predicted motif {}, aligned {}!'.format(pred_motif, check_motif))
     if pred_motif!=check_motif:
-        print('Error: Predicted motif {} different from given one {}!'.format(pred_motif, check_motif))
+        print('\n!!!!!!!!!!!!!!!!!!!Error: Predicted motif =/= aligned!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n')
         return None
 
     return all_features[pos]

@@ -35,28 +35,29 @@ for f5_filepath in tqdm(glob(os.path.join(fast5_dir, '*.fast5'), recursive=True)
     for read_id in f5.get_read_ids():
         index_read_ids[read_id] = f5_filepath
 
-for _, row in df_glori.iterrows():
+### search by
+for ind, row in tqdm(df_glori.iterrows()):
+    ### debug ###
+    row = df_glori.iloc[2746]
+
     chr = row['Chr'].lstrip('chr')
-
-    if not ((chr.isnumeric()) or (chr in ['X', 'Y'])):
-        continue
-
     strand = row['Strand']
     site = row['Sites'] - 1   # 0-based
     ratio = row['Ratio']
 
-    if strand=='-':
+    if not ((chr.isnumeric()) or (chr in ['X', 'Y']) or (strand=='+')):
+    # if not ((chr.isnumeric()) or (chr in ['X', 'Y'])):
         continue
 
     ref_motif = ref[chr][site-2:site+3]
-    if strand=='-':
-        ref_motif = str(Seq(ref_motif).reverse_complement())
+    # if strand=='-':
+    #     ref_motif = str(Seq(ref_motif).reverse_complement())
 
     # overlap_reads = bam.fetch(chr, site, site+1)
     # for this_read in overlap_reads:
     #     print(str(this_read))
 
-    collected_features = {}
+    site_features = {}
     for pileupcolumn in bam.pileup(chr, site, site+1, truncate=True, min_base_quality=0):
         if pileupcolumn.pos == site:
             # coverage = pileupcolumn.n
@@ -68,13 +69,15 @@ for _, row in df_glori.iterrows():
                     # query_position = pileupread.query_position_or_next
                     query_position = pileupread.query_position
                     flag = pileupread.alignment.flag
-                    if (flag!=1):
-                        continue
+                    # print(query_name, query_position, flag, pileupread.alignment.query_sequence[query_position-2:query_position+3])
+                    # if (flag!=1):
+                    #     continue
                     # if flag==16:
                     #     reverse_complement = True
                     # else:
                     #     reverse_complement = False
-                    if query_position and (query_name in index_read_ids.keys()) and (pileupread.alignment.query_sequence[query_position] == 'A'):
+                    if query_position and (flag==0) and (query_name in index_read_ids.keys()) and (pileupread.alignment.query_sequence[query_position] == 'A'):
+                    # if query_position and (query_name in index_read_ids.keys()) and (pileupread.alignment.query_sequence[query_position] == 'A'):
                         valid_counts += 1
                         # print('\tmotif in read {} = {}, pos {}'.format(
                         #     query_name,
@@ -87,17 +90,17 @@ for _, row in df_glori.iterrows():
                         # print('{}, pos {}'.format(query_name, query_position))
                         # print(this_read_features)
                         if this_read_features is not None:
-                            collected_features[query_name] = this_read_features
+                            site_features[query_name] = this_read_features
                         # else:
                         #     print('Query read not in fast5 directory!')
 
                 if valid_counts>0:
-                    print('\nchr {}, pos {}, strand {}'.format(chr, pileupcolumn.pos, strand))
+                    print('\nrow {}, chr {}, pos {}, strand {}'.format(ind, chr, pileupcolumn.pos, strand))
                     print('Reference motif = {}'.format(ref_motif))
                     print('Mod. ratio = {}'.format(ratio))
                     print('coverage = {}'.format(coverage))
                     print('Valid reads = {}'.format(valid_counts))
-                    print('{} features collected'.format(len(collected_features)))
+                    print('{} features collected'.format(len(site_features)))
 
     # outlier_ratio = cluster_features(collected_features)
 
