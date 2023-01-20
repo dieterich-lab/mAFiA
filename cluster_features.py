@@ -25,7 +25,9 @@ def cluster_by_connected_components(vec_s, dim, threshold=0.5):
     return outlier_ratio
 
 def cluster_by_louvain(vec_s, dim):
-    vec_s_zeroed = vec_s - np.min(vec_s)
+    # vec_s_zeroed = vec_s - np.min(vec_s)
+    vec_s_zeroed = vec_s.copy()
+    vec_s_zeroed[vec_s_zeroed<0] = 0
     vec_i, vec_j = np.triu_indices(dim, k=1)
     g = ig.Graph()
     g.add_vertices(dim)
