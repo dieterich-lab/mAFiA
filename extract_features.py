@@ -97,7 +97,6 @@ def extract_features_from_signal(signal, pos, bam_motif):
     pred_label = ''.join(pred_labels)[::-1]
     all_features = np.vstack(features)[::-1]
 
-    ### todo: check pred label ###
     pred_motif = pred_label[pos-2:pos+3]
     # print('Predicted motif {}, aligned {}, matching {}'.format(pred_motif, bam_motif, pred_motif == bam_motif))
     if pred_motif!=bam_motif:

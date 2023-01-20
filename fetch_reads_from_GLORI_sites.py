@@ -10,6 +10,8 @@ from Bio.Seq import Seq
 from ont_fast5_api.fast5_interface import get_fast5_file
 from multiprocessing.pool import ThreadPool as Pool
 from utils import get_norm_signal_from_read_id
+from threading import Thread
+from multiprocessing import Process
 from extract_features import extract_features_from_signal
 from cluster_features import cluster_features
 
@@ -38,9 +40,6 @@ fast5_dir = '/prj/Isabel_IVT_Nanopore/HEK293A_wildtype/Jessica_HEK293/HEK293A_2/
 f5_paths = glob(os.path.join(fast5_dir, '*.fast5'), recursive=True)
 
 ### parallel version ###
-from threading import Thread
-from multiprocessing import Process
-
 def worker(f5_filepath, wanted_read_ids, id_signal):
     try:
         print('Reading {}'.format(f5_filepath))
@@ -56,22 +55,18 @@ def worker(f5_filepath, wanted_read_ids, id_signal):
         print('Error with {}'.format(f5_filepath))
     return True
 
-def main():
-    id_signal = [{} for x in f5_paths]
-    processes = []
-    for ii, f5_filepath in enumerate(f5_paths):
-        # process = Thread(target=worker, args=[f5_filepath, query_read_ids, id_signal[ii]])
-        p = Process(target=worker, args=[f5_filepath, query_read_ids, id_signal[ii]])
-        p.start()
-        processes.append(p)
+id_signal = [{} for x in f5_paths]
+processes = []
+for ii, f5_filepath in enumerate(f5_paths):
+    # process = Thread(target=worker, args=[f5_filepath, query_read_ids, id_signal[ii]])
+    p = Process(target=worker, args=[f5_filepath, query_read_ids, id_signal[ii]])
+    p.start()
+    processes.append(p)
 
-    for p in processes:
-        p.join()
+for p in processes:
+    p.join()
 
-    id_signal = {k: v for d in id_signal for (k, v) in d.items()}
-
-if __name__ == '__main__':
-    main()
+id_signal = {k: v for d in id_signal for (k, v) in d.items()}
 
 ### serial version ###
 # for f5_filepath in tqdm(glob(os.path.join(fast5_dir, '*.fast5'), recursive=True)):
