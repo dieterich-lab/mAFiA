@@ -96,12 +96,11 @@ for ind, row in df_glori.iterrows():
     #     continue
 
     ref_motif = ref[chr][site-2:site+3]
-    print('Reference motif = {}'.format(ref_motif))
-
-    print('\nCollecting WT features for site {}, chr{}, pos{}, strand{}'.format(ind, chr, site, strand))
+    print('\nReference motif = {}'.format(ref_motif))
+    print('Mod. ratio = {}'.format(glori_ratio))
+    print('Collecting WT features for site {}, chr{}, pos{}, strand{}'.format(ind, chr, site, strand))
     wt_site_motif_features = collect_features_from_aligned_site(wt_bam, wt_index_read_ids, chr, site)
     if len(wt_site_motif_features)>0:
-        print('Mod. ratio = {}'.format(glori_ratio))
         print('{} feature vectors collected'.format(len(wt_site_motif_features)))
 
     # if len(site_motif_features)>0:
