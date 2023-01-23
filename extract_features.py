@@ -1,9 +1,11 @@
 import os, sys
 HOME = os.path.expanduser('~')
 from utils import segment
+from tqdm import tqdm
 import torch
 import numpy as np
 from Bio.Seq import Seq
+from utils import get_norm_signal_from_read_id
 from models import objectview, rodan
 from fast_ctc_decode import beam_search
 
@@ -104,3 +106,28 @@ def extract_features_from_signal(signal, pos, bam_motif):
         return None
 
     return all_features[pos], pred_motif
+
+def collect_features_from_aligned_site(alignment, index_read_ids, chr, site):
+    site_motif_features = {}
+    for pileupcolumn in alignment.pileup(chr, site, site+1, truncate=True, min_base_quality=0):
+        if pileupcolumn.pos == site:
+            coverage = pileupcolumn.get_num_aligned()
+            if coverage>100:
+                valid_counts = 0
+                for pileupread in tqdm(pileupcolumn.pileups):
+                    query_name = pileupread.alignment.query_name
+                    query_position = pileupread.query_position_or_next
+                    # query_position = pileupread.query_position
+                    flag = pileupread.alignment.flag
+
+                    # if query_position and (flag==0) and (query_name in index_read_ids.keys()) and (pileupread.alignment.query_sequence[query_position] == 'A'):
+                    if query_position and (flag==0) and (query_name in index_read_ids.keys()):
+                    # if query_position and (flag==0) and (query_name in id_signal.keys()):
+                        valid_counts += 1
+                        query_motif = pileupread.alignment.query_sequence[query_position-2:query_position+3]
+                        this_read_signal = get_norm_signal_from_read_id(query_name, index_read_ids)
+                        # this_read_signal = id_signal[query_name]
+                        this_read_features, this_read_motif = extract_features_from_signal(this_read_signal, query_position, query_motif)
+                        if this_read_features is not None:
+                            site_motif_features[query_name] = (this_read_motif, this_read_features)
+    return site_motif_features
