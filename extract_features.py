@@ -103,4 +103,4 @@ def extract_features_from_signal(signal, pos, bam_motif):
         print('\n!!!!!!!!!!!!!!!!!!!Error: Predicted motif =/= aligned!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n')
         return None
 
-    return all_features[pos]
+    return all_features[pos], pred_motif
