@@ -74,14 +74,14 @@ def get_outlier_ratio_from_features(ivt_dict, wt_dict, wanted_motif):
         # if len(np.unique(ivt_membership))>30:
         #     break
         motifs = np.array(ivt_motifs)[ivt_membership==0]
-        print(motifs, Counter(motifs).most_common())
+        # print(motifs, Counter(motifs).most_common())
         if (len(Counter(motifs).most_common())==1) and Counter(motifs).most_common()[0][0]==wanted_motif:
             break
 
-    print(perc_thresh, np.unique(ivt_membership))
+    # print(perc_thresh, np.unique(ivt_membership))
     wt_membership = membership[np.array(labels)=='wt']
     outlier_ratio = 1.0 - sum(wt_membership==0) / len(wt_membership)
-    print('Outlier ratio = {:.2f}'.format(outlier_ratio))
+    # print('Outlier ratio = {:.2f}'.format(outlier_ratio))
 
     return outlier_ratio
 

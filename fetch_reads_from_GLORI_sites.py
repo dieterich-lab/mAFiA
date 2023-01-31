@@ -45,10 +45,10 @@ print('{} IVT reads collected'.format(len(ivt_index_read_ids)))
 
 ### search by GLORI sites ###
 # print('Going through GLORI m6A sites...')
-# for ind, row in df_glori.iterrows():
+for ind, row in df_glori.iterrows():
     ### debug ###
-    ind = 6047
-    row = df_glori.iloc[ind]
+    # ind = 6047
+    # row = df_glori.iloc[ind]
 
     chr = row['Chr'].lstrip('chr')
     strand = row['Strand']
@@ -59,21 +59,15 @@ print('{} IVT reads collected'.format(len(ivt_index_read_ids)))
     #     continue
 
     ref_motif = ref[chr][site-2:site+3]
-    print('Site {}, chr{}, pos{}, strand{}'.format(ind, chr, site, strand))
-    print('Reference motif {}'.format(ref_motif))
-    print('Mod. ratio = {}'.format(glori_ratio))
-
-    ### WT features ###
     wt_site_motif_features = collect_features_from_aligned_site(wt_bam, wt_index_read_ids, chr, site)
-    if len(wt_site_motif_features)>0:
-        print('{} feature vectors collected from WT'.format(len(wt_site_motif_features)))
-
-    ### IVT features ###
     ivt_site_motif_features = collect_features_from_aligned_site(ivt_bam, ivt_index_read_ids, chr, site)
-    if len(ivt_site_motif_features)>0:
-        print('{} feature vectors collected from IVT'.format(len(ivt_site_motif_features)))
 
     if len(wt_site_motif_features)>0 and len(ivt_site_motif_features)>0:
+        print('\nSite {}, chr{}, pos{}, strand{}'.format(ind, chr, site, strand))
+        print('Reference motif {}'.format(ref_motif))
+        print('Mod. ratio = {}'.format(glori_ratio))
+        print('{} feature vectors collected from WT'.format(len(wt_site_motif_features)))
+        print('{} feature vectors collected from IVT'.format(len(ivt_site_motif_features)))
         print('Now clustering features...')
         outlier_ratio = get_outlier_ratio_from_features(ivt_site_motif_features, wt_site_motif_features, ref_motif)
         print('Calculated outlier ratio {:.3f} [GLORI {:.3f}]'.format(outlier_ratio, glori_ratio))
