@@ -106,14 +106,14 @@ def extract_features_from_signal(model, device, signal, pos, bam_motif):
 
     return all_features[pos], pred_motif
 
-def collect_features_from_aligned_site(alignment, index_read_ids, chr, site):
+def collect_features_from_aligned_site(alignment, index_read_ids, chr, site, thresh_coverage=50):
     fixed_model, fixed_device = load_model(model_path, config)
 
     site_motif_features = {}
     for pileupcolumn in alignment.pileup(chr, site, site+1, truncate=True, min_base_quality=0):
         if pileupcolumn.pos == site:
             coverage = pileupcolumn.get_num_aligned()
-            if coverage>100:
+            if coverage>thresh_coverage:
                 valid_counts = 0
                 for pileupread in tqdm(pileupcolumn.pileups):
                     query_name = pileupread.alignment.query_name

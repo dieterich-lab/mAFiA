@@ -1,7 +1,7 @@
 import os
 HOME = os.path.expanduser('~')
 import numpy as np
-from scipy.spatial.distance import pdist
+from scipy.spatial.distance import pdist, squareform
 from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import connected_components
 from collections import Counter
@@ -19,10 +19,10 @@ def cluster_by_connected_components(vec_s, dim, threshold=0.5):
     sel_vec_w = vec_s[mask]
     mat_w = coo_matrix((sel_vec_w, (sel_vec_i, sel_vec_j)), shape=(dim, dim))
     n_components, labels = connected_components(csgraph=mat_w, directed=False, return_labels=True)
-    label_counts = Counter(labels).most_common()
-    outlier_ratio = (dim - label_counts[0][1]) / dim
+    # label_counts = Counter(labels).most_common()
+    # outlier_ratio = (dim - label_counts[0][1]) / dim
 
-    return outlier_ratio
+    return labels
 
 def cluster_by_louvain(vec_s, dim):
     # vec_s_zeroed = vec_s - np.min(vec_s)
@@ -34,17 +34,26 @@ def cluster_by_louvain(vec_s, dim):
     g.add_edges(zip(vec_i, vec_j))
     g.es['weight'] = vec_s_zeroed
     partition = la.ModularityVertexPartition(g, weights='weight')
-    label_counts = Counter(partition.membership).most_common()
-    outlier_ratio = (dim - label_counts[0][1]) / dim
+    # label_counts = Counter(partition.membership).most_common()
+    # outlier_ratio = (dim - label_counts[0][1]) / dim
 
-    return outlier_ratio
+    return partition.membership
 
-def cluster_features(id_features):
+def get_outlier_ratio_from_features(ivt_dict, wt_dict, wanted_motif):
+    labels = ['ivt' for ii in range(len(ivt_dict))] + ['wt' for ii in range(len(wt_dict))]
+
+    all_dicts = dict(ivt_dict)
+    all_dicts.update(wt_dict)
+
+    ivt_motifs = [v[0] for k, v in ivt_dict.items()]
+
     all_ids = []
+    all_motifs = []
     all_features = []
-    for k, v in id_features.items():
+    for k, v in all_dicts.items():
         all_ids.append(k)
-        all_features.append(v)
+        all_motifs.append(v[0])
+        all_features.append(v[1])
 
     ### check features ###
     # plt.figure(figsize=(16, 16))
@@ -56,11 +65,25 @@ def cluster_features(id_features):
 
     num_features = len(all_features)
     vec_w = 1.0 - pdist(np.vstack(all_features), metric='cosine')
+    # mat_w = squareform(vec_w)
 
-    # calc_ratio = cluster_by_connected_components(vec_w, num_features)
-    calc_ratio = cluster_by_louvain(vec_w, num_features)
+    for perc_thresh in np.arange(0, 1, 0.01):
+        # membership = cluster_by_louvain(vec_w, num_features)
+        membership = cluster_by_connected_components(vec_w, num_features, perc_thresh)
+        ivt_membership = membership[np.array(labels)=='ivt']
+        # if len(np.unique(ivt_membership))>30:
+        #     break
+        motifs = np.array(ivt_motifs)[ivt_membership==0]
+        print(motifs, Counter(motifs).most_common())
+        if (len(Counter(motifs).most_common())==1) and Counter(motifs).most_common()[0][0]==wanted_motif:
+            break
 
-    return calc_ratio
+    print(perc_thresh, np.unique(ivt_membership))
+    wt_membership = membership[np.array(labels)=='wt']
+    outlier_ratio = 1.0 - sum(wt_membership==0) / len(wt_membership)
+    print('Outlier ratio = {:.2f}'.format(outlier_ratio))
+
+    return outlier_ratio
 
     # plt.figure(figsize=(8, 8))
     # plt.hist(vec_w, bins=50)

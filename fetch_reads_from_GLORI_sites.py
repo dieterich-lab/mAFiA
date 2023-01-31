@@ -1,12 +1,14 @@
 import os
 HOME = os.path.expanduser('~')
+import sys
+sys.path.append(os.path.join(HOME, 'git/GLORI'))
 from glob import glob
 import pandas as pd
 import pysam
 from Bio import SeqIO
 from ont_fast5_api.fast5_interface import get_fast5_file
 from extract_features import collect_features_from_aligned_site
-from cluster_features import cluster_features
+from cluster_features import get_outlier_ratio_from_features
 
 glori_file = os.path.join(HOME, 'Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv')
 df_glori = pd.read_csv(glori_file)
@@ -14,75 +16,36 @@ df_glori = pd.read_csv(glori_file)
 ref_file = os.path.join(HOME, 'Data/genomes/GRCh38_96.fa')
 ref = {}
 for record in SeqIO.parse(ref_file, 'fasta'):
-    # print(record.id)
     if (record.id.isnumeric()) or (record.id in ['X', 'Y']):
         ref[record.id] = str(record.seq)
 
+### WT ###
 wt_bam_file = os.path.join(HOME, 'inference/HEK293_IVT_2_q50_10M/epoch29_HEK293A_WT_aligned_to_genome.bam.sorted')
 wt_bam = pysam.AlignmentFile(wt_bam_file, 'rb')
-
-# query_read_ids = []
-# for read in bam.fetch():
-#     if read.flag==0:
-#         query_read_ids.append(read.query_name)
-
-### index read ids ###
-print('Indexing fast5 reads...')
 wt_fast5_dir = '/prj/Isabel_IVT_Nanopore/HEK293A_wildtype/Jessica_HEK293/HEK293A_2/20190409_1503_GA10000_FAK10978_2e75d7be/fast5_all'
 wt_f5_paths = glob(os.path.join(wt_fast5_dir, '*.fast5'), recursive=True)
-
 wt_index_read_ids = {}
 for f5_filepath in wt_f5_paths:
     f5 = get_fast5_file(f5_filepath, mode="r")
     for read_id in f5.get_read_ids():
         wt_index_read_ids[read_id] = f5_filepath
+print('{} WT reads collected'.format(len(wt_index_read_ids)))
 
-### parallel version ###
-# from threading import Thread
-# from multiprocessing import Process
-#
-# def worker(f5_filepath, wanted_read_ids, id_signal):
-#     try:
-#         print('Reading {}'.format(f5_filepath))
-#         f5 = get_fast5_file(f5_filepath, mode="r")
-#         for read_id in tqdm(f5.get_read_ids()):
-#             # index_read_ids[read_id] = f5_filepath
-#             if read_id in wanted_read_ids:
-#                 read = f5.get_read(read_id)
-#                 signal = read.get_raw_data(scale=True)
-#                 med, mad = med_mad(signal)
-#                 id_signal[read_id] = (signal - med) / mad
-#     except:
-#         print('Error with {}'.format(f5_filepath))
-#     return True
-#
-# id_signal = [{} for x in f5_paths]
-# processes = []
-# for ii, f5_filepath in enumerate(f5_paths):
-#     # process = Thread(target=worker, args=[f5_filepath, query_read_ids, id_signal[ii]])
-#     p = Process(target=worker, args=[f5_filepath, query_read_ids, id_signal[ii]])
-#     p.start()
-#     processes.append(p)
-#
-# for p in processes:
-#     p.join()
-#
-# id_signal = {k: v for d in id_signal for (k, v) in d.items()}
-
-### serial version ###
-# for f5_filepath in tqdm(glob(os.path.join(fast5_dir, '*.fast5'), recursive=True)):
-#     f5 = get_fast5_file(f5_filepath, mode="r")
-#     for read_id in f5.get_read_ids():
-#         # index_read_ids[read_id] = f5_filepath
-#         if read_id in query_read_ids:
-#             read = f5.get_read(read_id)
-#             signal = read.get_raw_data(scale=True)
-#             med, mad = med_mad(signal)
-#             id_signal[read_id] = (signal - med) / mad
+### IVT ###
+ivt_bam_file = os.path.join(HOME, 'inference/HEK293_IVT_2_q50_10M/epoch29_HEK293_IVT_2_aligned_to_genome.bam.sorted')
+ivt_bam = pysam.AlignmentFile(ivt_bam_file, 'rb')
+ivt_fast5_dir = '/home/achan/Data/Isabel_IVT_Nanopore/HEK293_IVT_2/fast5_pass'
+ivt_f5_paths = glob(os.path.join(ivt_fast5_dir, '*.fast5'), recursive=True)
+ivt_index_read_ids = {}
+for f5_filepath in ivt_f5_paths:
+    f5 = get_fast5_file(f5_filepath, mode="r")
+    for read_id in f5.get_read_ids():
+        ivt_index_read_ids[read_id] = f5_filepath
+print('{} IVT reads collected'.format(len(ivt_index_read_ids)))
 
 ### search by GLORI sites ###
-print('Going through GLORI m6A sites...')
-for ind, row in df_glori.iterrows():
+# print('Going through GLORI m6A sites...')
+# for ind, row in df_glori.iterrows():
     ### debug ###
     ind = 6047
     row = df_glori.iloc[ind]
@@ -96,14 +59,21 @@ for ind, row in df_glori.iterrows():
     #     continue
 
     ref_motif = ref[chr][site-2:site+3]
-    print('\nReference motif = {}'.format(ref_motif))
+    print('Site {}, chr{}, pos{}, strand{}'.format(ind, chr, site, strand))
+    print('Reference motif {}'.format(ref_motif))
     print('Mod. ratio = {}'.format(glori_ratio))
-    print('Collecting WT features for site {}, chr{}, pos{}, strand{}'.format(ind, chr, site, strand))
+
+    ### WT features ###
     wt_site_motif_features = collect_features_from_aligned_site(wt_bam, wt_index_read_ids, chr, site)
     if len(wt_site_motif_features)>0:
-        print('{} feature vectors collected'.format(len(wt_site_motif_features)))
+        print('{} feature vectors collected from WT'.format(len(wt_site_motif_features)))
 
-    # if len(site_motif_features)>0:
-    #     print('Now clustering features...')
-    #     outlier_ratio = cluster_features(site_motif_features)
-    #     print('Calculated outlier ratio {:.3f} [GLORI {:.3f}]'.format(outlier_ratio, glori_ratio))
+    ### IVT features ###
+    ivt_site_motif_features = collect_features_from_aligned_site(ivt_bam, ivt_index_read_ids, chr, site)
+    if len(ivt_site_motif_features)>0:
+        print('{} feature vectors collected from IVT'.format(len(ivt_site_motif_features)))
+
+    if len(wt_site_motif_features)>0 and len(ivt_site_motif_features)>0:
+        print('Now clustering features...')
+        outlier_ratio = get_outlier_ratio_from_features(ivt_site_motif_features, wt_site_motif_features, ref_motif)
+        print('Calculated outlier ratio {:.3f} [GLORI {:.3f}]'.format(outlier_ratio, glori_ratio))
