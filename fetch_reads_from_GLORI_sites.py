@@ -53,8 +53,8 @@ print('{} IVT reads collected'.format(len(ivt_index_read_ids)))
 model_path = os.path.join(HOME, 'pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch')
 torchdict = torch.load(model_path, map_location="cpu")
 origconfig = torchdict["config"]
-config = objectview(origconfig)
-fixed_model, fixed_device = load_model(model_path, config)
+fixed_config = objectview(origconfig)
+fixed_model, fixed_device = load_model(model_path, fixed_config)
 
 ### search by GLORI sites ###
 MIN_COVERAGE = 50
@@ -66,6 +66,10 @@ for ind, row in df_glori.iterrows():
     # row = df_glori.iloc[ind]
     # ind = 1466
     # row = df_glori.iloc[ind]
+    # ind = 1715
+    # row = df_glori.iloc[ind]
+    ind = 2299
+    row = df_glori.iloc[ind]
 
     print('Site {}'.format(ind))
     chr = row['Chr'].lstrip('chr')
@@ -78,12 +82,13 @@ for ind, row in df_glori.iterrows():
         continue
 
     # print('Collecting WT features...')
-    wt_site_motif_features = collect_features_from_aligned_site(fixed_model, fixed_device, config, wt_bam, wt_index_read_ids, chr, site, MIN_COVERAGE)
+    wt_site_motif_features = collect_features_from_aligned_site(fixed_model, fixed_device, fixed_config, wt_bam, wt_index_read_ids, chr, site, MIN_COVERAGE)
     # print('Collecting IVT features...')
-    ivt_site_motif_features = collect_features_from_aligned_site(fixed_model, fixed_device, config, ivt_bam, ivt_index_read_ids, chr, site, MIN_COVERAGE)
+    ivt_site_motif_features = collect_features_from_aligned_site(fixed_model, fixed_device, fixed_config, ivt_bam, ivt_index_read_ids, chr, site, MIN_COVERAGE)
 
     if (len(wt_site_motif_features)>MIN_COVERAGE) and (len(ivt_site_motif_features)>MIN_COVERAGE):
-        print('\nchr{}, pos{}, strand{}'.format(chr, site, strand))
+        print('=========================================================')
+        print('chr{}, pos{}, strand{}'.format(chr, site, strand))
         print('Reference motif {}'.format(ref_motif))
         # print('Mod. ratio = {:.2f}'.format(glori_ratio))
         print('{} feature vectors collected from WT'.format(len(wt_site_motif_features)))
@@ -91,3 +96,4 @@ for ind, row in df_glori.iterrows():
         print('Now clustering features...')
         outlier_ratio = get_outlier_ratio_from_features(ivt_site_motif_features, wt_site_motif_features, ref_motif, PERC_THRESH)
         print('Calculated outlier ratio {:.2f} [GLORI {:.2f}]'.format(outlier_ratio, glori_ratio))
+        print('=========================================================')

@@ -113,10 +113,7 @@ def collect_features_from_aligned_site(model, device, config, alignment, index_r
                     query_position = pileupread.query_position_or_next
                     # query_position = pileupread.query_position
                     flag = pileupread.alignment.flag
-
-                    # if query_position and (flag==0) and (query_name in index_read_ids.keys()) and (pileupread.alignment.query_sequence[query_position] == 'A'):
                     if query_position and (flag==0) and (query_name in index_read_ids.keys()):
-                    # if query_position and (flag==0) and (query_name in id_signal.keys()):
                         valid_counts += 1
                         query_motif = pileupread.alignment.query_sequence[query_position-2:query_position+3]
                         this_read_signal = get_norm_signal_from_read_id(query_name, index_read_ids)
