@@ -43,7 +43,7 @@ ivt_fast5_dir = '/home/achan/Data/Isabel_IVT_Nanopore/HEK293_IVT_2/fast5_pass'
 ivt_f5_paths = glob(os.path.join(ivt_fast5_dir, '*.fast5'), recursive=True)
 ivt_index_read_ids = {}
 print('Parsing IVT fast5 files...')
-for f5_filepath in tqdm(ivt_f5_paths):
+for f5_filepath in ivt_f5_paths:
     f5 = get_fast5_file(f5_filepath, mode="r")
     for read_id in f5.get_read_ids():
         ivt_index_read_ids[read_id] = f5_filepath
@@ -107,7 +107,7 @@ for ind, row in df_glori.iterrows():
             new_row = row.copy()
             new_row['ratio_outlier'] = outlier_ratio
             # df_outlier.append(new_row)
-            pd.concat([df_outlier, new_row.to_frame().T])
+            df_outlier = pd.concat([df_outlier, new_row.to_frame().T])
             counts += 1
             if counts%5==0:
                 df_outlier.to_csv(outfile, sep='\t')
