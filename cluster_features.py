@@ -47,6 +47,9 @@ def get_outlier_ratio_from_features(ivt_dict, wt_dict, wanted_motif, perc_thresh
     if Counter(ivt_motifs).most_common(1)[0][0] != wanted_motif:
         print('IVT motif {} doesn\'t match reference one {}'.format(Counter(ivt_motifs).most_common(1)[0][0], wanted_motif))
         return -1
+    # if Counter(wt_motifs).most_common(1)[0][0] != wanted_motif:
+    #     print('WT motif {} doesn\'t match reference one {}'.format(Counter(wt_motifs).most_common(1)[0][0], wanted_motif))
+    #     return -1
 
     all_dicts = dict(ivt_dict)
     all_dicts.update(wt_dict)
@@ -83,6 +86,9 @@ def get_outlier_ratio_from_features(ivt_dict, wt_dict, wanted_motif, perc_thresh
 
     # print(perc_thresh, np.unique(ivt_membership))
     ivt_membership = membership[np.array(labels)=='ivt']
+    if Counter(ivt_membership).most_common()[0][0]!=0:
+        print('IVT largest cluster not 0!')
+        return -1
     wt_membership = membership[np.array(labels)=='wt']
     outlier_ratio = 1.0 - sum(wt_membership==0) / len(wt_membership)
     # print('Outlier ratio = {:.2f}'.format(outlier_ratio))

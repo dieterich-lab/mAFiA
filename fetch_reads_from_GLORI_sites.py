@@ -49,14 +49,13 @@ print('{} IVT reads collected'.format(len(ivt_index_read_ids)))
 
 ### search by GLORI sites ###
 MIN_COVERAGE = 50
-
+PERC_THRESH = 0.85
 # print('Going through GLORI m6A sites...')
 for ind, row in df_glori.iterrows():
     ### debug ###
     # ind = 6047
     # row = df_glori.iloc[ind]
-
-    ind = 1465
+    ind = 1466
     row = df_glori.iloc[ind]
 
     chr = row['Chr'].lstrip('chr')
@@ -80,5 +79,5 @@ for ind, row in df_glori.iterrows():
         print('{} feature vectors collected from WT'.format(len(wt_site_motif_features)))
         print('{} feature vectors collected from IVT'.format(len(ivt_site_motif_features)))
         print('Now clustering features...')
-        outlier_ratio = get_outlier_ratio_from_features(ivt_site_motif_features, wt_site_motif_features, ref_motif, 0.75)
+        outlier_ratio = get_outlier_ratio_from_features(ivt_site_motif_features, wt_site_motif_features, ref_motif, PERC_THRESH)
         print('Calculated outlier ratio {:.2f} [GLORI {:.2f}]'.format(outlier_ratio, glori_ratio))
