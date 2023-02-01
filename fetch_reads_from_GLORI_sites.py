@@ -56,10 +56,14 @@ origconfig = torchdict["config"]
 fixed_config = objectview(origconfig)
 fixed_model, fixed_device = load_model(model_path, fixed_config)
 
+outfile = os.path.join(HOME, 'Data/GLORI/df_outlier_ratios.tsv')
+
 ### search by GLORI sites ###
 MIN_COVERAGE = 50
-PERC_THRESH = 0.85
+PERC_THRESH = 0.8
 # print('Going through GLORI m6A sites...')
+df_outlier = pd.DataFrame()
+counts = 0
 for ind, row in df_glori.iterrows():
     ### debug ###
     # ind = 6047
@@ -68,10 +72,15 @@ for ind, row in df_glori.iterrows():
     # row = df_glori.iloc[ind]
     # ind = 1715
     # row = df_glori.iloc[ind]
-    ind = 2299
-    row = df_glori.iloc[ind]
+    # ind = 2299
+    # row = df_glori.iloc[ind]
+    # ind = 4112
+    # row = df_glori.iloc[ind]
 
-    print('Site {}'.format(ind))
+    if ind<2299:
+        continue
+
+    print('\nSite {}'.format(ind))
     chr = row['Chr'].lstrip('chr')
     strand = row['Strand']
     site = row['Sites'] - 1   # 0-based
@@ -97,3 +106,9 @@ for ind, row in df_glori.iterrows():
         outlier_ratio = get_outlier_ratio_from_features(ivt_site_motif_features, wt_site_motif_features, ref_motif, PERC_THRESH)
         print('Calculated outlier ratio {:.2f} [GLORI {:.2f}]'.format(outlier_ratio, glori_ratio))
         print('=========================================================')
+        new_row = row.copy()
+        new_row['ratio_outlier'] = outlier_ratio
+        df_outlier.append(new_row)
+        counts += 1
+        if counts%5==0:
+            df_outlier.to_csv(outfile, delimiter='\t')
