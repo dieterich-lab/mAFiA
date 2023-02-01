@@ -39,7 +39,7 @@ def cluster_by_louvain(vec_s, dim):
 
     return partition.membership
 
-def get_outlier_ratio_from_features(ivt_dict, wt_dict, wanted_motif):
+def get_outlier_ratio_from_features(ivt_dict, wt_dict, wanted_motif, perc_thresh=0.8):
     labels = ['ivt' for ii in range(len(ivt_dict))] + ['wt' for ii in range(len(wt_dict))]
 
     all_dicts = dict(ivt_dict)
@@ -67,16 +67,17 @@ def get_outlier_ratio_from_features(ivt_dict, wt_dict, wanted_motif):
     vec_w = 1.0 - pdist(np.vstack(all_features), metric='cosine')
     # mat_w = squareform(vec_w)
 
-    for perc_thresh in np.arange(0, 1, 0.01):
+    # for perc_thresh in np.arange(0, 1, 0.01):
         # membership = cluster_by_louvain(vec_w, num_features)
-        membership = cluster_by_connected_components(vec_w, num_features, perc_thresh)
-        ivt_membership = membership[np.array(labels)=='ivt']
-        # if len(np.unique(ivt_membership))>30:
-        #     break
-        motifs = np.array(ivt_motifs)[ivt_membership==0]
-        # print(motifs, Counter(motifs).most_common())
-        if (len(Counter(motifs).most_common())==1) and Counter(motifs).most_common()[0][0]==wanted_motif:
-            break
+
+    membership = cluster_by_connected_components(vec_w, num_features, perc_thresh)
+    ivt_membership = membership[np.array(labels)=='ivt']
+    # if len(np.unique(ivt_membership))>30:
+    #     break
+    # motifs = np.array(ivt_motifs)[ivt_membership==0]
+    # print(motifs, Counter(motifs).most_common())
+    # if (len(Counter(motifs).most_common())==1) and Counter(motifs).most_common()[0][0]==wanted_motif:
+    #     break
 
     # print(perc_thresh, np.unique(ivt_membership))
     wt_membership = membership[np.array(labels)=='wt']

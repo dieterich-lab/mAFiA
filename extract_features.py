@@ -115,7 +115,7 @@ def collect_features_from_aligned_site(alignment, index_read_ids, chr, site, thr
             coverage = pileupcolumn.get_num_aligned()
             if coverage>thresh_coverage:
                 valid_counts = 0
-                for pileupread in tqdm(pileupcolumn.pileups):
+                for pileupread in pileupcolumn.pileups:
                     query_name = pileupread.alignment.query_name
                     query_position = pileupread.query_position_or_next
                     # query_position = pileupread.query_position

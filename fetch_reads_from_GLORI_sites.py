@@ -15,6 +15,7 @@ df_glori = pd.read_csv(glori_file)
 
 ref_file = os.path.join(HOME, 'Data/genomes/GRCh38_96.fa')
 ref = {}
+print('')
 for record in SeqIO.parse(ref_file, 'fasta'):
     if (record.id.isnumeric()) or (record.id in ['X', 'Y']):
         ref[record.id] = str(record.seq)
@@ -62,12 +63,11 @@ for ind, row in df_glori.iterrows():
     wt_site_motif_features = collect_features_from_aligned_site(wt_bam, wt_index_read_ids, chr, site)
     ivt_site_motif_features = collect_features_from_aligned_site(ivt_bam, ivt_index_read_ids, chr, site)
 
-    if len(wt_site_motif_features)>0 and len(ivt_site_motif_features)>0:
-        print('\nSite {}, chr{}, pos{}, strand{}'.format(ind, chr, site, strand))
-        print('Reference motif {}'.format(ref_motif))
-        print('Mod. ratio = {}'.format(glori_ratio))
-        print('{} feature vectors collected from WT'.format(len(wt_site_motif_features)))
-        print('{} feature vectors collected from IVT'.format(len(ivt_site_motif_features)))
-        print('Now clustering features...')
-        outlier_ratio = get_outlier_ratio_from_features(ivt_site_motif_features, wt_site_motif_features, ref_motif)
-        print('Calculated outlier ratio {:.3f} [GLORI {:.3f}]'.format(outlier_ratio, glori_ratio))
+    print('\nSite {}, chr{}, pos{}, strand{}'.format(ind, chr, site, strand))
+    print('Reference motif {}'.format(ref_motif))
+    print('Mod. ratio = {:.2f}'.format(glori_ratio))
+    print('{} feature vectors collected from WT'.format(len(wt_site_motif_features)))
+    print('{} feature vectors collected from IVT'.format(len(ivt_site_motif_features)))
+    print('Now clustering features...')
+    outlier_ratio = get_outlier_ratio_from_features(ivt_site_motif_features, wt_site_motif_features, ref_motif)
+    print('Calculated outlier ratio {:.2f} [GLORI {:.2f}]'.format(outlier_ratio, glori_ratio))
