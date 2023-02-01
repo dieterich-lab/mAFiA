@@ -2,6 +2,7 @@ import os
 HOME = os.path.expanduser('~')
 import sys
 sys.path.append(os.path.join(HOME, 'git/GLORI'))
+from tqdm import tqdm
 from glob import glob
 import pandas as pd
 import pysam
@@ -15,8 +16,8 @@ df_glori = pd.read_csv(glori_file)
 
 ref_file = os.path.join(HOME, 'Data/genomes/GRCh38_96.fa')
 ref = {}
-print('')
-for record in SeqIO.parse(ref_file, 'fasta'):
+print('Parsing genome...')
+for record in tqdm(SeqIO.parse(ref_file, 'fasta')):
     if (record.id.isnumeric()) or (record.id in ['X', 'Y']):
         ref[record.id] = str(record.seq)
 
@@ -26,7 +27,8 @@ wt_bam = pysam.AlignmentFile(wt_bam_file, 'rb')
 wt_fast5_dir = '/prj/Isabel_IVT_Nanopore/HEK293A_wildtype/Jessica_HEK293/HEK293A_2/20190409_1503_GA10000_FAK10978_2e75d7be/fast5_all'
 wt_f5_paths = glob(os.path.join(wt_fast5_dir, '*.fast5'), recursive=True)
 wt_index_read_ids = {}
-for f5_filepath in wt_f5_paths:
+print('Parsing WT fast5 files...')
+for f5_filepath in tqdm(wt_f5_paths):
     f5 = get_fast5_file(f5_filepath, mode="r")
     for read_id in f5.get_read_ids():
         wt_index_read_ids[read_id] = f5_filepath
@@ -38,7 +40,8 @@ ivt_bam = pysam.AlignmentFile(ivt_bam_file, 'rb')
 ivt_fast5_dir = '/home/achan/Data/Isabel_IVT_Nanopore/HEK293_IVT_2/fast5_pass'
 ivt_f5_paths = glob(os.path.join(ivt_fast5_dir, '*.fast5'), recursive=True)
 ivt_index_read_ids = {}
-for f5_filepath in ivt_f5_paths:
+print('Parsing IVT fast5 files...')
+for f5_filepath in tqdm(ivt_f5_paths):
     f5 = get_fast5_file(f5_filepath, mode="r")
     for read_id in f5.get_read_ids():
         ivt_index_read_ids[read_id] = f5_filepath
@@ -55,19 +58,23 @@ for ind, row in df_glori.iterrows():
     strand = row['Strand']
     site = row['Sites'] - 1   # 0-based
     glori_ratio = row['Ratio']
-
-    # if not ((chr.isnumeric()) or (chr in ['X', 'Y']) or (strand=='+')):
-    #     continue
-
     ref_motif = ref[chr][site-2:site+3]
-    wt_site_motif_features = collect_features_from_aligned_site(wt_bam, wt_index_read_ids, chr, site)
-    ivt_site_motif_features = collect_features_from_aligned_site(ivt_bam, ivt_index_read_ids, chr, site)
+
+    if not ((chr.isnumeric()) or (chr in ['X', 'Y']) or (strand=='+')):
+        continue
 
     print('\nSite {}, chr{}, pos{}, strand{}'.format(ind, chr, site, strand))
     print('Reference motif {}'.format(ref_motif))
     print('Mod. ratio = {:.2f}'.format(glori_ratio))
+
+    print('Collecting WT features...')
+    wt_site_motif_features = collect_features_from_aligned_site(wt_bam, wt_index_read_ids, chr, site)
     print('{} feature vectors collected from WT'.format(len(wt_site_motif_features)))
+    print('Collecting IVT features...')
+    ivt_site_motif_features = collect_features_from_aligned_site(ivt_bam, ivt_index_read_ids, chr, site)
     print('{} feature vectors collected from IVT'.format(len(ivt_site_motif_features)))
-    print('Now clustering features...')
-    outlier_ratio = get_outlier_ratio_from_features(ivt_site_motif_features, wt_site_motif_features, ref_motif)
-    print('Calculated outlier ratio {:.2f} [GLORI {:.2f}]'.format(outlier_ratio, glori_ratio))
+
+    if (len(wt_site_motif_features)>0) and (len(ivt_site_motif_features)>0):
+        print('Now clustering features...')
+        outlier_ratio = get_outlier_ratio_from_features(ivt_site_motif_features, wt_site_motif_features, ref_motif, 0.75)
+        print('Calculated outlier ratio {:.2f} [GLORI {:.2f}]'.format(outlier_ratio, glori_ratio))

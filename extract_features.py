@@ -106,7 +106,7 @@ def extract_features_from_signal(model, device, signal, pos, bam_motif):
 
     return all_features[pos], pred_motif
 
-def collect_features_from_aligned_site(alignment, index_read_ids, chr, site, thresh_coverage=50):
+def collect_features_from_aligned_site(alignment, index_read_ids, chr, site, thresh_coverage=0):
     fixed_model, fixed_device = load_model(model_path, config)
 
     site_motif_features = {}
