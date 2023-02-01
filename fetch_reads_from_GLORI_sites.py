@@ -19,7 +19,7 @@ df_glori = pd.read_csv(glori_file)
 ref_file = os.path.join(HOME, 'Data/genomes/GRCh38_96.fa')
 ref = {}
 print('Parsing genome...')
-for record in tqdm(SeqIO.parse(ref_file, 'fasta')):
+for record in SeqIO.parse(ref_file, 'fasta'):
     if (record.id.isnumeric()) or (record.id in ['X', 'Y']):
         ref[record.id] = str(record.seq)
 
@@ -30,7 +30,7 @@ wt_fast5_dir = '/prj/Isabel_IVT_Nanopore/HEK293A_wildtype/Jessica_HEK293/HEK293A
 wt_f5_paths = glob(os.path.join(wt_fast5_dir, '*.fast5'), recursive=True)
 wt_index_read_ids = {}
 print('Parsing WT fast5 files...')
-for f5_filepath in tqdm(wt_f5_paths):
+for f5_filepath in wt_f5_paths:
     f5 = get_fast5_file(f5_filepath, mode="r")
     for read_id in f5.get_read_ids():
         wt_index_read_ids[read_id] = f5_filepath
@@ -77,9 +77,6 @@ for ind, row in df_glori.iterrows():
     # ind = 4112
     # row = df_glori.iloc[ind]
 
-    if ind<2299:
-        continue
-
     print('\nSite {}'.format(ind))
     chr = row['Chr'].lstrip('chr')
     strand = row['Strand']
@@ -106,9 +103,11 @@ for ind, row in df_glori.iterrows():
         outlier_ratio = get_outlier_ratio_from_features(ivt_site_motif_features, wt_site_motif_features, ref_motif, PERC_THRESH)
         print('Calculated outlier ratio {:.2f} [GLORI {:.2f}]'.format(outlier_ratio, glori_ratio))
         print('=========================================================')
-        new_row = row.copy()
-        new_row['ratio_outlier'] = outlier_ratio
-        df_outlier.append(new_row)
-        counts += 1
-        if counts%5==0:
-            df_outlier.to_csv(outfile, delimiter='\t')
+        if outlier_ratio!=-1:
+            new_row = row.copy()
+            new_row['ratio_outlier'] = outlier_ratio
+            # df_outlier.append(new_row)
+            pd.concat([df_outlier, new_row.to_frame().T])
+            counts += 1
+            if counts%5==0:
+                df_outlier.to_csv(outfile, sep='\t')
