@@ -9,11 +9,6 @@ from utils import get_norm_signal_from_read_id
 from models import objectview, rodan
 from fast_ctc_decode import beam_search
 
-model_path = os.path.join(HOME, 'pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch')
-torchdict = torch.load(model_path, map_location="cpu")
-origconfig = torchdict["config"]
-config = objectview(origconfig)
-
 def convert_statedict(state_dict):
     from collections import OrderedDict
     new_checkpoint = OrderedDict()
@@ -82,7 +77,7 @@ def ctcdecoder(logits, label, blank=False, beam_size=5, alphabet=alphabet, pre=N
             retstr.append("".join(cur))
     return ret, retstr
 
-def extract_features_from_signal(model, device, signal, pos, bam_motif):
+def extract_features_from_signal(model, device, config, signal, pos, bam_motif):
     chunks = segment(signal, config.seqlen)
     event = torch.unsqueeze(torch.FloatTensor(chunks), 1).to(device, non_blocking=True)
     out = model.forward(event)
@@ -106,9 +101,7 @@ def extract_features_from_signal(model, device, signal, pos, bam_motif):
 
     return all_features[pos], pred_motif
 
-def collect_features_from_aligned_site(alignment, index_read_ids, chr, site, thresh_coverage=0):
-    fixed_model, fixed_device = load_model(model_path, config)
-
+def collect_features_from_aligned_site(model, device, config, alignment, index_read_ids, chr, site, thresh_coverage=0):
     site_motif_features = {}
     for pileupcolumn in alignment.pileup(chr, site, site+1, truncate=True, min_base_quality=0):
         if pileupcolumn.pos == site:
@@ -128,7 +121,7 @@ def collect_features_from_aligned_site(alignment, index_read_ids, chr, site, thr
                         query_motif = pileupread.alignment.query_sequence[query_position-2:query_position+3]
                         this_read_signal = get_norm_signal_from_read_id(query_name, index_read_ids)
                         # this_read_signal = id_signal[query_name]
-                        this_read_features, this_read_motif = extract_features_from_signal(fixed_model, fixed_device, this_read_signal, query_position, query_motif)
+                        this_read_features, this_read_motif = extract_features_from_signal(model, device, config, this_read_signal, query_position, query_motif)
                         if this_read_features is not None:
                             site_motif_features[query_name] = (this_read_motif, this_read_features)
     return site_motif_features

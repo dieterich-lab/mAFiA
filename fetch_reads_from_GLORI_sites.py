@@ -5,10 +5,12 @@ sys.path.append(os.path.join(HOME, 'git/GLORI'))
 from tqdm import tqdm
 from glob import glob
 import pandas as pd
+import torch
+from models import objectview
 import pysam
 from Bio import SeqIO
 from ont_fast5_api.fast5_interface import get_fast5_file
-from extract_features import collect_features_from_aligned_site
+from extract_features import load_model, collect_features_from_aligned_site
 from cluster_features import get_outlier_ratio_from_features
 
 glori_file = os.path.join(HOME, 'Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv')
@@ -47,6 +49,13 @@ for f5_filepath in tqdm(ivt_f5_paths):
         ivt_index_read_ids[read_id] = f5_filepath
 print('{} IVT reads collected'.format(len(ivt_index_read_ids)))
 
+### load model, device ###
+model_path = os.path.join(HOME, 'pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch')
+torchdict = torch.load(model_path, map_location="cpu")
+origconfig = torchdict["config"]
+config = objectview(origconfig)
+fixed_model, fixed_device = load_model(model_path, config)
+
 ### search by GLORI sites ###
 MIN_COVERAGE = 50
 PERC_THRESH = 0.85
@@ -58,6 +67,7 @@ for ind, row in df_glori.iterrows():
     # ind = 1466
     # row = df_glori.iloc[ind]
 
+    print('Site {}'.format(ind))
     chr = row['Chr'].lstrip('chr')
     strand = row['Strand']
     site = row['Sites'] - 1   # 0-based
@@ -68,12 +78,12 @@ for ind, row in df_glori.iterrows():
         continue
 
     # print('Collecting WT features...')
-    wt_site_motif_features = collect_features_from_aligned_site(wt_bam, wt_index_read_ids, chr, site, MIN_COVERAGE)
+    wt_site_motif_features = collect_features_from_aligned_site(fixed_model, fixed_device, config, wt_bam, wt_index_read_ids, chr, site, MIN_COVERAGE)
     # print('Collecting IVT features...')
-    ivt_site_motif_features = collect_features_from_aligned_site(ivt_bam, ivt_index_read_ids, chr, site, MIN_COVERAGE)
+    ivt_site_motif_features = collect_features_from_aligned_site(fixed_model, fixed_device, config, ivt_bam, ivt_index_read_ids, chr, site, MIN_COVERAGE)
 
     if (len(wt_site_motif_features)>MIN_COVERAGE) and (len(ivt_site_motif_features)>MIN_COVERAGE):
-        print('\nSite {}, chr{}, pos{}, strand{}'.format(ind, chr, site, strand))
+        print('\nchr{}, pos{}, strand{}'.format(chr, site, strand))
         print('Reference motif {}'.format(ref_motif))
         # print('Mod. ratio = {:.2f}'.format(glori_ratio))
         print('{} feature vectors collected from WT'.format(len(wt_site_motif_features)))
