@@ -48,6 +48,8 @@ for f5_filepath in tqdm(ivt_f5_paths):
 print('{} IVT reads collected'.format(len(ivt_index_read_ids)))
 
 ### search by GLORI sites ###
+MIN_COVERAGE = 50
+
 # print('Going through GLORI m6A sites...')
 for ind, row in df_glori.iterrows():
     ### debug ###
@@ -60,21 +62,20 @@ for ind, row in df_glori.iterrows():
     glori_ratio = row['Ratio']
     ref_motif = ref[chr][site-2:site+3]
 
-    if not ((chr.isnumeric()) or (chr in ['X', 'Y']) or (strand=='+')):
+    if not (((chr.isnumeric()) or (chr in ['X', 'Y'])) and (strand=='+')):
         continue
 
-    print('\nSite {}, chr{}, pos{}, strand{}'.format(ind, chr, site, strand))
-    print('Reference motif {}'.format(ref_motif))
-    print('Mod. ratio = {:.2f}'.format(glori_ratio))
+    # print('Collecting WT features...')
+    wt_site_motif_features = collect_features_from_aligned_site(wt_bam, wt_index_read_ids, chr, site, MIN_COVERAGE)
+    # print('Collecting IVT features...')
+    ivt_site_motif_features = collect_features_from_aligned_site(ivt_bam, ivt_index_read_ids, chr, site, MIN_COVERAGE)
 
-    print('Collecting WT features...')
-    wt_site_motif_features = collect_features_from_aligned_site(wt_bam, wt_index_read_ids, chr, site)
-    print('{} feature vectors collected from WT'.format(len(wt_site_motif_features)))
-    print('Collecting IVT features...')
-    ivt_site_motif_features = collect_features_from_aligned_site(ivt_bam, ivt_index_read_ids, chr, site)
-    print('{} feature vectors collected from IVT'.format(len(ivt_site_motif_features)))
-
-    if (len(wt_site_motif_features)>0) and (len(ivt_site_motif_features)>0):
+    if (len(wt_site_motif_features)>MIN_COVERAGE) and (len(ivt_site_motif_features)>MIN_COVERAGE):
+        print('\nSite {}, chr{}, pos{}, strand{}'.format(ind, chr, site, strand))
+        print('Reference motif {}'.format(ref_motif))
+        # print('Mod. ratio = {:.2f}'.format(glori_ratio))
+        print('{} feature vectors collected from WT'.format(len(wt_site_motif_features)))
+        print('{} feature vectors collected from IVT'.format(len(ivt_site_motif_features)))
         print('Now clustering features...')
         outlier_ratio = get_outlier_ratio_from_features(ivt_site_motif_features, wt_site_motif_features, ref_motif, 0.75)
         print('Calculated outlier ratio {:.2f} [GLORI {:.2f}]'.format(outlier_ratio, glori_ratio))
