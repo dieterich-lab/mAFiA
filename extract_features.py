@@ -102,7 +102,7 @@ def extract_features_from_signal(model, device, signal, pos, bam_motif):
     # print('Predicted motif {}, aligned {}, matching {}'.format(pred_motif, bam_motif, pred_motif == bam_motif))
     if pred_motif!=bam_motif:
         print('\n!!!!!!!!!!!!!!!!!!!Error: Predicted motif =/= aligned!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n')
-        return None
+        return None, pred_motif
 
     return all_features[pos], pred_motif
 

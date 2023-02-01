@@ -55,8 +55,8 @@ for ind, row in df_glori.iterrows():
     ### debug ###
     # ind = 6047
     # row = df_glori.iloc[ind]
-    ind = 1466
-    row = df_glori.iloc[ind]
+    # ind = 1466
+    # row = df_glori.iloc[ind]
 
     chr = row['Chr'].lstrip('chr')
     strand = row['Strand']
