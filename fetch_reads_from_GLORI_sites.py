@@ -56,6 +56,9 @@ for ind, row in df_glori.iterrows():
     # ind = 6047
     # row = df_glori.iloc[ind]
 
+    ind = 1465
+    row = df_glori.iloc[ind]
+
     chr = row['Chr'].lstrip('chr')
     strand = row['Strand']
     site = row['Sites'] - 1   # 0-based
