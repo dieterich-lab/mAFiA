@@ -9,6 +9,7 @@ corr = np.corrcoef(df['Ratio'], df['ratio_outlier'])[0, 1]
 
 plt.figure(figsize=(6, 6))
 plt.plot(df['Ratio'], df['ratio_outlier'], 'o', mfc='none')
+plt.plot(np.arange(0, 1.1, 0.1), np.arange(0, 1.1, 0.1), 'r-', alpha=0.5)
 plt.xlim([-0.05, 1.05])
 plt.ylim([-0.05, 1.05])
 plt.xlabel('GLORI')

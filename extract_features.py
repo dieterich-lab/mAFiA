@@ -101,6 +101,32 @@ def extract_features_from_signal(model, device, config, signal, pos, bam_motif):
 
     return all_features[pos], pred_motif
 
+def extract_features_from_multiple_signals(model, device, config, site_normReads_qPos, bam_motif):
+    qNames = []
+    chunks = []
+    adj_pos = []
+    for qname, (this_signal, this_pos) in site_normReads_qPos.items():
+        qNames.append(qname)
+        this_read_segs = segment(this_signal, config.seqlen)
+        chunks.append(this_read_segs[this_pos // config.seqlen - 1])
+        adj_pos.append(this_pos % config.seqlen - 1)
+
+    event = torch.unsqueeze(torch.FloatTensor(chunks), 1).to(device, non_blocking=True)
+    out = model.forward(event)
+
+    site_motif_features = {}
+    for i in range(out.shape[1]):
+        this_adj_pos = adj_pos[i]
+        this_pred_label, pred_locs = beam_search(torch.softmax(out[:, i, :], dim=-1).cpu().detach().numpy(), alphabet=alphabet)
+        pred_motif = this_pred_label[this_adj_pos-2:this_adj_pos+3]
+        if pred_motif!=bam_motif:
+            print('\n!!!!!!!!!!!!!!!!!!!Error: Predicted motif =/= aligned!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n')
+            continue
+        this_feature = activation['conv21'].detach().cpu().numpy()[i, :, pred_locs]
+        site_motif_features[qNames[i]] = (pred_motif, this_feature[this_adj_pos])
+
+    return site_motif_features
+
 def collect_features_from_aligned_site(model, device, config, alignment, index_read_ids, chr, site, thresh_coverage=0):
     site_motif_features = {}
     for pileupcolumn in alignment.pileup(chr, site, site+1, truncate=True, min_base_quality=0):
@@ -121,4 +147,26 @@ def collect_features_from_aligned_site(model, device, config, alignment, index_r
                         this_read_features, this_read_motif = extract_features_from_signal(model, device, config, this_read_signal, query_position, query_motif)
                         if this_read_features is not None:
                             site_motif_features[query_name] = (this_read_motif, this_read_features)
+    return site_motif_features
+
+def collect_features_from_aligned_site_v2(model, device, config, alignment, index_read_ids, chr, site, thresh_coverage=0):
+    site_normReads_qPos = {}
+    for pileupcolumn in alignment.pileup(chr, site, site+1, truncate=True, min_base_quality=0):
+        if pileupcolumn.pos == site:
+            coverage = pileupcolumn.get_num_aligned()
+            if coverage>thresh_coverage:
+                valid_counts = 0
+                for pileupread in pileupcolumn.pileups:
+                    query_name = pileupread.alignment.query_name
+                    # query_position = pileupread.query_position_or_next
+                    query_position = pileupread.query_position
+                    flag = pileupread.alignment.flag
+                    if query_position and (flag==0) and (query_name in index_read_ids.keys()):
+                        valid_counts += 1
+                        query_motif = pileupread.alignment.query_sequence[query_position-2:query_position+3]
+                        this_read_signal = get_norm_signal_from_read_id(query_name, index_read_ids)
+                        # this_read_signal = id_signal[query_name]
+                        site_normReads_qPos[query_name] = (this_read_signal, query_position)
+
+    site_motif_features = extract_features_from_multiple_signals(model, device, config, site_normReads_qPos, query_motif)
     return site_motif_features
