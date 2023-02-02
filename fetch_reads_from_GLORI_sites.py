@@ -11,8 +11,9 @@ from models import objectview
 import pysam
 from Bio import SeqIO
 from ont_fast5_api.fast5_interface import get_fast5_file
-from extract_features import load_model, collect_features_from_aligned_site
+from extract_features import load_model, collect_features_from_aligned_site, collect_features_from_aligned_site_v2
 from cluster_features import get_outlier_ratio_from_features
+from time import time
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--perc_thresh', help='percolation threshold')
@@ -82,6 +83,8 @@ for ind, row in df_glori.iterrows():
     # row = df_glori.iloc[ind]
     # ind = 4112
     # row = df_glori.iloc[ind]
+    ind = 2298
+    row = df_glori.iloc[ind]
 
     print('\nSite {}'.format(ind), flush=True)
     chr = row['Chr'].lstrip('chr')
@@ -94,7 +97,16 @@ for ind, row in df_glori.iterrows():
         continue
 
     # print('Collecting WT features...', flush=True)
+    tic = time()
     wt_site_motif_features = collect_features_from_aligned_site(fixed_model, fixed_device, fixed_config, wt_bam, wt_index_read_ids, chr, site, MIN_COVERAGE)
+    elapsed = time() - tic
+    print('v1 time elapsed: {:.1f}'.format(elapsed))
+
+    tic = time()
+    wt_site_motif_features = collect_features_from_aligned_site_v2(fixed_model, fixed_device, fixed_config, wt_bam, wt_index_read_ids, chr, site, MIN_COVERAGE)
+    elapsed = time() - tic
+    print('v2 time elapsed: {:.1f}'.format(elapsed))
+
     # print('Collecting IVT features...', flush=True)
     ivt_site_motif_features = collect_features_from_aligned_site(fixed_model, fixed_device, fixed_config, ivt_bam, ivt_index_read_ids, chr, site, MIN_COVERAGE)
 

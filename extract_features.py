@@ -101,29 +101,55 @@ def extract_features_from_signal(model, device, config, signal, pos, bam_motif):
 
     return all_features[pos], pred_motif
 
-def extract_features_from_multiple_signals(model, device, config, site_normReads_qPos, bam_motif):
+def extract_features_from_multiple_signals(model, device, config, site_normReads_qPos_motif, batch_size=256):
     qNames = []
-    chunks = []
-    adj_pos = []
-    for qname, (this_signal, this_pos) in site_normReads_qPos.items():
+    all_chunks = []
+    chunk_sizes = []
+    all_pos = []
+    all_motifs = []
+    for qname, (this_signal, this_pos, this_motif) in site_normReads_qPos_motif.items():
         qNames.append(qname)
-        this_read_segs = segment(this_signal, config.seqlen)
-        chunks.append(this_read_segs[this_pos // config.seqlen - 1])
-        adj_pos.append(this_pos % config.seqlen - 1)
+        this_chunk = segment(this_signal, config.seqlen)
+        all_chunks.append(this_chunk)
+        chunk_sizes.append(this_chunk.shape[0])
+        all_pos.append(this_pos)
+        all_motifs.append(this_motif)
+    all_chunks = np.vstack(all_chunks)
+    cum_chunk_sizes = np.cumsum([0] + chunk_sizes)
 
-    event = torch.unsqueeze(torch.FloatTensor(chunks), 1).to(device, non_blocking=True)
-    out = model.forward(event)
+    event = torch.unsqueeze(torch.FloatTensor(all_chunks), 1).to(device, non_blocking=True)
+    outs = []
+    features = []
+    for start in np.arange(0, event.shape[0], batch_size):
+        stop = min(start+batch_size, event.shape[0])
+        outs.append(model.forward(event[start:stop]))
+        features.append(activation['conv21'].detach().cpu().numpy())
+    outs = torch.cat(outs, 1)
+    features = np.vstack(features)
 
     site_motif_features = {}
-    for i in range(out.shape[1]):
-        this_adj_pos = adj_pos[i]
-        this_pred_label, pred_locs = beam_search(torch.softmax(out[:, i, :], dim=-1).cpu().detach().numpy(), alphabet=alphabet)
-        pred_motif = this_pred_label[this_adj_pos-2:this_adj_pos+3]
-        if pred_motif!=bam_motif:
+    for i in range(len(all_pos)):
+        this_qname = qNames[i]
+        this_pos = all_pos[i]
+        this_out = outs[:, cum_chunk_sizes[i]:cum_chunk_sizes[i+1], :]
+        pred_str = []
+        str_features = []
+        for j in range(this_out.shape[1]):
+            this_pred_label, pred_locs = beam_search(torch.softmax(this_out[:, j, :], dim=-1).cpu().detach().numpy(), alphabet=alphabet)
+            pred_str.extend(this_pred_label)
+            str_features.append(features[cum_chunk_sizes[i]:cum_chunk_sizes[i + 1]][j][:, pred_locs].T)
+
+        pred_str = ''.join(pred_str)[::-1]
+        str_features = np.vstack(str_features)[::-1]
+
+        query_motif = all_motifs[i]
+        pred_motif = ''.join(pred_str[this_pos-2:this_pos+3])
+        if pred_motif!=query_motif:
             print('\n!!!!!!!!!!!!!!!!!!!Error: Predicted motif =/= aligned!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n')
             continue
-        this_feature = activation['conv21'].detach().cpu().numpy()[i, :, pred_locs]
-        site_motif_features[qNames[i]] = (pred_motif, this_feature[this_adj_pos])
+
+        str_features = np.vstack(str_features)
+        site_motif_features[this_qname] = (pred_motif, str_features[this_pos])
 
     return site_motif_features
 
@@ -150,7 +176,7 @@ def collect_features_from_aligned_site(model, device, config, alignment, index_r
     return site_motif_features
 
 def collect_features_from_aligned_site_v2(model, device, config, alignment, index_read_ids, chr, site, thresh_coverage=0):
-    site_normReads_qPos = {}
+    site_normReads_qPos_motif = {}
     for pileupcolumn in alignment.pileup(chr, site, site+1, truncate=True, min_base_quality=0):
         if pileupcolumn.pos == site:
             coverage = pileupcolumn.get_num_aligned()
@@ -166,7 +192,7 @@ def collect_features_from_aligned_site_v2(model, device, config, alignment, inde
                         query_motif = pileupread.alignment.query_sequence[query_position-2:query_position+3]
                         this_read_signal = get_norm_signal_from_read_id(query_name, index_read_ids)
                         # this_read_signal = id_signal[query_name]
-                        site_normReads_qPos[query_name] = (this_read_signal, query_position)
+                        site_normReads_qPos_motif[query_name] = (this_read_signal, query_position, query_motif)
 
-    site_motif_features = extract_features_from_multiple_signals(model, device, config, site_normReads_qPos, query_motif)
+    site_motif_features = extract_features_from_multiple_signals(model, device, config, site_normReads_qPos_motif)
     return site_motif_features
