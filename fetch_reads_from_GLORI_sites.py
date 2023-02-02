@@ -17,7 +17,8 @@ from cluster_features import get_outlier_ratio_from_features
 parser = argparse.ArgumentParser()
 parser.add_argument('--perc_thresh', help='percolation threshold')
 args = parser.parse_args()
-PERC_THRESH = args['perc_thresh']
+PERC_THRESH = float(args['perc_thresh'])
+print('Clustering at threshold {:.2f}'.format(PERC_THRESH))
 
 glori_file = os.path.join(HOME, 'Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv')
 df_glori = pd.read_csv(glori_file)
