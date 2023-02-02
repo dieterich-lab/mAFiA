@@ -110,8 +110,8 @@ def collect_features_from_aligned_site(model, device, config, alignment, index_r
                 valid_counts = 0
                 for pileupread in pileupcolumn.pileups:
                     query_name = pileupread.alignment.query_name
-                    query_position = pileupread.query_position_or_next
-                    # query_position = pileupread.query_position
+                    # query_position = pileupread.query_position_or_next
+                    query_position = pileupread.query_position
                     flag = pileupread.alignment.flag
                     if query_position and (flag==0) and (query_name in index_read_ids.keys()):
                         valid_counts += 1

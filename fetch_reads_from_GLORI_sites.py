@@ -2,6 +2,7 @@ import os
 HOME = os.path.expanduser('~')
 import sys
 sys.path.append(os.path.join(HOME, 'git/GLORI'))
+import argparse
 from tqdm import tqdm
 from glob import glob
 import pandas as pd
@@ -12,6 +13,11 @@ from Bio import SeqIO
 from ont_fast5_api.fast5_interface import get_fast5_file
 from extract_features import load_model, collect_features_from_aligned_site
 from cluster_features import get_outlier_ratio_from_features
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--perc_thresh', help='percolation threshold')
+args = parser.parse_args()
+PERC_THRESH = args['perc_thresh']
 
 glori_file = os.path.join(HOME, 'Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv')
 df_glori = pd.read_csv(glori_file)
@@ -58,7 +64,7 @@ fixed_model, fixed_device = load_model(model_path, fixed_config)
 
 ### search by GLORI sites ###
 MIN_COVERAGE = 50
-PERC_THRESH = 0.7
+# PERC_THRESH = 0.7
 outfile = os.path.join(HOME, 'Data/GLORI/df_outlier_ratios_thresh{:.2f}.tsv'.format(PERC_THRESH))
 # print('Going through GLORI m6A sites...', flush=True)
 df_outlier = pd.DataFrame()
