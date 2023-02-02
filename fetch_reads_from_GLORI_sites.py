@@ -83,8 +83,8 @@ for ind, row in df_glori.iterrows():
     # row = df_glori.iloc[ind]
     # ind = 4112
     # row = df_glori.iloc[ind]
-    ind = 2298
-    row = df_glori.iloc[ind]
+    # ind = 2298
+    # row = df_glori.iloc[ind]
 
     print('\nSite {}'.format(ind), flush=True)
     chr = row['Chr'].lstrip('chr')
