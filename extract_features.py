@@ -114,6 +114,8 @@ def extract_features_from_multiple_signals(model, device, config, site_normReads
         chunk_sizes.append(this_chunk.shape[0])
         all_pos.append(this_pos)
         all_motifs.append(this_motif)
+    if len(all_chunks)==0:
+        return {}
     all_chunks = np.vstack(all_chunks)
     cum_chunk_sizes = np.cumsum([0] + chunk_sizes)
 
@@ -193,6 +195,7 @@ def collect_features_from_aligned_site_v2(model, device, config, alignment, inde
                         this_read_signal = get_norm_signal_from_read_id(query_name, index_read_ids)
                         # this_read_signal = id_signal[query_name]
                         site_normReads_qPos_motif[query_name] = (this_read_signal, query_position, query_motif)
-
+    if len(site_normReads_qPos_motif)==0:
+        return {}
     site_motif_features = extract_features_from_multiple_signals(model, device, config, site_normReads_qPos_motif)
     return site_motif_features
