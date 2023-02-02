@@ -97,18 +97,18 @@ for ind, row in df_glori.iterrows():
         continue
 
     # print('Collecting WT features...', flush=True)
-    tic = time()
-    wt_site_motif_features = collect_features_from_aligned_site(fixed_model, fixed_device, fixed_config, wt_bam, wt_index_read_ids, chr, site, MIN_COVERAGE)
-    elapsed = time() - tic
-    print('v1 time elapsed: {:.1f}'.format(elapsed))
+    # tic = time()
+    # v1_wt_site_motif_features = collect_features_from_aligned_site(fixed_model, fixed_device, fixed_config, wt_bam, wt_index_read_ids, chr, site, MIN_COVERAGE)
+    # elapsed = time() - tic
+    # print('v1 time elapsed: {:.1f} secs'.format(elapsed))
 
-    tic = time()
+    # tic = time()
     wt_site_motif_features = collect_features_from_aligned_site_v2(fixed_model, fixed_device, fixed_config, wt_bam, wt_index_read_ids, chr, site, MIN_COVERAGE)
-    elapsed = time() - tic
-    print('v2 time elapsed: {:.1f}'.format(elapsed))
+    # elapsed = time() - tic
+    # print('v2 time elapsed: {:.1f} secs'.format(elapsed))
 
     # print('Collecting IVT features...', flush=True)
-    ivt_site_motif_features = collect_features_from_aligned_site(fixed_model, fixed_device, fixed_config, ivt_bam, ivt_index_read_ids, chr, site, MIN_COVERAGE)
+    ivt_site_motif_features = collect_features_from_aligned_site_v2(fixed_model, fixed_device, fixed_config, ivt_bam, ivt_index_read_ids, chr, site, MIN_COVERAGE)
 
     if (len(wt_site_motif_features)>MIN_COVERAGE) and (len(ivt_site_motif_features)>MIN_COVERAGE):
         print('=========================================================', flush=True)
