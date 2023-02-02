@@ -18,7 +18,7 @@ df_glori = pd.read_csv(glori_file)
 
 ref_file = os.path.join(HOME, 'Data/genomes/GRCh38_96.fa')
 ref = {}
-print('Parsing genome...')
+print('Parsing genome...', flush=True)
 for record in SeqIO.parse(ref_file, 'fasta'):
     if (record.id.isnumeric()) or (record.id in ['X', 'Y']):
         ref[record.id] = str(record.seq)
@@ -29,12 +29,12 @@ wt_bam = pysam.AlignmentFile(wt_bam_file, 'rb')
 wt_fast5_dir = '/prj/Isabel_IVT_Nanopore/HEK293A_wildtype/Jessica_HEK293/HEK293A_2/20190409_1503_GA10000_FAK10978_2e75d7be/fast5_all'
 wt_f5_paths = glob(os.path.join(wt_fast5_dir, '*.fast5'), recursive=True)
 wt_index_read_ids = {}
-print('Parsing WT fast5 files...')
+print('Parsing WT fast5 files...', flush=True)
 for f5_filepath in wt_f5_paths:
     f5 = get_fast5_file(f5_filepath, mode="r")
     for read_id in f5.get_read_ids():
         wt_index_read_ids[read_id] = f5_filepath
-print('{} WT reads collected'.format(len(wt_index_read_ids)))
+print('{} WT reads collected'.format(len(wt_index_read_ids)), flush=True)
 
 ### IVT ###
 ivt_bam_file = os.path.join(HOME, 'inference/HEK293_IVT_2_q50_10M/epoch29_HEK293_IVT_2_aligned_to_genome.bam.sorted')
@@ -42,12 +42,12 @@ ivt_bam = pysam.AlignmentFile(ivt_bam_file, 'rb')
 ivt_fast5_dir = '/home/achan/Data/Isabel_IVT_Nanopore/HEK293_IVT_2/fast5_pass'
 ivt_f5_paths = glob(os.path.join(ivt_fast5_dir, '*.fast5'), recursive=True)
 ivt_index_read_ids = {}
-print('Parsing IVT fast5 files...')
+print('Parsing IVT fast5 files...', flush=True)
 for f5_filepath in ivt_f5_paths:
     f5 = get_fast5_file(f5_filepath, mode="r")
     for read_id in f5.get_read_ids():
         ivt_index_read_ids[read_id] = f5_filepath
-print('{} IVT reads collected'.format(len(ivt_index_read_ids)))
+print('{} IVT reads collected'.format(len(ivt_index_read_ids)), flush=True)
 
 ### load model, device ###
 model_path = os.path.join(HOME, 'pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch')
@@ -56,12 +56,11 @@ origconfig = torchdict["config"]
 fixed_config = objectview(origconfig)
 fixed_model, fixed_device = load_model(model_path, fixed_config)
 
-outfile = os.path.join(HOME, 'Data/GLORI/df_outlier_ratios.tsv')
-
 ### search by GLORI sites ###
 MIN_COVERAGE = 50
-PERC_THRESH = 0.8
-# print('Going through GLORI m6A sites...')
+PERC_THRESH = 0.7
+outfile = os.path.join(HOME, 'Data/GLORI/df_outlier_ratios_thresh{:.2f}.tsv'.format(PERC_THRESH))
+# print('Going through GLORI m6A sites...', flush=True)
 df_outlier = pd.DataFrame()
 counts = 0
 for ind, row in df_glori.iterrows():
@@ -77,7 +76,7 @@ for ind, row in df_glori.iterrows():
     # ind = 4112
     # row = df_glori.iloc[ind]
 
-    print('\nSite {}'.format(ind))
+    print('\nSite {}'.format(ind), flush=True)
     chr = row['Chr'].lstrip('chr')
     strand = row['Strand']
     site = row['Sites'] - 1   # 0-based
@@ -87,22 +86,22 @@ for ind, row in df_glori.iterrows():
     if not (((chr.isnumeric()) or (chr in ['X', 'Y'])) and (strand=='+')):
         continue
 
-    # print('Collecting WT features...')
+    # print('Collecting WT features...', flush=True)
     wt_site_motif_features = collect_features_from_aligned_site(fixed_model, fixed_device, fixed_config, wt_bam, wt_index_read_ids, chr, site, MIN_COVERAGE)
-    # print('Collecting IVT features...')
+    # print('Collecting IVT features...', flush=True)
     ivt_site_motif_features = collect_features_from_aligned_site(fixed_model, fixed_device, fixed_config, ivt_bam, ivt_index_read_ids, chr, site, MIN_COVERAGE)
 
     if (len(wt_site_motif_features)>MIN_COVERAGE) and (len(ivt_site_motif_features)>MIN_COVERAGE):
-        print('=========================================================')
-        print('chr{}, pos{}, strand{}'.format(chr, site, strand))
-        print('Reference motif {}'.format(ref_motif))
-        # print('Mod. ratio = {:.2f}'.format(glori_ratio))
-        print('{} feature vectors collected from WT'.format(len(wt_site_motif_features)))
-        print('{} feature vectors collected from IVT'.format(len(ivt_site_motif_features)))
-        print('Now clustering features...')
+        print('=========================================================', flush=True)
+        print('chr{}, pos{}, strand{}'.format(chr, site, strand), flush=True)
+        print('Reference motif {}'.format(ref_motif), flush=True)
+        # print('Mod. ratio = {:.2f}'.format(glori_ratio), flush=True)
+        print('{} feature vectors collected from WT'.format(len(wt_site_motif_features)), flush=True)
+        print('{} feature vectors collected from IVT'.format(len(ivt_site_motif_features)), flush=True)
+        print('Now clustering features...', flush=True)
         outlier_ratio = get_outlier_ratio_from_features(ivt_site_motif_features, wt_site_motif_features, ref_motif, PERC_THRESH)
-        print('Calculated outlier ratio {:.2f} [GLORI {:.2f}]'.format(outlier_ratio, glori_ratio))
-        print('=========================================================')
+        print('Calculated outlier ratio {:.2f} [GLORI {:.2f}]'.format(outlier_ratio, glori_ratio), flush=True)
+        print('=========================================================', flush=True)
         if outlier_ratio!=-1:
             new_row = row.copy()
             new_row['ratio_outlier'] = outlier_ratio
