@@ -177,7 +177,7 @@ def collect_features_from_aligned_site(model, device, config, alignment, index_r
                             site_motif_features[query_name] = (this_read_motif, this_read_features)
     return site_motif_features
 
-def collect_features_from_aligned_site_v2(model, device, config, alignment, index_read_ids, chr, site, thresh_coverage=0):
+def collect_features_from_aligned_site_v2(model, device, config, alignment, index_read_ids, chr, site, thresh_coverage=0, enforce_motif=None):
     site_normReads_qPos_motif = {}
     for pileupcolumn in alignment.pileup(chr, site, site+1, truncate=True, min_base_quality=0):
         if pileupcolumn.pos == site:
@@ -188,10 +188,12 @@ def collect_features_from_aligned_site_v2(model, device, config, alignment, inde
                     query_name = pileupread.alignment.query_name
                     # query_position = pileupread.query_position_or_next
                     query_position = pileupread.query_position
+                    query_motif = pileupread.alignment.query_sequence[query_position - 2:query_position + 3]
                     flag = pileupread.alignment.flag
+                    if (enforce_motif is not None) and (query_motif!=enforce_motif):
+                        continue
                     if query_position and (flag==0) and (query_name in index_read_ids.keys()):
                         valid_counts += 1
-                        query_motif = pileupread.alignment.query_sequence[query_position-2:query_position+3]
                         this_read_signal = get_norm_signal_from_read_id(query_name, index_read_ids)
                         # this_read_signal = id_signal[query_name]
                         site_normReads_qPos_motif[query_name] = (this_read_signal, query_position, query_motif)
