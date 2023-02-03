@@ -193,7 +193,7 @@ def collect_features_from_aligned_site(model, device, config, alignment, index_r
 
 def collect_features_from_aligned_site_v2(model, device, config, alignment, index_read_ids, chr, site, thresh_coverage=0, enforce_motif=None):
     site_normReads_qPos_motif = {}
-    for pileupcolumn in alignment.pileup(chr, site, site+1, truncate=True, min_base_quality=0):
+    for pileupcolumn in alignment.pileup(chr, site, site+1, truncate=True):
         if pileupcolumn.pos == site:
             coverage = pileupcolumn.get_num_aligned()
             if coverage>thresh_coverage:
