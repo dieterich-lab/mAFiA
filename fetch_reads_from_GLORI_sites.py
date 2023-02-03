@@ -123,8 +123,10 @@ for ind, row in df_glori.iterrows():
         print('=========================================================', flush=True)
         if outlier_ratio!=-1:
             new_row = row.copy()
+            new_row['motif'] = ref_motif
             new_row['ratio_outlier'] = outlier_ratio
-            # df_outlier.append(new_row)
+            new_row['num_features_ivt'] = len(ivt_site_motif_features)
+            new_row['num_features_wt'] = len(wt_site_motif_features)
             df_outlier = pd.concat([df_outlier, new_row.to_frame().T])
             counts += 1
             if counts%5==0:

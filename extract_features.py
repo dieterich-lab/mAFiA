@@ -101,7 +101,7 @@ def extract_features_from_signal(model, device, config, signal, pos, bam_motif):
 
     return all_features[pos], pred_motif
 
-def extract_features_from_multiple_signals(model, device, config, site_normReads_qPos_motif, batch_size=256):
+def extract_features_from_multiple_signals(model, device, config, site_normReads_qPos_motif, batch_size=128):
     qNames = []
     all_chunks = []
     chunk_sizes = []
