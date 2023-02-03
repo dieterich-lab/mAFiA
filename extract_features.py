@@ -17,6 +17,18 @@ def convert_statedict(state_dict):
         new_checkpoint[name] = v
     return new_checkpoint
 
+def get_freer_device():
+    if torch.cuda.is_available():
+        os.system('nvidia-smi -q -d Memory |grep -A5 GPU|grep Free >tmp')
+        memory_available = [int(x.split()[2]) for x in open('tmp', 'r').readlines()]
+        device_num = np.argmax(memory_available)
+        freer_device = torch.device("cuda:{}".format(device_num))
+        free_mem = memory_available[device_num]
+    else:
+        freer_device = torch.device("cpu")
+        free_mem = -1
+    return freer_device, free_mem
+
 activation = {}
 def get_activation(name):
     def hook(model, input, output):
@@ -27,8 +39,10 @@ def load_model(modelfile, config):
     if modelfile == None:
         sys.stderr.write("No model file specified!")
         sys.exit(1)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # print("Using device:", device)
+    device, mem = get_freer_device()
+    print("Using device {} with free memory {}MB".format(device, mem))
     model = rodan(config=config).to(device)
     state_dict = torch.load(modelfile, map_location=device)["state_dict"]
     if "state_dict" in state_dict:
@@ -188,6 +202,8 @@ def collect_features_from_aligned_site_v2(model, device, config, alignment, inde
                     query_name = pileupread.alignment.query_name
                     # query_position = pileupread.query_position_or_next
                     query_position = pileupread.query_position
+                    if query_position is None:
+                        continue
                     query_motif = pileupread.alignment.query_sequence[query_position - 2:query_position + 3]
                     flag = pileupread.alignment.flag
                     if (enforce_motif is not None) and (query_motif!=enforce_motif):
