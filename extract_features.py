@@ -169,14 +169,16 @@ def extract_features_from_multiple_signals(model, device, config, site_normReads
 
     return site_motif_features
 
-def collect_features_from_aligned_site(model, device, config, alignment, index_read_ids, chr, site, thresh_coverage=0, enforce_motif=None):
+def collect_features_from_aligned_site(model, device, config, alignment, index_read_ids, contig, site, thresh_coverage=0, enforce_motif=None):
     site_motif_features = {}
-    for pileupcolumn in alignment.pileup(chr, site, site+1, truncate=True, min_base_quality=0):
+    for pileupcolumn in alignment.pileup(contig, site, site + 1, truncate=True, min_base_quality=20):
         if pileupcolumn.pos == site:
             coverage = pileupcolumn.get_num_aligned()
+            print('Coverage {}'.format(coverage))
             if coverage>thresh_coverage:
                 valid_counts = 0
-                for pileupread in pileupcolumn.pileups:
+                for ind, pileupread in enumerate(pileupcolumn.pileups):
+                    print('Pileup {}/{}'.format(ind, coverage))
                     query_name = pileupread.alignment.query_name
                     # query_position = pileupread.query_position_or_next
                     query_position = pileupread.query_position

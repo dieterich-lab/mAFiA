@@ -87,7 +87,7 @@ for ind, row in df_mod_Am.iterrows():
     # print('v2 time elapsed: {:.1f} secs'.format(elapsed))
 
     # print('Collecting IVT features...', flush=True)
-    ivt_site_motif_features = collect_features_from_aligned_site_v2(fixed_model, fixed_device, fixed_config, ivt_bam, ivt_index_read_ids, chr, site, MIN_COVERAGE, enforce_motif=ref_motif)
+    ivt_site_motif_features = collect_features_from_aligned_site(fixed_model, fixed_device, fixed_config, ivt_bam, ivt_index_read_ids, sample, site, MIN_COVERAGE, enforce_motif=ref_motif)
 
     if (len(wt_site_motif_features)>MIN_COVERAGE) and (len(ivt_site_motif_features)>MIN_COVERAGE):
         print('=========================================================', flush=True)
