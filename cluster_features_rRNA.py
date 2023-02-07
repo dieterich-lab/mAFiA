@@ -20,7 +20,7 @@ from time import time
 # args = parser.parse_args()
 # PERC_THRESH = float(args.perc_thresh)
 # print('Clustering at threshold {:.2f}'.format(PERC_THRESH))
-PERC_THRESH = 0.8
+PERC_THRESH = 0.9
 
 mod_file = os.path.join(HOME, 'Data/rRNA/only_mod.bed')
 df_mod = pd.read_csv(mod_file, names=['sample', 'start', 'stop', 'mod'], sep='\t')
@@ -91,14 +91,14 @@ for ind, row in df_mod_Am.iterrows():
 
     if (len(wt_site_motif_features)>MIN_COVERAGE) and (len(ivt_site_motif_features)>MIN_COVERAGE):
         print('=========================================================', flush=True)
-        print('chr{}, pos{}, strand{}'.format(chr, site, strand), flush=True)
+        print('{}, pos{}, mod {}'.format(sample, site, mod), flush=True)
         print('Reference motif {}'.format(ref_motif), flush=True)
-        # print('Mod. ratio = {:.2f}'.format(glori_ratio), flush=True)
         print('{} feature vectors collected from WT'.format(len(wt_site_motif_features)), flush=True)
         print('{} feature vectors collected from IVT'.format(len(ivt_site_motif_features)), flush=True)
         print('Now clustering features...', flush=True)
         outlier_ratio = get_outlier_ratio_from_features(ivt_site_motif_features, wt_site_motif_features, ref_motif, PERC_THRESH)
-        print('Calculated outlier ratio {:.2f} [GLORI {:.2f}]'.format(outlier_ratio, glori_ratio), flush=True)
+        print('Calculated outlier ratio {:.2f}'.format(outlier_ratio), flush=True)
+        # print('Calculated outlier ratio {:.2f} [GLORI {:.2f}]'.format(outlier_ratio, glori_ratio), flush=True)
         print('=========================================================', flush=True)
         if outlier_ratio!=-1:
             new_row = row.copy()

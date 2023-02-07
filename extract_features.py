@@ -170,15 +170,16 @@ def extract_features_from_multiple_signals(model, device, config, site_normReads
     return site_motif_features
 
 def collect_features_from_aligned_site(model, device, config, alignment, index_read_ids, contig, site, thresh_coverage=0, enforce_motif=None):
+    MAX_READS_IN_PILEUP = 500
     site_motif_features = {}
-    for pileupcolumn in alignment.pileup(contig, site, site + 1, truncate=True, min_base_quality=20):
+    for pileupcolumn in alignment.pileup(contig, site, site + 1, truncate=True, min_base_quality=20, min_mapping_quality=20):
         if pileupcolumn.pos == site:
             coverage = pileupcolumn.get_num_aligned()
             print('Coverage {}'.format(coverage))
             if coverage>thresh_coverage:
                 valid_counts = 0
                 for ind, pileupread in enumerate(pileupcolumn.pileups):
-                    print('Pileup {}/{}'.format(ind, coverage))
+                    # print('Pileup {}/{}'.format(ind, coverage))
                     query_name = pileupread.alignment.query_name
                     # query_position = pileupread.query_position_or_next
                     query_position = pileupread.query_position
@@ -190,6 +191,8 @@ def collect_features_from_aligned_site(model, device, config, alignment, index_r
                         continue
                     if query_position and (flag==0) and (query_name in index_read_ids.keys()):
                         valid_counts += 1
+                        if valid_counts>=MAX_READS_IN_PILEUP:
+                            break
                         query_motif = pileupread.alignment.query_sequence[query_position-2:query_position+3]
                         this_read_signal = get_norm_signal_from_read_id(query_name, index_read_ids)
                         # this_read_signal = id_signal[query_name]
