@@ -127,7 +127,7 @@ for ind, row in df_mod_sel.iterrows():
         print('Now clustering features...', flush=True)
         # outlier_ratio = get_outlier_ratio_from_features(ivt_site_motif_features, wt_site_motif_features, ref_motif, PERC_THRESH)
         outlier_ratio = get_outlier_ratio_from_features_v2(ivt_site_motif_features, wt_site_motif_features, ref_motif, sigma_thresh)
-        outlier_ratio = get_outlier_ratio_from_features_v3(ivt_site_motif_features, wt_site_motif_features, ref_motif, sigma_thresh)
+        # outlier_ratio = get_outlier_ratio_from_features_v3(ivt_site_motif_features, wt_site_motif_features, ref_motif, sigma_thresh)
         print('Calculated outlier ratio {:.2f}'.format(outlier_ratio), flush=True)
         # print('Calculated outlier ratio {:.2f} [GLORI {:.2f}]'.format(outlier_ratio, glori_ratio), flush=True)
         print('=========================================================', flush=True)
