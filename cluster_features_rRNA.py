@@ -22,7 +22,7 @@ import numpy as np
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--sigma_thresh', help='sigma threshold for clustering')
-parser.add_argument('--mod_type', nargs='*', default=None, help='mod types')
+parser.add_argument('--mod_types', nargs='*', default=None, help='mod types')
 args = parser.parse_args()
 
 sigma_thresh = float(args.sigma_thresh)
@@ -30,13 +30,14 @@ print('Clustering at threshold {:.2f}'.format(sigma_thresh))
 # PERC_THRESH = float(args.perc_thresh)
 # PERC_THRESH = 0.9
 
-mod_type = 'psU'
+# mod_type = 'psU'
 rRNA_species = 'NR_003286_RNA18SN5'
 mod_file = os.path.join(HOME, 'Data/rRNA/only_mod.bed')
 df_mod = pd.read_csv(mod_file, names=['sample', 'start', 'stop', 'mod'], sep='\t')
 
-mod_types = args.mod_type
+mod_types = args.mod_types
 if mod_types is None:
+    print('All mod types')
     mod_type = 'all'
     df_mod_sel = df_mod
 else:
