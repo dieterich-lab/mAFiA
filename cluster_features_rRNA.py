@@ -13,7 +13,7 @@ from Bio import SeqIO
 from ont_fast5_api.fast5_interface import get_fast5_file
 from extract_features import load_model, collect_features_from_aligned_site, collect_features_from_aligned_site_v2
 from extract_features import get_features_from_collection_of_signals, collect_site_features
-from cluster_features import get_outlier_ratio_from_features_v3
+from cluster_features import get_outlier_ratio_from_features_v2, get_outlier_ratio_from_features_v3
 from time import time
 import random
 random.seed(10)
@@ -22,7 +22,9 @@ import numpy as np
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--sigma_thresh', help='sigma threshold for clustering')
+parser.add_argument('--mod_type', nargs='*', default=None, help='mod types')
 args = parser.parse_args()
+
 sigma_thresh = float(args.sigma_thresh)
 print('Clustering at threshold {:.2f}'.format(sigma_thresh))
 # PERC_THRESH = float(args.perc_thresh)
@@ -32,7 +34,14 @@ mod_type = 'psU'
 rRNA_species = 'NR_003286_RNA18SN5'
 mod_file = os.path.join(HOME, 'Data/rRNA/only_mod.bed')
 df_mod = pd.read_csv(mod_file, names=['sample', 'start', 'stop', 'mod'], sep='\t')
-df_mod_sel = df_mod[(df_mod['mod'] == mod_type) & (df_mod['sample'] == rRNA_species)]
+
+mod_types = args.mod_type
+if mod_types is None:
+    mod_type = 'all'
+    df_mod_sel = df_mod
+else:
+    print('Mod types: {}'.format(mod_types))
+    df_mod_sel = df_mod[(df_mod['mod'] in mod_types) & (df_mod['sample'] == rRNA_species)]
 
 ref_file = os.path.join(HOME, 'Data/transcriptomes/rRNA_18S_28S.fasta')
 ref = {}
@@ -80,7 +89,7 @@ fixed_config = objectview(origconfig)
 fixed_model, fixed_device = load_model(model_path, fixed_config)
 
 ### extract features ###
-max_num_reads = 1000
+max_num_reads = 100
 print('Now extracting features from WT...')
 wt_index_read_ids_sample = {id: wt_index_read_ids[id] for id in sample(wt_index_read_ids.keys(), max_num_reads)}
 wt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, wt_index_read_ids_sample)
@@ -116,6 +125,7 @@ for ind, row in df_mod_sel.iterrows():
         print('{} feature vectors collected from IVT'.format(len(ivt_site_motif_features)), flush=True)
         print('Now clustering features...', flush=True)
         # outlier_ratio = get_outlier_ratio_from_features(ivt_site_motif_features, wt_site_motif_features, ref_motif, PERC_THRESH)
+        outlier_ratio = get_outlier_ratio_from_features_v2(ivt_site_motif_features, wt_site_motif_features, ref_motif, sigma_thresh)
         outlier_ratio = get_outlier_ratio_from_features_v3(ivt_site_motif_features, wt_site_motif_features, ref_motif, sigma_thresh)
         print('Calculated outlier ratio {:.2f}'.format(outlier_ratio), flush=True)
         # print('Calculated outlier ratio {:.2f} [GLORI {:.2f}]'.format(outlier_ratio, glori_ratio), flush=True)
