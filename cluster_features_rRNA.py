@@ -12,6 +12,7 @@ import pysam
 from Bio import SeqIO
 from ont_fast5_api.fast5_interface import get_fast5_file
 from extract_features import load_model, collect_features_from_aligned_site, collect_features_from_aligned_site_v2
+from extract_features import get_features_from_collection_of_signals
 from cluster_features import get_outlier_ratio_from_features
 from time import time
 
@@ -35,8 +36,8 @@ for record in SeqIO.parse(ref_file, 'fasta'):
 ### WT ###
 wt_bam_file = os.path.join(HOME, 'inference/rRNA/HCT116_wt_rRNA_sorted.bam')
 wt_bam = pysam.AlignmentFile(wt_bam_file, 'rb')
-# wt_fast5_dir = '/home/adrian/Data/rRNA/HCT116_wt_rRNA/fast5_pass'
-wt_fast5_dir = '/prj/nanopore_direct_rnaseq/20210415_WFT_2/HCT116_wt_rRNA/20210415_1220_X2_AEV256_0b8f2ff4/fast5_pass'
+wt_fast5_dir = '/home/adrian/Data/rRNA/HCT116_wt_rRNA/fast5_pass'
+# wt_fast5_dir = '/prj/nanopore_direct_rnaseq/20210415_WFT_2/HCT116_wt_rRNA/20210415_1220_X2_AEV256_0b8f2ff4/fast5_pass'
 wt_f5_paths = glob(os.path.join(wt_fast5_dir, '*.fast5'), recursive=True)
 wt_index_read_ids = {}
 print('Parsing WT fast5 files...', flush=True)
@@ -49,8 +50,8 @@ print('{} WT reads collected'.format(len(wt_index_read_ids)), flush=True)
 ### IVT ###
 ivt_bam_file = os.path.join(HOME, 'inference/rRNA/18S_IVT_rRNA_sorted.bam')
 ivt_bam = pysam.AlignmentFile(ivt_bam_file, 'rb')
-# ivt_fast5_dir = '/home/adrian/Data/rRNA/18S_IVT_rRNA/fast5_pass/'
-ivt_fast5_dir = '/prj/nanopore_direct_rnaseq/20210520_rRNA/18S_IVT_rRNA/20210520_1059_X1_AGT888_6ebcc4d8/fast5_pass'
+ivt_fast5_dir = '/home/adrian/Data/rRNA/18S_IVT_rRNA/fast5_pass/'
+# ivt_fast5_dir = '/prj/nanopore_direct_rnaseq/20210520_rRNA/18S_IVT_rRNA/20210520_1059_X1_AGT888_6ebcc4d8/fast5_pass'
 ivt_f5_paths = glob(os.path.join(ivt_fast5_dir, '*.fast5'), recursive=True)
 ivt_index_read_ids = {}
 print('Parsing IVT fast5 files...', flush=True)
@@ -67,14 +68,20 @@ origconfig = torchdict["config"]
 fixed_config = objectview(origconfig)
 fixed_model, fixed_device = load_model(model_path, fixed_config)
 
+### extract features ###
+print('Now extracting features from WT...')
+wt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, wt_index_read_ids)
+print('Now extracting features from IVT...')
+ivt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, ivt_index_read_ids)
+
 ### search by GLORI sites ###
 MIN_COVERAGE = 0
-outfile = os.path.join(HOME, 'Data/MAFIA/rRNA_outlier_ratios_thresh{:.2f}.tsv'.format(PERC_THRESH))
+outfile = os.path.join(HOME, 'inference/rRNA/MAFIA_outlier_ratios_thresh{:.2f}.tsv'.format(PERC_THRESH))
 df_outlier = pd.DataFrame()
 counts = 0
 for ind, row in df_mod_Am.iterrows():
-    ind = 0
-    row = df_mod_Am.iloc[ind]
+    # ind = 0
+    # row = df_mod_Am.iloc[ind]
     print('\nSite {}'.format(ind), flush=True)
     sample = row['sample']
     site = row['start']
