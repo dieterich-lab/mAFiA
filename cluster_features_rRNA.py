@@ -90,7 +90,7 @@ fixed_config = objectview(origconfig)
 fixed_model, fixed_device = load_model(model_path, fixed_config)
 
 ### extract features ###
-max_num_reads = 100
+max_num_reads = 5000
 print('Now extracting features from WT...')
 wt_index_read_ids_sample = {id: wt_index_read_ids[id] for id in sample(wt_index_read_ids.keys(), max_num_reads)}
 wt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, wt_index_read_ids_sample)
@@ -129,7 +129,6 @@ for ind, row in df_mod_sel.iterrows():
         outlier_ratio = get_outlier_ratio_from_features_v2(ivt_site_motif_features, wt_site_motif_features, ref_motif, sigma_thresh)
         # outlier_ratio = get_outlier_ratio_from_features_v3(ivt_site_motif_features, wt_site_motif_features, ref_motif, sigma_thresh)
         print('Calculated outlier ratio {:.2f}'.format(outlier_ratio), flush=True)
-        # print('Calculated outlier ratio {:.2f} [GLORI {:.2f}]'.format(outlier_ratio, glori_ratio), flush=True)
         print('=========================================================', flush=True)
         if outlier_ratio!=-1:
             new_row = row.copy()
