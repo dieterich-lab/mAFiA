@@ -24,7 +24,7 @@ from random import sample
 # args = parser.parse_args()
 # PERC_THRESH = float(args.perc_thresh)
 # print('Clustering at threshold {:.2f}'.format(PERC_THRESH))
-PERC_THRESH = 0.9
+# PERC_THRESH = 0.9
 
 mod_file = os.path.join(HOME, 'Data/rRNA/only_mod.bed')
 df_mod = pd.read_csv(mod_file, names=['sample', 'start', 'stop', 'mod'], sep='\t')
@@ -39,8 +39,10 @@ for record in SeqIO.parse(ref_file, 'fasta'):
 ### WT ###
 wt_bam_file = os.path.join(HOME, 'inference/rRNA/HCT116_wt_rRNA_sorted.bam')
 wt_bam = pysam.AlignmentFile(wt_bam_file, 'rb')
-wt_fast5_dir = '/home/adrian/Data/rRNA/HCT116_wt_rRNA/fast5_pass'
-# wt_fast5_dir = '/prj/nanopore_direct_rnaseq/20210415_WFT_2/HCT116_wt_rRNA/20210415_1220_X2_AEV256_0b8f2ff4/fast5_pass'
+if HOME=='/home/adrian':
+    wt_fast5_dir = os.path.join(HOME, 'Data/rRNA/HCT116_wt_rRNA/fast5_pass')
+else:
+    wt_fast5_dir = '/prj/nanopore_direct_rnaseq/20210415_WFT_2/HCT116_wt_rRNA/20210415_1220_X2_AEV256_0b8f2ff4/fast5_pass'
 wt_f5_paths = glob(os.path.join(wt_fast5_dir, '*.fast5'), recursive=True)
 wt_index_read_ids = {}
 print('Parsing WT fast5 files...', flush=True)
@@ -53,8 +55,10 @@ print('{} WT reads collected'.format(len(wt_index_read_ids)), flush=True)
 ### IVT ###
 ivt_bam_file = os.path.join(HOME, 'inference/rRNA/18S_IVT_rRNA_sorted.bam')
 ivt_bam = pysam.AlignmentFile(ivt_bam_file, 'rb')
-ivt_fast5_dir = '/home/adrian/Data/rRNA/18S_IVT_rRNA/fast5_pass/'
-# ivt_fast5_dir = '/prj/nanopore_direct_rnaseq/20210520_rRNA/18S_IVT_rRNA/20210520_1059_X1_AGT888_6ebcc4d8/fast5_pass'
+if HOME=='/home/adrian':
+    ivt_fast5_dir = os.path.join(HOME, 'Data/rRNA/18S_IVT_rRNA/fast5_pass/')
+else:
+    ivt_fast5_dir = '/prj/nanopore_direct_rnaseq/20210520_rRNA/18S_IVT_rRNA/20210520_1059_X1_AGT888_6ebcc4d8/fast5_pass'
 ivt_f5_paths = glob(os.path.join(ivt_fast5_dir, '*.fast5'), recursive=True)
 ivt_index_read_ids = {}
 print('Parsing IVT fast5 files...', flush=True)
@@ -82,8 +86,8 @@ ivt_index_read_ids_sample = {id: ivt_index_read_ids[id] for id in sample(ivt_ind
 ivt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, ivt_index_read_ids_sample)
 
 ### search by GLORI sites ###
-MIN_COVERAGE = 0
-outfile = os.path.join(HOME, 'inference/rRNA/MAFIA_outlier_ratios_thresh{:.2f}.tsv'.format(PERC_THRESH))
+MIN_COVERAGE = 50
+outfile = os.path.join(HOME, 'inference/rRNA/MAFIA_outlier_ratios.tsv')
 df_outlier = pd.DataFrame()
 counts = 0
 for ind, row in df_mod_Am.iterrows():
