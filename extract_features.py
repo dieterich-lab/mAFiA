@@ -231,6 +231,30 @@ def extract_features_from_multiple_signals(model, device, config, site_normReads
 
     return site_motif_features
 
+def collect_site_features(alignment, contig, pos, dict_predStr_feature, thresh_coverage=0, enforce_motif=None):
+    site_motif_features = {}
+    for pileupcolumn in alignment.pileup(contig, pos, pos+1, truncate=True, min_base_quality=20, min_mapping_quality=20):
+        if pileupcolumn.pos == pos:
+            valid_counts = 0
+            for ind, pileupread in enumerate(pileupcolumn.pileups):
+                query_name = pileupread.alignment.query_name
+                query_position = pileupread.query_position
+                if query_position is None:
+                    continue
+                query_motif = pileupread.alignment.query_sequence[(query_position-2):(query_position+3)]
+                flag = pileupread.alignment.flag
+                if (enforce_motif is not None) and (query_motif != enforce_motif):
+                    continue
+                if query_position and (flag == 0) and (query_name in dict_predStr_feature.keys()):
+                    this_read_predStr, this_read_feature = dict_predStr_feature[query_name]
+                    this_site_motif = this_read_predStr[(query_position-2):(query_position+3)]
+                    this_site_feature = this_read_feature[query_position]
+                    if this_site_motif!=query_motif:
+                        print('Site motif not matching!!!')
+                    site_motif_features[query_name] = (this_site_motif, this_site_feature)
+                    valid_counts += 1
+    return site_motif_features
+
 def collect_features_from_aligned_site(model, device, config, alignment, index_read_ids, contig, site, thresh_coverage=0, enforce_motif=None):
     MAX_READS_IN_PILEUP = 500
     site_motif_features = {}

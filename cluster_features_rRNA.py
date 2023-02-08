@@ -12,9 +12,12 @@ import pysam
 from Bio import SeqIO
 from ont_fast5_api.fast5_interface import get_fast5_file
 from extract_features import load_model, collect_features_from_aligned_site, collect_features_from_aligned_site_v2
-from extract_features import get_features_from_collection_of_signals
-from cluster_features import get_outlier_ratio_from_features
+from extract_features import get_features_from_collection_of_signals, collect_site_features
+from cluster_features import get_outlier_ratio_from_features_v3
 from time import time
+import random
+random.seed(10)
+from random import sample
 
 # parser = argparse.ArgumentParser()
 # parser.add_argument('--perc_thresh', help='percolation threshold')
@@ -69,10 +72,14 @@ fixed_config = objectview(origconfig)
 fixed_model, fixed_device = load_model(model_path, fixed_config)
 
 ### extract features ###
+max_num_reads = 1000
 print('Now extracting features from WT...')
-wt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, wt_index_read_ids)
+wt_index_read_ids_sample = {id: wt_index_read_ids[id] for id in sample(wt_index_read_ids.keys(), max_num_reads)}
+wt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, wt_index_read_ids_sample)
+
 print('Now extracting features from IVT...')
-ivt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, ivt_index_read_ids)
+ivt_index_read_ids_sample = {id: ivt_index_read_ids[id] for id in sample(ivt_index_read_ids.keys(), max_num_reads)}
+ivt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, ivt_index_read_ids_sample)
 
 ### search by GLORI sites ###
 MIN_COVERAGE = 0
@@ -88,13 +95,10 @@ for ind, row in df_mod_Am.iterrows():
     mod = row['mod']
     ref_motif = ref[sample][site-2:site+3]
 
-    # tic = time()
-    wt_site_motif_features = collect_features_from_aligned_site(fixed_model, fixed_device, fixed_config, wt_bam, wt_index_read_ids, sample, site, MIN_COVERAGE)
-    # elapsed = time() - tic
-    # print('v2 time elapsed: {:.1f} secs'.format(elapsed))
-
-    # print('Collecting IVT features...', flush=True)
-    ivt_site_motif_features = collect_features_from_aligned_site(fixed_model, fixed_device, fixed_config, ivt_bam, ivt_index_read_ids, sample, site, MIN_COVERAGE, enforce_motif=ref_motif)
+    wt_site_motif_features = collect_site_features(wt_bam, sample, site, wt_predStr_features)
+    # print('{} features from WT'.format(len(wt_site_motif_features)))
+    ivt_site_motif_features = collect_site_features(ivt_bam, sample, site, ivt_predStr_features, ref_motif)
+    # print('{} features from IVT'.format(len(ivt_site_motif_features)))
 
     if (len(wt_site_motif_features)>MIN_COVERAGE) and (len(ivt_site_motif_features)>MIN_COVERAGE):
         print('=========================================================', flush=True)
@@ -103,7 +107,8 @@ for ind, row in df_mod_Am.iterrows():
         print('{} feature vectors collected from WT'.format(len(wt_site_motif_features)), flush=True)
         print('{} feature vectors collected from IVT'.format(len(ivt_site_motif_features)), flush=True)
         print('Now clustering features...', flush=True)
-        outlier_ratio = get_outlier_ratio_from_features(ivt_site_motif_features, wt_site_motif_features, ref_motif, PERC_THRESH)
+        # outlier_ratio = get_outlier_ratio_from_features(ivt_site_motif_features, wt_site_motif_features, ref_motif, PERC_THRESH)
+        outlier_ratio = get_outlier_ratio_from_features_v3(ivt_site_motif_features, wt_site_motif_features, ref_motif, 1.0)
         print('Calculated outlier ratio {:.2f}'.format(outlier_ratio), flush=True)
         # print('Calculated outlier ratio {:.2f} [GLORI {:.2f}]'.format(outlier_ratio, glori_ratio), flush=True)
         print('=========================================================', flush=True)
