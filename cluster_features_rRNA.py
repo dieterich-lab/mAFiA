@@ -20,11 +20,12 @@ random.seed(10)
 from random import sample
 import numpy as np
 
-# parser = argparse.ArgumentParser()
-# parser.add_argument('--perc_thresh', help='percolation threshold')
-# args = parser.parse_args()
+parser = argparse.ArgumentParser()
+parser.add_argument('--sigma_thresh', help='sigma threshold for clustering')
+args = parser.parse_args()
+sigma_thresh = float(args.sigma_thresh)
+print('Clustering at threshold {:.2f}'.format(sigma_thresh))
 # PERC_THRESH = float(args.perc_thresh)
-# print('Clustering at threshold {:.2f}'.format(PERC_THRESH))
 # PERC_THRESH = 0.9
 
 mod_type = 'psU'
@@ -90,7 +91,6 @@ ivt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixe
 
 ### search by GLORI sites ###
 MIN_COVERAGE = 50
-sigma_thresh = 0.5
 outfile = os.path.join(HOME, 'inference/rRNA/{}_outlier_ratios_{}_sigma{:.2f}.tsv'.format(rRNA_species, mod_type, sigma_thresh))
 df_outlier = pd.DataFrame()
 counts = 0
