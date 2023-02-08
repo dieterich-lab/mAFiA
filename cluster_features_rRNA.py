@@ -100,7 +100,7 @@ ivt_index_read_ids_sample = {id: ivt_index_read_ids[id] for id in sample(ivt_ind
 ivt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, ivt_index_read_ids_sample)
 
 ### search by GLORI sites ###
-MIN_COVERAGE = 50
+MIN_COVERAGE = 0
 outfile = os.path.join(HOME, 'inference/rRNA/{}_outlier_ratios_{}_sigma{:.2f}.tsv'.format(rRNA_species, mod_type, sigma_thresh))
 df_outlier = pd.DataFrame()
 counts = 0
