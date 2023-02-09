@@ -83,7 +83,8 @@ for f5_filepath in ivt_f5_paths:
 print('{} IVT reads collected'.format(len(ivt_index_read_ids)), flush=True)
 
 ### load model, device ###
-model_path = os.path.join(HOME, 'pytorch_models/rRNA/rRNA-epoch29.torch')
+# model_path = os.path.join(HOME, 'pytorch_models/rRNA/rRNA-epoch29.torch')
+model_path = os.path.join(HOME, 'pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch')
 torchdict = torch.load(model_path, map_location="cpu")
 origconfig = torchdict["config"]
 fixed_config = objectview(origconfig)
