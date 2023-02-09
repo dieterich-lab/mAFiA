@@ -231,9 +231,9 @@ def extract_features_from_multiple_signals(model, device, config, site_normReads
 
     return site_motif_features
 
-def collect_site_features(alignment, contig, pos, dict_predStr_feature, thresh_coverage=0, enforce_motif=None):
+def collect_site_features(alignment, contig, pos, dict_predStr_feature, enforce_motif=None):
     site_motif_features = {}
-    for pileupcolumn in alignment.pileup(contig, pos, pos+1, truncate=True, min_base_quality=20, min_mapping_quality=20):
+    for pileupcolumn in alignment.pileup(contig, pos, pos+1, truncate=True):
         if pileupcolumn.pos == pos:
             valid_counts = 0
             for ind, pileupread in enumerate(pileupcolumn.pileups):

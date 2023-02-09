@@ -1,7 +1,7 @@
 import os
 HOME = os.path.expanduser('~')
 import numpy as np
-from scipy.spatial.distance import pdist, squareform
+from scipy.spatial.distance import pdist, cdist, squareform
 from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import connected_components
 from collections import Counter
@@ -124,11 +124,11 @@ def get_outlier_ratio_from_features_v2(ivt_dict, wt_dict, wanted_motif, sigma_de
         return -1
 
     ivt_features = np.vstack([v[1] for k, v in ivt_dict.items()])
-    ivt_features -= np.mean(ivt_features, axis=1)[:, np.newaxis]
-    ivt_features /= np.std(ivt_features, axis=1)[:, np.newaxis]
+    # ivt_features -= np.mean(ivt_features, axis=1)[:, np.newaxis]
+    # ivt_features /= np.std(ivt_features, axis=1)[:, np.newaxis]
     wt_features = np.vstack([v[1] for k, v in wt_dict.items()])
-    wt_features -= np.mean(wt_features, axis=1)[:, np.newaxis]
-    wt_features /= np.std(wt_features, axis=1)[:, np.newaxis]
+    # wt_features -= np.mean(wt_features, axis=1)[:, np.newaxis]
+    # wt_features /= np.std(wt_features, axis=1)[:, np.newaxis]
 
     c_mat_ivt = np.mean(ivt_features[:, np.newaxis, :] * ivt_features[np.newaxis, :, ], axis=-1)
     i_ind, j_ind = np.triu_indices_from(c_mat_ivt, k=1)
