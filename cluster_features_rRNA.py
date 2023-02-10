@@ -94,11 +94,11 @@ fixed_model, fixed_device = load_model(model_path, fixed_config)
 
 ### extract features ###
 print('Now extracting features from WT...')
-wt_index_read_ids_sample = {id: wt_index_read_ids[id] for id in sample(list(wt_index_read_ids.keys()), max_num_reads)}
+wt_index_read_ids_sample = {id: wt_index_read_ids[id] for id in sample(list(wt_index_read_ids.keys()), min(len(wt_index_read_ids.keys()), max_num_reads))}
 wt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, wt_index_read_ids_sample)
 
 print('Now extracting features from IVT...')
-ivt_index_read_ids_sample = {id: ivt_index_read_ids[id] for id in sample(list(ivt_index_read_ids.keys()), max_num_reads)}
+ivt_index_read_ids_sample = {id: ivt_index_read_ids[id] for id in sample(list(ivt_index_read_ids.keys()), min(len(ivt_index_read_ids.keys()), max_num_reads))}
 ivt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, ivt_index_read_ids_sample)
 
 ### search by GLORI sites ###
