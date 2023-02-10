@@ -112,7 +112,6 @@ for ind, row in df_mod_sel.iterrows():
     site = row['start']
     mod = row['mod']
     ref_motif = ref[sample][site-2:site+3]
-
     wt_site_motif_features = collect_site_features(wt_bam, sample, site, wt_predStr_features)
     # print('{} features from WT'.format(len(wt_site_motif_features)))
     ivt_site_motif_features = collect_site_features(ivt_bam, sample, site, ivt_predStr_features, enforce_motif=ref_motif)
