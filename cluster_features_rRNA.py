@@ -47,17 +47,17 @@ min_coverage = int(args.min_coverage)
 mod_type = args.mod_type
 model_path = args.model_path
 cluster_thresh = float(args.cluster_thresh)
-outfile = os.path.join(HOME, 'inference/rRNA/{}_outlier_ratios_{}_sigma{:.2f}.tsv'.format(rRNA_species, mod_type, cluster_thresh))
 
 df_mod = pd.read_csv(mod_file, names=['sample', 'start', 'stop', 'mod'], sep='\t')
 
 if (mod_type is None) or (mod_type==[]):
     print('All mod types')
-    mod_type = 'all'
     df_mod_sel = df_mod[df_mod['sample'] == rRNA_species]
+    outfile = os.path.join(HOME, 'inference/rRNA/{}_outlier_ratios_[{}]_sigma{:.2f}.tsv'.format(rRNA_species, 'all', cluster_thresh))
 else:
     print('Mod types: {}'.format(mod_type))
     df_mod_sel = df_mod[(df_mod['mod'].isin(mod_type)) & (df_mod['sample'] == rRNA_species)]
+    outfile = os.path.join(HOME, 'inference/rRNA/{}_outlier_ratios_[{}]_sigma{:.2f}.tsv'.format(rRNA_species, '_'.join(mod_type), cluster_thresh))
 
 ref = {}
 print('Parsing reference...', flush=True)
@@ -139,3 +139,4 @@ for ind, row in df_mod_sel.iterrows():
             counts += 1
             if counts%5==0:
                 df_outlier.to_csv(outfile, sep='\t')
+df_outlier.to_csv(outfile, sep='\t')

@@ -43,6 +43,8 @@ def get_outlier_ratio_from_features(ivt_dict, wt_dict, wanted_motif, perc_thresh
     labels = ['ivt' for ii in range(len(ivt_dict))] + ['wt' for ii in range(len(wt_dict))]
     ivt_motifs = [v[0] for k, v in ivt_dict.items()]
     wt_motifs = [v[0] for k, v in wt_dict.items()]
+    ivt_features = [v[1] for k, v in ivt_dict.items()]
+    wt_features = [v[1] for k, v in wt_dict.items()]
 
     if Counter(ivt_motifs).most_common(1)[0][0] != wanted_motif:
         print('IVT motif {} doesn\'t match reference one {}'.format(Counter(ivt_motifs).most_common(1)[0][0], wanted_motif))
@@ -61,13 +63,34 @@ def get_outlier_ratio_from_features(ivt_dict, wt_dict, wanted_motif, perc_thresh
         all_motifs.append(v[0])
         all_features.append(v[1])
 
-    ### check features ###
+    ### debug ###
+    # import matplotlib
+    # matplotlib.use('tkagg')
+    # import matplotlib.pyplot as plt
     # plt.figure(figsize=(16, 16))
-    # for i in range(16):
-    #     plt.subplot(4, 4, i+1)
-    #     plt.plot(all_features[i])
-    # plt.savefig(os.path.join(img_out, 'feature_vectors.png'), bbox_inches='tight')
-    # plt.close('all')
+    # for i in range(8):
+    #     plt.subplot(8, 2, 2*i+1)
+    #     plt.plot(ivt_features[i])
+    #     if i==0:
+    #         plt.title('IVT')
+    #     plt.xlim([-1, 769])
+    #     if i<7:
+    #         plt.xticks([])
+    #     else:
+    #         plt.xlabel('Feature')
+    #     plt.subplot(8, 2, 2*i+2)
+    #     plt.plot(wt_features[i])
+    #     if i==0:
+    #         plt.title('WT')
+    #     plt.xlim([-1, 769])
+    #     if i<7:
+    #         plt.xticks([])
+    #     else:
+    #         plt.xlabel('Feature')
+    #
+    # # plt.savefig(os.path.join(img_out, 'feature_vectors.png'), bbox_inches='tight')
+    # # plt.close('all')
+    ##################################
 
     num_features = len(all_features)
     vec_w = 1.0 - pdist(np.vstack(all_features), metric='cosine')

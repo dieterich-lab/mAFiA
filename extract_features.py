@@ -7,7 +7,7 @@ import numpy as np
 from Bio.Seq import Seq
 from utils import get_norm_signal_from_read_id
 from models import objectview, rodan
-from fast_ctc_decode import beam_search
+from fast_ctc_decode import beam_search, viterbi_search
 from time import time
 
 def convert_statedict(state_dict):
@@ -60,6 +60,7 @@ def load_model(modelfile, config):
 
 vocab = { 1:"A", 2:"C", 3:"G", 4:"T" }
 alphabet = "".join(["N"] + list(vocab.values()))
+alphabet_to_num = {v: k for k, v in enumerate(list(alphabet))}
 
 def ctcdecoder(logits, label, blank=False, beam_size=5, alphabet=alphabet, pre=None):
     ret = np.zeros((label.shape[0], label.shape[1]+50))
@@ -99,9 +100,43 @@ def get_features_from_signal(model, device, config, signal):
     pred_labels = []
     features = []
     for i in range(out.shape[1]):
-        this_pred_label, pred_locs = beam_search(torch.softmax(out[:, i, :], dim=-1).cpu().detach().numpy(), alphabet=alphabet)
+        probs = torch.softmax(out[:, i, :], dim=-1).cpu().detach().numpy()
+        this_pred_label, pred_locs = beam_search(probs, alphabet=alphabet)
+        # this_pred_label_viterbi, pred_locs_viterbi = viterbi_search(probs, alphabet=alphabet)
+
+        ### drop first str ###
+        # if pred_locs[0]==0:
+        #     this_pred_label = this_pred_label[1:]
+        #     pred_locs = pred_locs[1:]
+        ######################
         pred_labels.append(this_pred_label)
-        this_feature = activation['conv21'].detach().cpu().numpy()[i, :, pred_locs]
+
+        pred_locs_corrected = []
+        for loc_ind in range(len(this_pred_label)):
+            start_loc = pred_locs[loc_ind]
+            if loc_ind<(len(this_pred_label)-2):
+                end_loc = pred_locs[loc_ind+2]
+            else:
+                end_loc = probs.shape[0]
+            pred_locs_corrected.append(start_loc + np.argmax(probs[start_loc:end_loc, alphabet_to_num[this_pred_label[loc_ind]]]))
+
+        ### debug feature loc ###
+        # import matplotlib
+        # matplotlib.use('tkagg')
+        # import matplotlib.pyplot as plt
+        # alphabet_colors = {a: c for (a, c) in zip(alphabet, ['black', 'blue', 'red', 'green', 'purple'])}
+        #
+        # plt.figure(figsize=(15, 10))
+        # for i in range(probs.shape[1]):
+        #     plt.plot(probs[:, i], label=alphabet[i], color=alphabet_colors[alphabet[i]])
+        #     plt.legend(loc='upper left')
+        # for i, loc in enumerate(pred_locs_corrected):
+        #     plt.axvline(loc, color=alphabet_colors[this_pred_label[i]])
+        # plt.xticks(pred_locs_corrected, this_pred_label)
+
+        #########################
+
+        this_feature = activation['conv21'].detach().cpu().numpy()[i, :, pred_locs_corrected]
         features.append(this_feature)
     pred_label = ''.join(pred_labels)[::-1]
     features = np.vstack(features)[::-1]
