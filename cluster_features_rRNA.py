@@ -20,6 +20,7 @@ import random
 random.seed(10)
 from random import sample
 import numpy as np
+from joblib import dump, load
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--wt_bam_file', default=os.path.join(HOME, 'inference/rRNA/HCT116_wt_rRNA_sorted.bam'))
@@ -34,7 +35,9 @@ parser.add_argument('--min_coverage', default=0)
 parser.add_argument('--mod_type', nargs='*', default=None, help='mod type')
 parser.add_argument('--model_path', default=os.path.join(HOME, 'pytorch_models/rRNA/rRNA-epoch29.torch'))
 parser.add_argument('--cluster_thresh', default=1.0, help='sigma threshold for clustering')
-parser.add_argument('--outfile', default=os.path.join(HOME, 'inference/rRNA/mafia_outliers.tsv'))
+parser.add_argument('--outfile', default=None)
+parser.add_argument('--model_dir', default=None)
+
 args = parser.parse_args()
 wt_bam_file = args.wt_bam_file
 wt_fast5_dir = args.wt_fast5_dir
@@ -48,17 +51,23 @@ min_coverage = int(args.min_coverage)
 mod_type = args.mod_type
 model_path = args.model_path
 cluster_thresh = float(args.cluster_thresh)
+outfile = args.outfile
+model_dir = args.model_dir
+if model_dir is not None:
+    os.makedirs(model_dir, exist_ok=True)
 
-df_mod = pd.read_csv(mod_file, names=['sample', 'start', 'stop', 'mod'], sep='\t')
+df_mod = pd.read_csv(mod_file, skiprows=[0], names=['sample', 'start', 'stop', 'mod'], sep='\t')
 
 if (mod_type is None) or (mod_type==[]):
     print('All mod types')
     df_mod_sel = df_mod[df_mod['sample'] == rRNA_species]
-    outfile = os.path.join(HOME, 'inference/rRNA/{}_outlier_ratios_[{}]_sigma{:.2f}.tsv'.format(rRNA_species, 'all', cluster_thresh))
+    if outfile is None:
+        outfile = os.path.join(HOME, 'inference/rRNA/{}_outlier_ratios_[{}]_sigma{:.2f}.tsv'.format(rRNA_species, 'all', cluster_thresh))
 else:
     print('Mod types: {}'.format(mod_type))
     df_mod_sel = df_mod[(df_mod['mod'].isin(mod_type)) & (df_mod['sample'] == rRNA_species)]
-    outfile = os.path.join(HOME, 'inference/rRNA/{}_outlier_ratios_[{}]_sigma{:.2f}.tsv'.format(rRNA_species, '_'.join(mod_type), cluster_thresh))
+    if outfile is None:
+        outfile = os.path.join(HOME, 'inference/rRNA/{}_outlier_ratios_[{}]_sigma{:.2f}.tsv'.format(rRNA_species, '_'.join(mod_type), cluster_thresh))
 
 ref = {}
 print('Parsing reference...', flush=True)
@@ -102,7 +111,6 @@ print('Now extracting features from IVT...')
 ivt_index_read_ids_sample = {id: ivt_index_read_ids[id] for id in sample(list(ivt_index_read_ids.keys()), min(len(ivt_index_read_ids.keys()), max_num_reads))}
 ivt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, ivt_index_read_ids_sample)
 
-### search by GLORI sites ###
 df_outlier = pd.DataFrame()
 counts = 0
 for ind, row in df_mod_sel.iterrows():
@@ -130,17 +138,19 @@ for ind, row in df_mod_sel.iterrows():
         # outlier_ratio = get_outlier_ratio_from_features_v3(ivt_site_motif_features, wt_site_motif_features, ref_motif, cluster_thresh)
         # print('Calculated outlier ratio {:.2f}'.format(outlier_ratio), flush=True)
         print('Now classifying with SVM...', flush=True)
-        acc = binary_classification_with_svm(ivt_site_motif_features, wt_site_motif_features, ref_motif)
+        acc, svm_model = binary_classification_with_svm(ivt_site_motif_features, wt_site_motif_features, ref_motif)
         print('Accuracy {:.2f}'.format(acc), flush=True)
         print('=========================================================', flush=True)
         # if outlier_ratio!=-1:
         new_row = row.copy()
         new_row['motif'] = ref_motif
         # new_row['ratio_outlier'] = np.round(outlier_ratio, 2)
-        new_row['svm_accuracy'] = np.round(acc*100, 2)
+        new_row['svm_accuracy'] = int(acc*100)
         new_row['num_features_ivt'] = len(ivt_site_motif_features)
         new_row['num_features_wt'] = len(wt_site_motif_features)
         df_outlier = pd.concat([df_outlier, new_row.to_frame().T])
+        if model_dir is not None:
+            dump(svm_model, os.path.join(model_dir, 'svm_{}_{}_{}.joblib'.format(row['sample'], row['start'], row['mod'])))
         counts += 1
         if counts%5==0:
             df_outlier.to_csv(outfile, sep='\t')
