@@ -6,7 +6,7 @@ import matplotlib
 matplotlib.use('tkagg')
 import matplotlib.pyplot as plt
 
-cluster_thresh = 0.80
+cluster_thresh = 0.90
 # mafia_file = '/home/adrian/inference/rRNA/NR_003286_RNA18SN5_outlier_ratios_None_sigma0.97.tsv'
 mafia_file = "/home/adrian/inference/rRNA/NR_003286_RNA18SN5_outlier_ratios_[all]_sigma{:.2f}.tsv".format(cluster_thresh)
 

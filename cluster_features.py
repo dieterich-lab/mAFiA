@@ -39,6 +39,35 @@ def cluster_by_louvain(vec_s, dim):
 
     return partition.membership
 
+
+def binary_classification_with_svm(ivt_dict, wt_dict, wanted_motif):
+    from sklearn.model_selection import train_test_split
+    from sklearn.svm import SVC
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import StandardScaler
+
+    frac_test_split = 0.25
+
+    labels = np.array([0 for ii in range(len(ivt_dict))] + [1 for ii in range(len(wt_dict))])
+    ivt_motifs = [v[0] for k, v in ivt_dict.items()]
+    wt_motifs = [v[0] for k, v in wt_dict.items()]
+    ivt_features = [v[1] for k, v in ivt_dict.items()]
+    wt_features = [v[1] for k, v in wt_dict.items()]
+    all_features = np.array(ivt_features + wt_features)
+
+    if Counter(ivt_motifs).most_common(1)[0][0] != wanted_motif:
+        print('IVT motif {} doesn\'t match reference one {}'.format(Counter(ivt_motifs).most_common(1)[0][0], wanted_motif))
+        return -1
+
+    X_train, X_test, y_train, y_test = train_test_split(all_features, labels, test_size=frac_test_split)
+    clf = make_pipeline(StandardScaler(), SVC(gamma='auto'))
+    clf = clf.fit(X_train, y_train)
+    predictions = clf.predict(X_test)
+    accuracy = clf.score(X_test, y_test)
+
+    return accuracy
+
+
 def get_outlier_ratio_from_features(ivt_dict, wt_dict, wanted_motif, perc_thresh=0.8):
     labels = ['ivt' for ii in range(len(ivt_dict))] + ['wt' for ii in range(len(wt_dict))]
     ivt_motifs = [v[0] for k, v in ivt_dict.items()]
@@ -64,32 +93,32 @@ def get_outlier_ratio_from_features(ivt_dict, wt_dict, wanted_motif, perc_thresh
         all_features.append(v[1])
 
     ### debug ###
-    # import matplotlib
-    # matplotlib.use('tkagg')
-    # import matplotlib.pyplot as plt
-    # plt.figure(figsize=(16, 16))
-    # for i in range(8):
-    #     plt.subplot(8, 2, 2*i+1)
-    #     plt.plot(ivt_features[i])
-    #     if i==0:
-    #         plt.title('IVT')
-    #     plt.xlim([-1, 769])
-    #     if i<7:
-    #         plt.xticks([])
-    #     else:
-    #         plt.xlabel('Feature')
-    #     plt.subplot(8, 2, 2*i+2)
-    #     plt.plot(wt_features[i])
-    #     if i==0:
-    #         plt.title('WT')
-    #     plt.xlim([-1, 769])
-    #     if i<7:
-    #         plt.xticks([])
-    #     else:
-    #         plt.xlabel('Feature')
-    #
-    # # plt.savefig(os.path.join(img_out, 'feature_vectors.png'), bbox_inches='tight')
-    # # plt.close('all')
+    import matplotlib
+    matplotlib.use('tkagg')
+    import matplotlib.pyplot as plt
+    plt.figure(figsize=(16, 16))
+    for i in range(8):
+        plt.subplot(8, 2, 2*i+1)
+        plt.plot(ivt_features[i])
+        if i==0:
+            plt.title('IVT')
+        plt.xlim([-1, 769])
+        if i<7:
+            plt.xticks([])
+        else:
+            plt.xlabel('Feature')
+        plt.subplot(8, 2, 2*i+2)
+        plt.plot(wt_features[i])
+        if i==0:
+            plt.title('WT')
+        plt.xlim([-1, 769])
+        if i<7:
+            plt.xticks([])
+        else:
+            plt.xlabel('Feature')
+
+    # plt.savefig(os.path.join(img_out, 'feature_vectors.png'), bbox_inches='tight')
+    # plt.close('all')
     ##################################
 
     num_features = len(all_features)

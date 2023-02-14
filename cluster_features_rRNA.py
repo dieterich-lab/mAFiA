@@ -14,6 +14,7 @@ from ont_fast5_api.fast5_interface import get_fast5_file
 from extract_features import load_model, collect_features_from_aligned_site, collect_features_from_aligned_site_v2
 from extract_features import get_features_from_collection_of_signals, collect_site_features
 from cluster_features import get_outlier_ratio_from_features, get_outlier_ratio_from_features_v2, get_outlier_ratio_from_features_v3
+from cluster_features import binary_classification_with_svm
 from time import time
 import random
 random.seed(10)
@@ -109,34 +110,38 @@ for ind, row in df_mod_sel.iterrows():
     # row = df_mod_sel.loc[ind]
     print('\nSite {}'.format(ind), flush=True)
     sample = row['sample']
-    site = row['start']
+    start = int(row['start'])
     mod = row['mod']
-    ref_motif = ref[sample][site-2:site+3]
-    wt_site_motif_features = collect_site_features(wt_bam, sample, site, wt_predStr_features)
+    ref_motif = ref[sample][start - 2:start + 3]
+    wt_site_motif_features = collect_site_features(wt_bam, sample, start, wt_predStr_features)
     # print('{} features from WT'.format(len(wt_site_motif_features)))
-    ivt_site_motif_features = collect_site_features(ivt_bam, sample, site, ivt_predStr_features, enforce_motif=ref_motif)
+    ivt_site_motif_features = collect_site_features(ivt_bam, sample, start, ivt_predStr_features, enforce_motif=ref_motif)
     # print('{} features from IVT'.format(len(ivt_site_motif_features)))
 
     if (len(wt_site_motif_features)>min_coverage) and (len(ivt_site_motif_features)>min_coverage):
         print('=========================================================', flush=True)
-        print('{}, pos{}, mod {}'.format(sample, site, mod), flush=True)
+        print('{}, pos{}, mod {}'.format(sample, start, mod), flush=True)
         print('Reference motif {}'.format(ref_motif), flush=True)
         print('{} feature vectors collected from WT'.format(len(wt_site_motif_features)), flush=True)
         print('{} feature vectors collected from IVT'.format(len(ivt_site_motif_features)), flush=True)
-        print('Now clustering features...', flush=True)
-        outlier_ratio = get_outlier_ratio_from_features(ivt_site_motif_features, wt_site_motif_features, ref_motif, cluster_thresh)
+        # print('Now clustering features...', flush=True)
+        # outlier_ratio = get_outlier_ratio_from_features(ivt_site_motif_features, wt_site_motif_features, ref_motif, cluster_thresh)
         # outlier_ratio = get_outlier_ratio_from_features_v2(ivt_site_motif_features, wt_site_motif_features, ref_motif, cluster_thresh)
         # outlier_ratio = get_outlier_ratio_from_features_v3(ivt_site_motif_features, wt_site_motif_features, ref_motif, cluster_thresh)
-        print('Calculated outlier ratio {:.2f}'.format(outlier_ratio), flush=True)
+        # print('Calculated outlier ratio {:.2f}'.format(outlier_ratio), flush=True)
+        print('Now classifying with SVM...', flush=True)
+        acc = binary_classification_with_svm(ivt_site_motif_features, wt_site_motif_features, ref_motif)
+        print('Accuracy {:.2f}'.format(acc), flush=True)
         print('=========================================================', flush=True)
-        if outlier_ratio!=-1:
-            new_row = row.copy()
-            new_row['motif'] = ref_motif
-            new_row['ratio_outlier'] = np.round(outlier_ratio, 2)
-            new_row['num_features_ivt'] = len(ivt_site_motif_features)
-            new_row['num_features_wt'] = len(wt_site_motif_features)
-            df_outlier = pd.concat([df_outlier, new_row.to_frame().T])
-            counts += 1
-            if counts%5==0:
-                df_outlier.to_csv(outfile, sep='\t')
+        # if outlier_ratio!=-1:
+        new_row = row.copy()
+        new_row['motif'] = ref_motif
+        # new_row['ratio_outlier'] = np.round(outlier_ratio, 2)
+        new_row['svm_accuracy'] = np.round(acc*100, 2)
+        new_row['num_features_ivt'] = len(ivt_site_motif_features)
+        new_row['num_features_wt'] = len(wt_site_motif_features)
+        df_outlier = pd.concat([df_outlier, new_row.to_frame().T])
+        counts += 1
+        if counts%5==0:
+            df_outlier.to_csv(outfile, sep='\t')
 df_outlier.to_csv(outfile, sep='\t')
