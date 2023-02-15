@@ -3,7 +3,6 @@ HOME = os.path.expanduser('~')
 import sys
 sys.path.append(os.path.join(HOME, 'git/MAFIA'))
 import argparse
-from tqdm import tqdm
 from glob import glob
 import pandas as pd
 import torch
@@ -11,20 +10,17 @@ from models import objectview
 import pysam
 from Bio import SeqIO
 from ont_fast5_api.fast5_interface import get_fast5_file
-from extract_features import load_model, collect_features_from_aligned_site, collect_features_from_aligned_site_v2
+from extract_features import load_model
 from extract_features import get_features_from_collection_of_signals, collect_site_features
 from cluster_features import get_mod_ratio_svm
-from time import time
 import random
 random.seed(10)
 from random import sample
-import numpy as np
-from joblib import dump, load
+from joblib import load
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--test_bam_file', default=os.path.join(HOME, 'inference/rRNA/HCT116_wt_rRNA_sorted.bam'))
 parser.add_argument('--test_fast5_dir', default=os.path.join(HOME, 'Data/rRNA/HCT116_wt_rRNA/fast5_pass'))
-
 parser.add_argument('--ref_file', default=os.path.join(HOME, 'Data/transcriptomes/rRNA_18S_28S.fasta'))
 parser.add_argument('--mod_file', default=os.path.join(HOME, 'Data/rRNA/only_mod.bed'))
 parser.add_argument('--rRNA_species', default='NR_003286_RNA18SN5')
@@ -49,7 +45,7 @@ model_path = args.model_path
 svm_model_dir = args.svm_model_dir
 outfile = args.outfile
 
-df_mod = pd.read_csv(mod_file, skiprows=[0], names=['sample', 'start', 'stop', 'mod'], sep='\t')
+df_mod = pd.read_csv(mod_file, names=['sample', 'start', 'stop', 'mod'], sep='\t')
 
 if (mod_type is None) or (mod_type==[]):
     print('All mod types')
@@ -96,8 +92,6 @@ else:
 df_svm_mod_ratio = pd.DataFrame()
 counts = 0
 for ind, row in df_mod_sel.iterrows():
-    # ind = 0
-    # row = df_mod_sel.loc[ind]
     print('\nSite {}'.format(ind), flush=True)
     sample = row['sample']
     start = int(row['start'])
