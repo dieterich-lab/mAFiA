@@ -14,7 +14,7 @@ from ont_fast5_api.fast5_interface import get_fast5_file
 from extract_features import load_model, collect_features_from_aligned_site, collect_features_from_aligned_site_v2
 from extract_features import get_features_from_collection_of_signals, collect_site_features
 from cluster_features import get_outlier_ratio_from_features, get_outlier_ratio_from_features_v2, get_outlier_ratio_from_features_v3
-from cluster_features import binary_classification_with_svm
+from cluster_features import train_svm_ivt_wt
 from time import time
 import random
 random.seed(10)
@@ -138,7 +138,7 @@ for ind, row in df_mod_sel.iterrows():
         # outlier_ratio = get_outlier_ratio_from_features_v3(ivt_site_motif_features, wt_site_motif_features, ref_motif, cluster_thresh)
         # print('Calculated outlier ratio {:.2f}'.format(outlier_ratio), flush=True)
         print('Now classifying with SVM...', flush=True)
-        acc, svm_model = binary_classification_with_svm(ivt_site_motif_features, wt_site_motif_features, ref_motif)
+        acc, svm_model = train_svm_ivt_wt(ivt_site_motif_features, wt_site_motif_features, ref_motif)
         print('Accuracy {:.2f}'.format(acc), flush=True)
         print('=========================================================', flush=True)
         # if outlier_ratio!=-1:

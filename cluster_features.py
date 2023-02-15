@@ -43,7 +43,7 @@ def cluster_by_louvain(vec_s, dim):
     return partition.membership
 
 
-def binary_classification_with_svm(ivt_dict, wt_dict, wanted_motif):
+def train_svm_ivt_wt(ivt_dict, wt_dict, wanted_motif):
     frac_test_split = 0.25
 
     labels = np.array([0 for ii in range(len(ivt_dict))] + [1 for ii in range(len(wt_dict))])
@@ -64,6 +64,24 @@ def binary_classification_with_svm(ivt_dict, wt_dict, wanted_motif):
     accuracy = clf.score(X_test, y_test)
 
     return accuracy, clf
+
+def get_mod_ratio_svm(dict_motif_feature, clf):
+    test_motifs = [v[0] for k, v in dict_motif_feature.items()]
+    test_features = [v[1] for k, v in dict_motif_feature.items()]
+
+    # if Counter(test_motifs).most_common(1)[0][0] != wanted_motif:
+    #     print('IVT motif {} doesn\'t match reference one {}'.format(Counter(test_motifs).most_common(1)[0][0], wanted_motif))
+    #     return -1
+
+    # X_train, X_test, y_train, y_test = train_test_split(all_features, labels, test_size=frac_test_split)
+    # clf = make_pipeline(StandardScaler(), SVC(gamma='auto'))
+    # clf = clf.fit(X_train, y_train)
+    # accuracy = clf.score(X_test, y_test)
+
+    predictions = clf.predict(test_features)
+    avg_mod_ratio = np.mean(predictions)
+
+    return avg_mod_ratio
 
 
 def get_outlier_ratio_from_features(ivt_dict, wt_dict, wanted_motif, perc_thresh=0.8):
