@@ -106,7 +106,7 @@ for ind, row in df_mod_sel.iterrows():
         print('=========================================================', flush=True)
         print('{}, pos{}, mod {}'.format(sample, start, mod), flush=True)
         print('Reference motif {}'.format(ref_motif), flush=True)
-        print('{} feature vectors collected from WT'.format(len(test_site_motif_features)), flush=True)
+        print('{} feature vectors collected'.format(len(test_site_motif_features)), flush=True)
 
         print('Now classifying with SVM...', flush=True)
         svm_model = load(os.path.join(svm_model_dir, 'svm_{}_{}_{}.joblib'.format(row['sample'], row['start'], row['mod'])))
