@@ -24,7 +24,7 @@ parser.add_argument('--test_fast5_dir', default=os.path.join(HOME, 'Data/rRNA/HC
 parser.add_argument('--ref_file', default=os.path.join(HOME, 'Data/transcriptomes/rRNA_18S_28S.fasta'))
 parser.add_argument('--mod_file', default=os.path.join(HOME, 'Data/rRNA/only_mod.bed'))
 parser.add_argument('--rRNA_species', default='NR_003286_RNA18SN5')
-parser.add_argument('--max_num_reads', default=100)
+parser.add_argument('--max_num_reads', default=-1)
 parser.add_argument('--min_coverage', default=0)
 parser.add_argument('--mod_type', nargs='*', default=None, help='mod type')
 parser.add_argument('--model_path', default=os.path.join(HOME, 'pytorch_models/rRNA/rRNA-epoch29.torch'))
