@@ -45,7 +45,8 @@ model_path = args.model_path
 svm_model_dir = args.svm_model_dir
 outfile = args.outfile
 
-df_mod = pd.read_csv(mod_file, names=['sample', 'start', 'stop', 'mod'], sep='\t')
+# df_mod = pd.read_csv(mod_file, names=['sample', 'start', 'stop', 'mod'], sep='\t')
+df_mod = pd.read_csv(mod_file, sep='\t')
 
 if (mod_type is None) or (mod_type==[]):
     print('All mod types')
@@ -99,6 +100,8 @@ for ind, row in df_mod_sel.iterrows():
     ref_motif = ref[sample][start - 2:start + 3]
     test_site_motif_features = collect_site_features(test_bam, sample, start, test_predStr_features)
 
+    opt_thresh = row['opt_thresh']
+
     if len(test_site_motif_features)>min_coverage:
         print('=========================================================', flush=True)
         print('{}, pos{}, mod {}'.format(sample, start, mod), flush=True)
@@ -107,7 +110,7 @@ for ind, row in df_mod_sel.iterrows():
 
         print('Now classifying with SVM...', flush=True)
         svm_model = load(os.path.join(svm_model_dir, 'svm_{}_{}_{}.joblib'.format(row['sample'], row['start'], row['mod'])))
-        mod_ratio = get_mod_ratio_svm(test_site_motif_features, svm_model)
+        mod_ratio = get_mod_ratio_svm(test_site_motif_features, svm_model, opt_thresh)
         print('Mod. ratio {:.2f}'.format(mod_ratio), flush=True)
         print('=========================================================', flush=True)
         new_row = row.copy()

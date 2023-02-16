@@ -98,7 +98,7 @@ def train_svm_ivt_wt(ivt_dict, wt_dict, wanted_motif):
 
     return score_auc, clf, opt_thresh
 
-def get_mod_ratio_svm(dict_motif_feature, clf):
+def get_mod_ratio_svm(dict_motif_feature, clf, mod_thresh=0):
     test_motifs = [v[0] for k, v in dict_motif_feature.items()]
     test_features = [v[1] for k, v in dict_motif_feature.items()]
 
@@ -111,7 +111,9 @@ def get_mod_ratio_svm(dict_motif_feature, clf):
     # clf = clf.fit(X_train, y_train)
     # accuracy = clf.score(X_test, y_test)
 
-    predictions = clf.predict(test_features)
+    y_score = clf.decision_function(test_features)
+    predictions = np.int32(y_score>mod_thresh)
+    # predictions = clf.predict(test_features)
     avg_mod_ratio = np.mean(predictions)
 
     return avg_mod_ratio
