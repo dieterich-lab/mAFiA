@@ -76,21 +76,26 @@ def train_svm_ivt_wt(ivt_dict, wt_dict, wanted_motif):
     score_auc = auc(recall, precision)
     opt_ind = np.where(precision >= 0.8)[0][0]
     opt_thresh = thresholds[opt_ind-1]
-    opt_recall = recall[opt_ind]
-    opt_predictions = np.int32(y_score>=opt_thresh)
-    opt_accuracy = np.mean(opt_predictions==y_test)
-    import matplotlib
-    matplotlib.use('tkagg')
-    import matplotlib.pyplot as plt
-    plt.figure()
-    plt.plot(recall, precision)
-    plt.axvline(opt_recall, c='g')
-    plt.xlabel('Recall')
-    plt.ylabel('Precision')
-    plt.ylim([0, 1.05])
-    plt.title('AUC = {:.2f}'.format(score_auc))
-    plt.show()
-    # display = PrecisionRecallDisplay.from_estimator(clf, X_test, y_test)
+
+    ### debug ############################################################
+    # opt_recall = recall[opt_ind]
+    # opt_predictions = np.int32(y_score>=opt_thresh)
+    # opt_accuracy = np.mean(opt_predictions==y_test)
+
+    # import matplotlib
+    # matplotlib.use('tkagg')
+    # import matplotlib.pyplot as plt
+    # plt.figure()
+    # plt.plot(recall, precision)
+    # plt.axvline(opt_recall, c='g')
+    # plt.xlabel('Recall')
+    # plt.ylabel('Precision')
+    # plt.ylim([0, 1.05])
+    # plt.title('AUC = {:.2f}'.format(score_auc))
+    # plt.show()
+    # # display = PrecisionRecallDisplay.from_estimator(clf, X_test, y_test)
+    ######################################################################
+
     return score_auc, clf, opt_thresh
 
 def get_mod_ratio_svm(dict_motif_feature, clf):
