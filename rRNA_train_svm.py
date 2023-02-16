@@ -5,6 +5,7 @@ sys.path.append(os.path.join(HOME, 'git/MAFIA'))
 import argparse
 from glob import glob
 import pandas as pd
+import numpy as np
 import torch
 from models import objectview
 import pysam
@@ -128,12 +129,13 @@ for ind, row in df_mod_sel.iterrows():
         print('{} feature vectors collected from WT'.format(len(wt_site_motif_features)), flush=True)
         print('{} feature vectors collected from IVT'.format(len(ivt_site_motif_features)), flush=True)
         print('Now classifying with SVM...', flush=True)
-        acc, svm_model = train_svm_ivt_wt(ivt_site_motif_features, wt_site_motif_features, ref_motif)
-        print('Accuracy {:.2f}'.format(acc), flush=True)
+        auc_score, svm_model, opt_thresh = train_svm_ivt_wt(ivt_site_motif_features, wt_site_motif_features, ref_motif)
+        print('AUC {:.2f}'.format(auc_score), flush=True)
         print('=========================================================', flush=True)
         new_row = row.copy()
         new_row['motif'] = ref_motif
-        new_row['svm_accuracy'] = int(acc*100)
+        new_row['auc_score'] = np.round(auc_score, 2)
+        new_row['opt_thresh'] = np.round(opt_thresh, 2)
         new_row['num_features_ivt'] = len(ivt_site_motif_features)
         new_row['num_features_wt'] = len(wt_site_motif_features)
         df_mod_ratio = pd.concat([df_mod_ratio, new_row.to_frame().T])

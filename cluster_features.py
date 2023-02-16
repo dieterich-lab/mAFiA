@@ -1,6 +1,9 @@
 import os
 HOME = os.path.expanduser('~')
 import numpy as np
+import random
+random.seed(10)
+from random import sample
 from scipy.spatial.distance import pdist, cdist, squareform
 from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import connected_components
@@ -11,6 +14,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import PrecisionRecallDisplay, precision_recall_curve, auc
 
 img_out = os.path.join(HOME, 'img_out')
 
@@ -45,12 +49,15 @@ def cluster_by_louvain(vec_s, dim):
 
 def train_svm_ivt_wt(ivt_dict, wt_dict, wanted_motif):
     frac_test_split = 0.25
+    max_num_features = min(len(ivt_dict), len(wt_dict))
+    sample_ivt_dict = {k: ivt_dict[k] for k in sample(ivt_dict.keys(), max_num_features)}
+    sample_wt_dict = {k: wt_dict[k] for k in sample(wt_dict.keys(), max_num_features)}
 
-    labels = np.array([0 for ii in range(len(ivt_dict))] + [1 for ii in range(len(wt_dict))])
-    ivt_motifs = [v[0] for k, v in ivt_dict.items()]
-    wt_motifs = [v[0] for k, v in wt_dict.items()]
-    ivt_features = [v[1] for k, v in ivt_dict.items()]
-    wt_features = [v[1] for k, v in wt_dict.items()]
+    labels = np.array([0 for ii in range(len(sample_ivt_dict))] + [1 for ii in range(len(sample_wt_dict))])
+    ivt_motifs = [v[0] for k, v in sample_ivt_dict.items()]
+    wt_motifs = [v[0] for k, v in sample_wt_dict.items()]
+    ivt_features = [v[1] for k, v in sample_ivt_dict.items()]
+    wt_features = [v[1] for k, v in sample_wt_dict.items()]
     all_features = np.array(ivt_features + wt_features)
 
     if Counter(ivt_motifs).most_common(1)[0][0] != wanted_motif:
@@ -59,11 +66,32 @@ def train_svm_ivt_wt(ivt_dict, wt_dict, wanted_motif):
 
     X_train, X_test, y_train, y_test = train_test_split(all_features, labels, test_size=frac_test_split)
     clf = make_pipeline(StandardScaler(), SVC(gamma='auto'))
+    # clf = SVC()
     clf = clf.fit(X_train, y_train)
-    predictions = clf.predict(X_test)
-    accuracy = clf.score(X_test, y_test)
+    # predictions = clf.predict(X_test)
+    # accuracy = clf.score(X_test, y_test)
 
-    return accuracy, clf
+    y_score = clf.decision_function(X_test)
+    precision, recall, thresholds = precision_recall_curve(y_test, y_score)
+    score_auc = auc(recall, precision)
+    opt_ind = np.where(precision >= 0.8)[0][0]
+    opt_thresh = thresholds[opt_ind-1]
+    opt_recall = recall[opt_ind]
+    opt_predictions = np.int32(y_score>=opt_thresh)
+    opt_accuracy = np.mean(opt_predictions==y_test)
+    import matplotlib
+    matplotlib.use('tkagg')
+    import matplotlib.pyplot as plt
+    plt.figure()
+    plt.plot(recall, precision)
+    plt.axvline(opt_recall, c='g')
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.ylim([0, 1.05])
+    plt.title('AUC = {:.2f}'.format(score_auc))
+    plt.show()
+    # display = PrecisionRecallDisplay.from_estimator(clf, X_test, y_test)
+    return score_auc, clf, opt_thresh
 
 def get_mod_ratio_svm(dict_motif_feature, clf):
     test_motifs = [v[0] for k, v in dict_motif_feature.items()]
