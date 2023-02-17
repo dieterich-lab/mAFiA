@@ -29,6 +29,7 @@ parser.add_argument('--min_coverage', default=0)
 parser.add_argument('--mod_type', nargs='*', default=None, help='mod type')
 parser.add_argument('--model_path', default=os.path.join(HOME, 'pytorch_models/rRNA/rRNA-epoch29.torch'))
 parser.add_argument('--svm_model_dir', default=None)
+parser.add_argument('--use_opt_thresh', default=False)
 parser.add_argument('--outfile', default=None)
 
 args = parser.parse_args()
@@ -43,6 +44,7 @@ min_coverage = int(args.min_coverage)
 mod_type = args.mod_type
 model_path = args.model_path
 svm_model_dir = args.svm_model_dir
+use_opt_thresh = bool(args.use_opt_thresh)
 outfile = args.outfile
 
 # df_mod = pd.read_csv(mod_file, names=['sample', 'start', 'stop', 'mod'], sep='\t')
@@ -111,7 +113,10 @@ for ind, row in df_mod_sel.iterrows():
 
         print('Now classifying with SVM...', flush=True)
         svm_model = load(os.path.join(svm_model_dir, 'svm_{}_{}_{}.joblib'.format(row['sample'], row['start'], row['mod'])))
-        mod_ratio = get_mod_ratio_svm(test_site_motif_features, svm_model, opt_thresh)
+        if use_opt_thresh:
+            mod_ratio = get_mod_ratio_svm(test_site_motif_features, svm_model, opt_thresh)
+        else:
+            mod_ratio = get_mod_ratio_svm(test_site_motif_features, svm_model)
         print('Mod. ratio {:.2f}'.format(mod_ratio), flush=True)
         print('=========================================================', flush=True)
         new_row = row.copy()
