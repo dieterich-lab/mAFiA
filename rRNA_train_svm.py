@@ -113,11 +113,11 @@ else:
 
 df_mod_ratio = pd.DataFrame()
 counts = 0
-for ind, row in df_mod_sel.iterrows():
+for ind, mod_site in df_mod_sel.iterrows():
     print('\nSite {}'.format(ind), flush=True)
-    sample = row['sample']
-    start = int(row['start'])
-    mod = row['mod']
+    sample = mod_site['sample']
+    start = int(mod_site['start'])
+    mod = mod_site['mod']
     ref_motif = ref[sample][start - 2:start + 3]
     wt_site_motif_features = collect_site_features(wt_bam, sample, start, wt_predStr_features)
     ivt_site_motif_features = collect_site_features(ivt_bam, sample, start, ivt_predStr_features, enforce_motif=ref_motif)
@@ -129,10 +129,10 @@ for ind, row in df_mod_sel.iterrows():
         print('{} feature vectors collected from WT'.format(len(wt_site_motif_features)), flush=True)
         print('{} feature vectors collected from IVT'.format(len(ivt_site_motif_features)), flush=True)
         print('Now classifying with SVM...', flush=True)
-        auc_score, svm_model, opt_thresh = train_svm_ivt_wt(ivt_site_motif_features, wt_site_motif_features, ref_motif)
+        auc_score, svm_model, opt_thresh = train_svm_ivt_wt(ivt_site_motif_features, wt_site_motif_features, ref_motif, mod_site, debug_img_dir=svm_model_dir)
         print('AUC {:.2f}'.format(auc_score), flush=True)
         print('=========================================================', flush=True)
-        new_row = row.copy()
+        new_row = mod_site.copy()
         new_row['motif'] = ref_motif
         new_row['auc_score'] = np.round(auc_score, 2)
         new_row['opt_thresh'] = np.round(opt_thresh, 2)
@@ -140,7 +140,7 @@ for ind, row in df_mod_sel.iterrows():
         new_row['num_features_wt'] = len(wt_site_motif_features)
         df_mod_ratio = pd.concat([df_mod_ratio, new_row.to_frame().T])
         if svm_model_dir is not None:
-            dump(svm_model, os.path.join(svm_model_dir, 'svm_{}_{}_{}.joblib'.format(row['sample'], row['start'], row['mod'])))
+            dump(svm_model, os.path.join(svm_model_dir, 'svm_{}_{}_{}.joblib'.format(mod_site['sample'], mod_site['start'], mod_site['mod'])))
         counts += 1
         if counts%5==0:
             df_mod_ratio.to_csv(outfile, sep='\t')

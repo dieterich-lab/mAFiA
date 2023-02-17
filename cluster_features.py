@@ -15,6 +15,9 @@ from sklearn.svm import SVC
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import PrecisionRecallDisplay, precision_recall_curve, auc
+# import matplotlib
+# matplotlib.use('tkagg')
+import matplotlib.pyplot as plt
 
 img_out = os.path.join(HOME, 'img_out')
 
@@ -47,7 +50,7 @@ def cluster_by_louvain(vec_s, dim):
     return partition.membership
 
 
-def train_svm_ivt_wt(ivt_dict, wt_dict, wanted_motif):
+def train_svm_ivt_wt(ivt_dict, wt_dict, wanted_motif, site, debug_img_dir=None):
     frac_test_split = 0.25
     max_num_features = min(len(ivt_dict), len(wt_dict))
     sample_ivt_dict = {k: ivt_dict[k] for k in sample(ivt_dict.keys(), max_num_features)}
@@ -78,22 +81,23 @@ def train_svm_ivt_wt(ivt_dict, wt_dict, wanted_motif):
     opt_thresh = thresholds[opt_ind-1]
 
     ### debug ############################################################
-    # opt_recall = recall[opt_ind]
-    # opt_predictions = np.int32(y_score>=opt_thresh)
-    # opt_accuracy = np.mean(opt_predictions==y_test)
+    if debug_img_dir is not None:
+        opt_recall = recall[opt_ind]
+        opt_predictions = np.int32(y_score>=opt_thresh)
+        opt_accuracy = np.mean(opt_predictions==y_test)
 
-    # import matplotlib
-    # matplotlib.use('tkagg')
-    # import matplotlib.pyplot as plt
-    # plt.figure()
-    # plt.plot(recall, precision)
-    # plt.axvline(opt_recall, c='g')
-    # plt.xlabel('Recall')
-    # plt.ylabel('Precision')
-    # plt.ylim([0, 1.05])
-    # plt.title('AUC = {:.2f}'.format(score_auc))
-    # plt.show()
-    # # display = PrecisionRecallDisplay.from_estimator(clf, X_test, y_test)
+        plt.figure(figsize=(5, 5))
+        plt.plot(recall, precision)
+        plt.axvline(opt_recall, c='g')
+        plt.xlabel('Recall')
+        plt.ylabel('Precision')
+        plt.ylim([0, 1.05])
+        plt.title('{} {}\nAUC = {:.2f}'.format(site['mod'], site['stop'], score_auc))
+
+        plt.savefig(os.path.join(debug_img_dir, 'svm_auc_{}_{}.png'.format(site['mod'], site['stop'])), bbox_inches='tight')
+        plt.close('all')
+        # plt.show()
+        # display = PrecisionRecallDisplay.from_estimator(clf, X_test, y_test)
     ######################################################################
 
     return score_auc, clf, opt_thresh
