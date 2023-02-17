@@ -145,7 +145,8 @@ def get_features_from_signal(model, device, config, signal, feature_width=0):
             for loc_shift in range(-feature_width, feature_width+1):
                 shifted_locs = [max(min(x+loc_shift, num_locs-1), 0) for x in pred_locs_corrected]
                 this_feature.append(layer_activation[i, :, shifted_locs])
-            this_feature = np.hstack(this_feature)
+            # this_feature = np.hstack(this_feature)
+            this_feature = np.mean(np.stack(this_feature, axis=-1), axis=-1)
         features.append(this_feature)
     pred_label = ''.join(pred_labels)[::-1]
     features = np.vstack(features)[::-1]
@@ -153,7 +154,7 @@ def get_features_from_signal(model, device, config, signal, feature_width=0):
 
 def get_features_from_collection_of_signals(model, device, config, index_read_ids, feature_width=0):
     id_predStr_feature = {}
-    for query_name in tqdm(index_read_ids.keys(), file=sys.stdout):
+    for query_name in tqdm(index_read_ids.keys()):
         this_read_signal = get_norm_signal_from_read_id(query_name, index_read_ids)
         # tic = time()
         this_read_features, this_read_predStr = get_features_from_signal(model, device, config, this_read_signal, feature_width)
