@@ -10,6 +10,12 @@ from models import objectview, rodan
 from fast_ctc_decode import beam_search, viterbi_search
 from time import time
 
+CTC_MODE='viterbi'
+if CTC_MODE=='beam':
+    ctc_decoder = beam_search
+elif CTC_MODE=='viterbi':
+    ctc_decoder = viterbi_search
+
 def convert_statedict(state_dict):
     from collections import OrderedDict
     new_checkpoint = OrderedDict()
@@ -67,7 +73,7 @@ def ctcdecoder(logits, label, blank=False, beam_size=5, alphabet=alphabet, pre=N
     retstr = []
     for i in range(logits.shape[0]):
         if pre is not None:
-            beamcur = beam_search(torch.softmax(torch.tensor(pre[:,i,:]), dim=-1).cpu().detach().numpy(), alphabet=alphabet, beam_size=beam_size)[0]
+            beamcur = ctc_decoder(torch.softmax(torch.tensor(pre[:,i,:]), dim=-1).cpu().detach().numpy(), alphabet=alphabet, beam_size=beam_size)[0]
         prev = None
         cur = []
         pos = 0
@@ -103,8 +109,7 @@ def get_features_from_signal(model, device, config, signal, feature_width=0):
     features = []
     for i in range(out.shape[1]):
         probs = torch.softmax(out[:, i, :], dim=-1).cpu().detach().numpy()
-        this_pred_label, pred_locs = beam_search(probs, alphabet=alphabet)
-        # this_pred_label_viterbi, pred_locs_viterbi = viterbi_search(probs, alphabet=alphabet)
+        this_pred_label, pred_locs = ctc_decoder(probs, alphabet=alphabet)
 
         ### drop first str ###
         # if pred_locs[0]==0:
@@ -116,8 +121,8 @@ def get_features_from_signal(model, device, config, signal, feature_width=0):
         pred_locs_corrected = []
         for loc_ind in range(len(this_pred_label)):
             start_loc = pred_locs[loc_ind]
-            if loc_ind<(len(this_pred_label)-2):
-                end_loc = pred_locs[loc_ind+2]
+            if loc_ind<(len(this_pred_label)-1):
+                end_loc = pred_locs[loc_ind+1]
             else:
                 end_loc = probs.shape[0]
             pred_locs_corrected.append(start_loc + np.argmax(probs[start_loc:end_loc, alphabet_to_num[this_pred_label[loc_ind]]]))
@@ -128,13 +133,23 @@ def get_features_from_signal(model, device, config, signal, feature_width=0):
         # import matplotlib.pyplot as plt
         # alphabet_colors = {a: c for (a, c) in zip(alphabet, ['black', 'blue', 'red', 'green', 'purple'])}
         #
-        # plt.figure(figsize=(15, 10))
+        # plt.figure(figsize=(20, 10))
+        # plt.subplot(2, 1, 1)
+        # for i in range(probs.shape[1]):
+        #     plt.plot(probs[:, i], label=alphabet[i], color=alphabet_colors[alphabet[i]])
+        #     plt.legend(loc='upper left')
+        # for i, loc in enumerate(pred_locs):
+        #     plt.axvline(loc, color=alphabet_colors[this_pred_label[i]])
+        # plt.xticks(pred_locs, this_pred_label)
+        # plt.title('Original')
+        # plt.subplot(2, 1, 2)
         # for i in range(probs.shape[1]):
         #     plt.plot(probs[:, i], label=alphabet[i], color=alphabet_colors[alphabet[i]])
         #     plt.legend(loc='upper left')
         # for i, loc in enumerate(pred_locs_corrected):
         #     plt.axvline(loc, color=alphabet_colors[this_pred_label[i]])
         # plt.xticks(pred_locs_corrected, this_pred_label)
+        # plt.title('Corrected')
 
         #########################
 
@@ -174,7 +189,7 @@ def extract_features_from_signal(model, device, config, signal, pos, bam_motif):
     pred_labels = []
     features = []
     for i in range(out.shape[1]):
-        this_pred_label, pred_locs = beam_search(torch.softmax(out[:, i, :], dim=-1).cpu().detach().numpy(), alphabet=alphabet)
+        this_pred_label, pred_locs = ctc_decoder(torch.softmax(out[:, i, :], dim=-1).cpu().detach().numpy(), alphabet=alphabet)
         pred_labels.append(this_pred_label)
         this_feature = activation['conv21'].detach().cpu().numpy()[i, :, pred_locs]
         features.append(this_feature)
@@ -201,7 +216,7 @@ def extract_features_from_signal_v2(model, device, config, signal, pos, bam_moti
     pred_labels = []
     features = None
     for i in range(out.shape[1])[::-1]:
-        this_pred_label, pred_locs = beam_search(torch.softmax(out[:, i, :], dim=-1).cpu().detach().numpy(), alphabet=alphabet)
+        this_pred_label, pred_locs = ctc_decoder(torch.softmax(out[:, i, :], dim=-1).cpu().detach().numpy(), alphabet=alphabet)
         pred_labels.extend(this_pred_label[::-1])
         this_feature = activation['conv21'].detach().cpu().numpy()[i, :, pred_locs]
         if features is None:
@@ -258,7 +273,7 @@ def extract_features_from_multiple_signals(model, device, config, site_normReads
         pred_str = []
         str_features = []
         for j in range(this_out.shape[1]):
-            this_pred_label, pred_locs = beam_search(torch.softmax(this_out[:, j, :], dim=-1).cpu().detach().numpy(), alphabet=alphabet)
+            this_pred_label, pred_locs = ctc_decoder(torch.softmax(this_out[:, j, :], dim=-1).cpu().detach().numpy(), alphabet=alphabet)
             pred_str.extend(this_pred_label)
             str_features.append(features[cum_chunk_sizes[i]:cum_chunk_sizes[i + 1]][j][:, pred_locs].T)
 
