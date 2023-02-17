@@ -84,11 +84,12 @@ fixed_model, fixed_device = load_model(model_path, fixed_config)
 
 ### extract features ###
 print('Now extracting features from reads...')
+feature_width = df_mod_sel['feature_width'].values[0]
 if max_num_reads>0:
     test_index_read_ids_sample = {id: test_index_read_ids[id] for id in sample(list(test_index_read_ids.keys()), min(len(test_index_read_ids.keys()), max_num_reads))}
-    test_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, test_index_read_ids_sample)
+    test_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, test_index_read_ids_sample, feature_width)
 else:
-    test_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, test_index_read_ids)
+    test_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, test_index_read_ids, feature_width)
 
 df_svm_mod_ratio = pd.DataFrame()
 counts = 0

@@ -82,6 +82,8 @@ def train_svm_ivt_wt(ivt_dict, wt_dict, wanted_motif, site, debug_img_dir=None):
 
     ### debug ############################################################
     if debug_img_dir is not None:
+        if not os.path.exists(debug_img_dir):
+            os.makedirs(debug_img_dir, exist_ok=True)
         opt_recall = recall[opt_ind]
         opt_predictions = np.int32(y_score>=opt_thresh)
         opt_accuracy = np.mean(opt_predictions==y_test)
@@ -92,7 +94,7 @@ def train_svm_ivt_wt(ivt_dict, wt_dict, wanted_motif, site, debug_img_dir=None):
         plt.xlabel('Recall')
         plt.ylabel('Precision')
         plt.ylim([0, 1.05])
-        plt.title('{} {}\nAUC = {:.2f}'.format(site['mod'], site['stop'], score_auc))
+        plt.title('{} {}\n{} WT, {} IVT, AUC = {:.2f}'.format(site['mod'], site['stop'], len(wt_features), len(ivt_features), score_auc))
 
         plt.savefig(os.path.join(debug_img_dir, 'svm_auc_{}_{}.png'.format(site['mod'], site['stop'])), bbox_inches='tight')
         plt.close('all')

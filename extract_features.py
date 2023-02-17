@@ -93,10 +93,12 @@ def ctcdecoder(logits, label, blank=False, beam_size=5, alphabet=alphabet, pre=N
             retstr.append("".join(cur))
     return ret, retstr
 
-def get_features_from_signal(model, device, config, signal):
+def get_features_from_signal(model, device, config, signal, feature_width=0):
     chunks = segment(signal, config.seqlen)
     event = torch.unsqueeze(torch.FloatTensor(chunks), 1).to(device, non_blocking=True)
     out = model.forward(event)
+    layer_activation = activation['conv21'].detach().cpu().numpy()
+    num_locs = layer_activation.shape[-1]
     pred_labels = []
     features = []
     for i in range(out.shape[1]):
@@ -136,18 +138,25 @@ def get_features_from_signal(model, device, config, signal):
 
         #########################
 
-        this_feature = activation['conv21'].detach().cpu().numpy()[i, :, pred_locs_corrected]
+        if feature_width==0:
+            this_feature = layer_activation[i, :, pred_locs_corrected]
+        else:
+            this_feature = []
+            for loc_shift in range(-feature_width, feature_width+1):
+                shifted_locs = [max(min(x+loc_shift, num_locs-1), 0) for x in pred_locs_corrected]
+                this_feature.append(layer_activation[i, :, shifted_locs])
+            this_feature = np.hstack(this_feature)
         features.append(this_feature)
     pred_label = ''.join(pred_labels)[::-1]
     features = np.vstack(features)[::-1]
     return features, pred_label
 
-def get_features_from_collection_of_signals(model, device, config, index_read_ids):
+def get_features_from_collection_of_signals(model, device, config, index_read_ids, feature_width=0):
     id_predStr_feature = {}
-    for query_name in tqdm(index_read_ids.keys()):
+    for query_name in tqdm(index_read_ids.keys(), file=sys.stdout):
         this_read_signal = get_norm_signal_from_read_id(query_name, index_read_ids)
         # tic = time()
-        this_read_features, this_read_predStr = get_features_from_signal(model, device, config, this_read_signal)
+        this_read_features, this_read_predStr = get_features_from_signal(model, device, config, this_read_signal, feature_width)
         # toc = time()
         # print('Time: {:.3f}'.format(toc-tic))
         id_predStr_feature[query_name] = (this_read_predStr, this_read_features)

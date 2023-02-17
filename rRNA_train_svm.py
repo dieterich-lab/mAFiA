@@ -29,6 +29,7 @@ parser.add_argument('--mod_file', default=os.path.join(HOME, 'Data/rRNA/only_mod
 parser.add_argument('--rRNA_species', default='NR_003286_RNA18SN5')
 parser.add_argument('--max_num_reads', default=-1)
 parser.add_argument('--min_coverage', default=0)
+parser.add_argument('--feature_width', default=0)
 parser.add_argument('--mod_type', nargs='*', default=None, help='mod type')
 parser.add_argument('--model_path', default=os.path.join(HOME, 'pytorch_models/rRNA/rRNA-epoch29.torch'))
 parser.add_argument('--outfile', default=None)
@@ -44,6 +45,7 @@ mod_file = args.mod_file
 rRNA_species = args.rRNA_species
 max_num_reads = int(args.max_num_reads)
 min_coverage = int(args.min_coverage)
+feature_width = int(args.feature_width)
 mod_type = args.mod_type
 model_path = args.model_path
 svm_model_dir = args.svm_model_dir
@@ -101,15 +103,15 @@ fixed_model, fixed_device = load_model(model_path, fixed_config)
 if max_num_reads>0:
     print('Now extracting features from WT...')
     wt_index_read_ids_sample = {id: wt_index_read_ids[id] for id in sample(list(wt_index_read_ids.keys()), min(len(wt_index_read_ids.keys()), max_num_reads))}
-    wt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, wt_index_read_ids_sample)
+    wt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, wt_index_read_ids_sample, feature_width)
     print('Now extracting features from IVT...')
     ivt_index_read_ids_sample = {id: ivt_index_read_ids[id] for id in sample(list(ivt_index_read_ids.keys()), min(len(ivt_index_read_ids.keys()), max_num_reads))}
-    ivt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, ivt_index_read_ids_sample)
+    ivt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, ivt_index_read_ids_sample, feature_width)
 else:
     print('Now extracting features from WT...')
-    wt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, wt_index_read_ids)
+    wt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, wt_index_read_ids, feature_width)
     print('Now extracting features from IVT...')
-    ivt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, ivt_index_read_ids)
+    ivt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, ivt_index_read_ids, feature_width)
 
 df_mod_ratio = pd.DataFrame()
 counts = 0
@@ -129,7 +131,7 @@ for ind, mod_site in df_mod_sel.iterrows():
         print('{} feature vectors collected from WT'.format(len(wt_site_motif_features)), flush=True)
         print('{} feature vectors collected from IVT'.format(len(ivt_site_motif_features)), flush=True)
         print('Now classifying with SVM...', flush=True)
-        auc_score, svm_model, opt_thresh = train_svm_ivt_wt(ivt_site_motif_features, wt_site_motif_features, ref_motif, mod_site, debug_img_dir=svm_model_dir)
+        auc_score, svm_model, opt_thresh = train_svm_ivt_wt(ivt_site_motif_features, wt_site_motif_features, ref_motif, mod_site, debug_img_dir=os.path.join(svm_model_dir, 'auc'))
         print('AUC {:.2f}'.format(auc_score), flush=True)
         print('=========================================================', flush=True)
         new_row = mod_site.copy()
@@ -138,6 +140,7 @@ for ind, mod_site in df_mod_sel.iterrows():
         new_row['opt_thresh'] = np.round(opt_thresh, 2)
         new_row['num_features_ivt'] = len(ivt_site_motif_features)
         new_row['num_features_wt'] = len(wt_site_motif_features)
+        new_row['feature_width'] = feature_width
         df_mod_ratio = pd.concat([df_mod_ratio, new_row.to_frame().T])
         if svm_model_dir is not None:
             dump(svm_model, os.path.join(svm_model_dir, 'svm_{}_{}_{}.joblib'.format(mod_site['sample'], mod_site['start'], mod_site['mod'])))
