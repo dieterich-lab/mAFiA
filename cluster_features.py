@@ -68,8 +68,8 @@ def train_svm_ivt_wt(ivt_dict, wt_dict, wanted_motif, site, debug_img_dir=None):
         return -1
 
     X_train, X_test, y_train, y_test = train_test_split(all_features, labels, test_size=frac_test_split)
-    clf = make_pipeline(StandardScaler(), SVC(gamma='auto'))
-    # clf = SVC()
+    # clf = make_pipeline(StandardScaler(), SVC(gamma='auto'))
+    clf = SVC(gamma='auto')
     clf = clf.fit(X_train, y_train)
     # predictions = clf.predict(X_test)
     # accuracy = clf.score(X_test, y_test)
