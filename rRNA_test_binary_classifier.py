@@ -113,7 +113,7 @@ for ind, row in df_mod_sel.iterrows():
         print('Reference motif {}'.format(ref_motif), flush=True)
         print('{} feature vectors collected'.format(len(test_site_motif_features)), flush=True)
 
-        classifier_model = load(os.path.join(classifier_model_dir, '{}_{}.joblib'.format(row['sample'], row['start'], row['mod'])))
+        classifier_model = load(os.path.join(classifier_model_dir, '{}_{}_{}.joblib'.format(classifier, row['sample'], row['start'], row['mod'])))
         if classifier=='svm':
             print('Now classifying with SVM...', flush=True)
         elif classifier=='logistic_regression':

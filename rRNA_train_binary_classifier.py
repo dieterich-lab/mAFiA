@@ -153,7 +153,7 @@ for ind, mod_site in df_mod_sel.iterrows():
         new_row['feature_width'] = feature_width
         df_mod_ratio = pd.concat([df_mod_ratio, new_row.to_frame().T])
         if classifier_model_dir is not None:
-            dump(classifier_model, os.path.join(classifier_model_dir, '{}_{}.joblib'.format(mod_site['start'], mod_site['mod'])))
+            dump(classifier_model, os.path.join(classifier_model_dir, '{}_{}_{}.joblib'.format(classifier, mod_site['start'], mod_site['mod'])))
         counts += 1
         if counts%5==0:
             df_mod_ratio.to_csv(outfile, sep='\t')
