@@ -13,7 +13,7 @@ import leidenalg as la
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
 from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MaxAbsScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import PrecisionRecallDisplay, precision_recall_curve, auc
 # import matplotlib
@@ -68,7 +68,8 @@ def train_logistic_regression_ivt_wt(ivt_dict, wt_dict, wanted_motif, site, debu
         return -1
 
     X_train, X_test, y_train, y_test = train_test_split(all_features, labels, test_size=frac_test_split)
-    clf = LogisticRegression(random_state=0).fit(X_train, y_train)
+    clf = make_pipeline(MaxAbsScaler(), LogisticRegression(random_state=0))
+    clf = clf.fit(X_train, y_train)
     # predictions = clf.predict(X_test)
     # accuracy = clf.score(X_test, y_test)
 
