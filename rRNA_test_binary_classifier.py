@@ -12,7 +12,7 @@ from Bio import SeqIO
 from ont_fast5_api.fast5_interface import get_fast5_file
 from extract_features import load_model
 from extract_features import get_features_from_collection_of_signals, collect_site_features
-from cluster_features import get_mod_ratio_svm
+from feature_classifiers import get_mod_ratio_with_binary_classifier
 import random
 random.seed(10)
 from random import sample
@@ -113,15 +113,15 @@ for ind, row in df_mod_sel.iterrows():
         print('Reference motif {}'.format(ref_motif), flush=True)
         print('{} feature vectors collected'.format(len(test_site_motif_features)), flush=True)
 
-        classifier_model = load(os.path.join(classifier_model_dir, 'classifier_{}_{}_{}.joblib'.format(row['sample'], row['start'], row['mod'])))
+        classifier_model = load(os.path.join(classifier_model_dir, '{}_{}.joblib'.format(row['sample'], row['start'], row['mod'])))
         if classifier=='svm':
             print('Now classifying with SVM...', flush=True)
-            if use_opt_thresh:
-                mod_ratio = get_mod_ratio_svm(test_site_motif_features, classifier_model, opt_thresh)
-            else:
-                mod_ratio = get_mod_ratio_svm(test_site_motif_features, classifier_model)
         elif classifier=='logistic_regression':
             print('Now classifying with logistic regression...', flush=True)
+        if use_opt_thresh:
+            mod_ratio = get_mod_ratio_with_binary_classifier(test_site_motif_features, classifier_model, opt_thresh)
+        else:
+            mod_ratio = get_mod_ratio_with_binary_classifier(test_site_motif_features, classifier_model)
 
         print('Mod. ratio {:.2f}'.format(mod_ratio), flush=True)
         print('=========================================================', flush=True)

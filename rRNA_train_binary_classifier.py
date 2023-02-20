@@ -13,7 +13,7 @@ from Bio import SeqIO
 from ont_fast5_api.fast5_interface import get_fast5_file
 from extract_features import load_model
 from extract_features import get_features_from_collection_of_signals, collect_site_features
-from cluster_features import train_svm_ivt_wt, train_logistic_regression_ivt_wt
+from feature_classifiers import train_svm_ivt_wt, train_logistic_regression_ivt_wt
 import random
 random.seed(10)
 from random import sample
@@ -153,7 +153,7 @@ for ind, mod_site in df_mod_sel.iterrows():
         new_row['feature_width'] = feature_width
         df_mod_ratio = pd.concat([df_mod_ratio, new_row.to_frame().T])
         if classifier_model_dir is not None:
-            dump(classifier_model, os.path.join(classifier_model_dir, 'classifier_{}_{}_{}.joblib'.format(mod_site['sample'], mod_site['start'], mod_site['mod'])))
+            dump(classifier_model, os.path.join(classifier_model_dir, '{}_{}.joblib'.format(mod_site['start'], mod_site['mod'])))
         counts += 1
         if counts%5==0:
             df_mod_ratio.to_csv(outfile, sep='\t')

@@ -12,7 +12,7 @@ import pysam
 from Bio import SeqIO
 from ont_fast5_api.fast5_interface import get_fast5_file
 from extract_features import load_model, collect_features_from_aligned_site, collect_features_from_aligned_site_v2
-from cluster_features import get_outlier_ratio_from_features
+from feature_classifiers import get_outlier_ratio_from_features
 from time import time
 
 parser = argparse.ArgumentParser()
