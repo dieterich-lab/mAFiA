@@ -14,6 +14,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import PrecisionRecallDisplay, precision_recall_curve, auc
 # import matplotlib
 # matplotlib.use('tkagg')
@@ -49,6 +50,57 @@ def cluster_by_louvain(vec_s, dim):
 
     return partition.membership
 
+def train_logistic_regression_ivt_wt(ivt_dict, wt_dict, wanted_motif, site, debug_img_dir=None):
+    frac_test_split = 0.25
+    max_num_features = min(len(ivt_dict), len(wt_dict))
+    sample_ivt_dict = {k: ivt_dict[k] for k in sample(ivt_dict.keys(), max_num_features)}
+    sample_wt_dict = {k: wt_dict[k] for k in sample(wt_dict.keys(), max_num_features)}
+
+    labels = np.array([0 for ii in range(len(sample_ivt_dict))] + [1 for ii in range(len(sample_wt_dict))])
+    ivt_motifs = [v[0] for k, v in sample_ivt_dict.items()]
+    wt_motifs = [v[0] for k, v in sample_wt_dict.items()]
+    ivt_features = [v[1] for k, v in sample_ivt_dict.items()]
+    wt_features = [v[1] for k, v in sample_wt_dict.items()]
+    all_features = np.array(ivt_features + wt_features)
+
+    if Counter(ivt_motifs).most_common(1)[0][0] != wanted_motif:
+        print('IVT motif {} doesn\'t match reference one {}'.format(Counter(ivt_motifs).most_common(1)[0][0], wanted_motif))
+        return -1
+
+    X_train, X_test, y_train, y_test = train_test_split(all_features, labels, test_size=frac_test_split)
+    clf = LogisticRegression(random_state=0).fit(X_train, y_train)
+    # predictions = clf.predict(X_test)
+    # accuracy = clf.score(X_test, y_test)
+
+    y_score = clf.decision_function(X_test)
+    precision, recall, thresholds = precision_recall_curve(y_test, y_score)
+    score_auc = auc(recall, precision)
+    opt_ind = np.where(precision >= 0.8)[0][0]
+    opt_thresh = thresholds[opt_ind-1]
+
+    ### debug ############################################################
+    if debug_img_dir is not None:
+        if not os.path.exists(debug_img_dir):
+            os.makedirs(debug_img_dir, exist_ok=True)
+        opt_recall = recall[opt_ind]
+        opt_predictions = np.int32(y_score>=opt_thresh)
+        opt_accuracy = np.mean(opt_predictions==y_test)
+
+        plt.figure(figsize=(5, 5))
+        plt.plot(recall, precision)
+        plt.axvline(opt_recall, c='g')
+        plt.xlabel('Recall')
+        plt.ylabel('Precision')
+        plt.ylim([0, 1.05])
+        plt.title('{} {}\n{} WT, {} IVT, AUC = {:.2f}'.format(site['mod'], site['stop'], len(wt_features), len(ivt_features), score_auc))
+
+        plt.savefig(os.path.join(debug_img_dir, 'log_reg_auc_{}_{}.png'.format(site['mod'], site['stop'])), bbox_inches='tight')
+        plt.close('all')
+        # plt.show()
+        # display = PrecisionRecallDisplay.from_estimator(clf, X_test, y_test)
+    ######################################################################
+
+    return score_auc, clf, opt_thresh
 
 def train_svm_ivt_wt(ivt_dict, wt_dict, wanted_motif, site, debug_img_dir=None):
     frac_test_split = 0.25

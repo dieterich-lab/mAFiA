@@ -28,7 +28,8 @@ parser.add_argument('--max_num_reads', default=-1)
 parser.add_argument('--min_coverage', default=0)
 parser.add_argument('--mod_type', nargs='*', default=None, help='mod type')
 parser.add_argument('--model_path', default=os.path.join(HOME, 'pytorch_models/rRNA/rRNA-epoch29.torch'))
-parser.add_argument('--svm_model_dir', default=None)
+parser.add_argument('--classifier', default='svm')
+parser.add_argument('--classifier_model_dir', default=None)
 parser.add_argument('--use_opt_thresh', default=False)
 parser.add_argument('--outfile', default=None)
 
@@ -43,7 +44,8 @@ max_num_reads = int(args.max_num_reads)
 min_coverage = int(args.min_coverage)
 mod_type = args.mod_type
 model_path = args.model_path
-svm_model_dir = args.svm_model_dir
+classifier = args.classifier
+classifier_model_dir = args.classifier_model_dir
 use_opt_thresh = bool(args.use_opt_thresh)
 outfile = args.outfile
 
@@ -111,12 +113,16 @@ for ind, row in df_mod_sel.iterrows():
         print('Reference motif {}'.format(ref_motif), flush=True)
         print('{} feature vectors collected'.format(len(test_site_motif_features)), flush=True)
 
-        print('Now classifying with SVM...', flush=True)
-        svm_model = load(os.path.join(svm_model_dir, 'svm_{}_{}_{}.joblib'.format(row['sample'], row['start'], row['mod'])))
-        if use_opt_thresh:
-            mod_ratio = get_mod_ratio_svm(test_site_motif_features, svm_model, opt_thresh)
-        else:
-            mod_ratio = get_mod_ratio_svm(test_site_motif_features, svm_model)
+        classifier_model = load(os.path.join(classifier_model_dir, 'classifier_{}_{}_{}.joblib'.format(row['sample'], row['start'], row['mod'])))
+        if classifier=='svm':
+            print('Now classifying with SVM...', flush=True)
+            if use_opt_thresh:
+                mod_ratio = get_mod_ratio_svm(test_site_motif_features, classifier_model, opt_thresh)
+            else:
+                mod_ratio = get_mod_ratio_svm(test_site_motif_features, classifier_model)
+        elif classifier=='logistic_regression':
+            print('Now classifying with logistic regression...', flush=True)
+
         print('Mod. ratio {:.2f}'.format(mod_ratio), flush=True)
         print('=========================================================', flush=True)
         new_row = row.copy()

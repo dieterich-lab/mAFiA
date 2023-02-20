@@ -13,7 +13,7 @@ from Bio import SeqIO
 from ont_fast5_api.fast5_interface import get_fast5_file
 from extract_features import load_model
 from extract_features import get_features_from_collection_of_signals, collect_site_features
-from cluster_features import train_svm_ivt_wt
+from cluster_features import train_svm_ivt_wt, train_logistic_regression_ivt_wt
 import random
 random.seed(10)
 from random import sample
@@ -32,8 +32,9 @@ parser.add_argument('--min_coverage', default=0)
 parser.add_argument('--feature_width', default=0)
 parser.add_argument('--mod_type', nargs='*', default=None, help='mod type')
 parser.add_argument('--model_path', default=os.path.join(HOME, 'pytorch_models/rRNA/rRNA-epoch29.torch'))
+parser.add_argument('--classifier', default='svm')
+parser.add_argument('--classifier_model_dir', default=None)
 parser.add_argument('--outfile', default=None)
-parser.add_argument('--svm_model_dir', default=None)
 
 args = parser.parse_args()
 wt_bam_file = args.wt_bam_file
@@ -48,9 +49,10 @@ min_coverage = int(args.min_coverage)
 feature_width = int(args.feature_width)
 mod_type = args.mod_type
 model_path = args.model_path
-svm_model_dir = args.svm_model_dir
-if svm_model_dir is not None:
-    os.makedirs(svm_model_dir, exist_ok=True)
+classifier = args.classifier
+classifier_model_dir = args.classifier_model_dir
+if classifier_model_dir is not None:
+    os.makedirs(classifier_model_dir, exist_ok=True)
 outfile = args.outfile
 
 df_mod = pd.read_csv(mod_file, names=['sample', 'start', 'stop', 'mod'], sep='\t')
@@ -130,8 +132,16 @@ for ind, mod_site in df_mod_sel.iterrows():
         print('Reference motif {}'.format(ref_motif), flush=True)
         print('{} feature vectors collected from WT'.format(len(wt_site_motif_features)), flush=True)
         print('{} feature vectors collected from IVT'.format(len(ivt_site_motif_features)), flush=True)
-        print('Now classifying with SVM...', flush=True)
-        auc_score, svm_model, opt_thresh = train_svm_ivt_wt(ivt_site_motif_features, wt_site_motif_features, ref_motif, mod_site, debug_img_dir=os.path.join(svm_model_dir, 'auc'))
+        if classifier=='svm':
+            print('Now classifying with SVM...', flush=True)
+            auc_score, classifier_model, opt_thresh = train_svm_ivt_wt(ivt_site_motif_features, wt_site_motif_features, ref_motif, mod_site, debug_img_dir=os.path.join(classifier_model_dir, 'auc'))
+        elif classifier=='logistic_regression':
+            print('Now classifying with logistic regression...', flush=True)
+            auc_score, classifier_model, opt_thresh = train_logistic_regression_ivt_wt(ivt_site_motif_features, wt_site_motif_features, ref_motif, mod_site, debug_img_dir=os.path.join(classifier_model_dir, 'auc'))
+        else:
+            print('Classifier unspecified!')
+            break
+
         print('AUC {:.2f}'.format(auc_score), flush=True)
         print('=========================================================', flush=True)
         new_row = mod_site.copy()
@@ -142,8 +152,8 @@ for ind, mod_site in df_mod_sel.iterrows():
         new_row['num_features_wt'] = len(wt_site_motif_features)
         new_row['feature_width'] = feature_width
         df_mod_ratio = pd.concat([df_mod_ratio, new_row.to_frame().T])
-        if svm_model_dir is not None:
-            dump(svm_model, os.path.join(svm_model_dir, 'svm_{}_{}_{}.joblib'.format(mod_site['sample'], mod_site['start'], mod_site['mod'])))
+        if classifier_model_dir is not None:
+            dump(classifier_model, os.path.join(classifier_model_dir, 'classifier_{}_{}_{}.joblib'.format(mod_site['sample'], mod_site['start'], mod_site['mod'])))
         counts += 1
         if counts%5==0:
             df_mod_ratio.to_csv(outfile, sep='\t')
