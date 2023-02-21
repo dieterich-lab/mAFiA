@@ -172,6 +172,7 @@ def get_features_from_signal(model, device, config, signal, ext_layer, feature_w
     return features, pred_label
 
 def get_features_from_collection_of_signals(model, device, config, index_read_ids, layer, feature_width=0):
+    print('Extracting features from {}, width {}...'.format(layer, feature_width))
     id_predStr_feature = {}
     for query_name in tqdm(index_read_ids.keys()):
         this_read_signal = get_norm_signal_from_read_id(query_name, index_read_ids)
