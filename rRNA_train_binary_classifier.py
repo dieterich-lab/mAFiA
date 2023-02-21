@@ -32,6 +32,7 @@ parser.add_argument('--min_coverage', default=0)
 parser.add_argument('--feature_width', default=0)
 parser.add_argument('--mod_type', nargs='*', default=None, help='mod type')
 parser.add_argument('--model_path', default=os.path.join(HOME, 'pytorch_models/rRNA/rRNA-epoch29.torch'))
+parser.add_argument('--extraction_layer', default='convlayers.conv21')
 parser.add_argument('--classifier', default='svm')
 parser.add_argument('--classifier_model_dir', default=None)
 parser.add_argument('--outfile', default=None)
@@ -49,6 +50,7 @@ min_coverage = int(args.min_coverage)
 feature_width = int(args.feature_width)
 mod_type = args.mod_type
 model_path = args.model_path
+extraction_layer = args.extraction_layer
 classifier = args.classifier
 classifier_model_dir = args.classifier_model_dir
 if classifier_model_dir is not None:
@@ -99,21 +101,21 @@ print('{} IVT reads indexed'.format(len(ivt_index_read_ids)), flush=True)
 torchdict = torch.load(model_path, map_location="cpu")
 origconfig = torchdict["config"]
 fixed_config = objectview(origconfig)
-fixed_model, fixed_device = load_model(model_path, fixed_config)
+fixed_model, fixed_device = load_model(model_path, fixed_config, extraction_layer)
 
 ### extract features ###
 if max_num_reads>0:
     print('Now extracting features from WT...')
     wt_index_read_ids_sample = {id: wt_index_read_ids[id] for id in sample(list(wt_index_read_ids.keys()), min(len(wt_index_read_ids.keys()), max_num_reads))}
-    wt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, wt_index_read_ids_sample, feature_width)
+    wt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, wt_index_read_ids_sample, extraction_layer, feature_width)
     print('Now extracting features from IVT...')
     ivt_index_read_ids_sample = {id: ivt_index_read_ids[id] for id in sample(list(ivt_index_read_ids.keys()), min(len(ivt_index_read_ids.keys()), max_num_reads))}
-    ivt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, ivt_index_read_ids_sample, feature_width)
+    ivt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, ivt_index_read_ids_sample, extraction_layer, feature_width)
 else:
     print('Now extracting features from WT...')
-    wt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, wt_index_read_ids, feature_width)
+    wt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, wt_index_read_ids, extraction_layer, feature_width)
     print('Now extracting features from IVT...')
-    ivt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, ivt_index_read_ids, feature_width)
+    ivt_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, ivt_index_read_ids, extraction_layer, feature_width)
 
 df_mod_ratio = pd.DataFrame()
 counts = 0
