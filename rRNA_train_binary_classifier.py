@@ -29,10 +29,10 @@ parser.add_argument('--mod_file', default=os.path.join(HOME, 'Data/rRNA/only_mod
 parser.add_argument('--rRNA_species', default='NR_003286_RNA18SN5')
 parser.add_argument('--max_num_reads', default=-1)
 parser.add_argument('--min_coverage', default=0)
-parser.add_argument('--feature_width', default=0)
 parser.add_argument('--mod_type', nargs='*', default=None, help='mod type')
 parser.add_argument('--model_path', default=os.path.join(HOME, 'pytorch_models/rRNA/rRNA-epoch29.torch'))
 parser.add_argument('--extraction_layer', default='convlayers.conv21')
+parser.add_argument('--feature_width', default=0)
 parser.add_argument('--classifier', default='svm')
 parser.add_argument('--classifier_model_dir', default=None)
 parser.add_argument('--outfile', default=None)
@@ -47,10 +47,10 @@ mod_file = args.mod_file
 rRNA_species = args.rRNA_species
 max_num_reads = int(args.max_num_reads)
 min_coverage = int(args.min_coverage)
-feature_width = int(args.feature_width)
 mod_type = args.mod_type
 model_path = args.model_path
 extraction_layer = args.extraction_layer
+feature_width = int(args.feature_width)
 classifier = args.classifier
 classifier_model_dir = args.classifier_model_dir
 if classifier_model_dir is not None:
@@ -152,7 +152,7 @@ for ind, mod_site in df_mod_sel.iterrows():
         new_row['opt_thresh'] = np.round(opt_thresh, 2)
         new_row['num_features_ivt'] = len(ivt_site_motif_features)
         new_row['num_features_wt'] = len(wt_site_motif_features)
-        new_row['feature_width'] = feature_width
+        # new_row['feature_width'] = feature_width
         df_mod_ratio = pd.concat([df_mod_ratio, new_row.to_frame().T])
         if classifier_model_dir is not None:
             dump(classifier_model, os.path.join(classifier_model_dir, '{}_{}_{}.joblib'.format(classifier, mod_site['start'], mod_site['mod'])))

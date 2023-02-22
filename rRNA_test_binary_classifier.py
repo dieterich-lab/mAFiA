@@ -29,6 +29,7 @@ parser.add_argument('--min_coverage', default=0)
 parser.add_argument('--mod_type', nargs='*', default=None, help='mod type')
 parser.add_argument('--model_path', default=os.path.join(HOME, 'pytorch_models/rRNA/rRNA-epoch29.torch'))
 parser.add_argument('--extraction_layer', default=None)
+parser.add_argument('--feature_width', default=0)
 parser.add_argument('--classifier', default='svm')
 parser.add_argument('--classifier_model_dir', default=None)
 parser.add_argument('--use_opt_thresh', default=False)
@@ -46,6 +47,7 @@ min_coverage = int(args.min_coverage)
 mod_type = args.mod_type
 model_path = args.model_path
 extraction_layer = args.extraction_layer
+feature_width = int(args.feature_width)
 classifier = args.classifier
 classifier_model_dir = args.classifier_model_dir
 use_opt_thresh = bool(args.use_opt_thresh)
@@ -90,7 +92,7 @@ fixed_model, fixed_device = load_model(model_path, fixed_config, extraction_laye
 
 ### extract features ###
 print('Now extracting features from reads...')
-feature_width = df_mod_sel['feature_width'].values[0]
+# feature_width = df_mod_sel['feature_width'].values[0]
 if max_num_reads>0:
     test_index_read_ids_sample = {id: test_index_read_ids[id] for id in sample(list(test_index_read_ids.keys()), min(len(test_index_read_ids.keys()), max_num_reads))}
     test_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, test_index_read_ids_sample, extraction_layer, feature_width)
