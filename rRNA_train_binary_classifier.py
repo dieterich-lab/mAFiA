@@ -33,6 +33,7 @@ parser.add_argument('--mod_type', nargs='*', default=None, help='mod type')
 parser.add_argument('--model_path', default=os.path.join(HOME, 'pytorch_models/rRNA/rRNA-epoch29.torch'))
 parser.add_argument('--extraction_layer', default='convlayers.conv21')
 parser.add_argument('--feature_width', default=0)
+parser.add_argument('--scaler', default=None)
 parser.add_argument('--classifier', default='svm')
 parser.add_argument('--classifier_model_dir', default=None)
 parser.add_argument('--outfile', default=None)
@@ -51,6 +52,7 @@ mod_type = args.mod_type
 model_path = args.model_path
 extraction_layer = args.extraction_layer
 feature_width = int(args.feature_width)
+scaler = args.scaler
 classifier = args.classifier
 classifier_model_dir = args.classifier_model_dir
 if classifier_model_dir is not None:
@@ -139,7 +141,7 @@ for ind, mod_site in df_mod_sel.iterrows():
             auc_score, classifier_model, opt_thresh = train_svm_ivt_wt(ivt_site_motif_features, wt_site_motif_features, ref_motif, mod_site, debug_img_dir=os.path.join(classifier_model_dir, 'auc'))
         elif classifier=='logistic_regression':
             print('Now classifying with logistic regression...', flush=True)
-            auc_score, classifier_model, opt_thresh = train_logistic_regression_ivt_wt(ivt_site_motif_features, wt_site_motif_features, ref_motif, mod_site, debug_img_dir=os.path.join(classifier_model_dir, 'auc'))
+            auc_score, classifier_model, opt_thresh = train_logistic_regression_ivt_wt(ivt_site_motif_features, wt_site_motif_features, ref_motif, mod_site, scaler=scaler, debug_img_dir=os.path.join(classifier_model_dir, 'auc'))
         else:
             print('Classifier unspecified!')
             break

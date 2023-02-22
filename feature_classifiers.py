@@ -50,7 +50,7 @@ def cluster_by_louvain(vec_s, dim):
 
     return partition.membership
 
-def train_logistic_regression_ivt_wt(ivt_dict, wt_dict, wanted_motif, site, debug_img_dir=None):
+def train_logistic_regression_ivt_wt(ivt_dict, wt_dict, wanted_motif, site, scaler=None, debug_img_dir=None):
     frac_test_split = 0.25
     max_num_features = min(len(ivt_dict), len(wt_dict))
     sample_ivt_dict = {k: ivt_dict[k] for k in sample(ivt_dict.keys(), max_num_features)}
@@ -68,9 +68,12 @@ def train_logistic_regression_ivt_wt(ivt_dict, wt_dict, wanted_motif, site, debu
         return -1
 
     X_train, X_test, y_train, y_test = train_test_split(all_features, labels, test_size=frac_test_split)
-    clf = LogisticRegression(random_state=0, max_iter=1000)
-    # clf = make_pipeline(MaxAbsScaler(), LogisticRegression(random_state=0))
-    # clf = make_pipeline(StandardScaler(), LogisticRegression(random_state=0))
+    if scaler is None:
+        clf = LogisticRegression(random_state=0, max_iter=1000)
+    elif scaler=='MaxAbs':
+        clf = make_pipeline(MaxAbsScaler(), LogisticRegression(random_state=0, max_iter=1000))
+    elif scaler=='Standard':
+        clf = make_pipeline(StandardScaler(), LogisticRegression(random_state=0, max_iter=1000))
     clf = clf.fit(X_train, y_train)
     # predictions = clf.predict(X_test)
     # accuracy = clf.score(X_test, y_test)
