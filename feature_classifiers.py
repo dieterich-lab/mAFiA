@@ -68,7 +68,7 @@ def train_logistic_regression_ivt_wt(ivt_dict, wt_dict, wanted_motif, site, debu
         return -1
 
     X_train, X_test, y_train, y_test = train_test_split(all_features, labels, test_size=frac_test_split)
-    clf = LogisticRegression(random_state=0)
+    clf = LogisticRegression(random_state=0, max_iter=1000)
     # clf = make_pipeline(MaxAbsScaler(), LogisticRegression(random_state=0))
     # clf = make_pipeline(StandardScaler(), LogisticRegression(random_state=0))
     clf = clf.fit(X_train, y_train)
