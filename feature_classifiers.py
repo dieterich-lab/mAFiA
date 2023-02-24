@@ -50,38 +50,41 @@ def cluster_by_louvain(vec_s, dim):
 
     return partition.membership
 
-def train_logistic_regression_ivt_wt(ivt_dict, wt_dict, wanted_motif, site, scaler=None, debug_img_dir=None):
+def train_binary_classifier(unm_dict, mod_dict, ref_motif, classifier, scaler=None, debug_img_dir=None):
     frac_test_split = 0.25
-    max_num_features = min(len(ivt_dict), len(wt_dict))
-    sample_ivt_dict = {k: ivt_dict[k] for k in sample(ivt_dict.keys(), max_num_features)}
-    sample_wt_dict = {k: wt_dict[k] for k in sample(wt_dict.keys(), max_num_features)}
+    max_num_features = min(len(unm_dict), len(mod_dict))
+    sample_unm_dict = {k: unm_dict[k] for k in sample(unm_dict.keys(), max_num_features)}
+    sample_mod_dict = {k: mod_dict[k] for k in sample(mod_dict.keys(), max_num_features)}
 
-    labels = np.array([0 for ii in range(len(sample_ivt_dict))] + [1 for ii in range(len(sample_wt_dict))])
-    ivt_motifs = [v[0] for k, v in sample_ivt_dict.items()]
-    wt_motifs = [v[0] for k, v in sample_wt_dict.items()]
-    ivt_features = [v[1] for k, v in sample_ivt_dict.items()]
-    wt_features = [v[1] for k, v in sample_wt_dict.items()]
-    all_features = np.array(ivt_features + wt_features)
-
-    if Counter(ivt_motifs).most_common(1)[0][0] != wanted_motif:
-        print('IVT motif {} doesn\'t match reference one {}'.format(Counter(ivt_motifs).most_common(1)[0][0], wanted_motif))
-        return -1
+    labels = np.array([0 for ii in range(len(sample_unm_dict))] + [1 for ii in range(len(sample_mod_dict))])
+    unm_motifs = [v[0] for k, v in sample_unm_dict.items()]
+    mod_motifs = [v[0] for k, v in sample_mod_dict.items()]
+    unm_features = [v[1] for k, v in sample_unm_dict.items()]
+    mod_features = [v[1] for k, v in sample_mod_dict.items()]
+    all_features = np.array(unm_features + mod_features)
 
     X_train, X_test, y_train, y_test = train_test_split(all_features, labels, test_size=frac_test_split)
-    if scaler is None:
-        clf = LogisticRegression(random_state=0, max_iter=1000)
-    elif scaler=='MaxAbs':
-        clf = make_pipeline(MaxAbsScaler(), LogisticRegression(random_state=0, max_iter=1000))
-    elif scaler=='Standard':
-        clf = make_pipeline(StandardScaler(), LogisticRegression(random_state=0, max_iter=1000))
-    clf = clf.fit(X_train, y_train)
-    # predictions = clf.predict(X_test)
-    # accuracy = clf.score(X_test, y_test)
 
-    y_score = clf.decision_function(X_test)
+    if classifier=='svm':
+        clf = SVC(gamma='auto', random_state=0, max_iter=1000)
+    elif classifier=='logistic_regression':
+        clf = LogisticRegression(random_state=0, max_iter=1000)
+
+    if scaler is None:
+        binary_model = clf
+    elif scaler=='MaxAbs':
+        binary_model = make_pipeline(MaxAbsScaler(), clf)
+    elif scaler=='Standard':
+        binary_model = make_pipeline(StandardScaler(), clf)
+
+    binary_model = binary_model.fit(X_train, y_train)
+    # predictions = binary_model.predict(X_test)
+    # accuracy = binary_model.score(X_test, y_test)
+
+    y_score = binary_model.decision_function(X_test)
     precision, recall, thresholds = precision_recall_curve(y_test, y_score)
     score_auc = auc(recall, precision)
-    opt_ind = np.where(precision >= 0.8)[0][0]
+    opt_ind = np.where(precision >= 0.9)[0][0]
     opt_thresh = thresholds[opt_ind-1]
 
     ### debug ############################################################
@@ -98,15 +101,13 @@ def train_logistic_regression_ivt_wt(ivt_dict, wt_dict, wanted_motif, site, scal
         plt.xlabel('Recall')
         plt.ylabel('Precision')
         plt.ylim([0, 1.05])
-        plt.title('{} {}\n{} WT, {} IVT, AUC = {:.2f}'.format(site['mod'], site['stop'], len(wt_features), len(ivt_features), score_auc))
+        plt.title('{}\n{} unm, {} mod, AUC = {:.2f}'.format(ref_motif, len(unm_features), len(mod_features), score_auc))
 
-        plt.savefig(os.path.join(debug_img_dir, 'log_reg_auc_{}_{}.png'.format(site['mod'], site['stop'])), bbox_inches='tight')
+        plt.savefig(os.path.join(debug_img_dir, 'log_reg_auc_{}.png'.format(ref_motif)), bbox_inches='tight')
         plt.close('all')
-        # plt.show()
-        # display = PrecisionRecallDisplay.from_estimator(clf, X_test, y_test)
     ######################################################################
 
-    return score_auc, clf, opt_thresh
+    return score_auc, binary_model, opt_thresh
 
 def train_svm_ivt_wt(ivt_dict, wt_dict, wanted_motif, site, debug_img_dir=None):
     frac_test_split = 0.25

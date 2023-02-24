@@ -13,7 +13,7 @@ from Bio import SeqIO
 from ont_fast5_api.fast5_interface import get_fast5_file
 from extract_features import load_model
 from extract_features import get_features_from_collection_of_signals, collect_site_features
-from feature_classifiers import train_svm_ivt_wt, train_logistic_regression_ivt_wt
+from feature_classifiers import train_svm_ivt_wt, train_binary_classifier
 import random
 random.seed(10)
 from random import sample
@@ -141,7 +141,7 @@ for ind, mod_site in df_mod_sel.iterrows():
             auc_score, classifier_model, opt_thresh = train_svm_ivt_wt(ivt_site_motif_features, wt_site_motif_features, ref_motif, mod_site, debug_img_dir=os.path.join(classifier_model_dir, 'auc'))
         elif classifier=='logistic_regression':
             print('Now classifying with logistic regression...', flush=True)
-            auc_score, classifier_model, opt_thresh = train_logistic_regression_ivt_wt(ivt_site_motif_features, wt_site_motif_features, ref_motif, mod_site, scaler=scaler, debug_img_dir=os.path.join(classifier_model_dir, 'auc'))
+            auc_score, classifier_model, opt_thresh = train_binary_classifier(ivt_site_motif_features, wt_site_motif_features, ref_motif, mod_site, scaler=scaler, debug_img_dir=os.path.join(classifier_model_dir, 'auc'))
         else:
             print('Classifier unspecified!')
             break
