@@ -17,8 +17,7 @@ parser.add_argument('--outfile')
 parser.add_argument('--indel_thresh', default=10)
 args = parser.parse_args()
 indel_thresh = int(args.indel_thresh)
-
-print('Filtering {} with max indel per read {}...'.format(args.infile, indel_thresh))
+print('Filtering {} with max indel per read {}'.format(args.infile, indel_thresh))
 
 ### check bam file ###
 bam_in = pysam.AlignmentFile(args.infile, 'rb')
@@ -45,5 +44,6 @@ bam_in.close()
 bam_out.close()
 
 survival_rate = out_counts / in_counts
-print('Before: {} reads, after: {} reads'.format(in_counts, out_counts))
+print('Before: {} reads'.format(in_counts))
+print('After: {} reads'.format(out_counts))
 print('Survival rate: {:.2f}'.format(survival_rate))
