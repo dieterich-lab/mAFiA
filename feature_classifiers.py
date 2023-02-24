@@ -164,17 +164,10 @@ def train_svm_ivt_wt(ivt_dict, wt_dict, wanted_motif, site, debug_img_dir=None):
     return score_auc, clf, opt_thresh
 
 def get_mod_ratio_with_binary_classifier(dict_motif_feature, clf, mod_thresh=None):
+    print('Classifying {} features with model: '.format(len(dict_motif_feature)), flush=True)
+    print(clf)
     test_motifs = [v[0] for k, v in dict_motif_feature.items()]
     test_features = [v[1] for k, v in dict_motif_feature.items()]
-
-    # if Counter(test_motifs).most_common(1)[0][0] != wanted_motif:
-    #     print('IVT motif {} doesn\'t match reference one {}'.format(Counter(test_motifs).most_common(1)[0][0], wanted_motif))
-    #     return -1
-
-    # X_train, X_test, y_train, y_test = train_test_split(all_features, labels, test_size=frac_test_split)
-    # clf = make_pipeline(StandardScaler(), SVC(gamma='auto'))
-    # clf = clf.fit(X_train, y_train)
-    # accuracy = clf.score(X_test, y_test)
 
     if mod_thresh is not None:
         y_score = clf.decision_function(test_features)

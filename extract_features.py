@@ -242,7 +242,7 @@ def extract_features_from_signal_v2(model, device, config, signal, pos, bam_moti
 
     return features[pos], pred_motif
 
-def extract_features_from_multiple_signals(model, device, config, site_normReads_qPos_motif, batch_size=128):
+def extract_features_from_multiple_signals(model, device, config, ext_layer, site_normReads_qPos_motif, batch_size=128):
     qNames = []
     all_chunks = []
     chunk_sizes = []
@@ -266,7 +266,7 @@ def extract_features_from_multiple_signals(model, device, config, site_normReads
     for start in np.arange(0, event.shape[0], batch_size):
         stop = min(start+batch_size, event.shape[0])
         outs.append(model.forward(event[start:stop]))
-        features.append(activation['conv21'].detach().cpu().numpy())
+        features.append(activation[ext_layer].detach().cpu().numpy())
     outs = torch.cat(outs, 1)
     features = np.vstack(features)
 
@@ -382,7 +382,7 @@ def collect_features_from_aligned_site(model, device, config, alignment, index_r
                             site_motif_features[query_name] = (this_read_motif, this_read_features)
     return site_motif_features
 
-def collect_features_from_aligned_site_v2(model, device, config, alignment, index_read_ids, contig, site, thresh_coverage=0, enforce_motif=None):
+def collect_features_from_aligned_site_v2(model, device, config, ext_layer, alignment, index_read_ids, contig, site, thresh_coverage=0, enforce_motif=None):
     site_normReads_qPos_motif = {}
     for pileupcolumn in alignment.pileup(contig, site, site + 1, truncate=True):
         if pileupcolumn.pos == site:
@@ -395,7 +395,7 @@ def collect_features_from_aligned_site_v2(model, device, config, alignment, inde
                     query_position = pileupread.query_position
                     if query_position is None:
                         continue
-                    query_motif = pileupread.alignment.query_sequence[query_position - 2:query_position + 3]
+                    query_motif = pileupread.alignment.query_sequence[(query_position-2):(query_position+3)]
                     flag = pileupread.alignment.flag
                     if (enforce_motif is not None) and (query_motif!=enforce_motif):
                         continue
@@ -406,5 +406,5 @@ def collect_features_from_aligned_site_v2(model, device, config, alignment, inde
                         site_normReads_qPos_motif[query_name] = (this_read_signal, query_position, query_motif)
     if len(site_normReads_qPos_motif)==0:
         return {}
-    site_motif_features = extract_features_from_multiple_signals(model, device, config, site_normReads_qPos_motif)
+    site_motif_features = extract_features_from_multiple_signals(model, device, config, ext_layer, site_normReads_qPos_motif)
     return site_motif_features
