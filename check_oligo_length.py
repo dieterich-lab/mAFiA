@@ -9,11 +9,12 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
 prj_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian'
-# dataset = 'A_RTA'
-dataset = 'm6A_RTA'
-ref_file = os.path.join(prj_dir, 'splint_variations_max_blocks_8.fasta')
+dataset = 'A_RTA'
+# dataset = 'm6A_RTA'
+max_blocks = 7
+ref_file = os.path.join(prj_dir, 'splint_variations_max_blocks_{}.fasta'.format(max_blocks))
 fasta_file = os.path.join(prj_dir, '{}.fasta'.format(dataset))
-bam_file = os.path.join(prj_dir, '{}_sorted.bam'.format(dataset))
+bam_file = os.path.join(prj_dir, '{}_max_blocks_{}_sorted.bam'.format(dataset, max_blocks))
 
 img_out = '/home/adrian/img_out/A_m6A_RTA'
 if not os.path.exists(img_out):
@@ -39,7 +40,7 @@ cs_strings = []
 bam_seq_len = []
 aligned_whole_ref_len = []
 for record in bam.fetch():
-    if record.flag==0:
+    if record.flag in [0, 2048]:
         ref_names.append(record.reference_name)
         cs_strings.append(record.cigarstring)
         bam_seq_len.append(len(record.seq))
@@ -81,7 +82,7 @@ plt.title('Max. deletion length in read', fontsize=15)
 plt.xlabel('NT', fontsize=10)
 # plt.ylabel('Count', fontsize=10)
 plt.suptitle(dataset, fontsize=20)
-plt.savefig(os.path.join(img_out, 'hist_max_indel_per_read_{}.png'.format(dataset)), bbox_inches='tight')
+plt.savefig(os.path.join(img_out, 'hist_max_indel_per_read_max_blocks_{}_{}.png'.format(max_blocks, dataset)), bbox_inches='tight')
 plt.close('all')
 
 plt.figure(figsize=(6, 6))
@@ -91,7 +92,7 @@ plt.ylabel('Max. del. len', fontsize=15)
 plt.xlim([0, 100])
 plt.ylim([0, 100])
 plt.suptitle(dataset, fontsize=20)
-plt.savefig(os.path.join(img_out, 'scatter_max_indel_per_read_{}.png'.format(dataset)), bbox_inches='tight')
+plt.savefig(os.path.join(img_out, 'scatter_max_indel_per_read_max_blocks_{}_{}.png'.format(max_blocks, dataset)), bbox_inches='tight')
 plt.close('all')
 
 indel_thresh = 10

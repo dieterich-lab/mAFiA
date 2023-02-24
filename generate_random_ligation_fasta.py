@@ -17,7 +17,7 @@ def add_block(base_list, add_list, base_names, add_names):
             )
     return new_list, new_names
 
-max_blocks = 10
+max_blocks = 7
 prj_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian'
 base_fasta = os.path.join(prj_dir, 'WUE_splint_test_w_splint.fasta')
 out_fasta = os.path.join(prj_dir, 'splint_variations_max_blocks_{}.fasta'.format(max_blocks))
