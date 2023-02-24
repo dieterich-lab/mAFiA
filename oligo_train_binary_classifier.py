@@ -87,25 +87,25 @@ fixed_model, fixed_device = load_model(backbone_model_path, fixed_config, extrac
 
 ### extract features ###
 if max_num_reads>0:
-    print('Now extracting features from unm...')
+    print('Now extracting features from unm...', flush=True)
     unm_index_read_ids_sample = {id: unm_index_read_ids[id] for id in sample(list(unm_index_read_ids.keys()), min(len(unm_index_read_ids.keys()), max_num_reads))}
     unm_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, unm_index_read_ids_sample, extraction_layer, feature_width)
-    print('Now extracting features from mod...')
+    print('Now extracting features from mod...', flush=True)
     mod_index_read_ids_sample = {id: mod_index_read_ids[id] for id in sample(list(mod_index_read_ids.keys()), min(len(mod_index_read_ids.keys()), max_num_reads))}
     mod_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, mod_index_read_ids_sample, extraction_layer, feature_width)
 else:
-    print('Now extracting features from unm...')
+    print('Now extracting features from unm...', flush=True)
     unm_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, unm_index_read_ids, extraction_layer, feature_width)
-    print('Now extracting features from mod...')
+    print('Now extracting features from mod...', flush=True)
     mod_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, mod_index_read_ids, extraction_layer, feature_width)
 
 ### collect motif features ###
 motif_ind = '0'
 motif_name = 'GGACA'
-print('Now collecting features for motif {} from unm reads...'.format(motif_name))
+print('Now collecting features for motif {} from unm reads...'.format(motif_name), flush=True)
 unm_motif_features = collect_all_motif_features(motif_ind, ref, unm_bam, unm_predStr_features, enforce_motif=True)
 print('{} feature vectors collected'.format(len(unm_motif_features)), flush=True)
-print('Now collecting features for motif {} from mod reads...'.format(motif_name))
+print('Now collecting features for motif {} from mod reads...'.format(motif_name), flush=True)
 mod_motif_features = collect_all_motif_features(motif_ind, ref, mod_bam, mod_predStr_features)
 print('{} feature vectors collected'.format(len(mod_motif_features)), flush=True)
 
