@@ -106,7 +106,7 @@ for ind, row in df_mod.iterrows():
         print('=========================================================', flush=True)
         new_row = row.copy()
         new_row['motif'] = ref_motif
-        new_row['mod_ratio'] = np.round(mod_ratio, 2)
+        new_row['mod_ratio'] = round(mod_ratio, 2)
         new_row['num_test_features'] = len(test_site_motif_features)
         df_mod_ratio = pd.concat([df_mod_ratio, new_row.to_frame().T])
         counts += 1
