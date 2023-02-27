@@ -100,16 +100,24 @@ else:
     mod_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, mod_index_read_ids, extraction_layer, feature_width)
 
 ### collect motif features ###
-motif_ind = '0'
-motif_name = 'GGACA'
-print('Now collecting features for motif {} from unm reads...'.format(motif_name), flush=True)
-unm_motif_features = collect_all_motif_features(motif_ind, ref, unm_bam, unm_predStr_features, enforce_motif=True)
-print('{} feature vectors collected'.format(len(unm_motif_features)), flush=True)
-print('Now collecting features for motif {} from mod reads...'.format(motif_name), flush=True)
-mod_motif_features = collect_all_motif_features(motif_ind, ref, mod_bam, mod_predStr_features)
-print('{} feature vectors collected'.format(len(mod_motif_features)), flush=True)
+# motif_ind = '0'
+# motif_name = 'GGACA'
 
-### train classifier ###
-auc_score, classifier_model, opt_thresh = train_binary_classifier(unm_motif_features, mod_motif_features, motif_name, classifier, scaler, debug_img_dir=os.path.join(classifier_model_dir, 'auc'))
-dump(classifier_model, os.path.join(classifier_model_dir, '{}_{}.joblib'.format(classifier, motif_name)))
-print('AUC {:.2f}'.format(auc_score), flush=True)
+motif_indices_names = [
+    ('0', 'GGACA'),
+    ('1', 'GGACC'),
+    ('2', 'AGACT')
+]
+
+for motif_ind, motif_name in motif_indices_names:
+    print('Now collecting features for motif {} from unm reads...'.format(motif_name), flush=True)
+    unm_motif_features = collect_all_motif_features(motif_ind, ref, unm_bam, unm_predStr_features, enforce_motif=True)
+    print('{} feature vectors collected'.format(len(unm_motif_features)), flush=True)
+    print('Now collecting features for motif {} from mod reads...'.format(motif_name), flush=True)
+    mod_motif_features = collect_all_motif_features(motif_ind, ref, mod_bam, mod_predStr_features)
+    print('{} feature vectors collected'.format(len(mod_motif_features)), flush=True)
+
+    ### train classifier ###
+    auc_score, classifier_model, opt_thresh = train_binary_classifier(unm_motif_features, mod_motif_features, motif_name, classifier, scaler, debug_img_dir=os.path.join(classifier_model_dir, 'auc'))
+    dump(classifier_model, os.path.join(classifier_model_dir, '{}_{}.joblib'.format(classifier, motif_name)))
+    print('AUC {:.2f}'.format(auc_score), flush=True)
