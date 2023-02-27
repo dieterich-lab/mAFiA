@@ -48,6 +48,10 @@ classifier_model_dir = args.classifier_model_dir
 use_opt_thresh = bool(args.use_opt_thresh)
 outfile = args.outfile
 
+outdir = os.path.dirname(outfile)
+if not os.path.exists(outdir):
+    os.makedirs(outdir, exist_ok=True)
+
 df_mod = pd.read_csv(mod_file)
 
 # ref_file = os.path.join(HOME, 'Data/genomes/GRCh38_96.fa')
@@ -79,7 +83,7 @@ target_motif = 'GGACA'
 df_mod_ratio = pd.DataFrame()
 counts = 0
 for ind, row in df_mod.iterrows():
-    print('\nSite {}'.format(ind), flush=True)
+    # print('\nSite {}'.format(ind), flush=True)
     chr = row['Chr'].lstrip('chr')
     strand = row['Strand']
     start = row['Sites'] - 1   # 0-based
@@ -102,7 +106,7 @@ for ind, row in df_mod.iterrows():
         print('=========================================================', flush=True)
         new_row = row.copy()
         new_row['motif'] = ref_motif
-        new_row['mod_ratio'] = mod_ratio
+        new_row['mod_ratio'] = np.round(mod_ratio, 2)
         new_row['num_test_features'] = len(test_site_motif_features)
         df_mod_ratio = pd.concat([df_mod_ratio, new_row.to_frame().T])
         counts += 1
