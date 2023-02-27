@@ -86,6 +86,8 @@ counts = 0
 for ind, row in df_mod.iterrows():
     # print('\nSite {}'.format(ind), flush=True)
     chr = row['Chr'].lstrip('chr')
+    if (chr.isnumeric()==False) and (chr not in ['X', 'Y']):
+        continue
     strand = row['Strand']
     start = row['Sites'] - 1   # 0-based
     glori_ratio = row['Ratio']
