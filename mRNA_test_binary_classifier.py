@@ -97,8 +97,8 @@ for ind, row in df_mod.iterrows():
     test_site_motif_features = collect_features_from_aligned_site_v2(fixed_model, fixed_device, fixed_config, extraction_layer, test_bam, test_index_read_ids, chr, start, min_coverage)
 
     if len(test_site_motif_features)>min_coverage:
-        print('=========================================================', flush=True)
-        print('{}, pos{}'.format(chr, start), flush=True)
+        print('\n=========================================================', flush=True)
+        print('chr{}, pos{}'.format(chr, start), flush=True)
         print('Reference motif {}'.format(ref_motif), flush=True)
         print('{} feature vectors collected'.format(len(test_site_motif_features)), flush=True)
         mod_ratio = get_mod_ratio_with_binary_classifier(test_site_motif_features, classifier_model)
