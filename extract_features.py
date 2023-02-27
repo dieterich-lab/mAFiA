@@ -316,7 +316,7 @@ def collect_all_motif_features(motif_ind, reference, bam_in, predStr_features, e
                 motif_features.append(site_motif_features)
     return {k: v for dic in motif_features for k, v in dic.items()}
 
-def collect_site_features(alignment, contig, pos, dict_predStr_feature, ref_motif=None):
+def collect_site_features(alignment, contig, pos, dict_predStr_feature, enforce_motif=None):
     site_motif_features = {}
     for pileupcolumn in alignment.pileup(contig, pos, pos+1, truncate=True):
         if pileupcolumn.pos == pos:
@@ -328,7 +328,7 @@ def collect_site_features(alignment, contig, pos, dict_predStr_feature, ref_moti
                     continue
                 query_motif = pileupread.alignment.query_sequence[(query_position-2):(query_position+3)]
                 flag = pileupread.alignment.flag
-                if (ref_motif is not None) and (query_motif != ref_motif):
+                if (enforce_motif is not None) and (query_motif != enforce_motif):
                     continue
                 if query_position and (flag == 0) and (query_name in dict_predStr_feature.keys()):
                     this_read_predStr, this_read_feature = dict_predStr_feature[query_name]
