@@ -9,7 +9,7 @@ img_out = os.path.join(HOME, 'img_out', 'MAFIA')
 if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
 
-P_VAL_THRESH = 1.0E-99
+P_VAL_THRESH = 1.0E-1
 df_all = pd.read_csv(df_file, sep='\t')
 df = df_all[df_all['P_adjust']<=P_VAL_THRESH]
 # df = df_all

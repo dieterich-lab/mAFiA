@@ -79,8 +79,10 @@ fixed_config = objectview(origconfig)
 fixed_model, fixed_device = load_model(backbone_model_path, fixed_config, extraction_layer)
 
 ### loop through sites ###
-target_motif = 'GGACA'
-classifier_model = load(os.path.join(classifier_model_dir, '{}_{}.joblib'.format(classifier, target_motif)))
+target_motifs = ['GGACA', 'GGACC', 'AGACT']
+classifier_models = {this_motif : load(os.path.join(classifier_model_dir, '{}_{}.joblib'.format(classifier, this_motif))) for this_motif in target_motifs}
+# target_motif = 'GGACA'
+# classifier_model = load(os.path.join(classifier_model_dir, '{}_{}.joblib'.format(classifier, target_motif)))
 df_mod_ratio = pd.DataFrame()
 counts = 0
 for ind, row in df_mod.iterrows():
@@ -93,7 +95,7 @@ for ind, row in df_mod.iterrows():
     glori_ratio = row['Ratio']
     ref_motif = ref[chr][start-2:start+3]
 
-    if ref_motif!=target_motif:
+    if ref_motif not in target_motifs:
         continue
 
     test_site_motif_features = collect_features_from_aligned_site_v2(fixed_model, fixed_device, fixed_config, extraction_layer, test_bam, test_index_read_ids, chr, start, min_coverage)
@@ -103,7 +105,7 @@ for ind, row in df_mod.iterrows():
         print('chr{}, pos{}'.format(chr, start), flush=True)
         print('Reference motif {}'.format(ref_motif), flush=True)
         print('{} feature vectors collected'.format(len(test_site_motif_features)), flush=True)
-        mod_ratio = get_mod_ratio_with_binary_classifier(test_site_motif_features, classifier_model)
+        mod_ratio = get_mod_ratio_with_binary_classifier(test_site_motif_features, classifier_models[ref_motif])
         print('Predicted mod ratio {:.2f} [GLORI {:.2f}]'.format(mod_ratio, glori_ratio), flush=True)
         print('=========================================================', flush=True)
         new_row = row.copy()
