@@ -9,6 +9,7 @@ import torch
 from models import objectview
 import pysam
 from Bio import SeqIO
+from Bio.Seq import Seq
 from ont_fast5_api.fast5_interface import get_fast5_file
 from extract_features import load_model
 from extract_features import collect_features_from_aligned_site_v2
@@ -94,6 +95,8 @@ for ind, row in df_mod.iterrows():
     start = row['Sites'] - 1   # 0-based
     glori_ratio = row['Ratio']
     ref_motif = ref[chr][start-2:start+3]
+    if strand=='-':
+        ref_motif = str(Seq(ref_motif).reverse_complement())
 
     if ref_motif not in target_motifs:
         continue

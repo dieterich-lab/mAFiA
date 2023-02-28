@@ -4,12 +4,12 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-df_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_HEK293A_WT.tsv'
-img_out = os.path.join(HOME, 'img_out', 'MAFIA')
+df_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_HEK293A_WT_multiple_motifs.tsv'
+img_out = os.path.join(HOME, 'img_out', 'MAFIA_MaxAbs_multiple')
 if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
 
-P_VAL_THRESH = 1.0E-1
+P_VAL_THRESH = 1.0E-99
 df_all = pd.read_csv(df_file, sep='\t')
 df = df_all[df_all['P_adjust']<=P_VAL_THRESH]
 # df = df_all
@@ -30,5 +30,5 @@ for this_motif in motifs:
     plt.title('{}, {} sites\nCorrelation {:.2f}'.format(this_motif, df_motif.shape[0], corr), fontsize=20)
     plt.show()
 
-    plt.savefig(os.path.join(img_out, 'corr_glori_mod_ration_p_val_thresh_{:.2E}.png'.format(P_VAL_THRESH)), bbox_inches='tight')
+    plt.savefig(os.path.join(img_out, 'corr_glori_mod_ratio_{}_p_val_thresh_{:.2E}.png'.format(this_motif, P_VAL_THRESH)), bbox_inches='tight')
     plt.close()

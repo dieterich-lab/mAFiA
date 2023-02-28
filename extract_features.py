@@ -242,19 +242,21 @@ def extract_features_from_signal_v2(model, device, config, signal, pos, bam_moti
 
     return features[pos], pred_motif
 
-def extract_features_from_multiple_signals(model, device, config, ext_layer, site_normReads_qPos_motif, batch_size=128):
+def extract_features_from_multiple_signals(model, device, config, ext_layer, site_normReads_qPos_motif_sense, batch_size=128):
     qNames = []
     all_chunks = []
     chunk_sizes = []
     all_pos = []
     all_motifs = []
-    for qname, (this_signal, this_pos, this_motif) in site_normReads_qPos_motif.items():
+    all_senses = []
+    for qname, (this_signal, this_pos, this_motif, this_sense) in site_normReads_qPos_motif_sense.items():
         qNames.append(qname)
         this_chunk = segment(this_signal, config.seqlen)
         all_chunks.append(this_chunk)
         chunk_sizes.append(this_chunk.shape[0])
         all_pos.append(this_pos)
         all_motifs.append(this_motif)
+        all_senses.append(this_sense)
     if len(all_chunks)==0:
         return {}
     all_chunks = np.vstack(all_chunks)
@@ -274,6 +276,7 @@ def extract_features_from_multiple_signals(model, device, config, ext_layer, sit
     for i in range(len(all_pos)):
         this_qname = qNames[i]
         this_pos = all_pos[i]
+        this_sense = all_senses[i]
         this_out = outs[:, cum_chunk_sizes[i]:cum_chunk_sizes[i+1], :]
         pred_str = []
         str_features = []
@@ -286,13 +289,20 @@ def extract_features_from_multiple_signals(model, device, config, ext_layer, sit
         str_features = np.vstack(str_features)[::-1]
 
         query_motif = all_motifs[i]
-        pred_motif = ''.join(pred_str[this_pos-2:this_pos+3])
+        if this_sense=='+':
+            pred_motif = ''.join(pred_str[this_pos-2:this_pos+3])
+        else:
+            pred_motif = ''.join(pred_str[::-1][this_pos-2:this_pos+3][::-1])
+
         if pred_motif!=query_motif:
             print('\n!!!!!!!!!!!!!!!!!!!Error: Predicted motif =/= aligned!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n')
             continue
 
         str_features = np.vstack(str_features)
-        site_motif_features[this_qname] = (pred_motif, str_features[this_pos])
+        if this_sense=='+':
+            site_motif_features[this_qname] = (pred_motif, str_features[this_pos])
+        else:
+            site_motif_features[this_qname] = (pred_motif, str_features[::-1][this_pos])
 
     return site_motif_features
 
@@ -383,7 +393,7 @@ def collect_features_from_aligned_site(model, device, config, alignment, index_r
     return site_motif_features
 
 def collect_features_from_aligned_site_v2(model, device, config, ext_layer, alignment, index_read_ids, contig, site, thresh_coverage=0, enforce_motif=None):
-    site_normReads_qPos_motif = {}
+    site_normReads_qPos_motif_sense = {}
     for pileupcolumn in alignment.pileup(contig, site, site + 1, truncate=True):
         if pileupcolumn.pos == site:
             coverage = pileupcolumn.get_num_aligned()
@@ -397,14 +407,17 @@ def collect_features_from_aligned_site_v2(model, device, config, ext_layer, alig
                         continue
                     query_motif = pileupread.alignment.query_sequence[(query_position-2):(query_position+3)]
                     flag = pileupread.alignment.flag
+                    if flag==16:
+                        query_motif = str(Seq(query_motif).reverse_complement())
                     if (enforce_motif is not None) and (query_motif!=enforce_motif):
                         continue
-                    if query_position and (flag==0) and (query_name in index_read_ids.keys()):
+                    if query_position and (flag in [0, 16]) and (query_name in index_read_ids.keys()):
                         valid_counts += 1
                         this_read_signal = get_norm_signal_from_read_id(query_name, index_read_ids)
                         # this_read_signal = id_signal[query_name]
-                        site_normReads_qPos_motif[query_name] = (this_read_signal, query_position, query_motif)
-    if len(site_normReads_qPos_motif)==0:
+                        sense = '+' if flag==0 else '-'
+                        site_normReads_qPos_motif_sense[query_name] = (this_read_signal, query_position, query_motif, sense)
+    if len(site_normReads_qPos_motif_sense)==0:
         return {}
-    site_motif_features = extract_features_from_multiple_signals(model, device, config, ext_layer, site_normReads_qPos_motif)
+    site_motif_features = extract_features_from_multiple_signals(model, device, config, ext_layer, site_normReads_qPos_motif_sense)
     return site_motif_features
