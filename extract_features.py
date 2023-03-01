@@ -295,7 +295,7 @@ def extract_features_from_multiple_signals(model, device, config, ext_layer, sit
             pred_motif = ''.join(pred_str[::-1][this_pos-2:this_pos+3][::-1])
 
         if pred_motif!=query_motif:
-            print('\n!!!!!!!!!!!!!!!!!!!Error: Predicted motif =/= aligned!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n')
+            print('\n!!!Error: Predicted motif {} =/= aligned {}!!!\n'.format(pred_motif, query_motif))
             continue
 
         str_features = np.vstack(str_features)
