@@ -97,7 +97,7 @@ def train_binary_classifier(unm_dict, mod_dict, ref_motif, classifier, scaler=No
 
         plt.figure(figsize=(5, 5))
         plt.plot(recall, precision)
-        plt.axvline(opt_recall, c='g')
+        # plt.axvline(opt_recall, c='g')
         plt.xlabel('Recall')
         plt.ylabel('Precision')
         plt.ylim([0, 1.05])

@@ -115,11 +115,6 @@ def get_features_from_signal(model, device, config, signal, ext_layer, feature_w
         probs = torch.softmax(out[:, i, :], dim=-1).cpu().detach().numpy()
         this_pred_label, pred_locs = ctc_decoder(probs, alphabet=alphabet)
 
-        ### drop first str ###
-        # if pred_locs[0]==0:
-        #     this_pred_label = this_pred_label[1:]
-        #     pred_locs = pred_locs[1:]
-        ######################
         pred_labels.append(this_pred_label)
 
         pred_locs_corrected = []
@@ -183,64 +178,64 @@ def get_features_from_collection_of_signals(model, device, config, index_read_id
         id_predStr_feature[query_name] = (this_read_predStr, this_read_features)
     return id_predStr_feature
 
-def extract_features_from_signal(model, device, config, signal, pos, bam_motif):
-    chunks = segment(signal, config.seqlen)
-    event = torch.unsqueeze(torch.FloatTensor(chunks), 1).to(device, non_blocking=True)
-    tic = time()
-    out = model.forward(event)
-    toc = time()
-    print('v1 model runtime: {:.2f}'.format(toc-tic))
+# def extract_features_from_signal(model, device, config, signal, pos, bam_motif):
+#     chunks = segment(signal, config.seqlen)
+#     event = torch.unsqueeze(torch.FloatTensor(chunks), 1).to(device, non_blocking=True)
+#     tic = time()
+#     out = model.forward(event)
+#     toc = time()
+#     print('v1 model runtime: {:.2f}'.format(toc-tic))
+#
+#     pred_labels = []
+#     features = []
+#     for i in range(out.shape[1]):
+#         this_pred_label, pred_locs = ctc_decoder(torch.softmax(out[:, i, :], dim=-1).cpu().detach().numpy(), alphabet=alphabet)
+#         pred_labels.append(this_pred_label)
+#         this_feature = activation['conv21'].detach().cpu().numpy()[i, :, pred_locs]
+#         features.append(this_feature)
+#
+#     pred_label = ''.join(pred_labels)[::-1]
+#     features = np.vstack(features)[::-1]
+#
+#     pred_motif = pred_label[pos-2:pos+3]
+#     # print('Predicted motif {}, aligned {}, matching {}'.format(pred_motif, bam_motif, pred_motif == bam_motif))
+#     if pred_motif!=bam_motif:
+#         print('\n!!!Error: Predicted motif =/= aligned!!!\n')
+#         return None, pred_motif
+#
+#     return features[pos], pred_motif
 
-    pred_labels = []
-    features = []
-    for i in range(out.shape[1]):
-        this_pred_label, pred_locs = ctc_decoder(torch.softmax(out[:, i, :], dim=-1).cpu().detach().numpy(), alphabet=alphabet)
-        pred_labels.append(this_pred_label)
-        this_feature = activation['conv21'].detach().cpu().numpy()[i, :, pred_locs]
-        features.append(this_feature)
-
-    pred_label = ''.join(pred_labels)[::-1]
-    features = np.vstack(features)[::-1]
-
-    pred_motif = pred_label[pos-2:pos+3]
-    # print('Predicted motif {}, aligned {}, matching {}'.format(pred_motif, bam_motif, pred_motif == bam_motif))
-    if pred_motif!=bam_motif:
-        print('\n!!!!!!!!!!!!!!!!!!!Error: Predicted motif =/= aligned!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n')
-        return None, pred_motif
-
-    return features[pos], pred_motif
-
-def extract_features_from_signal_v2(model, device, config, signal, pos, bam_motif):
-    chunks = segment(signal, config.seqlen)
-    event = torch.unsqueeze(torch.FloatTensor(chunks), 1).to(device, non_blocking=True)
-    tic = time()
-    out = model.forward(event)
-    toc = time()
-    print('v2 model runtime: {:.2f}'.format(toc-tic))
-
-    pred_labels = []
-    features = None
-    for i in range(out.shape[1])[::-1]:
-        this_pred_label, pred_locs = ctc_decoder(torch.softmax(out[:, i, :], dim=-1).cpu().detach().numpy(), alphabet=alphabet)
-        pred_labels.extend(this_pred_label[::-1])
-        this_feature = activation['conv21'].detach().cpu().numpy()[i, :, pred_locs]
-        if features is None:
-            features = this_feature[::-1]
-        else:
-            features = np.vstack((features, this_feature[::-1]))
-        if len(pred_labels)>=(pos+3):
-            break
-
-    pred_label = ''.join(pred_labels)
-    # all_features = np.vstack(features)[::-1]
-
-    pred_motif = pred_label[pos-2:pos+3]
-    # print('Predicted motif {}, aligned {}, matching {}'.format(pred_motif, bam_motif, pred_motif == bam_motif))
-    if pred_motif!=bam_motif:
-        print('\n!!!!!!!!!!!!!!!!!!!Error: Predicted motif =/= aligned!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n')
-        return None, pred_motif
-
-    return features[pos], pred_motif
+# def extract_features_from_signal_v2(model, device, config, signal, pos, bam_motif):
+#     chunks = segment(signal, config.seqlen)
+#     event = torch.unsqueeze(torch.FloatTensor(chunks), 1).to(device, non_blocking=True)
+#     tic = time()
+#     out = model.forward(event)
+#     toc = time()
+#     print('v2 model runtime: {:.2f}'.format(toc-tic))
+#
+#     pred_labels = []
+#     features = None
+#     for i in range(out.shape[1])[::-1]:
+#         this_pred_label, pred_locs = ctc_decoder(torch.softmax(out[:, i, :], dim=-1).cpu().detach().numpy(), alphabet=alphabet)
+#         pred_labels.extend(this_pred_label[::-1])
+#         this_feature = activation['conv21'].detach().cpu().numpy()[i, :, pred_locs]
+#         if features is None:
+#             features = this_feature[::-1]
+#         else:
+#             features = np.vstack((features, this_feature[::-1]))
+#         if len(pred_labels)>=(pos+3):
+#             break
+#
+#     pred_label = ''.join(pred_labels)
+#     # all_features = np.vstack(features)[::-1]
+#
+#     pred_motif = pred_label[pos-2:pos+3]
+#     # print('Predicted motif {}, aligned {}, matching {}'.format(pred_motif, bam_motif, pred_motif == bam_motif))
+#     if pred_motif!=bam_motif:
+#         print('\n!!!!!!!!!!!!!!!!!!!Error: Predicted motif =/= aligned!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n')
+#         return None, pred_motif
+#
+#     return features[pos], pred_motif
 
 def extract_features_from_multiple_signals(model, device, config, ext_layer, site_normReads_qPos_motif_sense, batch_size=128):
     qNames = []
@@ -295,7 +290,7 @@ def extract_features_from_multiple_signals(model, device, config, ext_layer, sit
             pred_motif = ''.join(pred_str[::-1][this_pos-2:this_pos+3][::-1])
 
         if pred_motif!=query_motif:
-            print('\n!!!Error: Predicted motif {} =/= aligned {}!!!\n'.format(pred_motif, query_motif))
+            print('\n!!! Error: Predicted motif {} =/= aligned {} !!!\n'.format(pred_motif, query_motif))
             continue
 
         str_features = np.vstack(str_features)
@@ -340,57 +335,57 @@ def collect_site_features(alignment, contig, pos, dict_predStr_feature, enforce_
                 flag = pileupread.alignment.flag
                 if (enforce_motif is not None) and (query_motif != enforce_motif):
                     continue
-                if query_position and (flag == 0) and (query_name in dict_predStr_feature.keys()):
+                if (query_position and (flag == 0) and (query_name in dict_predStr_feature.keys())):
                     this_read_predStr, this_read_feature = dict_predStr_feature[query_name]
                     this_site_motif = this_read_predStr[(query_position-2):(query_position+3)]
                     if this_site_motif!=query_motif:
-                        print('!!!Site motif {} not matching query{}!!!'.format(this_site_motif, query_motif))
+                        print('!!! Error: Site motif {} =/= query{}!!!'.format(this_site_motif, query_motif))
                         continue
                     this_site_feature = this_read_feature[query_position]
                     site_motif_features[query_name] = (this_site_motif, this_site_feature)
                     valid_counts += 1
     return site_motif_features
 
-def collect_features_from_aligned_site(model, device, config, alignment, index_read_ids, contig, site, thresh_coverage=0, enforce_motif=None):
-    MAX_READS_IN_PILEUP = 500
-    site_motif_features = {}
-    for pileupcolumn in alignment.pileup(contig, site, site + 1, truncate=True, min_base_quality=20, min_mapping_quality=20):
-        if pileupcolumn.pos == site:
-            coverage = pileupcolumn.get_num_aligned()
-            print('Coverage {}'.format(coverage), flush=True)
-            if coverage>thresh_coverage:
-                valid_counts = 0
-                for ind, pileupread in enumerate(pileupcolumn.pileups):
-                    if valid_counts >= MAX_READS_IN_PILEUP:
-                        break
-                    # print('Pileup {}/{}'.format(ind, coverage))
-                    query_name = pileupread.alignment.query_name
-                    # query_position = pileupread.query_position_or_next
-                    query_position = pileupread.query_position
-                    if query_position is None:
-                        continue
-                    query_motif = pileupread.alignment.query_sequence[query_position - 2:query_position + 3]
-                    flag = pileupread.alignment.flag
-                    if (enforce_motif is not None) and (query_motif!=enforce_motif):
-                        continue
-                    if query_position and (flag==0) and (query_name in index_read_ids.keys()):
-                        valid_counts += 1
-                        query_motif = pileupread.alignment.query_sequence[query_position-2:query_position+3]
-                        this_read_signal = get_norm_signal_from_read_id(query_name, index_read_ids)
-                        # this_read_signal = id_signal[query_name]
-                        tic = time()
-                        this_read_features_v1, this_read_motif_v1 = extract_features_from_signal(model, device, config, this_read_signal, query_position, query_motif)
-                        toc = time()
-                        print('v1 time: {:.3f}'.format(toc-tic))
-                        tic = time()
-                        this_read_features, this_read_motif = extract_features_from_signal_v2(model, device, config, this_read_signal, query_position, query_motif)
-                        toc = time()
-                        print('v2 time: {:.3f}'.format(toc-tic))
-                        print(this_read_motif_v1, this_read_motif)
-                        print(np.all(this_read_features_v1==this_read_features))
-                        if this_read_features is not None:
-                            site_motif_features[query_name] = (this_read_motif, this_read_features)
-    return site_motif_features
+# def collect_features_from_aligned_site(model, device, config, alignment, index_read_ids, contig, site, thresh_coverage=0, enforce_motif=None):
+#     MAX_READS_IN_PILEUP = 500
+#     site_motif_features = {}
+#     for pileupcolumn in alignment.pileup(contig, site, site + 1, truncate=True, min_base_quality=20, min_mapping_quality=20):
+#         if pileupcolumn.pos == site:
+#             coverage = pileupcolumn.get_num_aligned()
+#             print('Coverage {}'.format(coverage), flush=True)
+#             if coverage>thresh_coverage:
+#                 valid_counts = 0
+#                 for ind, pileupread in enumerate(pileupcolumn.pileups):
+#                     if valid_counts >= MAX_READS_IN_PILEUP:
+#                         break
+#                     # print('Pileup {}/{}'.format(ind, coverage))
+#                     query_name = pileupread.alignment.query_name
+#                     # query_position = pileupread.query_position_or_next
+#                     query_position = pileupread.query_position
+#                     if query_position is None:
+#                         continue
+#                     query_motif = pileupread.alignment.query_sequence[query_position - 2:query_position + 3]
+#                     flag = pileupread.alignment.flag
+#                     if (enforce_motif is not None) and (query_motif!=enforce_motif):
+#                         continue
+#                     if query_position and (flag==0) and (query_name in index_read_ids.keys()):
+#                         valid_counts += 1
+#                         query_motif = pileupread.alignment.query_sequence[query_position-2:query_position+3]
+#                         this_read_signal = get_norm_signal_from_read_id(query_name, index_read_ids)
+#                         # this_read_signal = id_signal[query_name]
+#                         tic = time()
+#                         this_read_features_v1, this_read_motif_v1 = extract_features_from_signal(model, device, config, this_read_signal, query_position, query_motif)
+#                         toc = time()
+#                         print('v1 time: {:.3f}'.format(toc-tic))
+#                         tic = time()
+#                         this_read_features, this_read_motif = extract_features_from_signal_v2(model, device, config, this_read_signal, query_position, query_motif)
+#                         toc = time()
+#                         print('v2 time: {:.3f}'.format(toc-tic))
+#                         print(this_read_motif_v1, this_read_motif)
+#                         print(np.all(this_read_features_v1==this_read_features))
+#                         if this_read_features is not None:
+#                             site_motif_features[query_name] = (this_read_motif, this_read_features)
+#     return site_motif_features
 
 def collect_features_from_aligned_site_v2(model, device, config, ext_layer, alignment, index_read_ids, contig, site, thresh_coverage=0, enforce_motif=None):
     site_normReads_qPos_motif_sense = {}
