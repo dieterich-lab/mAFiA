@@ -6,13 +6,13 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
-df_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_HEK293A_WT_multiple_motifs_minCov10_plusMinusReads.tsv'
-img_out = os.path.join(HOME, 'img_out', 'MAFIA_MaxAbs_multiple')
+df_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_HEK293A_WT_multipleMotifs_noNorm_g3.tsv'
+img_out = os.path.join(HOME, 'img_out', 'MAFIA_noNorm_multiple')
 if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
 
-P_VAL_THRESH = 1.0E-500
-NUM_READS_THRESH = 50
+P_VAL_THRESH = 1.0E-99
+NUM_READS_THRESH = 20
 df_all = pd.read_csv(df_file, sep='\t')
 df = df_all[(df_all['P_adjust']<=P_VAL_THRESH) * (df_all['num_test_features']>=NUM_READS_THRESH)]
 # df = df_all

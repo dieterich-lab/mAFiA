@@ -339,7 +339,7 @@ def collect_site_features(alignment, contig, pos, dict_predStr_feature, enforce_
                     this_read_predStr, this_read_feature = dict_predStr_feature[query_name]
                     this_site_motif = this_read_predStr[(query_position-2):(query_position+3)]
                     if this_site_motif!=query_motif:
-                        print('!!! Error: Site motif {} =/= query{}!!!'.format(this_site_motif, query_motif))
+                        print('!!! Error: Site motif {} =/= query {}!!!'.format(this_site_motif, query_motif))
                         continue
                     this_site_feature = this_read_feature[query_position]
                     site_motif_features[query_name] = (this_site_motif, this_site_feature)
