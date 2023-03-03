@@ -1,13 +1,18 @@
 import os
 HOME = os.path.expanduser('~')
+import argparse
 import pandas as pd
 import numpy as np
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
-df_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_HEK293A_WT_multipleMotifs_noNorm_g3.tsv'
-img_out = os.path.join(HOME, 'img_out', 'MAFIA_noNorm_multiple')
+parser = argparse.ArgumentParser()
+parser.add_argument('--df_file')
+args = parser.parse_args()
+df_file = args.df_file
+# df_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_HEK293A_WT_multipleMotifs_noNorm_g3.tsv'
+img_out = os.path.join(HOME, 'img_out/MAFIA', os.path.basename(df_file).rstrip('.tsv'))
 if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
 
