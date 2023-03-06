@@ -84,15 +84,23 @@ target_motifs = ['GGACA', 'GGACC', 'AGACT']
 classifier_models = {this_motif : load(os.path.join(classifier_model_dir, '{}_{}.joblib'.format(classifier, this_motif))) for this_motif in target_motifs}
 # target_motif = 'GGACA'
 # classifier_model = load(os.path.join(classifier_model_dir, '{}_{}.joblib'.format(classifier, target_motif)))
-df_mod_ratio = pd.DataFrame()
-counts = 0
+if os.path.exists(outfile):
+    df_out = pd.read_csv(outfile, sep='\t')
+    counts = len(df_out)
+    print('Restarting from {} with {} counts'.format(outfile, counts))
+else:
+    df_out = pd.DataFrame()
+    counts = 0
+    print('Starting from scratch')
 for ind, row in df_mod.iterrows():
     # print('\nSite {}'.format(ind), flush=True)
     chr = row['Chr'].lstrip('chr')
+    start = row['Sites'] - 1   # 0-based
+    if (chr in df_out['Chr']) and (row['Sites'] in df_out['Sites']):
+        continue
     if (chr.isnumeric()==False) and (chr not in ['X', 'Y']):
         continue
     strand = row['Strand']
-    start = row['Sites'] - 1   # 0-based
     glori_ratio = row['Ratio']
     ref_motif = ref[chr][start-2:start+3]
     if strand=='-':
@@ -115,8 +123,9 @@ for ind, row in df_mod.iterrows():
         new_row['motif'] = ref_motif
         new_row['mod_ratio'] = round(mod_ratio, 3)
         new_row['num_test_features'] = len(test_site_motif_features)
-        df_mod_ratio = pd.concat([df_mod_ratio, new_row.to_frame().T])
+        df_out = pd.concat([df_out, new_row.to_frame().T])
         counts += 1
         if counts % 5 == 0:
-            df_mod_ratio.to_csv(outfile, sep='\t')
-df_mod_ratio.to_csv(outfile, sep='\t')
+            df_out.to_csv(outfile, sep='\t')
+df_out.to_csv(outfile, sep='\t')
+print('Total {} sites'.format(counts))
