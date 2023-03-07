@@ -94,9 +94,10 @@ else:
     print('Starting from scratch', flush=True)
 for ind, row in df_mod.iterrows():
     # print('\nSite {}'.format(ind), flush=True)
-    if (row['Chr'] in df_out['Chr'].values) and (row['Sites'] in df_out['Sites'].values):
-        print('Skipping {} {}'.format(row['Chr'], row['Sites']), flush=True)
-        continue
+    if (len(df_out)>0):
+        if (row['Chr'] in df_out['Chr'].values) and (row['Sites'] in df_out['Sites'].values):
+            print('Skipping {} {}'.format(row['Chr'], row['Sites']), flush=True)
+            continue
     chr = row['Chr'].lstrip('chr')
     start = row['Sites'] - 1   # 0-based
     if (chr.isnumeric()==False) and (chr not in ['X', 'Y']):
