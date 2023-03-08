@@ -18,7 +18,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import PrecisionRecallDisplay, precision_recall_curve, auc
 # import matplotlib
 # matplotlib.use('tkagg')
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 img_out = os.path.join(HOME, 'img_out')
 
@@ -50,6 +50,60 @@ def cluster_by_louvain(vec_s, dim):
 
     return partition.membership
 
+def debug_features(mat_train, vec_labels, ref_motif):
+    import matplotlib
+    matplotlib.use('tkagg')
+    import matplotlib.pyplot as plt
+    import pickle
+    from joblib import load
+
+    classifier = 'logistic_regression'
+    classifier_model_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/MAFIA_classifiers/A_m6A_multiple_noNorm_allReads'
+    NUM_TOP_FEATURES = 10
+    with open(os.path.join(classifier_model_dir, 'top_{}_model_weights.pkl'.format(NUM_TOP_FEATURES)), 'rb') as p_in:
+        dict_top_feature_indices = pickle.load(p_in)
+    top_feature_indices = dict_top_feature_indices[ref_motif]
+    clf = load(os.path.join(classifier_model_dir, '{}_{}.joblib'.format(classifier, ref_motif)))
+    probs = clf.predict_proba(mat_train)[:, 1]
+
+    unm_features = mat_train[vec_labels==0]
+    mod_features = mat_train[vec_labels==1]
+    unm_probs = probs[vec_labels==0]
+    mod_probs = probs[vec_labels==1]
+
+    num_rows = 5
+    plt.figure(figsize=(16, 10))
+    for i in range(num_rows):
+        plt.subplot(num_rows, 2, 2*i+1)
+        plt.plot(unm_features[i], label='p={:.2f}'.format(unm_probs[i]))
+        plt.plot(top_feature_indices, unm_features[i, top_feature_indices], 'ro')
+        plt.xlim([0, len(unm_features[i])])
+        plt.ylim([-0.5, 4])
+        plt.legend(loc='upper left', fontsize=10)
+        if i==0:
+            plt.title('A', fontsize=15)
+        if i==num_rows-1:
+            plt.xlabel('Features', fontsize=15)
+        else:
+            plt.xticks([])
+
+        plt.subplot(num_rows, 2, 2*i+2)
+        plt.plot(mod_features[i], label='p={:.2f}'.format(mod_probs[i]))
+        plt.plot(top_feature_indices, mod_features[i, top_feature_indices], 'ro')
+        plt.xlim([0, len(mod_features[i])])
+        plt.ylim([-0.5, 4])
+        plt.legend(loc='upper left', fontsize=10)
+        if i==0:
+            plt.title('m6A', fontsize=15)
+        if i==num_rows-1:
+            plt.xlabel('Features', fontsize=15)
+        else:
+            plt.xticks([])
+
+    plt.suptitle('{}, top {} features'.format(ref_motif, NUM_TOP_FEATURES), fontsize=20)
+    plt.savefig(os.path.join(classifier_model_dir, '{}_top_{}_features.png'.format(ref_motif, NUM_TOP_FEATURES)), bbox_inches='tight')
+    plt.close('all')
+
 def train_binary_classifier(unm_dict, mod_dict, ref_motif, classifier, scaler=None, debug_img_dir=None):
     frac_test_split = 0.25
     max_num_features = min(len(unm_dict), len(mod_dict))
@@ -64,6 +118,7 @@ def train_binary_classifier(unm_dict, mod_dict, ref_motif, classifier, scaler=No
     all_features = np.array(unm_features + mod_features)
 
     X_train, X_test, y_train, y_test = train_test_split(all_features, labels, test_size=frac_test_split)
+    # debug_features(X_train, y_train, ref_motif)
 
     if classifier=='svm':
         clf = SVC(gamma='auto', random_state=0, max_iter=1000)
