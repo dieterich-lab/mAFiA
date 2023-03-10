@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 
 # COVERAGE_THRESH = 10
 NUM_MOTIFS = 16
-P_VAL_THRESH = 1.0E-99
+P_VAL_THRESH = 1.0E-10
 
 ref_file = '/home/adrian/Data/genomes/GRCh38_96.fa'
 mod_file = '/home/adrian/Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv'

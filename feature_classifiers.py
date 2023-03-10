@@ -105,6 +105,10 @@ def debug_features(mat_train, vec_labels, ref_motif):
     plt.close('all')
 
 def train_binary_classifier(unm_dict, mod_dict, ref_motif, classifier, scaler=None, debug_img_dir=None):
+    import matplotlib
+    matplotlib.use('tkagg')
+    import matplotlib.pyplot as plt
+
     frac_test_split = 0.25
     max_num_features = min(len(unm_dict), len(mod_dict))
     sample_unm_dict = {k: unm_dict[k] for k in sample(unm_dict.keys(), max_num_features)}
