@@ -5,8 +5,8 @@ from umap import UMAP
 from collections import Counter
 
 def plot_umap(in_embedding, labels, title, img_out=None):
-    import matplotlib
-    matplotlib.use('TkAgg')
+    # import matplotlib
+    # matplotlib.use('TkAgg')
     import matplotlib.pyplot as plt
 
     labels = np.array(labels)
@@ -26,6 +26,7 @@ def plot_umap(in_embedding, labels, title, img_out=None):
         plt.close('all')
 
 def train_cluster(unm_dict, mod_dict, ref_motif, scaler=None, debug_img_dir=None):
+    print('Now clustering features...', flush=True)
     labels = np.array([0 for ii in range(len(unm_dict))] + [1 for ii in range(len(mod_dict))])
     unm_motifs = [v[0] for k, v in unm_dict.items()]
     mod_motifs = [v[0] for k, v in mod_dict.items()]
