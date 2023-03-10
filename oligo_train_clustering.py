@@ -31,9 +31,8 @@ parser.add_argument('--min_coverage', default=0)
 parser.add_argument('--backbone_model_path')
 parser.add_argument('--extraction_layer', default='convlayers.conv21')
 parser.add_argument('--feature_width', default=0)
-parser.add_argument('--scaler', default=None)
-parser.add_argument('--classifier')
-parser.add_argument('--classifier_model_dir')
+parser.add_argument('--scaler')
+parser.add_argument('--clustering_model_dir')
 
 args = parser.parse_args()
 unm_bam_file = args.unm_bam_file
@@ -47,11 +46,10 @@ backbone_model_path = args.backbone_model_path
 extraction_layer = args.extraction_layer
 feature_width = int(args.feature_width)
 scaler = args.scaler
-classifier = args.classifier
-classifier_model_dir = args.classifier_model_dir
+clustering_model_dir = args.clustering_model_dir
 
-if classifier_model_dir is not None:
-    os.makedirs(classifier_model_dir, exist_ok=True)
+if clustering_model_dir is not None:
+    os.makedirs(clustering_model_dir, exist_ok=True)
 
 ref = {}
 print('Parsing reference...', flush=True)
@@ -119,7 +117,7 @@ for motif_ind, motif_name in motif_indices_names:
     print('{} feature vectors collected'.format(len(mod_motif_features)), flush=True)
 
     ### train classifier ###
-    train_cluster(unm_motif_features, mod_motif_features, motif_name, classifier, scaler, debug_img_dir=os.path.join(classifier_model_dir, 'clustering'))
+    train_cluster(unm_motif_features, mod_motif_features, motif_name, scaler, debug_img_dir=os.path.join(clustering_model_dir, 'clustering'))
 
     # dump(classifier_model, os.path.join(classifier_model_dir, '{}_{}.joblib'.format(classifier, motif_name)))
     # print('AUC {:.2f}'.format(auc_score), flush=True)

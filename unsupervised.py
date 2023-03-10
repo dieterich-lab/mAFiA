@@ -18,7 +18,6 @@ def plot_umap(in_embedding, labels, title, img_out=None):
     plt.legend(fontsize=15)
     plt.xlabel('UMAP 1', fontsize=15)
     plt.ylabel('UMAP 2', fontsize=15)
-    # plt.title('Gene Expression Only', fontsize=20)
     plt.title(title, fontsize=20)
     if img_out is not None:
         if not os.path.exists(img_out):
@@ -26,11 +25,7 @@ def plot_umap(in_embedding, labels, title, img_out=None):
         plt.savefig(os.path.join(img_out, 'umap_{}.png'.format('_'.join(title.split(' ')))), bbox_inches='tight')
         plt.close('all')
 
-def train_cluster(unm_dict, mod_dict, ref_motif, classifier, scaler=None, debug_img_dir=None):
-    import matplotlib
-    matplotlib.use('tkagg')
-    import matplotlib.pyplot as plt
-
+def train_cluster(unm_dict, mod_dict, ref_motif, scaler=None, debug_img_dir=None):
     labels = np.array([0 for ii in range(len(unm_dict))] + [1 for ii in range(len(mod_dict))])
     unm_motifs = [v[0] for k, v in unm_dict.items()]
     mod_motifs = [v[0] for k, v in mod_dict.items()]
@@ -38,14 +33,19 @@ def train_cluster(unm_dict, mod_dict, ref_motif, classifier, scaler=None, debug_
     mod_features = [v[1] for k, v in mod_dict.items()]
     all_features = np.array(unm_features + mod_features)
 
-    frac_test_split = 0.25
-    X_train, X_test, y_train, y_test = train_test_split(all_features, labels, test_size=frac_test_split)
-    # debug_features(X_train, y_train, ref_motif)
+    # frac_test_split = 0.25
+    # X_train, X_test, y_train, y_test = train_test_split(all_features, labels, test_size=frac_test_split)
+    # # debug_features(X_train, y_train, ref_motif)
+
+    if scaler=='MaxAbs':
+        scaled_features = all_features / np.max(all_features, axis=1)
+    else:
+        scaled_features = all_features
 
     ######################################################################################################
     ### umap ###
     reducer = UMAP(random_state=0)
-    embedding = reducer.fit_transform(all_features)
+    embedding = reducer.fit_transform(scaled_features)
     label_names = ['unm' if this_label==0 else 'mod' for this_label in labels]
     plot_umap(embedding, label_names, '{} cluster'.format(ref_motif), debug_img_dir)
 
