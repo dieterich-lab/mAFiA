@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #SBATCH --partition=gpu
-#SBATCH --mem=250GB
-#SBATCH --gres=gpu:pascal
+#SBATCH --nodelist=gpu-g3-1
+#SBATCH --mem=192GB
 #SBATCH --nodes=1
 #SBATCH --verbose
 #SBATCH --output=/home/achan/slurm/MAFIA_train_binary_classifier_oligo.out
