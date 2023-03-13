@@ -52,8 +52,8 @@ def cluster_by_louvain(vec_s, dim):
 
 def debug_features(mat_train, vec_labels, ref_motif):
     import matplotlib
-    matplotlib.use('tkagg')
-    import matplotlib.pyplot as plt
+    # matplotlib.use('tkagg')
+    # import matplotlib.pyplot as plt
     import pickle
     from joblib import load
 
@@ -106,8 +106,8 @@ def debug_features(mat_train, vec_labels, ref_motif):
 
 def train_binary_classifier(unm_dict, mod_dict, ref_motif, classifier, scaler=None, debug_img_dir=None):
     import matplotlib
-    matplotlib.use('tkagg')
-    import matplotlib.pyplot as plt
+    # matplotlib.use('tkagg')
+    # import matplotlib.pyplot as plt
 
     frac_test_split = 0.25
     max_num_features = min(len(unm_dict), len(mod_dict))
