@@ -59,7 +59,7 @@ for record in SeqIO.parse(ref_file, 'fasta'):
 
 ### unm ###
 unm_bam = pysam.AlignmentFile(unm_bam_file, 'rb')
-unm_f5_paths = glob(os.path.join(unm_fast5_dir, '*.fast5'), recursive=True)
+unm_f5_paths = glob(os.path.join(unm_fast5_dir, 'fast5_*/*.fast5'), recursive=True)
 unm_index_read_ids = {}
 print('Parsing unm fast5 files...', flush=True)
 for f5_filepath in unm_f5_paths:
@@ -70,7 +70,7 @@ print('{} unm reads indexed'.format(len(unm_index_read_ids)), flush=True)
 
 ### mod ###
 mod_bam = pysam.AlignmentFile(mod_bam_file, 'rb')
-mod_f5_paths = glob(os.path.join(mod_fast5_dir, '*.fast5'), recursive=True)
+mod_f5_paths = glob(os.path.join(mod_fast5_dir, 'fast5_*/*.fast5'), recursive=True)
 mod_index_read_ids = {}
 print('Parsing mod fast5 files...', flush=True)
 for f5_filepath in mod_f5_paths:
