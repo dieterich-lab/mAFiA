@@ -18,7 +18,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import PrecisionRecallDisplay, precision_recall_curve, auc
 # import matplotlib
 # matplotlib.use('tkagg')
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 img_out = os.path.join(HOME, 'img_out')
 
