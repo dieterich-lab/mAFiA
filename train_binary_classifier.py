@@ -57,26 +57,31 @@ print('Parsing reference...', flush=True)
 for record in SeqIO.parse(ref_file, 'fasta'):
     ref[record.id] = str(record.seq)
 
+def index_fast5_files(f5_paths):
+    index_read_ids = {}
+    for f5_filepath in f5_paths:
+        f5 = get_fast5_file(f5_filepath, mode="r")
+        try:
+            read_ids = f5.get_read_ids()
+        except RuntimeError:
+            print('Error reading {}!'.format(f5_filepath))
+        else:
+            for read_id in read_ids:
+                index_read_ids[read_id] = f5_filepath
+    return index_read_ids
+
 ### unm ###
 unm_bam = pysam.AlignmentFile(unm_bam_file, 'rb')
 unm_f5_paths = glob(os.path.join(unm_fast5_dir, '*.fast5'), recursive=True)
-unm_index_read_ids = {}
 print('Parsing unm fast5 files...', flush=True)
-for f5_filepath in unm_f5_paths:
-    f5 = get_fast5_file(f5_filepath, mode="r")
-    for read_id in f5.get_read_ids():
-        unm_index_read_ids[read_id] = f5_filepath
+unm_index_read_ids = index_fast5_files(unm_f5_paths)
 print('{} unm reads indexed'.format(len(unm_index_read_ids)), flush=True)
 
 ### mod ###
 mod_bam = pysam.AlignmentFile(mod_bam_file, 'rb')
 mod_f5_paths = glob(os.path.join(mod_fast5_dir, '*.fast5'), recursive=True)
-mod_index_read_ids = {}
 print('Parsing mod fast5 files...', flush=True)
-for f5_filepath in mod_f5_paths:
-    f5 = get_fast5_file(f5_filepath, mode="r")
-    for read_id in f5.get_read_ids():
-        mod_index_read_ids[read_id] = f5_filepath
+mod_index_read_ids = index_fast5_files(mod_f5_paths)
 print('{} mod reads indexed'.format(len(mod_index_read_ids)), flush=True)
 
 ### load model, device ###
