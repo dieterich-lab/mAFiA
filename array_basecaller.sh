@@ -23,3 +23,5 @@ python3 ${HOME}/git/renata/basecall_viterbi.py \
 --model ${MODEL} \
 --decoder viterbi \
 > ${OUTPUT}
+
+rm ${LIST_FILENAMES}
