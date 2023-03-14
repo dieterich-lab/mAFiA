@@ -28,7 +28,7 @@ def index_fast5_files(f5_paths):
         f5 = get_fast5_file(f5_filepath, mode="r")
         try:
             read_ids = f5.get_read_ids()
-        except RuntimeError:
+        except:
             print('Error reading {}!'.format(f5_filepath))
         else:
             for read_id in read_ids:
