@@ -4,8 +4,8 @@
 #SBATCH --cpus-per-task=32
 #SBATCH --mem-per-cpu=2GB
 #SBATCH --verbose
-#SBATCH --job-name=basecaller
-#SBATCH --output=/home/achan/slurm/basecaller_%02a.out
+#SBATCH --job-name=array_basecaller
+#SBATCH --output=/home/achan/slurm/array_basecaller_%02a.out
 
 set -e -u
 
