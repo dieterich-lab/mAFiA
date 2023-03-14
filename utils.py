@@ -25,8 +25,8 @@ def get_norm_signal_from_read_id(id, index_paths):
 def index_fast5_files(f5_paths):
     index_read_ids = {}
     for f5_filepath in f5_paths:
-        f5 = get_fast5_file(f5_filepath, mode="r")
         try:
+            f5 = get_fast5_file(f5_filepath, mode="r")
             read_ids = f5.get_read_ids()
         except:
             print('Error reading {}!'.format(f5_filepath))
