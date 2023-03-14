@@ -11,6 +11,7 @@ from models import objectview
 import pysam
 from Bio import SeqIO
 from ont_fast5_api.fast5_interface import get_fast5_file
+from utils import index_fast5_files
 from extract_features import load_model
 from extract_features import get_features_from_collection_of_signals, collect_all_motif_features
 from feature_classifiers import train_binary_classifier
@@ -56,19 +57,6 @@ ref = {}
 print('Parsing reference...', flush=True)
 for record in SeqIO.parse(ref_file, 'fasta'):
     ref[record.id] = str(record.seq)
-
-def index_fast5_files(f5_paths):
-    index_read_ids = {}
-    for f5_filepath in f5_paths:
-        f5 = get_fast5_file(f5_filepath, mode="r")
-        try:
-            read_ids = f5.get_read_ids()
-        except RuntimeError:
-            print('Error reading {}!'.format(f5_filepath))
-        else:
-            for read_id in read_ids:
-                index_read_ids[read_id] = f5_filepath
-    return index_read_ids
 
 ### unm ###
 unm_bam = pysam.AlignmentFile(unm_bam_file, 'rb')

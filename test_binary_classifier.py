@@ -11,6 +11,7 @@ import pysam
 from Bio import SeqIO
 from Bio.Seq import Seq
 from ont_fast5_api.fast5_interface import get_fast5_file
+from utils import index_fast5_files
 from extract_features import load_model
 from extract_features import collect_features_from_aligned_site_v2
 from feature_classifiers import get_mod_ratio_with_binary_classifier
@@ -65,12 +66,8 @@ for record in SeqIO.parse(ref_file, 'fasta'):
 ### collect reads ###
 test_bam = pysam.AlignmentFile(test_bam_file, 'rb')
 test_f5_paths = glob(os.path.join(test_fast5_dir, '*.fast5'), recursive=True)
-test_index_read_ids = {}
 print('Parsing test fast5 files...', flush=True)
-for f5_filepath in test_f5_paths:
-    f5 = get_fast5_file(f5_filepath, mode="r")
-    for read_id in f5.get_read_ids():
-        test_index_read_ids[read_id] = f5_filepath
+test_index_read_ids = index_fast5_files(test_f5_paths)
 print('{} test reads indexed'.format(len(test_index_read_ids)), flush=True)
 
 ### load model, device ###
