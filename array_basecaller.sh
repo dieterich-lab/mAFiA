@@ -2,8 +2,8 @@
 #
 #SBATCH --partition=gpu
 #SBATCH --exclude=gpu-g4-1,gpu-g2-1
-#SBATCH --cpus-per-task=10
-#SBATCH --mem-per-cpu=2GB
+#SBATCH --cpus-per-task=4
+#SBATCH --mem-per-cpu=4GB
 #SBATCH --verbose
 #SBATCH --job-name=array_basecaller
 #SBATCH --output=/home/achan/slurm/array_basecaller_%02a.out
