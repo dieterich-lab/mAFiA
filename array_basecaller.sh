@@ -22,7 +22,7 @@ python3 ${HOME}/git/renata/basecall_viterbi.py \
 --list_filenames ${LIST_FILENAMES} \
 --arch ${ARCH} \
 --model ${MODEL} \
---batchsize 64 \
+--batchsize 128 \
 --decoder viterbi \
 > ${OUTPUT}
 
