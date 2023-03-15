@@ -27,7 +27,6 @@ FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-75
 
 DATASET=HEK293T-WT-100-rep1
 FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-100-rep1/fast5_pass
-
 #####################################################################################################################################
 
 mkdir -p ${WORKSPACE}
@@ -44,8 +43,8 @@ split -l5 -d ${WORKSPACE}/${DATASET}_fast5_paths_all ${WORKSPACE}/${FILENAME_PRE
 NUM_STRAND_FILES=`ls ${WORKSPACE}/${DATASET}_fast5_paths_part* | wc -l`
 sbatch --array=0-$((${NUM_STRAND_FILES}-1)) --export=ALL,WORKSPACE=${WORKSPACE},FAST5_DIR=${FAST5_DIR},FILENAME_PREFIX=${FILENAME_PREFIX},FASTA=${FASTA},ARCH=${ARCH},MODEL=${MODEL} ${HOME}/git/MAFIA/array_basecaller.sh
 
-cat ${FASTA}*[0-9] > ${FASTA}_merged
-rm ${FASTA}*[0-9]
+cat ${FASTA}+([0-9]) > ${FASTA}_merged
+rm ${FASTA}+([0-9])
 
 #### align and check accuracy ###
 module purge
