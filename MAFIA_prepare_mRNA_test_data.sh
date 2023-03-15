@@ -13,20 +13,20 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 #DATASET=HEK293_IVT
 #FAST5_DIR=/beegfs/prj/Isabel_IVT_Nanopore/HEK293_IVT_2/20211201_1116_X5_FAR06706_305e3998/fast5_all
 
-DATASET=HEK293T-WT-0-rep2
-FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-0-rep2/fast5_pass
+#DATASET=HEK293T-WT-0-rep2
+#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-0-rep2/fast5_pass
 
-DATASET=HEK293T-WT-25-rep1
-FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-25-rep1/fast5_pass
-
+#DATASET=HEK293T-WT-25-rep1
+#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-25-rep1/fast5_pass
+#
 DATASET=HEK293T-WT-50-rep3
 FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-50-rep3/fast5
-
-DATASET=HEK293T-WT-75-rep4
-FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-75-rep4/fast5
-
-DATASET=HEK293T-WT-100-rep1
-FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-100-rep1/fast5_pass
+#
+#DATASET=HEK293T-WT-75-rep4
+#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-75-rep4/fast5
+#
+#DATASET=HEK293T-WT-100-rep1
+#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-100-rep1/fast5_pass
 #####################################################################################################################################
 
 mkdir -p ${WORKSPACE}
@@ -50,10 +50,9 @@ rm ${FASTA}+([0-9])
 module purge
 module load minimap2
 minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF} ${FASTA}_merged > ${SAM}
+samtools flagstats ${SAM}
 
 ${HOME}/git/renata/accuracy.py ${SAM} ${REF}
-
-samtools flagstats ${SAM}
 
 #### Convert to BAM ###
 samtools view -bST ${REF} ${SAM} -o ${BAM}

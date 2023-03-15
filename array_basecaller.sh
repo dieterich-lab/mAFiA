@@ -6,7 +6,7 @@
 #SBATCH --mem-per-cpu=4GB
 #SBATCH --verbose
 #SBATCH --job-name=array_basecaller
-#SBATCH --output=/home/achan/slurm/array_basecaller_%02a.out
+#SBATCH --output=/home/achan/slurm/array_basecaller_%A_%02a.out
 
 set -e -u
 
