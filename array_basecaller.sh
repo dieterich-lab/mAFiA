@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 #SBATCH --partition=gpu
-#SBATCH --nodelist=gpu-g3-1
+#SBATCH --exclude=gpu-g4-1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem-per-cpu=4GB
 #SBATCH --verbose
