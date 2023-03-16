@@ -2,7 +2,6 @@ sterm -c 4 -m 128GB
 
 WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 REF=${HOME}/Data/genomes/GRCh38_96.fa
-
 ARCH=${HOME}/git/renata/rnaarch
 MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 
@@ -18,10 +17,10 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 
 #DATASET=HEK293T-WT-25-rep1
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-25-rep1/fast5_pass
-#
+
 DATASET=HEK293T-WT-50-rep3
 FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-50-rep3/fast5
-#
+
 #DATASET=HEK293T-WT-75-rep4
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-75-rep4/fast5
 #
@@ -54,7 +53,9 @@ samtools flagstats ${SAM}
 
 ${HOME}/git/renata/accuracy.py ${SAM} ${REF}
 
-#### Convert to BAM ###
-samtools view -bST ${REF} ${SAM} -o ${BAM}
-samtools sort ${BAM} > ${BAM//.bam/_sorted.bam}
-samtools index ${BAM//.bam/_sorted.bam}
+#### Convert to BAM and index ###
+#samtools view -bST ${REF} ${SAM} -o ${BAM}
+#samtools sort ${BAM} > ${BAM//.bam/_sorted.bam}
+
+samtools view -bST ${REF} ${SAM} | samtools sort - > ${BAM}.sorted
+samtools index ${BAM}.sorted
