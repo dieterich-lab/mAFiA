@@ -41,8 +41,16 @@ source ${HOME}/git/renata/virtualenv/bin/activate
 FILENAME_PREFIX=${DATASET}_fast5_paths_part
 ls -1 ${FAST5_DIR}/*.fast5 > ${WORKSPACE}/${DATASET}_fast5_paths_all
 split -l5 -d ${WORKSPACE}/${DATASET}_fast5_paths_all ${WORKSPACE}/${FILENAME_PREFIX}
-NUM_STRAND_FILES=`ls ${WORKSPACE}/${DATASET}_fast5_paths_part* | wc -l`
-sbatch --array=0-$((${NUM_STRAND_FILES}-1)) --export=ALL,WORKSPACE=${WORKSPACE},FAST5_DIR=${FAST5_DIR},FILENAME_PREFIX=${FILENAME_PREFIX},FASTA=${FASTA},ARCH=${ARCH},MODEL=${MODEL} ${HOME}/git/MAFIA/array_basecaller.sh
+
+#NUM_STRAND_FILES=`ls ${WORKSPACE}/${DATASET}_fast5_paths_part* | wc -l`
+#sbatch --array=0-$((${NUM_STRAND_FILES}-1)) --export=ALL,WORKSPACE=${WORKSPACE},FAST5_DIR=${FAST5_DIR},FILENAME_PREFIX=${FILENAME_PREFIX},FASTA=${FASTA},ARCH=${ARCH},MODEL=${MODEL} ${HOME}/git/MAFIA/array_basecaller.sh
+
+NUM_ARRAYS=""
+for f in ${WORKSPACE}/${DATASET}_fast5_paths_part*; do ff=${f##*part}; NUM_ARRAYS+="${ff##+(0)},"; done
+NUM_ARRAYS=${NUM_ARRAYS%,*}
+sbatch --array=$NUM_ARRAYS --export=ALL,WORKSPACE=${WORKSPACE},FAST5_DIR=${FAST5_DIR},FILENAME_PREFIX=${FILENAME_PREFIX},FASTA=${FASTA},ARCH=${ARCH},MODEL=${MODEL} ${HOME}/git/MAFIA/array_basecaller.sh
+
+for f in ${FASTA}+([0-9]); do echo $f; grep '>' $f | wc -l; done
 
 cat ${FASTA}+([0-9]) > ${FASTA}_merged
 rm ${FASTA}+([0-9])
