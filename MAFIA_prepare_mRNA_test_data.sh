@@ -50,10 +50,11 @@ for f in ${WORKSPACE}/${DATASET}_fast5_paths_part*; do ff=${f##*part}; NUM_ARRAY
 NUM_ARRAYS=${NUM_ARRAYS%,*}
 sbatch --array=$NUM_ARRAYS --export=ALL,WORKSPACE=${WORKSPACE},FAST5_DIR=${FAST5_DIR},FILENAME_PREFIX=${FILENAME_PREFIX},FASTA=${FASTA},ARCH=${ARCH},MODEL=${MODEL} ${HOME}/git/MAFIA/array_basecaller.sh
 
-for f in ${FASTA}+([0-9]); do echo $f; grep '>' $f | wc -l; done
+#for f in ${FASTA}+([0-9]); do echo $f; grep '>' $f | wc -l; done
 
 cat ${FASTA}+([0-9]) > ${FASTA}_merged
 rm ${FASTA}+([0-9])
+rm ${WORKSPACE}/${DATASET}_fast5_paths_all
 
 #### align and check accuracy ###
 module purge
