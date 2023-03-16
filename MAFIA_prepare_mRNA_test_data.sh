@@ -45,9 +45,6 @@ split -l5 -d ${WORKSPACE}/${DATASET}_fast5_paths_all ${WORKSPACE}/${FILENAME_PRE
 #NUM_STRAND_FILES=`ls ${WORKSPACE}/${DATASET}_fast5_paths_part* | wc -l`
 #sbatch --array=0-$((${NUM_STRAND_FILES}-1)) --export=ALL,WORKSPACE=${WORKSPACE},FAST5_DIR=${FAST5_DIR},FILENAME_PREFIX=${FILENAME_PREFIX},FASTA=${FASTA},ARCH=${ARCH},MODEL=${MODEL} ${HOME}/git/MAFIA/array_basecaller.sh
 
-#NUM_ARRAYS=""
-#for f in ${WORKSPACE}/${DATASET}_fast5_paths_part*; do ff=${f##*part}; NUM_ARRAYS+="${ff##+(0)},"; done
-
 NUM_ARRAYS=""
 for f in ${WORKSPACE}/${DATASET}_fast5_paths_part*; do ff=${f##*part}; NUM_ARRAYS+="${ff},"; done
 NUM_ARRAYS=${NUM_ARRAYS%,*}
