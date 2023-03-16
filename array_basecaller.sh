@@ -4,7 +4,6 @@
 #SBATCH --exclude=gpu-g4-1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem-per-cpu=4GB
-#SBATCH --gpus-per-task=1
 #SBATCH --gpu-bind=single:1
 #SBATCH --verbose
 #SBATCH --job-name=array_basecaller
