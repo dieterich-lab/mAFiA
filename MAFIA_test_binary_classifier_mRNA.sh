@@ -15,8 +15,8 @@ WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 #DATASET=HEK293A_WT
 #FAST5_DIR=/beegfs/prj/Isabel_IVT_Nanopore/HEK293A_wildtype/Jessica_HEK293/HEK293A_2/20190409_1503_GA10000_FAK10978_2e75d7be/fast5_all
 
-#DATASET=HEK293_IVT
-#FAST5_DIR=/beegfs/prj/Isabel_IVT_Nanopore/HEK293_IVT_2/20211201_1116_X5_FAR06706_305e3998/fast5_all
+DATASET=HEK293_IVT
+FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293_IVT_2/fast5_pass
 
 #####################################################################################################################################
 #DATASET=HEK293T-WT-0-rep2
@@ -31,8 +31,8 @@ WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 #DATASET=HEK293T-WT-75-rep4
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-75-rep4/fast5
 
-DATASET=HEK293T-WT-100-rep1
-FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-100-rep1/fast5_pass
+#DATASET=HEK293T-WT-100-rep1
+#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-100-rep1/fast5_pass
 
 #####################################################################################################################################
 
