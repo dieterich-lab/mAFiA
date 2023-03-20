@@ -60,8 +60,8 @@ rm ${WORKSPACE}/${DATASET}_fast5_paths_all
 module purge
 module load minimap2
 minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF} ${FASTA}_merged > ${SAM}
-samtools flagstats ${SAM}
 
+samtools flagstats ${SAM}
 ${HOME}/git/renata/accuracy.py ${SAM} ${REF}
 
 #### Convert to BAM and index ###

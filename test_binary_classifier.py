@@ -32,7 +32,7 @@ parser.add_argument('--extraction_layer')
 parser.add_argument('--feature_width', default=0)
 parser.add_argument('--classifier')
 parser.add_argument('--classifier_model_dir')
-parser.add_argument('--use_opt_thresh', default=False)
+parser.add_argument('--mod_prob_thresh', default=0)
 parser.add_argument('--outfile')
 
 args = parser.parse_args()
@@ -47,7 +47,7 @@ extraction_layer = args.extraction_layer
 feature_width = int(args.feature_width)
 classifier = args.classifier
 classifier_model_dir = args.classifier_model_dir
-use_opt_thresh = bool(args.use_opt_thresh)
+mod_prob_thresh = float(args.mod_prob_thresh)
 outfile = args.outfile
 
 outdir = os.path.dirname(outfile)
@@ -115,7 +115,7 @@ for ind, row in df_mod.iterrows():
         print('chr{}, pos{}'.format(chr, start), flush=True)
         print('Reference motif {}'.format(ref_motif), flush=True)
         print('{} feature vectors collected'.format(len(test_site_motif_features)), flush=True)
-        mod_ratio = get_mod_ratio_with_binary_classifier(test_site_motif_features, classifier_models[ref_motif])
+        mod_ratio = get_mod_ratio_with_binary_classifier(test_site_motif_features, classifier_models[ref_motif], mod_prob_thresh)
         print('Predicted mod ratio {:.2f} [GLORI {:.2f}]'.format(mod_ratio, glori_ratio), flush=True)
         print('=========================================================', flush=True)
         new_row = row.copy()

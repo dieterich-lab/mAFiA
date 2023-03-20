@@ -222,15 +222,17 @@ def train_svm_ivt_wt(ivt_dict, wt_dict, wanted_motif, site, debug_img_dir=None):
 
     return score_auc, clf, opt_thresh
 
-def get_mod_ratio_with_binary_classifier(dict_motif_feature, clf, mod_thresh=None):
+def get_mod_ratio_with_binary_classifier(dict_motif_feature, clf, mod_thresh=0):
     # print('Classifying {} features with model: '.format(len(dict_motif_feature)), flush=True)
     # print(clf)
     test_motifs = [v[0] for k, v in dict_motif_feature.items()]
     test_features = [v[1] for k, v in dict_motif_feature.items()]
 
     if mod_thresh is not None:
-        y_score = clf.decision_function(test_features)
-        predictions = np.int32(y_score>mod_thresh)
+        # y_score = clf.decision_function(test_features)
+        # predictions = np.int32(y_score>mod_thresh)
+        mod_probs = clf.predict_proba(test_features)[:, 1]
+        predictions = np.int32(mod_probs > mod_thresh)
     else:
         predictions = clf.predict(test_features)
     avg_mod_ratio = np.mean(predictions)

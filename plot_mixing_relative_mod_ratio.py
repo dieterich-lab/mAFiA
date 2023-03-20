@@ -8,15 +8,16 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
 datasets = [
-    'HEK293T-WT-0-rep2',
-    'HEK293T-WT-50-rep3',
-    'HEK293T-WT-100-rep1'
+    'HEK293A_WT',
+    'HEK293_IVT',
 ]
+dataset_names = datasets
+# dataset_names = [' '.join(ds.split('-')[1:3]) for ds in datasets]
 df_files = [
-    '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/partial_res_{}.tsv'.format(dataset) for dataset in datasets
+    '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_{}.tsv'.format(dataset) for dataset in datasets
 ]
 
-img_out = os.path.join(HOME, 'img_out/MAFIA/WT_KO_mixing')
+img_out = os.path.join(HOME, 'img_out/MAFIA/IVT_WT')
 if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
 
@@ -40,11 +41,10 @@ for subplot_ind, this_motif in enumerate(motifs):
     x_vals = dfs_thresh[0].loc[common_idx]['Ratio'].values
 
     plt.subplot(1, 3, subplot_ind+1)
-    for (df, ds) in zip(dfs_thresh, datasets):
+    for (df, ds, ds_name) in zip(dfs_thresh, datasets, dataset_names):
         y_vals = df.loc[common_idx]['mod_ratio'].values
         corr = np.corrcoef(x_vals, y_vals)[0, 1]
-
-        plt.plot(x_vals, y_vals, '.', label='{}, corr. {:.2f}'.format(' '.join(ds.split('-')[1:3]), corr))
+        plt.plot(x_vals, y_vals, '.', label='{}, corr. {:.2f}'.format(ds_name, corr))
         # plt.plot(x_vals, y_vals, 'o', mfc='none', label=' '.join(ds.split('-')[1:3]))
     plt.xlim([-0.05, 1.05])
     plt.ylim([-0.05, 1.05])

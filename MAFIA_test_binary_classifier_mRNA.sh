@@ -54,11 +54,11 @@ python3 ${HOME}/git/MAFIA/test_binary_classifier.py \
 --ref_file ${REF} \
 --mod_file ${MOD_FILE} \
 --max_num_reads -1 \
---min_coverage 10 \
+--min_coverage 50 \
 --backbone_model_path ${BACKBON_MODEL} \
 --extraction_layer ${EXTRACTION_LAYER} \
 --feature_width 0 \
 --classifier logistic_regression \
 --classifier_model_dir ${CLASSIFIER_MODEL_DIR} \
---use_opt_thresh False \
+--mod_prob_thres 0.95 \
 --outfile ${OUTFILE}
