@@ -222,7 +222,7 @@ def train_svm_ivt_wt(ivt_dict, wt_dict, wanted_motif, site, debug_img_dir=None):
 
     return score_auc, clf, opt_thresh
 
-def get_mod_ratio_with_binary_classifier(dict_motif_feature, clf, mod_thresh=0):
+def get_mod_ratio_with_binary_classifier(dict_motif_feature, clf, mod_thresh=0.5):
     # print('Classifying {} features with model: '.format(len(dict_motif_feature)), flush=True)
     # print(clf)
     test_motifs = [v[0] for k, v in dict_motif_feature.items()]
