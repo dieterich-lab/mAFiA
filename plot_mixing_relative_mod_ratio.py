@@ -11,10 +11,11 @@ datasets = [
     'HEK293A_WT',
     'HEK293_IVT',
 ]
+mod_thresh = 0.95
 dataset_names = datasets
 # dataset_names = [' '.join(ds.split('-')[1:3]) for ds in datasets]
 df_files = [
-    '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_{}.tsv'.format(dataset) for dataset in datasets
+    '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_{}_modProbThresh{:.2f}.tsv'.format(dataset, mod_thresh) for dataset in datasets
 ]
 
 img_out = os.path.join(HOME, 'img_out/MAFIA/IVT_WT')
@@ -23,7 +24,7 @@ if not os.path.exists(img_out):
 
 dfs = [pd.read_csv(df_file, sep='\t', index_col=0) for df_file in df_files]
 
-P_VAL_THRESH = 1.0E-99
+P_VAL_THRESH = 1.0E-50
 COV_THRESH = 50
 motifs = ['GGACA', 'GGACC', 'AGACT']
 
@@ -56,5 +57,5 @@ for subplot_ind, this_motif in enumerate(motifs):
 
 plt.subplots_adjust(top=0.8)
 plt.suptitle('HEK293T WT / KO Mixing, Coverage $\geq$ {}'.format(COV_THRESH), fontsize=20)
-plt.savefig(os.path.join(img_out, 'mixing_glori_modRatio_pValThresh{:.2E}_covTHRESH{}.png'.format(P_VAL_THRESH, COV_THRESH)), bbox_inches='tight')
+plt.savefig(os.path.join(img_out, 'glori_modRatio__modProbThresh{:.2f}_pValThresh{:.2E}_covTHRESH{}.png'.format(mod_thresh, P_VAL_THRESH, COV_THRESH)), bbox_inches='tight')
 plt.close()
