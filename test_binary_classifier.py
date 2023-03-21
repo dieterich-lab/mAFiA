@@ -66,7 +66,7 @@ for record in SeqIO.parse(ref_file, 'fasta'):
 ### collect reads ###
 test_bam = pysam.AlignmentFile(test_bam_file, 'rb')
 test_f5_paths = glob(os.path.join(test_fast5_dir, '*.fast5'), recursive=True)
-print('Parsing test fast5 files...', flush=True)
+print('Parsing test fast5 files in {}...'.format(test_fast5_dir), flush=True)
 test_index_read_ids = index_fast5_files(test_f5_paths)
 print('{} test reads indexed'.format(len(test_index_read_ids)), flush=True)
 
