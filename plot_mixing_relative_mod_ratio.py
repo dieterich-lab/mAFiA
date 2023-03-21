@@ -24,7 +24,7 @@ if not os.path.exists(img_out):
 
 dfs = [pd.read_csv(df_file, sep='\t', index_col=0) for df_file in df_files]
 
-P_VAL_THRESH = 1.0E-50
+P_VAL_THRESH = 1.0E-99
 COV_THRESH = 50
 motifs = ['GGACA', 'GGACC', 'AGACT']
 
@@ -38,6 +38,7 @@ for subplot_ind, this_motif in enumerate(motifs):
             ] for df in dfs
     ]
     common_idx = list(set.intersection(*[set(this_df.index) for this_df in dfs_thresh]))
+    # print('{}: {} sites in common'.format(this_motif, len(common_idx)))
 
     x_vals = dfs_thresh[0].loc[common_idx]['Ratio'].values
 
@@ -53,9 +54,9 @@ for subplot_ind, this_motif in enumerate(motifs):
     if subplot_ind==0:
         plt.ylabel('Mixture mod. ratio', fontsize=15)
     plt.legend(loc='upper left', fontsize=10)
-    plt.title(this_motif, fontsize=15)
+    plt.title('{}\n{} common sites'.format(this_motif, len(common_idx)), fontsize=15)
 
 plt.subplots_adjust(top=0.8)
-plt.suptitle('HEK293T WT / KO Mixing, Coverage $\geq$ {}'.format(COV_THRESH), fontsize=20)
+plt.suptitle('HEK293 WT / IVT, Coverage $\geq$ {}'.format(COV_THRESH), fontsize=20)
 plt.savefig(os.path.join(img_out, 'glori_modRatio__modProbThresh{:.2f}_pValThresh{:.2E}_covTHRESH{}.png'.format(mod_thresh, P_VAL_THRESH, COV_THRESH)), bbox_inches='tight')
 plt.close()
