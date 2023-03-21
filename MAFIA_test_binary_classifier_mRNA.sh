@@ -42,7 +42,7 @@ MOD_FILE=${HOME}/Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv
 BACKBON_MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 EXTRACTION_LAYER=convlayers.conv21
 CLASSIFIER_MODEL_DIR=${WORKSPACE}/MAFIA_classifiers/A_m6A_multiple_NoNorm_allReads
-MOD_PROB_THRESH=0.68
+MOD_PROB_THRESH=0.95
 OUTFILE=${WORKSPACE}/results/res_${DATASET}_modProbThresh${MOD_PROB_THRESH}.tsv
 
 set -e -u
