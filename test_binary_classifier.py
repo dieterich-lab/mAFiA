@@ -87,8 +87,8 @@ if os.path.exists(outfile):
     if counts>0:
         print('Restarting from {} with {} counts'.format(outfile, counts), flush=True)
         last_row = df_out.tail(1)
-        last_chr = last_row['Chr'].lstrip('chr')
-        last_start = last_row['Sites'] - 1  # 0-based
+        last_chr = last_row['Chr'].values[0].lstrip('chr')
+        last_start = last_row['Sites'].values[0] - 1  # 0-based
         restart = True
 else:
     df_out = pd.DataFrame()
