@@ -54,7 +54,7 @@ python3 ${HOME}/git/MAFIA/test_binary_classifier.py \
 --test_fast5_dir ${FAST5_DIR} \
 --ref_file ${REF} \
 --mod_file ${MOD_FILE} \
---max_num_reads -1 \
+--max_num_reads 500 \
 --min_coverage 50 \
 --backbone_model_path ${BACKBON_MODEL} \
 --extraction_layer ${EXTRACTION_LAYER} \
