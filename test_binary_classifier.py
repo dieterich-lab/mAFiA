@@ -101,11 +101,11 @@ for ind, row in df_mod.iterrows():
     start = row['Sites'] - 1   # 0-based
 
     if restart:
-        if (chr!=last_chr) and (start!=last_start):
-            print('Skipping chr{}, pos{}'.format(chr, start), flush=True)
-        else:
+        if (chr==last_chr) and (start==last_start):
             print('Restarting from last row: chr{}, pos{}'.format(chr, start), flush=True)
             restart = False
+        else:
+            print('Skipping chr{}, pos{}'.format(chr, start), flush=True)
         continue
 
     if (chr.isnumeric()==False) and (chr not in ['X', 'Y']):
