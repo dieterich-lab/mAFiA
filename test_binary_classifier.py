@@ -92,9 +92,7 @@ else:
 for ind, row in df_mod.iterrows():
     skip_row = False
     if (len(df_out)>0):
-        def check_skip_row(in_df_out, in_row):
-            return (in_row['Chr'] in in_df_out['Chr'].values) and (in_row['Sites'] in in_df_out['Sites'].values)
-        skip_row = check_skip_row(df_out, row)
+        skip_row = (row['Chr'] in df_out['Chr'].values) and (row['Sites'] in df_out['Sites'].values)
     if skip_row:
         print('Skipping {} {}'.format(row['Chr'], row['Sites']), flush=True)
         continue
