@@ -90,13 +90,17 @@ else:
     counts = 0
     print('Starting from scratch', flush=True)
 for ind, row in df_mod.iterrows():
-    # print('\nSite {}'.format(ind), flush=True)
-    chr = row['Chr'].lstrip('chr')
-    start = row['Sites'] - 1   # 0-based
-    if (len(df_out)>0) and (chr in df_out['Chr'].values) and (start in df_out['Sites'].values):
+    skip_row = False
+    if (len(df_out)>0):
+        def check_skip_row(in_df_out, in_row):
+            return (in_row['Chr'] in in_df_out['Chr'].values) and (in_row['Sites'] in in_df_out['Sites'].values)
+        skip_row = check_skip_row(df_out, row)
+    if skip_row:
         print('Skipping {} {}'.format(row['Chr'], row['Sites']), flush=True)
         continue
 
+    chr = row['Chr'].lstrip('chr')
+    start = row['Sites'] - 1   # 0-based
     if (chr.isnumeric()==False) and (chr not in ['X', 'Y']):
         continue
     strand = row['Strand']
