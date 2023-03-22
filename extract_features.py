@@ -387,9 +387,11 @@ def collect_site_features(alignment, contig, pos, dict_predStr_feature, enforce_
 #                             site_motif_features[query_name] = (this_read_motif, this_read_features)
 #     return site_motif_features
 
-def collect_features_from_aligned_site_v2(model, device, config, ext_layer, alignment, index_read_ids, contig, site, thresh_coverage=0, enforce_motif=None):
+def collect_features_from_aligned_site_v2(model, device, config, ext_layer, alignment, index_read_ids, contig, site, thresh_coverage=0, max_num_reads=1000, enforce_motif=None):
     site_normReads_qPos_motif_sense = {}
     for pileupcolumn in alignment.pileup(contig, site, site + 1, truncate=True):
+        if len(site_normReads_qPos_motif_sense)>=max_num_reads:
+            break
         if pileupcolumn.pos == site:
             coverage = pileupcolumn.get_num_aligned()
             if coverage>thresh_coverage:
