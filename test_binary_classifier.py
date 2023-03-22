@@ -84,21 +84,29 @@ classifier_models = {this_motif : load(os.path.join(classifier_model_dir, '{}_{}
 if os.path.exists(outfile):
     df_out = pd.read_csv(outfile, sep='\t', index_col=0)
     counts = len(df_out)
-    print('Restarting from {} with {} counts'.format(outfile, counts), flush=True)
+    if counts>0:
+        print('Restarting from {} with {} counts'.format(outfile, counts), flush=True)
+        last_row = df_out.tail(1)
+        last_chr = last_row['Chr'].lstrip('chr')
+        last_start = last_row['Sites'] - 1  # 0-based
+        restart = True
 else:
     df_out = pd.DataFrame()
     counts = 0
     print('Starting from scratch', flush=True)
-for ind, row in df_mod.iterrows():
-    skip_row = False
-    if (len(df_out)>0):
-        skip_row = (row['Chr'] in df_out['Chr'].values) and (row['Sites'] in df_out['Sites'].values)
-    if skip_row:
-        print('Skipping {} {}'.format(row['Chr'], row['Sites']), flush=True)
-        continue
+    restart = False
 
+for ind, row in df_mod.iterrows():
     chr = row['Chr'].lstrip('chr')
     start = row['Sites'] - 1   # 0-based
+    if restart:
+        if (chr!=last_chr) and (start!=last_start):
+            print('Skipping chr{}, pos{}'.format(chr, start))
+        else:
+            print('Restarting from last row: chr{}, pos{}'.format(chr, start))
+            restart = False
+            continue
+
     if (chr.isnumeric()==False) and (chr not in ['X', 'Y']):
         continue
     strand = row['Strand']
