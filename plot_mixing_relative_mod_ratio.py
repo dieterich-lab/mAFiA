@@ -7,9 +7,14 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
+# datasets = [
+#     'HEK293A_WT',
+#     'HEK293_IVT',
+# ]
 datasets = [
-    'HEK293A_WT',
-    'HEK293_IVT',
+    'HEK293T-WT-0-rep2',
+    'HEK293T-WT-50-rep3',
+    'HEK293T-WT-100-rep1'
 ]
 mod_thresh = 0.95
 dataset_names = datasets
@@ -18,14 +23,14 @@ df_files = [
     '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_{}_modProbThresh{:.2f}.tsv'.format(dataset, mod_thresh) for dataset in datasets
 ]
 
-img_out = os.path.join(HOME, 'img_out/MAFIA/IVT_WT')
+img_out = os.path.join(HOME, 'img_out/MAFIA/Mettl3-mixing')
 if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
 
 dfs = [pd.read_csv(df_file, sep='\t', index_col=0) for df_file in df_files]
 
 P_VAL_THRESH = 1.0E-99
-COV_THRESH = 50
+COV_THRESH = 100
 motifs = ['GGACA', 'GGACC', 'AGACT']
 
 plt.figure(figsize=(15, 5))
@@ -57,6 +62,6 @@ for subplot_ind, this_motif in enumerate(motifs):
     plt.title('{}\n{} common sites'.format(this_motif, len(common_idx)), fontsize=15)
 
 plt.subplots_adjust(top=0.8)
-plt.suptitle('HEK293 WT / IVT, Coverage $\geq$ {}'.format(COV_THRESH), fontsize=20)
-plt.savefig(os.path.join(img_out, 'glori_modRatio__modProbThresh{:.2f}_pValThresh{:.2E}_covTHRESH{}.png'.format(mod_thresh, P_VAL_THRESH, COV_THRESH)), bbox_inches='tight')
-plt.close()
+plt.suptitle('HEK293T WT / KO, Coverage $\geq$ {}'.format(COV_THRESH), fontsize=20)
+# plt.savefig(os.path.join(img_out, 'glori_modRatio_modProbThresh{:.2f}_pValThresh{:.2E}_covTHRESH{}.png'.format(mod_thresh, P_VAL_THRESH, COV_THRESH)), bbox_inches='tight')
+# plt.close()
