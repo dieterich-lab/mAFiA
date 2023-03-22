@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #SBATCH --partition=gpu
 #SBATCH --exclude=gpu-g4-1,gpu-g2-1
-#SBATCH --mem=240GB
+#SBATCH --mem=120GB
 #SBATCH --nodes=1
 #SBATCH --verbose
 #SBATCH --output=/home/achan/slurm/MAFIA_test_binary_classifier_mRNA_NoNorm_%A.out
@@ -25,14 +25,14 @@ WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 #DATASET=HEK293T-WT-25-rep1
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-WT-25-rep1/fast5_pass
 
-#DATASET=HEK293T-WT-50-rep3
-#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-WT-50-rep3/fast5
+DATASET=HEK293T-WT-50-rep3
+FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-WT-50-rep3/fast5
 
 #DATASET=HEK293T-WT-75-rep4
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-WT-75-rep4/fast5
 
-DATASET=HEK293T-WT-100-rep1
-FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-WT-100-rep1/fast5_pass
+#DATASET=HEK293T-WT-100-rep1
+#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-WT-100-rep1/fast5_pass
 
 #####################################################################################################################################
 
