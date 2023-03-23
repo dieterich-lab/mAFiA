@@ -19,14 +19,14 @@ WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293_IVT_2/fast5_pass
 
 #####################################################################################################################################
-#DATASET=HEK293T-WT-0-rep2
-#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-WT-0-rep2/fast5_pass
+DATASET=HEK293T-WT-0-rep2
+FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-WT-0-rep2/fast5_pass
 
 #DATASET=HEK293T-WT-25-rep1
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-WT-25-rep1/fast5_pass
 
-DATASET=HEK293T-WT-50-rep3
-FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-WT-50-rep3/fast5
+#DATASET=HEK293T-WT-50-rep3
+#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-WT-50-rep3/fast5
 
 #DATASET=HEK293T-WT-75-rep4
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-WT-75-rep4/fast5
@@ -54,7 +54,7 @@ python3 ${HOME}/git/MAFIA/test_binary_classifier.py \
 --test_fast5_dir ${FAST5_DIR} \
 --ref_file ${REF} \
 --mod_file ${MOD_FILE} \
---max_num_reads 500 \
+--max_num_reads 1000 \
 --min_coverage 50 \
 --backbone_model_path ${BACKBON_MODEL} \
 --extraction_layer ${EXTRACTION_LAYER} \
