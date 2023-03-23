@@ -32,7 +32,7 @@ for this_motif in motifs:
 
         plt.subplot(1, 3, subplot_ind+1)
         plt.plot(df_motif['Ratio'], df_motif['mod_ratio'], 'o', mfc='none')
-        # plt.plot(np.arange(0, 1.1, 0.1), np.arange(0, 1.1, 0.1), 'r-', alpha=0.5)
+        plt.plot(np.arange(0, 1.1, 0.1), np.arange(0, 1.1, 0.1), 'k--', alpha=0.5)
         plt.xlim([-0.05, 1.05])
         plt.ylim([-0.05, 1.05])
         plt.xlabel('GLORI (p-val$\leq${:.2E})'.format(P_VAL_THRESH), fontsize=15)

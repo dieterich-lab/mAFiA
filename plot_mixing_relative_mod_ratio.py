@@ -58,7 +58,7 @@ for subplot_ind, this_motif in enumerate(motifs):
         y_vals = df.loc[common_idx]['mod_ratio'].values
         corr = np.corrcoef(x_vals, y_vals)[0, 1]
         plt.plot(x_vals, y_vals, '.', color=ds_color, label='{}, corr. {:.2f}'.format(ds_name, corr))
-        # plt.plot(x_vals, y_vals, 'o', mfc='none', label=' '.join(ds.split('-')[1:3]))
+        plt.plot(np.arange(0, 1.01, 0.1), np.arange(0, 1.01, 0.1), 'k--')
     plt.xlim([-0.05, 1.05])
     plt.ylim([-0.05, 1.05])
     plt.xlabel('GLORI mod. ratio', fontsize=15)
@@ -69,5 +69,5 @@ for subplot_ind, this_motif in enumerate(motifs):
 
 plt.subplots_adjust(top=0.8)
 plt.suptitle('HEK293T WT / KO, Coverage $\geq$ {}'.format(COV_THRESH), fontsize=20)
-# plt.savefig(os.path.join(img_out, 'glori_modRatio_modProbThresh{:.2f}_pValThresh{:.2E}_covTHRESH{}.png'.format(mod_thresh, P_VAL_THRESH, COV_THRESH)), bbox_inches='tight')
-# plt.close()
+plt.savefig(os.path.join(img_out, 'glori_modRatio_modProbThresh{:.2f}_pValThresh{:.2E}_covTHRESH{}.png'.format(mod_thresh, P_VAL_THRESH, COV_THRESH)), bbox_inches='tight')
+plt.close()
