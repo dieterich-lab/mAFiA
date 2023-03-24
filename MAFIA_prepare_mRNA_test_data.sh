@@ -1,5 +1,3 @@
-sterm -c 4 -m 128GB
-
 WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 REF=${HOME}/Data/genomes/GRCh38_96.fa
 ARCH=${HOME}/git/renata/rnaarch
@@ -29,8 +27,8 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-100-rep1/fast5_pass
 
 #####################################################################################################################################
-DATASET=HEK293T-Mettl3-KO-rep3
-FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-Mettl3-KO-rep3/fast5
+#DATASET=HEK293T-Mettl3-KO-rep3
+#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-Mettl3-KO-rep3/fast5
 
 DATASET=HEK293T-WT-rep3
 FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-WT-rep3/fast5
@@ -39,7 +37,7 @@ FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Me
 
 mkdir -p ${WORKSPACE}
 FASTA=${WORKSPACE}/basecall/${DATASET}.fasta
-SAM=${WORKSPACE}/mapping/${DATASET}.sam
+SAM=${WORKSPACE}/mapping/HEK293T-WT-Mettl3-Mix/${DATASET}.sam
 BAM=${SAM//.sam/.bam}
 
 source ${HOME}/git/renata/virtualenv/bin/activate
@@ -60,17 +58,20 @@ sbatch --array=${NUM_ARRAYS}%8 --export=ALL,WORKSPACE=${WORKSPACE},FAST5_DIR=${F
 #for f in ${FASTA}+([0-9]); do echo $f; grep '>' $f | wc -l; done
 
 cat ${FASTA}+([0-9]) > ${FASTA}_merged
-rm ${FASTA}+([0-9])
-rm ${WORKSPACE}/${DATASET}_fast5_paths_all
 
-#### align and check accuracy ###
+#### align to genome ###
 module purge
 module load minimap2
 minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF} ${FASTA}_merged > ${SAM}
 
+### check stats and accuracy ###
 samtools flagstats ${SAM}
 ${HOME}/git/renata/accuracy.py ${SAM} ${REF}
 
 #### Convert to BAM and index ###
 samtools view -bST ${REF} ${SAM} | samtools sort - > ${BAM}.sorted
 samtools index ${BAM}.sorted
+
+### clean up ###
+rm ${FASTA}+([0-9])
+rm ${WORKSPACE}/${DATASET}_fast5_paths_all

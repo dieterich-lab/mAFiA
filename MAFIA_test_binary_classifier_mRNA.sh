@@ -35,11 +35,11 @@ WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-WT-100-rep1/fast5_pass
 
 #####################################################################################################################################
-DATASET=HEK293T-Mettl3-KO-rep3
-FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-Mettl3-KO-rep3/fast5
+#DATASET=HEK293T-Mettl3-KO-rep3
+#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-Mettl3-KO-rep3/fast5
 
-#DATASET=HEK293T-WT-rep3
-#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-WT-rep3/fast5
+DATASET=HEK293T-WT-rep3
+FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-WT-rep3/fast5
 
 #####################################################################################################################################
 
