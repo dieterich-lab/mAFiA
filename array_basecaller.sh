@@ -2,6 +2,7 @@
 #
 #SBATCH --partition=gpu
 #SBATCH --exclude=gpu-g4-1
+#SBATCH --gres=gpu:turing:1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem-per-cpu=4GB
 #SBATCH --gpu-bind=single:1
