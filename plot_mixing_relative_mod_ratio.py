@@ -14,7 +14,8 @@ import matplotlib.pyplot as plt
 datasets = [
     #'HEK293T-WT-0-rep2',
     'HEK293T-Mettl3-KO-rep3',
-    'HEK293T-WT-50-rep3',
+    'HEK293T-WT-50-rep2',
+    # 'HEK293T-WT-50-rep3',
     #'HEK293T-WT-100-rep1'
     'HEK293T-WT-rep3'
 ]
@@ -38,7 +39,7 @@ if not os.path.exists(img_out):
 dfs = [pd.read_csv(df_file, sep='\t', index_col=0) for df_file in df_files]
 
 P_VAL_THRESH = 1.0E-99
-COV_THRESH = 50
+COV_THRESH = 100
 motifs = ['GGACA', 'GGACC', 'AGACT']
 
 plt.figure(figsize=(15, 5))
