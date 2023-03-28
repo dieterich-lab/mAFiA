@@ -148,10 +148,9 @@ for ind, mod_site in df_mod_sel.iterrows():
         new_row['opt_thresh'] = np.round(opt_thresh, 2)
         new_row['num_features_ivt'] = len(ivt_site_motif_features)
         new_row['num_features_wt'] = len(wt_site_motif_features)
-        # new_row['feature_width'] = feature_width
         df_mod_ratio = pd.concat([df_mod_ratio, new_row.to_frame().T])
         if classifier_model_dir is not None:
-            dump(classifier_model, os.path.join(classifier_model_dir, '{}_{}_{}.joblib'.format(classifier, mod_site['start'], mod_site['mod'])))
+            dump(classifier_model, os.path.join(classifier_model_dir, '{}_{}_{}_{}.joblib'.format(classifier, contig, start, mod)))
         counts += 1
         if counts%5==0:
             df_mod_ratio.to_csv(outfile, sep='\t')
