@@ -25,5 +25,5 @@ python3 tRNA_train_binary_classifier.py \
 --min_coverage 0 \
 --model_path ${HOME}/pytorch_models/tRNA_IVT/tRNA_IVT-epoch29.torch \
 --classifier logistic_regression \
---classifier_model_dir ${WORKSPACE}/adrian/classifier_models \
---outfile ${WORKSPACE}/adrian/classifier_models/logreg_auc.tsv
+--classifier_model_dir ${WORKSPACE}/achan/classifier_models \
+--outfile ${WORKSPACE}/achan/classifier_models/logreg_auc.tsv
