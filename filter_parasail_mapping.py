@@ -3,6 +3,7 @@ import pysam
 import numpy as np
 import argparse
 from glob import glob
+from tqdm import tqdm
 
 # fasta_file = '/home/adrian/Data/tRNA_Berlin/newBatchDec2022_Spombe/achan/basecall/tRNA_IVT.fasta'
 # ref_file = '/home/adrian/Data/tRNA_Berlin/newBatchDec2022_Spombe/S.pombe_mature_tRNAs_adapters_nuclear_and_mt.fasta'
@@ -39,9 +40,9 @@ with open(ref_file, 'r') as f:
             ref_names.append(l.lstrip('>').rstrip('\n'))
 
 query_ref_matches = {}
-for query_ind in df_csv['query'].unique():
+print('Now matching query to reference...')
+for query_ind in tqdm(df_csv['query'].unique()):
     sub_df = df_csv[df_csv['query']==query_ind]
-
     rand_scores = np.vstack([df_csv_rand[df_csv_rand['query']==query_ind]['score'].values for df_csv_rand in dfs_csv_rand]).T
     mu = np.mean(rand_scores, axis=1)
     sigma = np.std(rand_scores, axis=1)
