@@ -27,27 +27,31 @@ sam_file = args.sam_file
 df_csv = pd.read_csv(csv_file, sep=',', names=['query', 'ref', 'query_len', 'ref_len', 'score', 'query_end', 'ref_end'])
 dfs_csv_rand = [pd.read_csv(rand_csv_file, sep=',', names=['query', 'ref', 'query_len', 'ref_len', 'score', 'query_end', 'ref_end']) for rand_csv_file in rand_csv_files]
 
+print('Parsing fasta file...')
 query_names = []
 with open(fasta_file, 'r') as f:
     for l in f.readlines():
         if l[0]=='>':
             query_names.append(l.lstrip('>').rstrip('\n'))
 
+print('Parsing reference file...')
 ref_names = []
 with open(ref_file, 'r') as f:
     for l in f.readlines():
         if l[0]=='>':
             ref_names.append(l.lstrip('>').rstrip('\n'))
 
+### calculate norm score ###
+rand_scores = np.vstack([df_csv_rand['score'].values for df_csv_rand in dfs_csv_rand]).T
+mu = np.mean(rand_scores, axis=1)
+sigma = np.std(rand_scores, axis=1)
+df_csv['norm_score'] = (df_csv['score'] - mu) / sigma
+
+print('Matching query to reference...')
 query_ref_matches = {}
-print('Now matching query to reference...')
 for query_ind in tqdm(df_csv['query'].unique()):
     sub_df = df_csv[df_csv['query']==query_ind]
-    rand_scores = np.vstack([df_csv_rand[df_csv_rand['query']==query_ind]['score'].values for df_csv_rand in dfs_csv_rand]).T
-    mu = np.mean(rand_scores, axis=1)
-    sigma = np.std(rand_scores, axis=1)
-    norm_score = (sub_df['score'].values - mu) / sigma
-    ref_ind = sub_df.iloc[np.argmax(norm_score)]['ref']
+    ref_ind = sub_df.iloc[np.argmax(sub_df['norm_score'])]['ref']
     query_ref_matches[query_names[query_ind]] = ref_names[ref_ind]
 
 with pysam.AlignmentFile(sam_file, 'r') as in_sam:
