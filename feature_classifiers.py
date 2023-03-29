@@ -104,7 +104,7 @@ def debug_features(mat_train, vec_labels, ref_motif):
     plt.savefig(os.path.join(classifier_model_dir, '{}_top_{}_features.png'.format(ref_motif, NUM_TOP_FEATURES)), bbox_inches='tight')
     plt.close('all')
 
-def train_binary_classifier(unm_dict, mod_dict, ref_motif, classifier, scaler=None, debug_img_dir=None):
+def train_binary_classifier(unm_dict, mod_dict, ref_motif, classifier, scaler=None, debug_img_path=None):
     import matplotlib
     # matplotlib.use('tkagg')
     # import matplotlib.pyplot as plt
@@ -147,7 +147,8 @@ def train_binary_classifier(unm_dict, mod_dict, ref_motif, classifier, scaler=No
     opt_thresh = thresholds[opt_ind-1]
 
     ### debug ############################################################
-    if debug_img_dir is not None:
+    if debug_img_path is not None:
+        debug_img_dir = os.path.dirname(debug_img_path)
         if not os.path.exists(debug_img_dir):
             os.makedirs(debug_img_dir, exist_ok=True)
         opt_recall = recall[opt_ind]
@@ -162,7 +163,7 @@ def train_binary_classifier(unm_dict, mod_dict, ref_motif, classifier, scaler=No
         plt.ylim([0, 1.05])
         plt.title('{}\n{} unm, {} mod, AUC = {:.2f}'.format(ref_motif, len(unm_features), len(mod_features), score_auc))
 
-        plt.savefig(os.path.join(debug_img_dir, 'log_reg_auc_{}.png'.format(ref_motif)), bbox_inches='tight')
+        plt.savefig(debug_img_path, bbox_inches='tight')
         plt.close('all')
     ######################################################################
 
