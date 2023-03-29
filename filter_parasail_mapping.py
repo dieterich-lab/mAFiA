@@ -51,7 +51,7 @@ print('Matching query to reference...')
 query_ref_matches = {}
 for query_ind in tqdm(df_csv['query'].unique()):
     sub_df = df_csv[df_csv['query']==query_ind]
-    ref_ind = sub_df.iloc[sub_df['norm_score'].argmax()]['ref']
+    ref_ind = int(sub_df.iloc[sub_df['norm_score'].argmax()]['ref'])
     query_ref_matches[query_names[query_ind]] = ref_names[ref_ind]
 
 print('Writing out filtered reads...')
