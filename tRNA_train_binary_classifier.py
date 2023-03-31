@@ -135,7 +135,7 @@ for ind, mod_site in df_mod_sel.iterrows():
             auc_score, classifier_model, opt_thresh = train_svm_ivt_wt(ivt_site_motif_features, wt_site_motif_features, ref_motif, classifier, debug_img_dir=os.path.join(classifier_model_dir, 'auc'))
         elif classifier=='logistic_regression':
             print('Now classifying with logistic regression...', flush=True)
-            auc_score, classifier_model, opt_thresh = train_binary_classifier(ivt_site_motif_features, wt_site_motif_features, ref_motif, classifier, scaler=scaler, debug_img_path=os.path.join(classifier_model_dir, 'auc', '{}_{}_{}_{}.png'.format(classifier, contig, start, mod)))
+            auc_score, classifier_model, opt_thresh = train_binary_classifier(ivt_site_motif_features, wt_site_motif_features, classifier, scaler=scaler, debug_img_path=os.path.join(classifier_model_dir, 'auc', '{}_{}_{}_{}.png'.format(classifier, contig, start, mod)))
         else:
             print('Classifier unspecified!')
             break

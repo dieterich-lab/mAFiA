@@ -35,11 +35,18 @@ with open(fasta_file, 'r') as f:
             query_names.append(l.lstrip('>').rstrip('\n'))
 
 print('Parsing reference file...')
-ref_names = []
+ref_seqs = {}
 with open(ref_file, 'r') as f:
-    for l in f.readlines():
-        if l[0]=='>':
-            ref_names.append(l.lstrip('>').rstrip('\n'))
+    all_lines = f.readlines()
+l_ind = 0
+while l_ind < len(all_lines):
+    if all_lines[l_ind][0]=='>':
+        ref_name = all_lines[l_ind].lstrip('>').rstrip('\n')
+        ref_seq = all_lines[l_ind+1].rstrip('\n')
+        ref_seqs[ref_name] = ref_seq
+        l_ind += 2
+ref_names = list(ref_seqs.keys())
+ref_lens = np.array([len(seq) for seq in ref_seqs.values()])
 
 ### calculate norm score ###
 rand_scores = np.vstack([df_csv_rand['score'].values for df_csv_rand in dfs_csv_rand]).T

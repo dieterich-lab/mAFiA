@@ -104,12 +104,11 @@ def debug_features(mat_train, vec_labels, ref_motif):
     plt.savefig(os.path.join(classifier_model_dir, '{}_top_{}_features.png'.format(ref_motif, NUM_TOP_FEATURES)), bbox_inches='tight')
     plt.close('all')
 
-def train_binary_classifier(unm_dict, mod_dict, ref_motif, classifier, scaler=None, debug_img_path=None):
+def train_binary_classifier(unm_dict, mod_dict, classifier, scaler=None, frac_test_split=0.25, debug_img_path=None):
     import matplotlib
     # matplotlib.use('tkagg')
     # import matplotlib.pyplot as plt
 
-    frac_test_split = 0.25
     max_num_features = min(len(unm_dict), len(mod_dict))
     sample_unm_dict = {k: unm_dict[k] for k in sample(unm_dict.keys(), max_num_features)}
     sample_mod_dict = {k: mod_dict[k] for k in sample(mod_dict.keys(), max_num_features)}
@@ -155,13 +154,14 @@ def train_binary_classifier(unm_dict, mod_dict, ref_motif, classifier, scaler=No
         opt_predictions = np.int32(y_score>=opt_thresh)
         opt_accuracy = np.mean(opt_predictions==y_test)
 
+        fig_title = ' '.join(os.path.basename(debug_img_path).rstrip('.png').split('_'))
         plt.figure(figsize=(5, 5))
         plt.plot(recall, precision)
         # plt.axvline(opt_recall, c='g')
         plt.xlabel('Recall')
         plt.ylabel('Precision')
         plt.ylim([0, 1.05])
-        plt.title('{}\n{} unm, {} mod, AUC = {:.2f}'.format(ref_motif, len(unm_features), len(mod_features), score_auc))
+        plt.title('{}\n{} unm, {} mod, test split {:.2f}\n AUC = {:.2f}'.format(fig_title, len(unm_features), len(mod_features), frac_test_split, score_auc))
 
         plt.savefig(debug_img_path, bbox_inches='tight')
         plt.close('all')
