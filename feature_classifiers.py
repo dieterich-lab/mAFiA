@@ -104,7 +104,7 @@ def debug_features(mat_train, vec_labels, ref_motif):
     plt.savefig(os.path.join(classifier_model_dir, '{}_top_{}_features.png'.format(ref_motif, NUM_TOP_FEATURES)), bbox_inches='tight')
     plt.close('all')
 
-def train_binary_classifier(unm_dict, mod_dict, classifier, scaler=None, frac_test_split=0.25, debug_img_path=None):
+def train_binary_classifier(unm_dict, mod_dict, classifier, scaler=None, frac_test_split=0.25, debug_img_path=None, fig_title=None):
     import matplotlib
     # matplotlib.use('tkagg')
     # import matplotlib.pyplot as plt
@@ -154,7 +154,6 @@ def train_binary_classifier(unm_dict, mod_dict, classifier, scaler=None, frac_te
         opt_predictions = np.int32(y_score>=opt_thresh)
         opt_accuracy = np.mean(opt_predictions==y_test)
 
-        fig_title = ' '.join(os.path.basename(debug_img_path).rstrip('.png').split('_'))
         plt.figure(figsize=(5, 5))
         plt.plot(recall, precision)
         # plt.axvline(opt_recall, c='g')

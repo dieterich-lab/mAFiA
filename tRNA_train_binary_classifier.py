@@ -130,15 +130,11 @@ for ind, mod_site in df_mod_sel.iterrows():
         print('Reference motif {}'.format(ref_motif), flush=True)
         print('{} feature vectors collected from WT'.format(len(wt_site_motif_features)), flush=True)
         print('{} feature vectors collected from IVT'.format(len(ivt_site_motif_features)), flush=True)
-        if classifier=='svm':
-            print('Now classifying with SVM...', flush=True)
-            auc_score, classifier_model, opt_thresh = train_svm_ivt_wt(ivt_site_motif_features, wt_site_motif_features, ref_motif, classifier, debug_img_dir=os.path.join(classifier_model_dir, 'auc'))
-        elif classifier=='logistic_regression':
-            print('Now classifying with logistic regression...', flush=True)
-            auc_score, classifier_model, opt_thresh = train_binary_classifier(ivt_site_motif_features, wt_site_motif_features, classifier, scaler=scaler, debug_img_path=os.path.join(classifier_model_dir, 'auc', '{}_{}_{}_{}.png'.format(classifier, contig, start, mod)))
-        else:
-            print('Classifier unspecified!')
-            break
+        print('Now classifying with {}...'.format(' '.join(classifier.split('_'))), flush=True)
+        auc_score, classifier_model, opt_thresh = train_binary_classifier(ivt_site_motif_features, wt_site_motif_features, classifier, scaler=scaler,
+                                                                          debug_img_path=os.path.join(classifier_model_dir, 'auc', '{}_{}_{}_{}.png'.format(classifier, contig, start, mod)),
+                                                                          fig_title='{}, pos{}, mod {}'.format(contig, start, mod)
+                                                                          )
 
         print('AUC {:.2f}'.format(auc_score), flush=True)
         print('=========================================================', flush=True)
