@@ -123,13 +123,13 @@ for ind, mod_site in df_mod_sel.iterrows():
     ref_motif = ref[contig][start - 2:start + 3]
     wt_site_motif_features = collect_site_features(wt_bam, contig, start, wt_predStr_features)
     ivt_site_motif_features = collect_site_features(ivt_bam, contig, start, ivt_predStr_features, enforce_motif=ref_motif)
+    print('{} feature vectors collected from WT'.format(len(wt_site_motif_features)), flush=True)
+    print('{} feature vectors collected from IVT'.format(len(ivt_site_motif_features)), flush=True)
 
     if (len(wt_site_motif_features)>min_coverage) and (len(ivt_site_motif_features)>min_coverage):
         print('=========================================================', flush=True)
         print('{}, pos{}, mod {}'.format(contig, start, mod), flush=True)
         print('Reference motif {}'.format(ref_motif), flush=True)
-        print('{} feature vectors collected from WT'.format(len(wt_site_motif_features)), flush=True)
-        print('{} feature vectors collected from IVT'.format(len(ivt_site_motif_features)), flush=True)
         print('Now classifying with {}...'.format(' '.join(classifier.split('_'))), flush=True)
         auc_score, classifier_model, opt_thresh = train_binary_classifier(ivt_site_motif_features, wt_site_motif_features, classifier, scaler=scaler,
                                                                           debug_img_path=os.path.join(classifier_model_dir, 'auc', '{}_{}_{}_{}.png'.format(classifier, contig, start, mod)),
