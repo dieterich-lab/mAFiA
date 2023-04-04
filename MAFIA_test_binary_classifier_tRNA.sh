@@ -12,7 +12,13 @@ conda activate MAFIA
 WORKSPACE=/beegfs/prj/tRNA_Berlin/newBatchDec2022_Spombe
 
 #####################################################################################################################################
-DATASET=AEP1_T1
+#DATASET=AEP1_T1
+DATASET=AEP1_T2
+#DATASET=AEP1_T3
+#DATASET=AEP1_Q_T1
+#DATASET=AEP1_Q_T2
+#DATASET=AEP1_Q_T3
+
 FAST5_DIR=${WORKSPACE}/agg_fast5_pass/${DATASET}
 
 #####################################################################################################################################
