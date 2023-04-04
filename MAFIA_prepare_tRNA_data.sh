@@ -6,7 +6,11 @@ WORKSPACE=/beegfs/prj/tRNA_Berlin/newBatchDec2022_Spombe
 #DATASET=tRNA_IVT
 #DATASET=tRNA_Q
 #DATASET=AEP1_T1
-DATASET=AEP1_Q_T1
+#DATASET=AEP1_T2
+DATASET=AEP1_T3
+#DATASET=AEP1_Q_T1
+#DATASET=AEP1_Q_T2
+#DATASET=AEP1_Q_T3
 
 READS=${WORKSPACE}/agg_fast5_pass/${DATASET}
 FASTA=${WORKSPACE}/achan/basecall/${DATASET}.fasta
@@ -18,8 +22,7 @@ mkdir -p `dirname ${BAM}`
 source ${HOME}/git/renata/virtualenv/bin/activate
 
 ### basecall ###
-#srun -p gpu \
-srun -w gpu-g3-1 \
+srun --partition=gpu --exclude=gpu-g4-1 \
 python3 ${HOME}/git/renata/basecall_viterbi.py \
 --fast5dir ${READS} \
 --arch ${ARCH} \
