@@ -75,11 +75,11 @@ fixed_model, fixed_device = load_model(backbone_model_path, fixed_config, extrac
 
 ### extract features ###
 if max_num_reads>0:
-    print('Now extracting features from WT...')
+    print('Now extracting features from test dataset...')
     test_index_read_ids_sample = {id: test_index_read_ids[id] for id in sample(list(test_index_read_ids.keys()), min(len(test_index_read_ids.keys()), max_num_reads))}
     test_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, test_index_read_ids_sample, extraction_layer, feature_width)
 else:
-    print('Now extracting features from WT...')
+    print('Now extracting features from test dataset...')
     test_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, test_index_read_ids, extraction_layer, feature_width)
 
 ### loop through sites ###
