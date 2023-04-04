@@ -81,7 +81,7 @@ for ind, mod_site in df_mod.iterrows():
     mod = mod_site['mod']
     ref_motif = ref[contig][start - 2:start + 3]
     print('\n=========================================================', flush=True)
-    print('chr{}, pos{}'.format(chr, start), flush=True)
+    print('{}, pos{}'.format(contig, start), flush=True)
     print('Reference motif {}'.format(ref_motif), flush=True)
 
     classifier_model_path = os.path.join(classifier_model_dir, '{}_{}_{}_{}.joblib'.format(classifier, contig, start, mod))
