@@ -92,7 +92,7 @@ for ind, mod_site in df_mod.iterrows():
         print('=========================================================', flush=True)
         continue
 
-    test_site_motif_features = collect_features_from_aligned_site_v2(fixed_model, fixed_device, fixed_config, extraction_layer, test_bam, test_index_read_ids, chr, start, min_coverage, max_num_reads)
+    test_site_motif_features = collect_features_from_aligned_site_v2(fixed_model, fixed_device, fixed_config, extraction_layer, test_bam, test_index_read_ids, contig, start, min_coverage, max_num_reads)
 
     if len(test_site_motif_features)>min_coverage:
         print('{} feature vectors collected'.format(len(test_site_motif_features)), flush=True)
