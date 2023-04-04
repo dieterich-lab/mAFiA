@@ -11,10 +11,12 @@ import pysam
 from Bio import SeqIO
 from utils import index_fast5_files
 from extract_features import load_model
-from extract_features import collect_features_from_aligned_site_v2
+from extract_features import get_features_from_collection_of_signals, collect_site_features
+# from extract_features import collect_features_from_aligned_site_v2
 from feature_classifiers import get_mod_ratio_with_binary_classifier
 import random
 random.seed(10)
+from random import sample
 from joblib import load
 
 parser = argparse.ArgumentParser()
@@ -71,6 +73,15 @@ origconfig = torchdict["config"]
 fixed_config = objectview(origconfig)
 fixed_model, fixed_device = load_model(backbone_model_path, fixed_config, extraction_layer)
 
+### extract features ###
+if max_num_reads>0:
+    print('Now extracting features from WT...')
+    test_index_read_ids_sample = {id: test_index_read_ids[id] for id in sample(list(test_index_read_ids.keys()), min(len(test_index_read_ids.keys()), max_num_reads))}
+    test_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, test_index_read_ids_sample, extraction_layer, feature_width)
+else:
+    print('Now extracting features from WT...')
+    test_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, test_index_read_ids, extraction_layer, feature_width)
+
 ### loop through sites ###
 df_out = pd.DataFrame()
 counts = 0
@@ -92,7 +103,7 @@ for ind, mod_site in df_mod.iterrows():
         print('=========================================================', flush=True)
         continue
 
-    test_site_motif_features = collect_features_from_aligned_site_v2(fixed_model, fixed_device, fixed_config, extraction_layer, test_bam, test_index_read_ids, contig, start, min_coverage, max_num_reads)
+    test_site_motif_features = collect_site_features(test_bam, contig, start, test_predStr_features)
     print('{} feature vectors collected'.format(len(test_site_motif_features)), flush=True)
 
     if len(test_site_motif_features)>min_coverage:
