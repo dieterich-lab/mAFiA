@@ -13,9 +13,9 @@ WORKSPACE=/beegfs/prj/tRNA_Berlin/newBatchDec2022_Spombe
 
 #####################################################################################################################################
 #DATASET=AEP1_T1
-DATASET=AEP1_T2
+#DATASET=AEP1_T2
 #DATASET=AEP1_T3
-#DATASET=AEP1_Q_T1
+DATASET=AEP1_Q_T1
 #DATASET=AEP1_Q_T2
 #DATASET=AEP1_Q_T3
 
@@ -30,7 +30,7 @@ BACKBON_MODEL=${HOME}/pytorch_models/tRNA_IVT/tRNA_IVT-epoch29.torch
 EXTRACTION_LAYER=convlayers.conv21
 CLASSIFIER_MODEL_DIR=${WORKSPACE}/achan/rev_filtered_classifier_models
 MOD_PROB_THRESH=0.0
-OUTFILE=${WORKSPACE}/results/res_${DATASET}_modProbThresh${MOD_PROB_THRESH}.tsv
+OUTFILE=${WORKSPACE}/achan/results/res_${DATASET}_modProbThresh${MOD_PROB_THRESH}.tsv
 
 set -e -u
 

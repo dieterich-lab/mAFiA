@@ -99,7 +99,7 @@ for ind, mod_site in df_mod.iterrows():
     if os.path.exists(classifier_model_path):
         classifier_model = load(classifier_model_path)
     else:
-        print('Classifier model not found!\n', flush=True)
+        print('Classifier model not found!', flush=True)
         print('=========================================================', flush=True)
         continue
 
