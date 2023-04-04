@@ -106,8 +106,21 @@ def ctcdecoder(logits, label, blank=False, beam_size=5, alphabet=alphabet, pre=N
 def get_features_from_signal(model, device, config, signal, ext_layer, feature_width=0):
     chunks = segment(signal, config.seqlen)
     event = torch.unsqueeze(torch.FloatTensor(chunks), 1).to(device, non_blocking=True)
-    out = model.forward(event)
-    layer_activation = activation[ext_layer].detach().cpu().numpy()
+    event_size = event.shape[0]
+    batch_size = config.batchsize
+    if event_size<=batch_size:
+        out = model.forward(event)
+        layer_activation = activation[ext_layer].detach().cpu().numpy()
+    else:
+        break_pts = np.arange(0, event_size, batch_size)
+        start_stop_pts = [(start, stop) for start, stop in zip(break_pts, list(break_pts[1:]) + [event_size])]
+        batch_out = []
+        batch_layer_activation = []
+        for (start, stop) in start_stop_pts:
+            batch_out.append(model.forward(event[start:stop]))
+            batch_layer_activation.append(activation[ext_layer].detach().cpu().numpy())
+        out = torch.concat(batch_out, 1)
+        layer_activation = np.concatenate(batch_layer_activation, axis=0)
     num_locs = layer_activation.shape[-1]
     pred_labels = []
     features = []
