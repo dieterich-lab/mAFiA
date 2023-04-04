@@ -93,9 +93,9 @@ for ind, mod_site in df_mod.iterrows():
         continue
 
     test_site_motif_features = collect_features_from_aligned_site_v2(fixed_model, fixed_device, fixed_config, extraction_layer, test_bam, test_index_read_ids, contig, start, min_coverage, max_num_reads)
+    print('{} feature vectors collected'.format(len(test_site_motif_features)), flush=True)
 
     if len(test_site_motif_features)>min_coverage:
-        print('{} feature vectors collected'.format(len(test_site_motif_features)), flush=True)
         clf = load(os.path.join(classifier_model_dir, '{}_{}_{}_{}.joblib'.format(classifier, contig, start, mod)))
         mod_ratio = get_mod_ratio_with_binary_classifier(test_site_motif_features, classifier_model, mod_prob_thresh)
         print('Predicted mod ratio {:.2f}'.format(mod_ratio), flush=True)
