@@ -9,15 +9,12 @@ import torch
 from models import objectview
 import pysam
 from Bio import SeqIO
-from Bio.Seq import Seq
-from ont_fast5_api.fast5_interface import get_fast5_file
 from utils import index_fast5_files
 from extract_features import load_model
 from extract_features import collect_features_from_aligned_site_v2
 from feature_classifiers import get_mod_ratio_with_binary_classifier
 import random
 random.seed(10)
-from random import sample
 from joblib import load
 
 parser = argparse.ArgumentParser()
@@ -56,12 +53,10 @@ if not os.path.exists(outdir):
 
 df_mod = pd.read_csv(mod_file, names=['contig', 'start', 'stop', 'mod'], sep='\t')
 
-# ref_file = os.path.join(HOME, 'Data/genomes/GRCh38_96.fa')
 ref = {}
 print('Parsing genome...', flush=True)
 for record in SeqIO.parse(ref_file, 'fasta'):
-    if (record.id.isnumeric()) or (record.id in ['X', 'Y']):
-        ref[record.id] = str(record.seq)
+    ref[record.id] = str(record.seq)
 
 ### collect reads ###
 test_bam = pysam.AlignmentFile(test_bam_file, 'rb')
@@ -77,21 +72,8 @@ fixed_config = objectview(origconfig)
 fixed_model, fixed_device = load_model(backbone_model_path, fixed_config, extraction_layer)
 
 ### loop through sites ###
-if os.path.exists(outfile):
-    df_out = pd.read_csv(outfile, sep='\t', index_col=0)
-    counts = len(df_out)
-    if counts>0:
-        print('Restarting from {} with {} counts'.format(outfile, counts), flush=True)
-        last_row = df_out.tail(1)
-        last_chr = last_row['Chr'].values[0].lstrip('chr')
-        last_start = last_row['Sites'].values[0] - 1  # 0-based
-        restart = True
-else:
-    df_out = pd.DataFrame()
-    counts = 0
-    print('Starting from scratch', flush=True)
-    restart = False
-
+df_out = pd.DataFrame()
+counts = 0
 for ind, mod_site in df_mod.iterrows():
     print('\nSite {}'.format(ind), flush=True)
     contig = mod_site['contig']
@@ -108,15 +90,6 @@ for ind, mod_site in df_mod.iterrows():
     else:
         print('Classifier model not found!\n', flush=True)
         print('=========================================================', flush=True)
-
-        continue
-
-    if restart:
-        if (chr==last_chr) and (start==last_start):
-            print('Last row in file: chr{}, pos{}'.format(chr, start), flush=True)
-            restart = False
-        else:
-            print('Skipping chr{}, pos{}'.format(chr, start), flush=True)
         continue
 
     test_site_motif_features = collect_features_from_aligned_site_v2(fixed_model, fixed_device, fixed_config, extraction_layer, test_bam, test_index_read_ids, chr, start, min_coverage, max_num_reads)
