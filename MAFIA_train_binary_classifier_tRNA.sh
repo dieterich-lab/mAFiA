@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #SBATCH --partition=gpu
 #SBATCH --nodelist=gpu-g3-1
-#SBATCH --mem=120GB
+#SBATCH --mem=60GB
 #SBATCH --nodes=1
 #SBATCH --verbose
 #SBATCH --output=/home/achan/slurm/MAFIA_train_binary_classifier_tRNA_%A.out

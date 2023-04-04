@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #SBATCH --partition=gpu
 #SBATCH --exclude=gpu-g4-1
-#SBATCH --mem=120GB
+#SBATCH --mem=60GB
 #SBATCH --nodes=1
 #SBATCH --verbose
 #SBATCH --output=/home/achan/slurm/MAFIA_test_binary_classifier_tRNA_%A.out
