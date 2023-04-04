@@ -155,13 +155,12 @@ def activation_function(activation):
 
 
 class rodan(nn.Module):
-    def __init__(self, config=None, arch=None, seqlen=4096, debug=False):
+    def __init__(self, config=None, arch=None, debug=False):
         super().__init__()
         if debug: print("Initializing network")
 
-        self.seqlen = seqlen
+        self.seqlen = config.seqlen
         self.vocab = config.vocab
-
         self.bn = nn.BatchNorm1d
 
         # [P, Channels, Separable, kernel_size, stride, sqex, dropout]
