@@ -239,6 +239,12 @@ def get_mod_ratio_with_binary_classifier(dict_motif_feature, clf, mod_thresh=0.5
 
     return avg_mod_ratio
 
+def get_mod_probs(dict_motif_feature, clf):
+    test_motifs = [v[0] for k, v in dict_motif_feature.items()]
+    test_features = [v[1] for k, v in dict_motif_feature.items()]
+    mod_probs = clf.predict_proba(test_features)[:, 1]
+    read_mod_probs = {k: v for k, v in zip(dict_motif_feature.keys(), mod_probs)}
+    return read_mod_probs
 
 def get_outlier_ratio_from_features(ivt_dict, wt_dict, wanted_motif, perc_thresh=0.8):
     labels = ['ivt' for ii in range(len(ivt_dict))] + ['wt' for ii in range(len(wt_dict))]

@@ -12,7 +12,7 @@ from Bio import SeqIO
 from utils import index_fast5_files
 from extract_features import load_model
 from extract_features import get_features_from_collection_of_signals, collect_site_features
-from feature_classifiers import get_mod_ratio_with_binary_classifier
+from feature_classifiers import get_mod_ratio_with_binary_classifier, get_mod_probs
 import random
 random.seed(10)
 from random import sample
@@ -30,6 +30,7 @@ parser.add_argument('--extraction_layer')
 parser.add_argument('--feature_width', default=0)
 parser.add_argument('--classifier')
 parser.add_argument('--classifier_model_dir')
+parser.add_argument('--mod_probs_per_read')
 parser.add_argument('--mod_prob_thresh', default=0)
 parser.add_argument('--outfile')
 
@@ -45,6 +46,7 @@ extraction_layer = args.extraction_layer
 feature_width = int(args.feature_width)
 classifier = args.classifier
 classifier_model_dir = args.classifier_model_dir
+mod_probs_per_read = bool(args.mod_probs_per_read)
 mod_prob_thresh = float(args.mod_prob_thresh)
 outfile = args.outfile
 
@@ -107,16 +109,33 @@ for ind, mod_site in df_mod.iterrows():
 
     if len(test_site_motif_features)>min_coverage:
         clf = load(os.path.join(classifier_model_dir, '{}_{}_{}_{}.joblib'.format(classifier, contig, start, mod)))
-        mod_ratio = get_mod_ratio_with_binary_classifier(test_site_motif_features, classifier_model, mod_prob_thresh)
-        print('Predicted mod ratio {:.2f}'.format(mod_ratio), flush=True)
-        print('=========================================================', flush=True)
         new_row = mod_site.copy()
-        new_row['motif'] = ref_motif
-        new_row['mod_ratio'] = round(mod_ratio, 3)
-        new_row['num_test_features'] = len(test_site_motif_features)
-        df_out = pd.concat([df_out, new_row.to_frame().T])
-        counts += 1
-        if counts % 5 == 0:
-            df_out.to_csv(outfile, sep='\t')
+        new_row['ref_motif'] = ref_motif
+
+        if mod_probs_per_read:
+            dict_read_mod_probs = get_mod_probs(test_site_motif_features, classifier_model)
+            for read_id, mod_prob in dict_read_mod_probs.items():
+                new_row['read_id'] = read_id
+                new_row['det_motif'] = test_site_motif_features[read_id][0]
+                new_row['mod_prob'] = mod_prob
+                df_out = pd.concat([df_out, new_row.to_frame().T])
+                counts += 1
+                if counts % 50 == 0:
+                    df_out.to_csv(outfile, sep='\t')
+            print('Classified {} reads'.format(len(dict_read_mod_probs)), flush=True)
+            print('=========================================================', flush=True)
+        else:
+            mod_ratio = get_mod_ratio_with_binary_classifier(test_site_motif_features, classifier_model, mod_prob_thresh)
+            print('Predicted mod ratio {:.2f}'.format(mod_ratio), flush=True)
+            print('=========================================================', flush=True)
+            new_row['mod_ratio'] = round(mod_ratio, 3)
+            new_row['num_test_features'] = len(test_site_motif_features)
+            df_out = pd.concat([df_out, new_row.to_frame().T])
+            counts += 1
+            if counts % 5 == 0:
+                df_out.to_csv(outfile, sep='\t')
 df_out.to_csv(outfile, sep='\t')
-print('Total {} sites'.format(counts))
+if mod_probs_per_read:
+    print('Total {} reads'.format(counts))
+else:
+    print('Total {} sites'.format(counts))
