@@ -84,17 +84,21 @@ fixed_model, fixed_device = load_model(backbone_model_path, fixed_config, extrac
 ### loop through BID-seq sites ###
 for ind, row in df_mod.iterrows():
     chr = row['chr'].lstrip('chr')
-    pos = row['pos']   # 1-based
+    pos = row['pos']
     name = row['name']
     strand = row['strand']
     bidseq_motif = row['Motif_1']
     bidseq_ratio = row['Frac_Ave %']
-    ref_motif = ref[chr][pos-2:pos+3]
-    if strand=='-':
+    if strand=='+':
+        ref_motif = ref[chr][pos-2:pos+3]
+    elif strand=='-':
+        pos -= 1   ### why???
+        ref_motif = ref[chr][pos-2:pos+3]
         ref_motif = str(Seq(ref_motif).reverse_complement())
     if ref_motif!=bidseq_motif:
-        print('Warning: Aligned motif {} =/= BID-seq motif {}!'.format(ref_motif, bidseq_motif))
-    site_name = '{} {} {}, BID-seq ratio {:.1f}%'.format(chr, pos, name, bidseq_ratio)
+        print('Aligned motif {} =/= BID-seq motif {}!'.format(ref_motif, bidseq_motif))
+        continue
+    site_name = 'chr{} pos{} {}\nBID-seq ratio {}%'.format(chr, pos, name, int(bidseq_ratio))
     print('\n=========================================================', flush=True)
     print(site_name, flush=True)
 
@@ -105,4 +109,4 @@ for ind, row in df_mod.iterrows():
 
     ### train classifier ###
     if (len(unm_motif_features)>=min_coverage) and (len(mod_motif_features)>=min_coverage):
-        train_cluster(unm_motif_features, mod_motif_features, site_name, scaler, debug_img_dir=os.path.join(clustering_model_dir, 'clustering'))
+        train_cluster(unm_motif_features, mod_motif_features, site_name, scaler, debug_img_dir=clustering_model_dir)
