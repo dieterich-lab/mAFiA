@@ -13,7 +13,7 @@ from Bio.Seq import Seq
 from ont_fast5_api.fast5_interface import get_fast5_file
 from extract_features import load_model
 from extract_features import collect_features_from_aligned_site_v2
-from unsupervised import train_cluster
+from unsupervised import train_cluster, calculate_outlier_ratio_with_ivt_distance
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--unm_bam_file')
@@ -28,7 +28,7 @@ parser.add_argument('--backbone_model_path')
 parser.add_argument('--extraction_layer', default='convlayers.conv21')
 parser.add_argument('--feature_width', default=0)
 parser.add_argument('--scaler')
-parser.add_argument('--clustering_model_dir')
+parser.add_argument('--output_dir')
 
 args = parser.parse_args()
 unm_bam_file = args.unm_bam_file
@@ -43,15 +43,16 @@ backbone_model_path = args.backbone_model_path
 extraction_layer = args.extraction_layer
 feature_width = int(args.feature_width)
 scaler = args.scaler
-clustering_model_dir = args.clustering_model_dir
+output_dir = args.output_dir
 
-if clustering_model_dir is not None:
-    os.makedirs(clustering_model_dir, exist_ok=True)
+if output_dir is not None:
+    os.makedirs(output_dir, exist_ok=True)
+output_file = os.path.join(output_dir, 'res_outlier_ratio.tsv')
 
 ref = {}
 for record in SeqIO.parse(ref_file, 'fasta'):
     ref[record.id] = str(record.seq)
-print('Parsed reference with contigs:\n', list(ref.keys()), flush=True)
+print('Parsed reference with {} contigs', len(ref.keys()), flush=True)
 
 df_mod = pd.read_excel(mod_file, skiprows=3)
 print('Imported mod file with {} sites'.format(len(df_mod)), flush=True)
@@ -83,6 +84,8 @@ fixed_config = objectview(origconfig)
 fixed_model, fixed_device = load_model(backbone_model_path, fixed_config, extraction_layer)
 
 ### loop through BID-seq sites ###
+df_out = pd.DataFrame()
+counts = 0
 for ind, row in df_mod.iterrows():
     chr = row['chr'].lstrip('chr')
     pos = row['pos']
@@ -110,4 +113,18 @@ for ind, row in df_mod.iterrows():
 
     ### train classifier ###
     if (len(unm_motif_features)>=min_coverage) and (len(mod_motif_features)>=min_coverage):
-        train_cluster(unm_motif_features, mod_motif_features, site_name, scaler, debug_img_dir=clustering_model_dir)
+        # train_cluster(unm_motif_features, mod_motif_features, site_name, scaler, debug_img_dir=output_dir)
+        outlier_ratio = calculate_outlier_ratio_with_ivt_distance(unm_motif_features, mod_motif_features, site_name, scaler)
+        print('BID-seq ratio: {}%'.format(round(bidseq_ratio)), flush=True)
+        print('Outlier ratio: {}%'.format(round(outlier_ratio)), flush=True)
+
+        new_row = row.copy()
+        new_row['outlier_ratio'] = round(outlier_ratio, 1)
+        new_row['num_ivt_features'] = len(unm_motif_features)
+        new_row['num_wt_features'] = len(mod_motif_features)
+        df_out = pd.concat([df_out, new_row.to_frame().T])
+        counts += 1
+        if counts % 5 == 0:
+            df_out.to_csv(output_file, sep='\t')
+df_out.to_csv(output_file, sep='\t')
+print('Total {} sites'.format(counts), flush=True)

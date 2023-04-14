@@ -46,3 +46,23 @@ def train_cluster(unm_dict, mod_dict, site_name, scaler=None, debug_img_dir=None
     plot_umap(embedding, label_names, '{}'.format(site_name), debug_img_dir)
 
     return 1
+
+def calculate_outlier_ratio_with_ivt_distance(ivt_dict, wt_dict, site_name, scaler=None, sigma_multiplier=1, debug_img_dir=None):
+    print('Now clustering features...', flush=True)
+    labels = np.array([0 for ii in range(len(ivt_dict))] + [1 for ii in range(len(wt_dict))])
+    ivt_features = np.vstack([v[1] for k, v in ivt_dict.items()])
+    wt_features = np.vstack([v[1] for k, v in wt_dict.items()])
+
+    if scaler=='MaxAbs':
+        ivt_features = ivt_features / np.max(ivt_features, axis=1)
+        wt_features = wt_features / np.max(wt_features, axis=1)
+
+    ivt_centroid = np.mean(ivt_features, axis=0)
+    ivt_l1_dist = np.sum(np.abs(ivt_features - ivt_centroid), axis=1)
+    ivt_l1_dist_mu = np.mean(ivt_l1_dist)
+    ivt_l1_dist_sigma = np.std(ivt_l1_dist)
+
+    wt_l1_dist = np.sum(np.abs(wt_features - ivt_centroid), axis=1)
+    pred_mod_ratio = np.mean(np.abs(wt_l1_dist - ivt_l1_dist_mu) > (ivt_l1_dist_sigma * sigma_multiplier))
+
+    return pred_mod_ratio
