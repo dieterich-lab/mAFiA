@@ -96,12 +96,12 @@ for ind, row in df_mod.iterrows():
         pos -= 1   ### why???
         ref_motif = ref[chr][pos-2:pos+3]
         ref_motif = str(Seq(ref_motif).reverse_complement())
-    if ref_motif!=bidseq_motif:
-        print('Aligned motif {} =/= BID-seq motif {}!'.format(ref_motif, bidseq_motif))
-        continue
     site_name = 'chr{} pos{} {}\nBID-seq ratio {}%'.format(chr, pos, name, round(bidseq_ratio))
     print('\n=========================================================', flush=True)
     print(site_name, flush=True)
+    if ref_motif!=bidseq_motif:
+        print('Aligned motif {} =/= BID-seq motif {}!'.format(ref_motif, bidseq_motif), flush=True)
+        continue
 
     unm_motif_features = collect_features_from_aligned_site_v2(fixed_model, fixed_device, fixed_config, extraction_layer, unm_bam, unm_index_read_ids, chr, pos, min_coverage, max_num_reads, enforce_motif=ref_motif)
     print('{} IVT feature vectors collected'.format(len(unm_motif_features)), flush=True)
