@@ -5,20 +5,15 @@ sys.path.append(os.path.join(HOME, 'git/MAFIA'))
 import argparse
 from glob import glob
 import pandas as pd
-import numpy as np
 import torch
 from models import objectview
 import pysam
 from Bio import SeqIO
+from Bio.Seq import Seq
 from ont_fast5_api.fast5_interface import get_fast5_file
 from extract_features import load_model
-from extract_features import get_features_from_collection_of_signals, collect_all_motif_features
-# from feature_classifiers import train_binary_classifier
+from extract_features import collect_features_from_aligned_site_v2
 from unsupervised import train_cluster
-import random
-random.seed(10)
-from random import sample
-from joblib import dump
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--unm_bam_file')
@@ -64,23 +59,21 @@ df_mod = pd.read_excel(mod_file, skiprows=3)
 unm_bam = pysam.AlignmentFile(unm_bam_file, 'rb')
 unm_f5_paths = glob(os.path.join(unm_fast5_dir, '*.fast5'), recursive=True)
 unm_index_read_ids = {}
-print('Parsing unm fast5 files...', flush=True)
 for f5_filepath in unm_f5_paths:
     f5 = get_fast5_file(f5_filepath, mode="r")
     for read_id in f5.get_read_ids():
         unm_index_read_ids[read_id] = f5_filepath
-print('{} unm reads indexed'.format(len(unm_index_read_ids)), flush=True)
+print('{} IVT reads indexed'.format(len(unm_index_read_ids)), flush=True)
 
 ### mod ###
 mod_bam = pysam.AlignmentFile(mod_bam_file, 'rb')
 mod_f5_paths = glob(os.path.join(mod_fast5_dir, '*.fast5'), recursive=True)
 mod_index_read_ids = {}
-print('Parsing mod fast5 files...', flush=True)
 for f5_filepath in mod_f5_paths:
     f5 = get_fast5_file(f5_filepath, mode="r")
     for read_id in f5.get_read_ids():
         mod_index_read_ids[read_id] = f5_filepath
-print('{} mod reads indexed'.format(len(mod_index_read_ids)), flush=True)
+print('{} WT reads indexed'.format(len(mod_index_read_ids)), flush=True)
 
 ### load model, device ###
 torchdict = torch.load(backbone_model_path, map_location="cpu")
@@ -88,40 +81,28 @@ origconfig = torchdict["config"]
 fixed_config = objectview(origconfig)
 fixed_model, fixed_device = load_model(backbone_model_path, fixed_config, extraction_layer)
 
-### extract features ###
-if max_num_reads>0:
-    print('Now extracting features from unm...', flush=True)
-    unm_index_read_ids_sample = {id: unm_index_read_ids[id] for id in sample(list(unm_index_read_ids.keys()), min(len(unm_index_read_ids.keys()), max_num_reads))}
-    unm_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, unm_index_read_ids_sample, extraction_layer, feature_width)
-    print('Now extracting features from mod...', flush=True)
-    mod_index_read_ids_sample = {id: mod_index_read_ids[id] for id in sample(list(mod_index_read_ids.keys()), min(len(mod_index_read_ids.keys()), max_num_reads))}
-    mod_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, mod_index_read_ids_sample, extraction_layer, feature_width)
-else:
-    print('Now extracting features from unm...', flush=True)
-    unm_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, unm_index_read_ids, extraction_layer, feature_width)
-    print('Now extracting features from mod...', flush=True)
-    mod_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, mod_index_read_ids, extraction_layer, feature_width)
+### loop through BID-seq sites ###
+for ind, row in df_mod.iterrows():
+    chr = row['chr'].lstrip('chr')
+    pos = row['pos']   # 1-based
+    name = row['name']
+    strand = row['strand']
+    bidseq_motif = row['Motif_1']
+    bidseq_ratio = row['Frac_Ave %']
+    ref_motif = ref[chr][pos-2:pos+3]
+    if strand=='-':
+        ref_motif = str(Seq(ref_motif).reverse_complement())
+    if ref_motif!=bidseq_motif:
+        print('Warning: Aligned motif {} =/= BID-seq motif {}!'.format(ref_motif, bidseq_motif))
+    site_name = '{} {} {}, BID-seq ratio {:.1f}%'.format(chr, pos, name, bidseq_ratio)
+    print('\n=========================================================', flush=True)
+    print(site_name, flush=True)
 
-### collect motif features ###
-# motif_ind = '0'
-# motif_name = 'GGACA'
-
-motif_indices_names = [
-    ('0', 'GGACA'),
-    ('1', 'GGACC'),
-    ('2', 'AGACT')
-]
-
-for motif_ind, motif_name in motif_indices_names:
-    print('Now collecting features for motif {} from unm reads...'.format(motif_name), flush=True)
-    unm_motif_features = collect_all_motif_features(motif_ind, ref, unm_bam, unm_predStr_features, enforce_motif=True)
-    print('{} feature vectors collected'.format(len(unm_motif_features)), flush=True)
-    print('Now collecting features for motif {} from mod reads...'.format(motif_name), flush=True)
-    mod_motif_features = collect_all_motif_features(motif_ind, ref, mod_bam, mod_predStr_features)
-    print('{} feature vectors collected'.format(len(mod_motif_features)), flush=True)
+    unm_motif_features = collect_features_from_aligned_site_v2(fixed_model, fixed_device, fixed_config, extraction_layer, unm_bam, unm_index_read_ids, chr, pos, min_coverage, max_num_reads, enforce_motif=ref_motif)
+    print('{} IVT feature vectors collected'.format(len(unm_motif_features)), flush=True)
+    mod_motif_features = collect_features_from_aligned_site_v2(fixed_model, fixed_device, fixed_config, extraction_layer, mod_bam, mod_index_read_ids, chr, pos, min_coverage, max_num_reads)
+    print('{} WT feature vectors collected'.format(len(mod_motif_features)), flush=True)
 
     ### train classifier ###
-    train_cluster(unm_motif_features, mod_motif_features, motif_name, scaler, debug_img_dir=os.path.join(clustering_model_dir, 'clustering'))
-
-    # dump(classifier_model, os.path.join(classifier_model_dir, '{}_{}.joblib'.format(classifier, motif_name)))
-    # print('AUC {:.2f}'.format(auc_score), flush=True)
+    if (len(unm_motif_features)>=min_coverage) and (len(mod_motif_features)>=min_coverage):
+        train_cluster(unm_motif_features, mod_motif_features, site_name, scaler, debug_img_dir=os.path.join(clustering_model_dir, 'clustering'))
