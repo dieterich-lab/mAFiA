@@ -63,6 +63,6 @@ def calculate_outlier_ratio_with_ivt_distance(ivt_dict, wt_dict, site_name, scal
     ivt_l1_dist_sigma = np.std(ivt_l1_dist)
 
     wt_l1_dist = np.sum(np.abs(wt_features - ivt_centroid), axis=1)
-    pred_mod_ratio = np.mean(np.abs(wt_l1_dist - ivt_l1_dist_mu) > (ivt_l1_dist_sigma * sigma_multiplier))
+    pred_mod_ratio = np.mean(np.abs(wt_l1_dist - ivt_l1_dist_mu) > (ivt_l1_dist_sigma * sigma_multiplier)) * 100.0
 
     return pred_mod_ratio
