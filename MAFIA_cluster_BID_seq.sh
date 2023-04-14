@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #SBATCH --partition=gpu
 #SBATCH --exclude=gpu-g4-1
+#SBATCH --nodelist=gpu-g3-1
 #SBATCH --mem=60GB
 #SBATCH --nodes=1
 #SBATCH --verbose
@@ -20,7 +21,7 @@ python3 ${HOME}/git/MAFIA/mRNA_train_clustering.py \
 --mod_fast5_dir /prj/Isabel_IVT_Nanopore/HEK293A_wildtype/Jessica_HEK293/HEK293A_2/20190409_1503_GA10000_FAK10978_2e75d7be/fast5_all \
 --ref_file ${HOME}/Data/genomes/GRCh38_96.fa \
 --mod_file ${HOME}/Data/BID_seq/GSE179798_HEK293T_mRNA_WT_BID-seq.xlsx \
---max_num_reads -1 \
+--max_num_reads 1000 \
 --min_coverage 50 \
 --backbone_model_path ${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch \
 --extraction_layer convlayers.conv21 \
