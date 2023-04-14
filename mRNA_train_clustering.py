@@ -52,7 +52,7 @@ output_file = os.path.join(output_dir, 'res_outlier_ratio.tsv')
 ref = {}
 for record in SeqIO.parse(ref_file, 'fasta'):
     ref[record.id] = str(record.seq)
-print('Parsed reference with {} contigs', len(ref.keys()), flush=True)
+print('Parsed reference with {} contigs'.format(len(ref.keys())), flush=True)
 
 df_mod = pd.read_excel(mod_file, skiprows=3)
 print('Imported mod file with {} sites'.format(len(df_mod)), flush=True)
