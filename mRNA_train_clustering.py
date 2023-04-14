@@ -49,11 +49,12 @@ if clustering_model_dir is not None:
     os.makedirs(clustering_model_dir, exist_ok=True)
 
 ref = {}
-print('Parsing reference...', flush=True)
 for record in SeqIO.parse(ref_file, 'fasta'):
     ref[record.id] = str(record.seq)
+print('Parsed reference with contigs:\n', list(ref.keys()), flush=True)
 
 df_mod = pd.read_excel(mod_file, skiprows=3)
+print('Imported mod file with {} sites'.format(len(df_mod)), flush=True)
 
 ### unm ###
 unm_bam = pysam.AlignmentFile(unm_bam_file, 'rb')
@@ -98,7 +99,7 @@ for ind, row in df_mod.iterrows():
     if ref_motif!=bidseq_motif:
         print('Aligned motif {} =/= BID-seq motif {}!'.format(ref_motif, bidseq_motif))
         continue
-    site_name = 'chr{} pos{} {}\nBID-seq ratio {}%'.format(chr, pos, name, int(bidseq_ratio))
+    site_name = 'chr{} pos{} {}\nBID-seq ratio {}%'.format(chr, pos, name, round(bidseq_ratio))
     print('\n=========================================================', flush=True)
     print(site_name, flush=True)
 
