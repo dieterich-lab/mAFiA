@@ -47,7 +47,7 @@ output_dir = args.output_dir
 
 if output_dir is not None:
     os.makedirs(output_dir, exist_ok=True)
-output_file = os.path.join(output_dir, 'res_outlier_ratio.tsv')
+output_file = os.path.join(output_dir, 'res_outlier_ratio_{}.tsv'.format(scaler))
 
 ref = {}
 for record in SeqIO.parse(ref_file, 'fasta'):
@@ -114,7 +114,7 @@ for ind, row in df_mod.iterrows():
     ### train classifier ###
     if (len(unm_motif_features)>=min_coverage) and (len(mod_motif_features)>=min_coverage):
         # train_cluster(unm_motif_features, mod_motif_features, site_name, scaler, debug_img_dir=output_dir)
-        outlier_ratio = calculate_outlier_ratio_with_ivt_distance(unm_motif_features, mod_motif_features, site_name, scaler)
+        outlier_ratio = calculate_outlier_ratio_with_ivt_distance(unm_motif_features, mod_motif_features, scaler=scaler)
         print('BID-seq ratio: {}%'.format(round(bidseq_ratio)), flush=True)
         print('Outlier ratio: {}%'.format(round(outlier_ratio)), flush=True)
 

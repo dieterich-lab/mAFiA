@@ -26,4 +26,5 @@ python3 ${HOME}/git/MAFIA/mRNA_train_clustering.py \
 --backbone_model_path ${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch \
 --extraction_layer convlayers.conv21 \
 --feature_width 0 \
+--scaler MaxAbs \
 --output_dir ${HOME}/img_out/MAFIA_clustering/BID_seq

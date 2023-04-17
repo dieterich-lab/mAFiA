@@ -47,13 +47,14 @@ def train_cluster(unm_dict, mod_dict, site_name, scaler=None, debug_img_dir=None
 
     return 1
 
-def calculate_outlier_ratio_with_ivt_distance(ivt_dict, wt_dict, site_name, scaler=None, sigma_multiplier=1, debug_img_dir=None):
+def calculate_outlier_ratio_with_ivt_distance(ivt_dict, wt_dict, scaler=None, sigma_multiplier=1, debug_img_dir=None):
     print('Now clustering features...', flush=True)
     labels = np.array([0 for ii in range(len(ivt_dict))] + [1 for ii in range(len(wt_dict))])
     ivt_features = np.vstack([v[1] for k, v in ivt_dict.items()])
     wt_features = np.vstack([v[1] for k, v in wt_dict.items()])
 
     if scaler=='MaxAbs':
+        print('Re-scaling features with {}'.format(scaler))
         ivt_features = ivt_features / np.max(ivt_features, axis=1)
         wt_features = wt_features / np.max(wt_features, axis=1)
 
