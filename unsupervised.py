@@ -55,8 +55,8 @@ def calculate_outlier_ratio_with_ivt_distance(ivt_dict, wt_dict, scaler=None, si
 
     if scaler=='MaxAbs':
         print('Re-scaling features with {}'.format(scaler))
-        ivt_features = ivt_features / np.max(ivt_features, axis=1)
-        wt_features = wt_features / np.max(wt_features, axis=1)
+        ivt_features = ivt_features / np.max(ivt_features, axis=1, keepdims=True)
+        wt_features = wt_features / np.max(wt_features, axis=1, keepdims=True)
 
     ivt_centroid = np.mean(ivt_features, axis=0)
     ivt_l1_dist = np.sum(np.abs(ivt_features - ivt_centroid), axis=1)
