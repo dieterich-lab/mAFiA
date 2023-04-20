@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 #SBATCH --partition=gpu
 #SBATCH --exclude=gpu-g4-1
+#SBATCH --nodelist=gpu-g3-1
 #SBATCH --mem=120GB
 #SBATCH --nodes=1
 #SBATCH --verbose
-#SBATCH --output=/home/achan/slurm/MAFIA_test_binary_classifier_mRNA_NoNorm_%A.out
+#SBATCH --output=/home/achan/slurm/MAFIA_test_binary_classifier_mRNA_%A.out
 
 eval "$(conda shell.bash hook)"
 conda activate MAFIA
