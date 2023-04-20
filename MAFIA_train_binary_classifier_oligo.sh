@@ -33,9 +33,9 @@ CLASSIFIER=logistic_regression
 #OUTDIR=${WORKSPACE}/MAFIA_classifiers/A_m6A_NoNorm
 
 ### Isabel random 6 ###
-UNM_BAM=${WORKSPACE}/mapping/RL_RG1-6_A_RTA.bam.filtered
+UNM_BAM=${WORKSPACE}/mapping/RL_RG1-6_A_RTA.bam
 UNM_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG1-6_A_RTA/20230418_1325_X1_AOL616_885f620d/fast5
-MOD_BAM=${WORKSPACE}/mapping/RL_RG7-12_m6A_RTA.bam.filtered
+MOD_BAM=${WORKSPACE}/mapping/RL_RG7-12_m6A_RTA.bam
 MOD_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG7-12_m6A_RTA/20230418_1325_X2_AOC149_8138c168/fast5
 REF=${WORKSPACE}/reference/top6_random_permutation_max_blocks_5.fasta
 OUTDIR=${WORKSPACE}/MAFIA_classifiers/random_ligation_A_m6A
@@ -48,5 +48,6 @@ python3 mRNA_train_binary_classifier.py \
 --ref_file ${REF} \
 --backbone_model_path ${BACKBONE_MODEL} \
 --extraction_layer ${EXT_LAYER} \
+--min_coverage 10 \
 --classifier ${CLASSIFIER} \
 --classifier_model_dir ${OUTDIR}
