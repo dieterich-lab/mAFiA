@@ -82,7 +82,7 @@ fixed_model, fixed_device = load_model(backbone_model_path, fixed_config, extrac
 # target_motif = 'GGACA'
 # classifier_model = load(os.path.join(classifier_model_dir, '{}_{}.joblib'.format(classifier, target_motif)))
 classifier_model_paths = glob(os.path.join(classifier_model_dir, '{}_*.joblib'.format(classifier)))
-classifier_models = {os.path.basename(this_path).rstrip('.joblib').split('_')[1] : load(this_path) for this_path in classifier_model_paths}
+classifier_models = {os.path.basename(this_path).rstrip('.joblib').split('_')[-1] : load(this_path) for this_path in classifier_model_paths}
 target_motifs = list(classifier_models.keys())
 print('Target motifs: {}'.format(', '.join(target_motifs)), flush=True)
 if os.path.exists(outfile):
