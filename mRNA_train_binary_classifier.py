@@ -114,6 +114,6 @@ for motif_ind, motif_name in motif_indices_names:
     print('{} feature vectors collected'.format(len(mod_motif_features)), flush=True)
 
     ### train classifier ###
-    auc_score, classifier_model, opt_thresh = train_binary_classifier(unm_motif_features, mod_motif_features, motif_name, classifier, scaler, debug_img_dir=os.path.join(classifier_model_dir, 'auc'))
+    auc_score, classifier_model, opt_thresh = train_binary_classifier(unm_motif_features, mod_motif_features, classifier=classifier, scaler=scaler, debug_img_path=os.path.join(classifier_model_dir, 'auc'), fig_title=motif_name)
     dump(classifier_model, os.path.join(classifier_model_dir, '{}_{}.joblib'.format(classifier, motif_name)))
     print('AUC {:.2f}'.format(auc_score), flush=True)
