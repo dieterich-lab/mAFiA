@@ -1,7 +1,8 @@
 sterm -c 2 -m 64GB -N gpu-g3-1
 
 WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian
-REF=${WORKSPACE}/reference/splint_variations_max_blocks_7.fasta
+#REF=${WORKSPACE}/reference/splint_variations_max_blocks_7.fasta
+REF=${WORKSPACE}/reference/top6_random_permutation_max_blocks_7.fasta
 ARCH=${HOME}/git/renata/rnaarch
 MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 
@@ -9,16 +10,18 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 #DATASET=A_RTA
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_A_RTA/20230221_1328_X1_ANS648_701f60ca
 
-DATASET=m6A_RTA
-FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/20230221_1328_X2_ANS491_f891b4b9
+#DATASET=m6A_RTA
+#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/20230221_1328_X2_ANS491_f891b4b9
+
+#DATASET=RL_RG1-6_A_RTA
+#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG1-6_A_RTA/20230418_1325_X1_AOL616_885f620d/fast5
+
+DATASET=RL_RG7-12_m6A_RTA
+FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG7-12_m6A_RTA/20230418_1325_X2_AOC149_8138c168/fast5
 
 #####################################################################################################################################
 
 mkdir -p ${WORKSPACE}
-#FAST5_DIR=${WORKSPACE}/fast5_all/${DATASET}
-#mkdir -p ${FAST5_DIR}
-#cp ${RAW_FAST5_DIR}/fast5_pass/*.fast5 ${FAST5_DIR}
-#cp ${RAW_FAST5_DIR}/fast5_fail/*.fast5 ${FAST5_DIR}
 
 FASTA=${WORKSPACE}/basecall/${DATASET}.fasta
 SAM=${WORKSPACE}/mapping/${DATASET}.sam
@@ -44,17 +47,16 @@ ${HOME}/git/renata/accuracy.py ${SAM} ${REF}
 
 
 #### Convert to BAM ###
-samtools view -bST ${REF} ${SAM} -o ${BAM}
-samtools sort ${BAM} > ${BAM//.bam/_sorted.bam}
-samtools index ${BAM//.bam/_sorted.bam}
+samtools view -bST ${REF} ${SAM} | samtools sort - > ${BAM}
+samtools index ${BAM}
 
 ### filter reads by max indel ###
 deactivate
 conda activate MAFIA
 
 python3 ${HOME}/git/MAFIA/filter_bam_file_by_max_indel_len.py \
---infile ${BAM//.bam/_sorted.bam} \
---outfile ${BAM//.bam/_sorted_filtered.bam} \
+--infile ${BAM} \
+--outfile ${BAM}.filtered \
 --indel_thresh 10
 
-samtools index ${BAM//.bam/_sorted_filtered.bam}
+samtools index ${BAM}.filtered

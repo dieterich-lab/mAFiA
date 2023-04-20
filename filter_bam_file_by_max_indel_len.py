@@ -28,7 +28,7 @@ out_counts = 0
 thresholded_reads = []
 for read in bam_in.fetch():
     in_counts += 1
-    if read.flag in [0, 2048]:
+    if read.flag in [0, 256, 2048, 2304]:
         cs = read.cigarstring
         res = re.split('(\d+)', cs)[1:]
         cs_pairs = list(zip(np.int32(res[0::2]), res[1::2]))

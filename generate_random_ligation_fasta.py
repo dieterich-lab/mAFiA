@@ -18,9 +18,11 @@ def add_block(base_list, add_list, base_names, add_names):
     return new_list, new_names
 
 max_blocks = 7
-prj_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian'
-base_fasta = os.path.join(prj_dir, 'WUE_splint_test_w_splint.fasta')
-out_fasta = os.path.join(prj_dir, 'splint_variations_max_blocks_{}.fasta'.format(max_blocks))
+ref_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/reference'
+# base_fasta = os.path.join(ref_dir, 'WUE_splint_test_w_splint.fasta')
+# out_fasta = os.path.join(ref_dir, 'splint_variations_max_blocks_{}.fasta'.format(max_blocks))
+base_fasta = os.path.join(ref_dir, 'Top-6-GLORI_from_48-oligo-list.fasta')
+out_fasta = os.path.join(ref_dir, 'top6_random_permutation_max_blocks_{}.fasta'.format(max_blocks))
 
 base_sequences = []
 for record in SeqIO.parse(base_fasta, 'fasta'):
