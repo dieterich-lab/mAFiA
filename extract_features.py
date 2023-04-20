@@ -315,15 +315,13 @@ def extract_features_from_multiple_signals(model, device, config, ext_layer, sit
     return site_motif_features
 
 
-def collect_all_motif_features(motif_ind, reference, bam_in, predStr_features, enforce_motif=False):
-    BLOCK_CENTER = 16
-    BLOCK_SIZE = 33
+def collect_all_motif_features(motif_ind, reference, bam_in, predStr_features, block_size, block_center, enforce_motif=False):
 
     relevant_contigs = [k for k in reference.keys() if motif_ind in k.split('_')[1]]
     motif_features = []
     for contig in relevant_contigs:
         block_str = contig.split('_')[1]
-        site_positions = np.where(np.array(list(block_str)) == motif_ind)[0] * BLOCK_SIZE + BLOCK_CENTER
+        site_positions = np.where(np.array(list(block_str)) == motif_ind)[0] * block_size + block_center
         for pos in site_positions:
             reference_motif = reference[contig][(pos - 2):(pos + 3)]
             if enforce_motif:

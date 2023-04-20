@@ -101,19 +101,26 @@ else:
 #     ('1', 'GGACC'),
 #     ('2', 'AGACT')
 # ]
-motif_indices_names = [(k.split('_')[1],
-                        ref[k][len(ref[k])//2-2:len(ref[k])//2+3])
-                       for k in ref.keys() if k.lstrip('block').split('_')[0]=='1']
 
-for motif_ind, motif_name in motif_indices_names:
+block_index_motif_size_center = []
+for k in ref.keys():
+    if k.lstrip('block').split('_')[0] == '1':
+        block_index = k.split('_')[1]
+        block_seq = ref[k]
+        block_size = len(block_seq)
+        block_center = block_size // 2
+        motif = block_seq[block_center-2:block_center+3]
+        block_index_motif_size_center.append((block_index, motif, block_size, block_center))
+
+for motif_ind, motif_name, block_size, block_center in block_index_motif_size_center:
     print('Now collecting features for motif {} from unm reads...'.format(motif_name), flush=True)
-    unm_motif_features = collect_all_motif_features(motif_ind, ref, unm_bam, unm_predStr_features, enforce_motif=True)
+    unm_motif_features = collect_all_motif_features(motif_ind, ref, unm_bam, unm_predStr_features, block_size=block_size, block_center=block_center, enforce_motif=True)
     print('{} feature vectors collected'.format(len(unm_motif_features)), flush=True)
     print('Now collecting features for motif {} from mod reads...'.format(motif_name), flush=True)
-    mod_motif_features = collect_all_motif_features(motif_ind, ref, mod_bam, mod_predStr_features)
+    mod_motif_features = collect_all_motif_features(motif_ind, ref, mod_bam, mod_predStr_features, block_size=block_size, block_center=block_center)
     print('{} feature vectors collected'.format(len(mod_motif_features)), flush=True)
 
     ### train classifier ###
-    auc_score, classifier_model, opt_thresh = train_binary_classifier(unm_motif_features, mod_motif_features, classifier=classifier, scaler=scaler, debug_img_path=os.path.join(classifier_model_dir, 'auc'), fig_title=motif_name)
+    auc_score, classifier_model, opt_thresh = train_binary_classifier(unm_motif_features, mod_motif_features, classifier=classifier, scaler=scaler, debug_img_path=os.path.join(classifier_model_dir, 'auc_{}.png'.format(motif_name)), fig_title=motif_name)
     dump(classifier_model, os.path.join(classifier_model_dir, '{}_{}.joblib'.format(classifier, motif_name)))
     print('AUC {:.2f}'.format(auc_score), flush=True)
