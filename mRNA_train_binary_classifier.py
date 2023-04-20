@@ -96,11 +96,14 @@ else:
 # motif_ind = '0'
 # motif_name = 'GGACA'
 
-motif_indices_names = [
-    ('0', 'GGACA'),
-    ('1', 'GGACC'),
-    ('2', 'AGACT')
-]
+# motif_indices_names = [
+#     ('0', 'GGACA'),
+#     ('1', 'GGACC'),
+#     ('2', 'AGACT')
+# ]
+motif_indices_names = [(k.split('_')[1],
+                        ref[k][len(ref[k])//2-2:len(ref[k])//2+3])
+                       for k in ref.keys() if k.lstrip('block').split('_')[0]=='1']
 
 for motif_ind, motif_name in motif_indices_names:
     print('Now collecting features for motif {} from unm reads...'.format(motif_name), flush=True)
