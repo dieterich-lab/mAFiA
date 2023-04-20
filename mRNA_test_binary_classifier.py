@@ -77,10 +77,13 @@ fixed_config = objectview(origconfig)
 fixed_model, fixed_device = load_model(backbone_model_path, fixed_config, extraction_layer)
 
 ### loop through sites ###
-target_motifs = ['GGACA', 'GGACC', 'AGACT']
-classifier_models = {this_motif : load(os.path.join(classifier_model_dir, '{}_{}.joblib'.format(classifier, this_motif))) for this_motif in target_motifs}
+# target_motifs = ['GGACA', 'GGACC', 'AGACT']
+# classifier_models = {this_motif : load(os.path.join(classifier_model_dir, '{}_{}.joblib'.format(classifier, this_motif))) for this_motif in target_motifs}
 # target_motif = 'GGACA'
 # classifier_model = load(os.path.join(classifier_model_dir, '{}_{}.joblib'.format(classifier, target_motif)))
+classifier_model_paths = glob(os.path.join(classifier_model_dir, '{}_*.joblib'.format(classifier)))
+classifier_models = {os.path.basename(this_path).rstrip('.joblib').split('_')[1] : load(this_path) for this_path in classifier_model_paths}
+target_motifs = list(classifier_models.keys())
 if os.path.exists(outfile):
     df_out = pd.read_csv(outfile, sep='\t', index_col=0)
     counts = len(df_out)
