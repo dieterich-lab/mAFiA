@@ -13,11 +13,11 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 #DATASET=m6A_RTA
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/20230221_1328_X2_ANS491_f891b4b9
 
-#DATASET=RL_RG1-6_A_RTA
-#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG1-6_A_RTA/20230418_1325_X1_AOL616_885f620d/fast5
+DATASET=RL_RG1-6_A_RTA
+FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG1-6_A_RTA/20230418_1325_X1_AOL616_885f620d/fast5
 
-DATASET=RL_RG7-12_m6A_RTA
-FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG7-12_m6A_RTA/20230418_1325_X2_AOC149_8138c168/fast5
+#DATASET=RL_RG7-12_m6A_RTA
+#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG7-12_m6A_RTA/20230418_1325_X2_AOC149_8138c168/fast5
 
 #####################################################################################################################################
 
@@ -28,6 +28,7 @@ SAM=${WORKSPACE}/mapping/${DATASET}.sam
 BAM=${SAM//.sam/.bam}
 
 #### basecall with Rodan IVT ###
+deactivate
 source ${HOME}/git/renata/virtualenv/bin/activate
 
 python3 ${HOME}/git/renata/basecall_viterbi.py \
