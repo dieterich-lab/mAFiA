@@ -60,7 +60,7 @@ set -e -u
 
 cd ${HOME}/git/MAFIA
 
-python3 ${HOME}/git/MAFIA/test_binary_classifier.py \
+python3 ${HOME}/git/MAFIA/mRNA_test_binary_classifier.py \
 --test_bam_file ${BAM} \
 --test_fast5_dir ${FAST5_DIR} \
 --ref_file ${REF} \
