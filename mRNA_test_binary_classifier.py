@@ -84,6 +84,7 @@ fixed_model, fixed_device = load_model(backbone_model_path, fixed_config, extrac
 classifier_model_paths = glob(os.path.join(classifier_model_dir, '{}_*.joblib'.format(classifier)))
 classifier_models = {os.path.basename(this_path).rstrip('.joblib').split('_')[1] : load(this_path) for this_path in classifier_model_paths}
 target_motifs = list(classifier_models.keys())
+print('Target motifs: {}'.format(', '.join(target_motifs)), flush=True)
 if os.path.exists(outfile):
     df_out = pd.read_csv(outfile, sep='\t', index_col=0)
     counts = len(df_out)
