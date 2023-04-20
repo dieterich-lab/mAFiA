@@ -121,6 +121,7 @@ for motif_ind, motif_name, block_size, block_center in block_index_motif_size_ce
     print('{} feature vectors collected'.format(len(mod_motif_features)), flush=True)
 
     ### train classifier ###
-    auc_score, classifier_model, opt_thresh = train_binary_classifier(unm_motif_features, mod_motif_features, classifier=classifier, scaler=scaler, debug_img_path=os.path.join(classifier_model_dir, 'auc_{}.png'.format(motif_name)), fig_title=motif_name)
-    dump(classifier_model, os.path.join(classifier_model_dir, '{}_{}.joblib'.format(classifier, motif_name)))
-    print('AUC {:.2f}'.format(auc_score), flush=True)
+    if min(len(unm_motif_features), len(mod_motif_features))>=min_coverage:
+        auc_score, classifier_model, opt_thresh = train_binary_classifier(unm_motif_features, mod_motif_features, classifier=classifier, scaler=scaler, debug_img_path=os.path.join(classifier_model_dir, 'auc_{}.png'.format(motif_name)), fig_title=motif_name)
+        dump(classifier_model, os.path.join(classifier_model_dir, '{}_{}.joblib'.format(classifier, motif_name)))
+        print('AUC {:.2f}'.format(auc_score), flush=True)
