@@ -24,7 +24,7 @@ CLASSIFIER=logistic_regression
 ############################################################################################
 ### source data ############################################################################
 ############################################################################################
-### Würzburg first 3 splint ###
+### Claudia first 3 splint ###
 #UNM_BAM=${WORKSPACE}/mapping/A_RTA_sorted_filtered.bam
 #UNM_FAST5=/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_A_RTA/20230221_1328_X1_ANS648_701f60ca/fast5_pass
 #MOD_BAM=${WORKSPACE}/mapping/m6A_RTA_sorted_filtered.bam
