@@ -12,8 +12,8 @@ conda activate MAFIA
 WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 
 #####################################################################################################################################
-#DATASET=HEK293A_WT
-#FAST5_DIR=/beegfs/prj/Isabel_IVT_Nanopore/HEK293A_wildtype/Jessica_HEK293/HEK293A_2/20190409_1503_GA10000_FAK10978_2e75d7be/fast5_all
+DATASET=HEK293A_WT
+FAST5_DIR=/beegfs/prj/Isabel_IVT_Nanopore/HEK293A_wildtype/Jessica_HEK293/HEK293A_2/20190409_1503_GA10000_FAK10978_2e75d7be/fast5_all
 
 #DATASET=HEK293_IVT
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293_IVT_2/fast5_pass
@@ -25,8 +25,8 @@ WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 #DATASET=HEK293T-WT-25-rep1
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-WT-25-rep1/fast5_pass
 
-DATASET=HEK293T-WT-50-rep2
-FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-WT-50-rep2/fast5_pass
+#DATASET=HEK293T-WT-50-rep2
+#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-WT-50-rep2/fast5_pass
 
 #DATASET=HEK293T-WT-50-rep3
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-WT-50-rep3/fast5
@@ -47,13 +47,14 @@ FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Me
 #####################################################################################################################################
 
 REF=${HOME}/Data/genomes/GRCh38_96.fa
-BAM=${WORKSPACE}/mapping/HEK293T-WT-Mettl3-Mix/${DATASET}.bam.sorted
+BAM=${WORKSPACE}/mapping/${DATASET}.bam.sorted
 MOD_FILE=${HOME}/Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv
-BACKBON_MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
+BACKBONE_MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 EXTRACTION_LAYER=convlayers.conv21
-CLASSIFIER_MODEL_DIR=${WORKSPACE}/MAFIA_classifiers/A_m6A_multiple_NoNorm_allReads
-MOD_PROB_THRESH=0.95
-OUTFILE=${WORKSPACE}/results/res_${DATASET}_modProbThresh${MOD_PROB_THRESH}.tsv
+TRAINING_DATA=random_ligation_A_m6A
+CLASSIFIER_MODEL_DIR=${WORKSPACE}/MAFIA_classifiers/${TRAINING_DATA}
+MOD_PROB_THRESH=0.5
+OUTFILE=${WORKSPACE}/results/res_${DATASET}_${TRAINING_DATA}_modProbThresh${MOD_PROB_THRESH}.tsv
 
 set -e -u
 
@@ -66,9 +67,8 @@ python3 ${HOME}/git/MAFIA/test_binary_classifier.py \
 --mod_file ${MOD_FILE} \
 --max_num_reads 1000 \
 --min_coverage 50 \
---backbone_model_path ${BACKBON_MODEL} \
+--backbone_model_path ${BACKBONE_MODEL} \
 --extraction_layer ${EXTRACTION_LAYER} \
---feature_width 0 \
 --classifier logistic_regression \
 --classifier_model_dir ${CLASSIFIER_MODEL_DIR} \
 --mod_prob_thres ${MOD_PROB_THRESH} \
