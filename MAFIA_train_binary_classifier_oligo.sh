@@ -20,7 +20,7 @@ WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 BACKBONE_MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 EXT_LAYER=convlayers.conv21
 CLASSIFIER=logistic_regression
-SCALER='MaxAbs'
+SCALER=MaxAbs
 
 ############################################################################################
 ### source data ############################################################################
@@ -49,7 +49,7 @@ python3 mRNA_train_binary_classifier.py \
 --ref_file ${REF} \
 --backbone_model_path ${BACKBONE_MODEL} \
 --extraction_layer ${EXT_LAYER} \
---scaler ${SCALER}
+--scaler ${SCALER} \
 --min_coverage 10 \
 --classifier ${CLASSIFIER} \
 --classifier_model_dir ${OUTDIR}
