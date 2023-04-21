@@ -20,6 +20,7 @@ WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 BACKBONE_MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 EXT_LAYER=convlayers.conv21
 CLASSIFIER=logistic_regression
+SCALER='MaxAbs'
 
 ############################################################################################
 ### source data ############################################################################
@@ -38,7 +39,7 @@ UNM_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Lig
 MOD_BAM=${WORKSPACE}/mapping/RL_RG7-12_m6A_RTA.bam
 MOD_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG7-12_m6A_RTA/20230418_1325_X2_AOC149_8138c168/fast5
 REF=${WORKSPACE}/reference/top6_random_permutation_max_blocks_5.fasta
-OUTDIR=${WORKSPACE}/MAFIA_classifiers/random_ligation_A_m6A
+OUTDIR=${WORKSPACE}/MAFIA_classifiers/random_ligation_A_m6A_${SCALER}
 
 python3 mRNA_train_binary_classifier.py \
 --unm_bam_file ${UNM_BAM} \
@@ -48,6 +49,7 @@ python3 mRNA_train_binary_classifier.py \
 --ref_file ${REF} \
 --backbone_model_path ${BACKBONE_MODEL} \
 --extraction_layer ${EXT_LAYER} \
+--scaler ${SCALER}
 --min_coverage 10 \
 --classifier ${CLASSIFIER} \
 --classifier_model_dir ${OUTDIR}

@@ -128,12 +128,12 @@ def train_binary_classifier(unm_dict, mod_dict, classifier, scaler=None, frac_te
     elif classifier=='logistic_regression':
         clf = LogisticRegression(random_state=0, max_iter=1000)
 
-    if scaler is None:
-        binary_model = clf
-    elif scaler=='MaxAbs':
+    if scaler=='MaxAbs':
         binary_model = make_pipeline(MaxAbsScaler(), clf)
     elif scaler=='Standard':
         binary_model = make_pipeline(StandardScaler(), clf)
+    else:
+        binary_model = clf
 
     binary_model = binary_model.fit(X_train, y_train)
     # predictions = binary_model.predict(X_test)
