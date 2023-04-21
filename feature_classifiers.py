@@ -222,22 +222,19 @@ def train_svm_ivt_wt(ivt_dict, wt_dict, wanted_motif, site, debug_img_dir=None):
 
     return score_auc, clf, opt_thresh
 
-def get_mod_ratio_with_binary_classifier(dict_motif_feature, clf, mod_thresh=0.5):
-    # print('Classifying {} features with model: '.format(len(dict_motif_feature)), flush=True)
-    # print(clf)
+def get_mod_ratio_with_binary_classifier(dict_motif_feature, clf, mod_thresh=0.5, output_mod_probs=False):
     test_motifs = [v[0] for k, v in dict_motif_feature.items()]
     test_features = [v[1] for k, v in dict_motif_feature.items()]
 
-    if mod_thresh is not None:
-        # y_score = clf.decision_function(test_features)
-        # predictions = np.int32(y_score>mod_thresh)
-        mod_probs = clf.predict_proba(test_features)[:, 1]
-        predictions = np.int32(mod_probs > mod_thresh)
-    else:
-        predictions = clf.predict(test_features)
+    mod_probs = clf.predict_proba(test_features)[:, 1]
+    read_predMotif_modProbs = {read_id: (pred_motif, mod_prob) for read_id, pred_motif, mod_prob in zip(dict_motif_feature.keys(), test_motifs, mod_probs)}
+    predictions = np.int32(mod_probs > mod_thresh)
     avg_mod_ratio = np.mean(predictions)
 
-    return avg_mod_ratio
+    if output_mod_probs:
+        return avg_mod_ratio, read_predMotif_modProbs
+    else:
+        return avg_mod_ratio
 
 def get_mod_probs(dict_motif_feature, clf):
     test_motifs = [v[0] for k, v in dict_motif_feature.items()]

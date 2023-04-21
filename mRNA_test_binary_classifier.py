@@ -32,8 +32,9 @@ parser.add_argument('--extraction_layer')
 parser.add_argument('--feature_width', default=0)
 parser.add_argument('--classifier')
 parser.add_argument('--classifier_model_dir')
-parser.add_argument('--mod_prob_thresh', default=0)
+parser.add_argument('--mod_prob_thresh', default=0.5)
 parser.add_argument('--outfile')
+parser.add_argument('--output_mod_probs', action='store_true')
 
 args = parser.parse_args()
 test_bam_file = args.test_bam_file
@@ -49,6 +50,7 @@ classifier = args.classifier
 classifier_model_dir = args.classifier_model_dir
 mod_prob_thresh = float(args.mod_prob_thresh)
 outfile = args.outfile
+output_mod_probs = bool(args.output_mod_probs)
 
 outdir = os.path.dirname(outfile)
 if not os.path.exists(outdir):
@@ -131,16 +133,25 @@ for ind, row in df_mod.iterrows():
         print('chr{}, pos{}'.format(chr, start), flush=True)
         print('Reference motif {}'.format(ref_motif), flush=True)
         print('{} feature vectors collected'.format(len(test_site_motif_features)), flush=True)
-        mod_ratio = get_mod_ratio_with_binary_classifier(test_site_motif_features, classifier_models[ref_motif], mod_prob_thresh)
+        if output_mod_probs:
+            mod_ratio, read_predMotif_modProbs = get_mod_ratio_with_binary_classifier(test_site_motif_features, classifier_models[ref_motif], mod_prob_thresh, output_mod_probs=output_mod_probs)
+            for read_id, (pred_motif, mod_prob) in read_predMotif_modProbs.items():
+                new_row = row.copy()
+                new_row['ref_motif'] = ref_motif
+                new_row['pred_motif'] = pred_motif
+                new_row['read_id'] = read_id
+                new_row['mod_prob'] = round(mod_prob, 3)
+                df_out = pd.concat([df_out, new_row.to_frame().T])
+        else:
+            mod_ratio = get_mod_ratio_with_binary_classifier(test_site_motif_features, classifier_models[ref_motif], mod_prob_thresh, output_mod_probs=output_mod_probs)
+            new_row = row.copy()
+            new_row['ref_motif'] = ref_motif
+            new_row['mod_ratio'] = round(mod_ratio, 3)
+            new_row['num_test_features'] = len(test_site_motif_features)
+            df_out = pd.concat([df_out, new_row.to_frame().T])
         print('Predicted mod ratio {:.2f} [GLORI {:.2f}]'.format(mod_ratio, glori_ratio), flush=True)
         print('=========================================================', flush=True)
-        new_row = row.copy()
-        new_row['motif'] = ref_motif
-        new_row['mod_ratio'] = round(mod_ratio, 3)
-        new_row['num_test_features'] = len(test_site_motif_features)
-        df_out = pd.concat([df_out, new_row.to_frame().T])
+
         counts += 1
-        if counts % 5 == 0:
-            df_out.to_csv(outfile, sep='\t')
-df_out.to_csv(outfile, sep='\t')
+        df_out.to_csv(outfile, sep='\t')
 print('Total {} sites'.format(counts))
