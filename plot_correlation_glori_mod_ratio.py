@@ -39,5 +39,5 @@ for subplot_ind, this_motif in enumerate(motifs):
     plt.title('{}, {} sites'.format(this_motif, df_motif.shape[0]) + '\nCorrelation {:.2f}'.format(corr), fontsize=15)
 # plt.subplots_adjust(top=0.8)
 plt.tight_layout()
-plt.savefig(os.path.join(img_out, 'corr_glori_modRatio_{}_pValThresh{:.2E}.png'.format(this_motif, P_VAL_THRESH)), bbox_inches='tight')
+plt.savefig(os.path.join(img_out, 'corr_glori_modRatio_pValThresh{:.2E}.png'.format(P_VAL_THRESH)), bbox_inches='tight')
 plt.close()
