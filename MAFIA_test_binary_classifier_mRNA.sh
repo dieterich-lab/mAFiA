@@ -73,4 +73,5 @@ python3 ${HOME}/git/MAFIA/mRNA_test_binary_classifier.py \
 --classifier logistic_regression \
 --classifier_model_dir ${CLASSIFIER_MODEL_DIR} \
 --mod_prob_thres ${MOD_PROB_THRESH} \
---outfile ${OUTFILE}
+--outfile ${OUTFILE} \
+--output_mod_probs
