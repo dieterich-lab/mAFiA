@@ -20,7 +20,7 @@ WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 BACKBONE_MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 EXT_LAYER=convlayers.conv21
 CLASSIFIER=logistic_regression
-SCALER=MaxAbs
+#SCALER=MaxAbs
 
 ############################################################################################
 ### source data ############################################################################
@@ -39,9 +39,9 @@ UNM_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Lig
 MOD_BAM=${WORKSPACE}/mapping/RL_RG7-12_m6A_RTA.bam
 MOD_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG7-12_m6A_RTA/20230418_1325_X2_AOC149_8138c168/fast5
 REF=${WORKSPACE}/reference/top6_random_permutation_max_blocks_5.fasta
-OUTDIR=${WORKSPACE}/MAFIA_classifiers/random_ligation_A_m6A_${SCALER}
+OUTDIR=${WORKSPACE}/MAFIA_classifiers/random_ligation_A_m6A_${SCALER}_noEnforceMotif
 
-python3 mRNA_train_binary_classifier.py \
+python3 oligo_train_binary_classifier.py \
 --unm_bam_file ${UNM_BAM} \
 --unm_fast5_dir ${UNM_FAST5} \
 --mod_bam_file ${MOD_BAM} \

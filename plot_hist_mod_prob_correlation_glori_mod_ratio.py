@@ -3,15 +3,15 @@ HOME = os.path.expanduser('~')
 import argparse
 import pandas as pd
 import numpy as np
-# import matplotlib
-# matplotlib.use('TkAgg')
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
 # parser = argparse.ArgumentParser()
 # parser.add_argument('--df_file')
 # args = parser.parse_args()
 # df_file = args.df_file
-df_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_HEK293A_WT_random_ligation_A_m6A_modProbThresh0.5.tsv'
+df_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_HEK293_IVT_random_ligation_A_m6A_modProbThresh0.5.tsv'
 img_out = os.path.join(HOME, 'img_out/MAFIA', os.path.basename(df_file).rstrip('.tsv'))
 if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
@@ -29,15 +29,26 @@ axes_hist = fig_hist.subplots(2, 3).flatten()
 fig_mod_ratio = plt.figure(figsize=(16, 12))
 axes_mod_ratio = fig_mod_ratio.subplots(2, 3).flatten()
 
+num_bins = 100
+bin_edges = np.linspace(0, 1, num_bins + 1)
+bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
+
 for subplot_ind, this_motif in enumerate(motifs):
     df = df_all[df_all['P_adjust'] <= P_VAL_THRESH]
-    df_motif = df[df['ref_motif']==this_motif]
+    df_motif = df[
+        (df['ref_motif']==this_motif)
+        # & (df['pred_motif']==this_motif)
+        ]
 
     ### histogram of mod prob ###
-    axes_hist[subplot_ind].hist(df_motif['mod_prob'], bins=50, range=[0, 1])
+    bin_counts, _ = np.histogram(df_motif['mod_prob'], bins=bin_edges)
+    norm_counts = bin_counts / np.sum(bin_counts)
+    axes_hist[subplot_ind].plot(bin_centers, norm_counts)
     axes_hist[subplot_ind].set_xlabel('Mod. Prob.', fontsize=15)
-    axes_hist[subplot_ind].set_ylabel('Counts', fontsize=15)
+    axes_hist[subplot_ind].set_ylabel('Norm. frequency', fontsize=15)
     axes_hist[subplot_ind].set_title('{}, {} features'.format(this_motif, len(df_motif)), fontsize=20)
+    axes_hist[subplot_ind].set_xlim([0, 1])
+    axes_hist[subplot_ind].set_ylim([0, 0.25])
 
     ### average per site ###
     df_motif_avg = pd.DataFrame()
@@ -67,4 +78,4 @@ fig_hist.tight_layout()
 fig_hist.savefig(os.path.join(img_out, 'hist_modProbs_pValThresh{:.2E}.png'.format(P_VAL_THRESH)), bbox_inches='tight')
 fig_mod_ratio.tight_layout()
 fig_mod_ratio.savefig(os.path.join(img_out, 'corr_glori_modRatio_pValThresh{:.2E}.png'.format(P_VAL_THRESH)), bbox_inches='tight')
-plt.close('all')
+# plt.close('all')

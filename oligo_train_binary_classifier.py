@@ -114,7 +114,7 @@ for k in ref.keys():
 
 for motif_ind, motif_name, block_size, block_center in block_index_motif_size_center:
     print('Now collecting features for motif {} from unm reads...'.format(motif_name), flush=True)
-    unm_motif_features = collect_all_motif_features(motif_ind, ref, unm_bam, unm_predStr_features, block_size=block_size, block_center=block_center, enforce_motif=True)
+    unm_motif_features = collect_all_motif_features(motif_ind, ref, unm_bam, unm_predStr_features, block_size=block_size, block_center=block_center)
     print('{} feature vectors collected'.format(len(unm_motif_features)), flush=True)
     print('Now collecting features for motif {} from mod reads...'.format(motif_name), flush=True)
     mod_motif_features = collect_all_motif_features(motif_ind, ref, mod_bam, mod_predStr_features, block_size=block_size, block_center=block_center)
