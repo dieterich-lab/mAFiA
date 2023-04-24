@@ -55,7 +55,8 @@ EXTRACTION_LAYER=convlayers.conv21
 TRAINING_DATA=random_ligation_A_m6A_MaxAbs
 CLASSIFIER_MODEL_DIR=${WORKSPACE}/MAFIA_classifiers/${TRAINING_DATA}
 MOD_PROB_THRESH=0.5
-OUTFILE=${WORKSPACE}/results/res_${DATASET}_${TRAINING_DATA}_modProbThresh${MOD_PROB_THRESH}.tsv
+#OUTFILE=${WORKSPACE}/results/res_${DATASET}_${TRAINING_DATA}_modProbThresh${MOD_PROB_THRESH}.tsv
+OUTFILE=${WORKSPACE}/results/res_${DATASET}_${TRAINING_DATA}_modProbPerRead.tsv
 
 set -e -u
 
