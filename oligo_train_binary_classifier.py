@@ -28,6 +28,7 @@ parser.add_argument('--mod_fast5_dir')
 parser.add_argument('--ref_file')
 parser.add_argument('--max_num_reads', default=-1)
 parser.add_argument('--min_coverage', default=0)
+parser.add_argument('--enforce_motif', action='store_true')
 parser.add_argument('--backbone_model_path')
 parser.add_argument('--extraction_layer', default='convlayers.conv21')
 parser.add_argument('--feature_width', default=0)
@@ -43,6 +44,7 @@ mod_fast5_dir = args.mod_fast5_dir
 ref_file = args.ref_file
 max_num_reads = int(args.max_num_reads)
 min_coverage = int(args.min_coverage)
+enforce_motif = bool(args.enforce_motif)
 backbone_model_path = args.backbone_model_path
 extraction_layer = args.extraction_layer
 feature_width = int(args.feature_width)
@@ -112,16 +114,22 @@ for k in ref.keys():
         motif = block_seq[block_center-2:block_center+3]
         block_index_motif_size_center.append((block_index, motif, block_size, block_center))
 
-for motif_ind, motif_name, block_size, block_center in block_index_motif_size_center:
-    print('Now collecting features for motif {} from unm reads...'.format(motif_name), flush=True)
-    unm_motif_features = collect_all_motif_features(motif_ind, ref, unm_bam, unm_predStr_features, block_size=block_size, block_center=block_center)
+for motif_ind, motif, block_size, block_center in block_index_motif_size_center:
+    print('Now collecting features for motif {} from unm reads...'.format(motif), flush=True)
+    if enforce_motif:
+        unm_motif_features = collect_all_motif_features(motif_ind, ref, unm_bam, unm_predStr_features, block_size=block_size, block_center=block_center, enforce_motif=motif)
+    else:
+        unm_motif_features = collect_all_motif_features(motif_ind, ref, unm_bam, unm_predStr_features, block_size=block_size, block_center=block_center)
     print('{} feature vectors collected'.format(len(unm_motif_features)), flush=True)
-    print('Now collecting features for motif {} from mod reads...'.format(motif_name), flush=True)
-    mod_motif_features = collect_all_motif_features(motif_ind, ref, mod_bam, mod_predStr_features, block_size=block_size, block_center=block_center)
+    print('Now collecting features for motif {} from mod reads...'.format(motif), flush=True)
+    if enforce_motif:
+        mod_motif_features = collect_all_motif_features(motif_ind, ref, mod_bam, mod_predStr_features, block_size=block_size, block_center=block_center, enforce_motif=motif)
+    else:
+        mod_motif_features = collect_all_motif_features(motif_ind, ref, mod_bam, mod_predStr_features, block_size=block_size, block_center=block_center)
     print('{} feature vectors collected'.format(len(mod_motif_features)), flush=True)
 
     ### train classifier ###
     if min(len(unm_motif_features), len(mod_motif_features))>=min_coverage:
-        auc_score, classifier_model, opt_thresh = train_binary_classifier(unm_motif_features, mod_motif_features, classifier=classifier, scaler=scaler, debug_img_path=os.path.join(classifier_model_dir, 'auc_{}.png'.format(motif_name)), fig_title=motif_name)
-        dump(classifier_model, os.path.join(classifier_model_dir, '{}_{}.joblib'.format(classifier, motif_name)))
+        auc_score, classifier_model, opt_thresh = train_binary_classifier(unm_motif_features, mod_motif_features, classifier=classifier, scaler=scaler, debug_img_path=os.path.join(classifier_model_dir, 'auc_{}.png'.format(motif)), fig_title=motif)
+        dump(classifier_model, os.path.join(classifier_model_dir, '{}_{}.joblib'.format(classifier, motif)))
         print('AUC {:.2f}'.format(auc_score), flush=True)

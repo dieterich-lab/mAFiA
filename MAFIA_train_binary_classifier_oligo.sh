@@ -39,7 +39,7 @@ UNM_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Lig
 MOD_BAM=${WORKSPACE}/mapping/RL_RG7-12_m6A_RTA.bam
 MOD_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG7-12_m6A_RTA/20230418_1325_X2_AOC149_8138c168/fast5
 REF=${WORKSPACE}/reference/top6_random_permutation_max_blocks_5.fasta
-OUTDIR=${WORKSPACE}/MAFIA_classifiers/random_ligation_A_m6A_${SCALER}_noEnforceMotif
+OUTDIR=${WORKSPACE}/MAFIA_classifiers/random_ligation_A_m6A_${SCALER}_enforceMotif
 
 python3 oligo_train_binary_classifier.py \
 --unm_bam_file ${UNM_BAM} \
@@ -47,6 +47,7 @@ python3 oligo_train_binary_classifier.py \
 --mod_bam_file ${MOD_BAM} \
 --mod_fast5_dir ${MOD_FAST5} \
 --ref_file ${REF} \
+--enforce_motif \
 --backbone_model_path ${BACKBONE_MODEL} \
 --extraction_layer ${EXT_LAYER} \
 --scaler ${SCALER} \
