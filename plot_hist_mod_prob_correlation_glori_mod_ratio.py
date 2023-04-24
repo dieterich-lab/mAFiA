@@ -22,8 +22,9 @@ if not os.path.exists(img_out):
 
 P_VAL_THRESH = 1.0E-99
 # THRESH_MOD = 0.8
-COV_THRESH = 50
+COV_THRESH = 100
 THRESH_FA = 0.1
+COMMON_SITES_ONLY = True
 
 df_ivt = pd.read_csv(ivt_res_file, sep='\t')
 df_ivt = df_ivt.rename(columns={'Unnamed: 0': 'site_index'})
@@ -101,19 +102,32 @@ for subplot_ind, this_motif in enumerate(motifs):
         return df_motif_avg
 
     df_motif_avg_ivt = calc_mod_ratio(df_motif_ivt, thresh_mod=crit_thresh, thresh_cov=COV_THRESH)
-    glori_ratio_ivt = np.float64(df_motif_avg_ivt['Ratio'])
-    mod_ratio_ivt = np.float64(df_motif_avg_ivt['mod_ratio'])
-    corr_ivt = np.corrcoef(glori_ratio_ivt, mod_ratio_ivt)[0, 1]
-
     df_motif_avg_wt = calc_mod_ratio(df_motif_wt, thresh_mod=crit_thresh, thresh_cov=COV_THRESH)
-    glori_ratio_wt = np.float64(df_motif_avg_wt['Ratio'])
-    mod_ratio_wt = np.float64(df_motif_avg_wt['mod_ratio'])
-    corr_wt = np.corrcoef(glori_ratio_wt, mod_ratio_wt)[0, 1]
+
+    ### common sites between IVT and WT ###
+    if COMMON_SITES_ONLY:
+        common_site_indices = list(set.intersection(set(df_motif_avg_ivt['site_index']), set(df_motif_avg_wt['site_index'])))
+        df_motif_avg_ivt_common_sites = df_motif_avg_ivt[df_motif_avg_ivt['site_index'].isin(common_site_indices)]
+        glori_ratio_ivt = np.float64(df_motif_avg_ivt_common_sites['Ratio'])
+        mod_ratio_ivt = np.float64(df_motif_avg_ivt_common_sites['mod_ratio'])
+        corr_ivt = np.corrcoef(glori_ratio_ivt, mod_ratio_ivt)[0, 1]
+        df_motif_avg_wt_common_sites = df_motif_avg_wt[df_motif_avg_wt['site_index'].isin(common_site_indices)]
+        glori_ratio_wt = np.float64(df_motif_avg_wt_common_sites['Ratio'])
+        mod_ratio_wt = np.float64(df_motif_avg_wt_common_sites['mod_ratio'])
+        corr_wt = np.corrcoef(glori_ratio_wt, mod_ratio_wt)[0, 1]
+    #######################################
+    else:
+        glori_ratio_ivt = np.float64(df_motif_avg_ivt['Ratio'])
+        mod_ratio_ivt = np.float64(df_motif_avg_ivt['mod_ratio'])
+        corr_ivt = np.corrcoef(glori_ratio_ivt, mod_ratio_ivt)[0, 1]
+        glori_ratio_wt = np.float64(df_motif_avg_wt['Ratio'])
+        mod_ratio_wt = np.float64(df_motif_avg_wt['mod_ratio'])
+        corr_wt = np.corrcoef(glori_ratio_wt, mod_ratio_wt)[0, 1]
 
     # axes_mod_ratio[subplot_ind].plot(glori_ratio_ivt, mod_ratio_ivt, 'bo', mfc='none', label='IVT, {} sites, corr. {:.2f}'.format(len(df_motif_avg_ivt), corr_ivt))
     # axes_mod_ratio[subplot_ind].plot(glori_ratio_wt, mod_ratio_wt, 'ro', mfc='none', label='WT, {} sites, corr. {:.2f}'.format(len(df_motif_avg_wt), corr_wt))
-    axes_mod_ratio[subplot_ind].plot(glori_ratio_ivt, mod_ratio_ivt, 'b.', label='IVT, {} sites, corr. {:.2f}'.format(len(df_motif_avg_ivt), corr_ivt))
-    axes_mod_ratio[subplot_ind].plot(glori_ratio_wt, mod_ratio_wt, 'r.', label='WT, {} sites, corr. {:.2f}'.format(len(df_motif_avg_wt), corr_wt))
+    axes_mod_ratio[subplot_ind].plot(glori_ratio_ivt, mod_ratio_ivt, 'b.', label='IVT, {} sites, corr. {:.2f}'.format(len(glori_ratio_ivt), corr_ivt))
+    axes_mod_ratio[subplot_ind].plot(glori_ratio_wt, mod_ratio_wt, 'r.', label='WT, {} sites, corr. {:.2f}'.format(len(glori_ratio_wt), corr_wt))
 
     axes_mod_ratio[subplot_ind].plot(np.arange(0, 1.1, 0.1), np.arange(0, 1.1, 0.1), 'k--', alpha=0.5)
     axes_mod_ratio[subplot_ind].set_xlim([-0.05, 1.05])
@@ -122,10 +136,11 @@ for subplot_ind, this_motif in enumerate(motifs):
     axes_mod_ratio[subplot_ind].set_ylabel('ONT mod. ratio', fontsize=15)
     axes_mod_ratio[subplot_ind].set_title('{}'.format(this_motif), fontsize=15)
     axes_mod_ratio[subplot_ind].legend(loc='upper left', fontsize=12)
-
-# plt.subplots_adjust(top=0.8)
 fig_hist.tight_layout()
-fig_hist.savefig(os.path.join(img_out, 'hist_modProbs_pValThresh{:.2E}_faThresh{:.2f}.png'.format(P_VAL_THRESH, THRESH_FA)), bbox_inches='tight')
 fig_mod_ratio.tight_layout()
-fig_mod_ratio.savefig(os.path.join(img_out, 'corr_glori_modRatio_pValThresh{:.2E}_faThresh{:.2f}.png'.format(P_VAL_THRESH, THRESH_FA)), bbox_inches='tight')
-# plt.close('all')
+fig_hist.savefig(os.path.join(img_out, 'hist_modProbs_pValThresh{:.2E}_faThresh{:.2f}.png'.format(P_VAL_THRESH, THRESH_FA)), bbox_inches='tight')
+if COMMON_SITES_ONLY:
+    fig_mod_ratio.savefig(os.path.join(img_out, 'common_sites_corr_glori_modRatio_pValThresh{:.2E}_covThresh{}_faThresh{:.2f}.png'.format(P_VAL_THRESH, COV_THRESH, THRESH_FA)), bbox_inches='tight')
+else:
+    fig_mod_ratio.savefig(os.path.join(img_out, 'corr_glori_modRatio_pValThresh{:.2E}_covThresh{}_faThresh{:.2f}.png'.format(P_VAL_THRESH, COV_THRESH, THRESH_FA)), bbox_inches='tight')
+plt.close('all')
