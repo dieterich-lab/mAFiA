@@ -20,7 +20,7 @@ WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 BACKBONE_MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 EXT_LAYER=convlayers.conv21
 CLASSIFIER=logistic_regression
-#SCALER=MaxAbs
+SCALER=None
 
 ############################################################################################
 ### source data ############################################################################
