@@ -13,11 +13,11 @@ conda activate MAFIA
 WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 
 #####################################################################################################################################
-DATASET=HEK293A_WT
-FAST5_DIR=/beegfs/prj/Isabel_IVT_Nanopore/HEK293A_wildtype/Jessica_HEK293/HEK293A_2/20190409_1503_GA10000_FAK10978_2e75d7be/fast5_all
+#DATASET=HEK293A_WT
+#FAST5_DIR=/beegfs/prj/Isabel_IVT_Nanopore/HEK293A_wildtype/Jessica_HEK293/HEK293A_2/20190409_1503_GA10000_FAK10978_2e75d7be/fast5_all
 
-#DATASET=HEK293_IVT
-#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293_IVT_2/fast5_pass
+DATASET=HEK293_IVT
+FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293_IVT_2/fast5_pass
 
 #####################################################################################################################################
 #DATASET=HEK293T-WT-0-rep2
@@ -52,7 +52,7 @@ BAM=${WORKSPACE}/mapping/${DATASET}.bam.sorted
 MOD_FILE=${HOME}/Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv
 BACKBONE_MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 EXTRACTION_LAYER=convlayers.conv21
-TRAINING_DATA=random_ligation_A_m6A_MaxAbs
+TRAINING_DATA=random_ligation_A_m6A_None_noEnforceMotif
 CLASSIFIER_MODEL_DIR=${WORKSPACE}/MAFIA_classifiers/${TRAINING_DATA}
 MOD_PROB_THRESH=0.5
 #OUTFILE=${WORKSPACE}/results/res_${DATASET}_${TRAINING_DATA}_modProbThresh${MOD_PROB_THRESH}.tsv
