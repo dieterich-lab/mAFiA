@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 # args = parser.parse_args()
 # df_file = args.df_file
 
-classifier = 'random_ligation_A_m6A'
-ivt_res_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_HEK293_IVT_{}_modProbThresh0.5.tsv'.format(classifier)
+classifier = 'random_ligation_A_m6A_MaxAbs'
+ivt_res_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_HEK293_IVT_{}_noEnforceMotif_modProbPerRead.tsv'.format(classifier)
 wt_res_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_HEK293A_WT_{}_modProbThresh0.5.tsv'.format(classifier)
 
 img_out = os.path.join(HOME, 'img_out/MAFIA', os.path.basename('HEK293_WT_vs_IVT_{}'.format(classifier)))
@@ -21,7 +21,7 @@ if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
 
 P_VAL_THRESH = 1.0E-99
-THRESH_MOD = 0.90
+THRESH_MOD = 0.50
 
 df_ivt = pd.read_csv(ivt_res_file, sep='\t')
 df_ivt = df_ivt.rename(columns={'Unnamed: 0': 'site_index'})
@@ -30,14 +30,15 @@ df_wt = df_wt.rename(columns={'Unnamed: 0': 'site_index'})
 
 motifs = df_wt['ref_motif'].unique()
 
+### plots ###
+num_bins = 100
+bin_edges = np.linspace(0, 1, num_bins + 1)
+bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
+
 fig_hist = plt.figure(figsize=(16, 12))
 axes_hist = fig_hist.subplots(2, 3).flatten()
 fig_mod_ratio = plt.figure(figsize=(16, 12))
 axes_mod_ratio = fig_mod_ratio.subplots(2, 3).flatten()
-
-num_bins = 100
-bin_edges = np.linspace(0, 1, num_bins + 1)
-bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
 
 for subplot_ind, this_motif in enumerate(motifs):
     df_motif_ivt = df_ivt[
@@ -58,8 +59,10 @@ for subplot_ind, this_motif in enumerate(motifs):
     bin_counts_wt, _ = np.histogram(df_motif_wt['mod_prob'], bins=bin_edges)
     norm_counts_wt = bin_counts_wt / np.sum(bin_counts_wt)
 
-    axes_hist[subplot_ind].plot(bin_centers, norm_counts_ivt, c='b', label='IVT, {} features'.format(len(df_motif_ivt)))
-    axes_hist[subplot_ind].plot(bin_centers, norm_counts_wt, c='r', label='WT, {} features'.format(len(df_motif_wt)))
+    # axes_hist[subplot_ind].plot(bin_centers, norm_counts_ivt, c='b', label='IVT, {} features'.format(len(df_motif_ivt)))
+    # axes_hist[subplot_ind].plot(bin_centers, norm_counts_wt, c='r', label='WT, {} features'.format(len(df_motif_wt)))
+    axes_hist[subplot_ind].step(bin_centers, norm_counts_ivt, color='b', label='IVT, {} features'.format(len(df_motif_ivt)))
+    axes_hist[subplot_ind].step(bin_centers, norm_counts_wt, color='r', label='WT, {} features'.format(len(df_motif_wt)))
 
     axes_hist[subplot_ind].set_xlabel('Mod. Prob.', fontsize=15)
     axes_hist[subplot_ind].set_ylabel('Norm. frequency', fontsize=15)
