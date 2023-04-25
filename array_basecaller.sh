@@ -2,7 +2,7 @@
 #
 #SBATCH --partition=gpu
 #SBATCH --exclude=gpu-g4-1
-#SBATCH --nodelist=gpu-g3-1
+#SBATCH --nodelist=gpu-g3-1,gpu-g2-1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem-per-cpu=4GB
 #SBATCH --verbose
