@@ -19,7 +19,6 @@ OUTPUT=${FASTA}${PART}
 echo "Running basecaller on ${LIST_FILENAMES}"
 
 python3 ${HOME}/git/renata/basecall_viterbi.py \
---fast5dir ${FAST5_DIR} \
 --list_filenames ${LIST_FILENAMES} \
 --arch ${ARCH} \
 --model ${MODEL} \
