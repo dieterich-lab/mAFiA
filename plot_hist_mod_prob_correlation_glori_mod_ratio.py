@@ -23,7 +23,8 @@ if not os.path.exists(img_out):
 P_VAL_THRESH = 1.0E-99
 # THRESH_MOD = 0.8
 COV_THRESH = 100
-THRESH_FA = 0.1
+# THRESH_FA = 0.1
+PROB_MARGIN = 0.25
 COMMON_SITES_ONLY = True
 
 df_ivt = pd.read_csv(ivt_res_file, sep='\t')
@@ -62,21 +63,22 @@ for subplot_ind, this_motif in enumerate(motifs):
     bin_counts_wt, _ = np.histogram(df_motif_wt['mod_prob'], bins=bin_edges)
     norm_counts_wt = bin_counts_wt / np.sum(bin_counts_wt)
 
-    rcdf_ivt = np.cumsum(norm_counts_ivt[::-1])[::-1]
-    rcdf_wt = np.cumsum(norm_counts_wt[::-1])[::-1]
-    frac_false_count = rcdf_ivt / (rcdf_ivt + rcdf_wt)
-    if np.where(frac_false_count<THRESH_FA)[0].any():
-        crit_thresh = bin_centers[np.where(frac_false_count<THRESH_FA)[0][0]]
-    else:
-        crit_thresh = bin_centers[np.argmin(frac_false_count)]
-    crit_thresh = max(0.5, crit_thresh)
+    # rcdf_ivt = np.cumsum(norm_counts_ivt[::-1])[::-1]
+    # rcdf_wt = np.cumsum(norm_counts_wt[::-1])[::-1]
+    # frac_false_count = rcdf_ivt / (rcdf_ivt + rcdf_wt)
+    # if np.where(frac_false_count<THRESH_FA)[0].any():
+    #     crit_thresh = bin_centers[np.where(frac_false_count<THRESH_FA)[0][0]]
+    # else:
+    #     crit_thresh = bin_centers[np.argmin(frac_false_count)]
+    # crit_thresh = max(0.5, crit_thresh)
 
     # axes_hist[subplot_ind].plot(bin_centers, norm_counts_ivt, c='b', label='IVT, {} features'.format(len(df_motif_ivt)))
     # axes_hist[subplot_ind].plot(bin_centers, norm_counts_wt, c='r', label='WT, {} features'.format(len(df_motif_wt)))
     axes_hist[subplot_ind].step(bin_centers, norm_counts_ivt, color='b', label='IVT, {} features'.format(len(df_motif_ivt)))
     axes_hist[subplot_ind].step(bin_centers, norm_counts_wt, color='r', label='WT, {} features'.format(len(df_motif_wt)))
 
-    axes_hist[subplot_ind].axvline(x=crit_thresh, c='g', label='{}% FA threshold at {:.2f}'.format(int(THRESH_FA*100), crit_thresh))
+    # axes_hist[subplot_ind].axvline(x=crit_thresh, c='g', label='{}% FA threshold at {:.2f}'.format(int(THRESH_FA*100), crit_thresh))
+    axes_hist[subplot_ind].axvspan(xmin=PROB_MARGIN, xmax=1-PROB_MARGIN, color='gray', alpha=0.5)
 
     axes_hist[subplot_ind].set_xlabel('Mod. Prob.', fontsize=15)
     axes_hist[subplot_ind].set_ylabel('Norm. frequency', fontsize=15)
@@ -86,23 +88,45 @@ for subplot_ind, this_motif in enumerate(motifs):
     axes_hist[subplot_ind].legend(loc='upper left', fontsize=12)
 
     ### aggregate mod. ratio per site ###
-    def calc_mod_ratio(in_df_motif, thresh_mod=0.5, thresh_cov=50):
+    # def calc_mod_ratio(in_df_motif, thresh_mod=0.5, thresh_cov=50):
+    #     df_motif_avg = pd.DataFrame()
+    #     for site_index in in_df_motif['site_index'].unique():
+    #         df_site = in_df_motif[in_df_motif['site_index']==site_index]
+    #         if len(df_site)<thresh_cov:
+    #             continue
+    #         num_features = len(df_site)
+    #         mod_ratio = np.mean((df_site['mod_prob'].values)>=thresh_mod)
+    #         new_row = df_site.iloc[0][:16]
+    #         new_row['num_features'] = num_features
+    #         new_row['mod_ratio'] = mod_ratio
+    #         df_motif_avg = pd.concat([df_motif_avg, new_row.to_frame().T])
+    #     df_motif_avg.reset_index(drop=True)
+    #     return df_motif_avg
+    #
+    # df_motif_avg_ivt = calc_mod_ratio(df_motif_ivt, thresh_mod=crit_thresh, thresh_cov=COV_THRESH)
+    # df_motif_avg_wt = calc_mod_ratio(df_motif_wt, thresh_mod=crit_thresh, thresh_cov=COV_THRESH)
+
+    def calc_mod_ratio_with_margin(in_df_motif, prob_margin, thresh_cov=50):
         df_motif_avg = pd.DataFrame()
         for site_index in in_df_motif['site_index'].unique():
             df_site = in_df_motif[in_df_motif['site_index']==site_index]
-            if len(df_site)<thresh_cov:
+            df_site_margin = df_site[
+                (df_site['mod_prob']<prob_margin)
+                | (df_site['mod_prob']>=(1-prob_margin))
+                ]
+            if len(df_site_margin)<thresh_cov:
                 continue
-            num_features = len(df_site)
-            mod_ratio = np.mean((df_site['mod_prob'].values)>=thresh_mod)
-            new_row = df_site.iloc[0][:16]
+            num_features = len(df_site_margin)
+            mod_ratio = np.mean((df_site_margin['mod_prob'].values)>=(1-prob_margin))
+            new_row = df_site_margin.iloc[0][:16]
             new_row['num_features'] = num_features
             new_row['mod_ratio'] = mod_ratio
             df_motif_avg = pd.concat([df_motif_avg, new_row.to_frame().T])
         df_motif_avg.reset_index(drop=True)
         return df_motif_avg
 
-    df_motif_avg_ivt = calc_mod_ratio(df_motif_ivt, thresh_mod=crit_thresh, thresh_cov=COV_THRESH)
-    df_motif_avg_wt = calc_mod_ratio(df_motif_wt, thresh_mod=crit_thresh, thresh_cov=COV_THRESH)
+    df_motif_avg_ivt = calc_mod_ratio_with_margin(df_motif_ivt, prob_margin=PROB_MARGIN, thresh_cov=COV_THRESH)
+    df_motif_avg_wt = calc_mod_ratio_with_margin(df_motif_wt, prob_margin=PROB_MARGIN, thresh_cov=COV_THRESH)
 
     ### common sites between IVT and WT ###
     if COMMON_SITES_ONLY:
@@ -138,6 +162,7 @@ for subplot_ind, this_motif in enumerate(motifs):
     axes_mod_ratio[subplot_ind].legend(loc='upper left', fontsize=12)
 fig_hist.tight_layout()
 fig_mod_ratio.tight_layout()
+
 fig_hist.savefig(os.path.join(img_out, 'hist_modProbs_pValThresh{:.2E}_faThresh{:.2f}.png'.format(P_VAL_THRESH, THRESH_FA)), bbox_inches='tight')
 if COMMON_SITES_ONLY:
     fig_mod_ratio.savefig(os.path.join(img_out, 'common_sites_corr_glori_modRatio_pValThresh{:.2E}_covThresh{}_faThresh{:.2f}.png'.format(P_VAL_THRESH, COV_THRESH, THRESH_FA)), bbox_inches='tight')
