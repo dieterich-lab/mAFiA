@@ -2,10 +2,9 @@
 #
 #SBATCH --partition=gpu
 #SBATCH --exclude=gpu-g4-1
-#SBATCH --gres=gpu:turing:1
+#SBATCH --nodelist=gpu-g3-1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem-per-cpu=4GB
-#SBATCH --gpu-bind=single:1
 #SBATCH --verbose
 #SBATCH --job-name=array_basecaller
 #SBATCH --output=/home/achan/slurm/array_basecaller_%A_%02a.out
