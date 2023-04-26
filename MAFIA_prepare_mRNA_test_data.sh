@@ -44,7 +44,6 @@ FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230419_HEK293_WT_
 WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${DATASET}
 mkdir -p ${WORKSPACE}
 
-FASTA=${WORKSPACE}/basecall.fasta
 SAM=${WORKSPACE}/genome_mapped.sam
 BAM=${SAM//.sam/_q50.bam}
 
@@ -60,7 +59,7 @@ for f in ${WORKSPACE}/fast5_paths_part*; do ff=${f##*part}; NUM_ARRAYS+="${ff},"
 NUM_ARRAYS=${NUM_ARRAYS%,*}
 sbatch --array=${NUM_ARRAYS} --export=ALL,WORKSPACE=${WORKSPACE},FILENAME_PREFIX=${FILENAME_PREFIX},ARCH=${ARCH},MODEL=${MODEL} ${HOME}/git/MAFIA/array_basecaller.sh
 
-#for f in ${FASTA}+([0-9]); do echo $f; grep '>' $f | wc -l; done
+#for f in ${WORKSPACE}/part*.fasta; do echo $f; grep '>' $f | wc -l; done
 
 cat ${WORKSPACE}/part*.fasta > ${WORKSPACE}/merged.fasta
 
