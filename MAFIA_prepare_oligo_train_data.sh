@@ -1,36 +1,38 @@
-sterm -c 2 -m 64GB -N gpu-g3-1
-
-WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian
-#REF=${WORKSPACE}/reference/splint_variations_max_blocks_7.fasta
-REF=${WORKSPACE}/reference/top6_random_permutation_max_blocks_5.fasta
 ARCH=${HOME}/git/renata/rnaarch
 MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 
-#####################################################################################################################################
-#DATASET=A_RTA
-#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_A_RTA/20230221_1328_X1_ANS648_701f60ca
+### Wuerzburg first 3 oligos #########################################################################################################
+REF=${WORKSPACE}/reference/splint_variations_max_blocks_7.fasta
+
+DATASET=WUE_splint_lig_A_RTA
+#DATASET=WUE_splint_lig_m6A_RTA
+FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/${DATASET}/*
 
 #DATASET=m6A_RTA
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/20230221_1328_X2_ANS491_f891b4b9
 
+### Isabel random ligation ###########################################################################################################
+#REF=${WORKSPACE}/reference/top6_random_permutation_max_blocks_5.fasta
+
 #DATASET=RL_RG1-6_A_RTA
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG1-6_A_RTA/20230418_1325_X1_AOL616_885f620d/fast5
 
-DATASET=RL_RG7-12_m6A_RTA
-FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG7-12_m6A_RTA/20230418_1325_X2_AOC149_8138c168/fast5
+#DATASET=RL_RG7-12_m6A_RTA
+#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG7-12_m6A_RTA/20230418_1325_X2_AOC149_8138c168/fast5
 
 #####################################################################################################################################
-
+WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${DATASET}
 mkdir -p ${WORKSPACE}
 
-FASTA=${WORKSPACE}/basecall/${DATASET}.fasta
-SAM=${WORKSPACE}/mapping/${DATASET}.sam
+FASTA=${WORKSPACE}/basecalled.fasta
+SAM=${WORKSPACE}/mapped.sam
 BAM=${SAM//.sam/.bam}
 
 #### basecall with Rodan IVT ###
 deactivate
 source ${HOME}/git/renata/virtualenv/bin/activate
 
+srun --partition=gpu --gres=gpu:turing:1 --cpus-per-task=8 --mem-per-cpu=8GB \
 python3 ${HOME}/git/renata/basecall_viterbi.py \
 --fast5dir ${FAST5_DIR} \
 --arch ${ARCH} \
