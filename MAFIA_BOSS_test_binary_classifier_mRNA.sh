@@ -19,7 +19,7 @@ MOD_FILE=${HOME}/Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv
 BACKBONE_MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 EXTRACTION_LAYER=convlayers.conv21
 TRAIN_DATASET=20230221_WUE_splint_lig
-CLASSIFIER_MODEL_DIR=${WORKSPACE}/MAFIA_classifiers/${TRAIN_DATASET}
+CLASSIFIER_MODEL_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/MAFIA_classifiers/${TRAIN_DATASET}
 OUTFILE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_${DATASET}_${TRAIN_DATASET}_modProbPerRead.tsv
 
 NUM_ARRAYS=""
