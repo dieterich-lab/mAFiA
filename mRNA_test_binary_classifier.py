@@ -70,7 +70,7 @@ for record in tqdm(SeqIO.parse(ref_file, 'fasta')):
 test_bam = pysam.AlignmentFile(test_bam_file, 'rb')
 test_f5_paths = list(iglob(os.path.join(test_fast5_dir, '*.fast5'), recursive=True))
 print('Parsing {} test fast5 files'.format(len(test_f5_paths)), flush=True)
-test_index_read_ids = index_fast5_files(test_f5_paths, test_bam)
+test_index_read_ids = index_fast5_files(test_f5_paths)
 print('{} test reads indexed'.format(len(test_index_read_ids)), flush=True)
 
 ### load model, device ###
