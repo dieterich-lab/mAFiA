@@ -14,7 +14,7 @@ FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230419_HEK293_WT_
 
 WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${DATASET}
 REF=${HOME}/Data/genomes/GRCh38_96.fa
-BAM=${WORKSPACE}/genome_mapped_q50.bam
+BAM=${WORKSPACE}/filtered_q50.bam
 MOD_FILE=${HOME}/Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv
 BACKBONE_MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 EXTRACTION_LAYER=convlayers.conv21
