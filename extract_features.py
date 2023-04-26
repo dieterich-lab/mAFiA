@@ -423,7 +423,7 @@ def collect_features_from_aligned_site_v2(model, device, config, ext_layer, alig
                         # this_read_signal = id_signal[query_name]
                         sense = '+' if flag==0 else '-'
                         site_normReads_qPos_motif_sense[query_name] = (this_read_signal, query_position, query_motif, sense)
-                    if len(site_normReads_qPos_motif_sense) >= max_num_reads:
+                    if (max_num_reads>0) and (len(site_normReads_qPos_motif_sense)>=max_num_reads):
                         break
     if len(site_normReads_qPos_motif_sense)==0:
         return {}

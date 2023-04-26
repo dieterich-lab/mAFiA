@@ -24,6 +24,5 @@ python3 ${HOME}/git/MAFIA/mRNA_test_binary_classifier.py \
 --extraction_layer ${EXTRACTION_LAYER} \
 --classifier logistic_regression \
 --classifier_model_dir ${CLASSIFIER_MODEL_DIR} \
---mod_prob_thres ${MOD_PROB_THRESH} \
 --outfile ${OUTFILE}.part${SLURM_ARRAY_TASK_ID} \
 --output_mod_probs
