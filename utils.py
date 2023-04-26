@@ -22,8 +22,9 @@ def get_norm_signal_from_read_id(id, index_paths):
     med, mad = med_mad(signal[signal_start:signal_end])
     return (signal[signal_start:signal_end] - med) / mad
 
-def index_fast5_files(f5_paths):
+def index_fast5_files(f5_paths, bam):
     index_read_ids = {}
+    query_names = [alignment.query_name for alignment in bam.fetch()]
     for f5_filepath in f5_paths:
         # if 'fail' in f5_filepath:
         #     print('Skipping {}'.format(f5_filepath))
@@ -35,5 +36,6 @@ def index_fast5_files(f5_paths):
             print('Error reading {}!'.format(f5_filepath))
         else:
             for read_id in read_ids:
-                index_read_ids[read_id] = f5_filepath
+                if read_id in query_names:
+                    index_read_ids[read_id] = f5_filepath
     return index_read_ids
