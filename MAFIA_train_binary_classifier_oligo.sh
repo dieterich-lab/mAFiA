@@ -9,7 +9,7 @@
 eval "$(conda shell.bash hook)"
 #eval "$(/home/achan/miniconda3/condabin/conda shell.bash hook)"
 conda activate MAFIA
-set -e -u
+set -e -u -f
 cd ${HOME}/git/MAFIA
 
 WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian
