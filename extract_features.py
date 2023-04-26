@@ -48,10 +48,10 @@ def load_model(modelfile, config, ext_layer):
     if modelfile == None:
         sys.stderr.write("No model file specified!")
         sys.exit(1)
-    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # print("Using device:", device)
-    device, mem = get_freer_device()
-    print("Using device {} with free memory {}MB".format(device, mem), flush=True)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print("Using device:", device)
+    # device, mem = get_freer_device()
+    # print("Using device {} with free memory {}MB".format(device, mem), flush=True)
     model = rodan(config=config).to(device)
     state_dict = torch.load(modelfile, map_location=device)["state_dict"]
     if "state_dict" in state_dict:
