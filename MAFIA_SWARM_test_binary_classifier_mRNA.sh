@@ -11,7 +11,7 @@
 eval "$(conda shell.bash hook)"
 conda activate MAFIA
 
-set -e -u
+set -e -u -f
 
 python3 ${HOME}/git/MAFIA/mRNA_test_binary_classifier.py \
 --test_bam_file ${BAM} \
