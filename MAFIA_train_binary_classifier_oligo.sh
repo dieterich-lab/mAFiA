@@ -20,26 +20,27 @@ WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 BACKBONE_MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 EXT_LAYER=convlayers.conv21
 CLASSIFIER=logistic_regression
-SCALER=None
+SCALER=MaxAbs
 
 ############################################################################################
 ### source data ############################################################################
 ############################################################################################
 ### Claudia first 3 splint ###
-#UNM_BAM=${WORKSPACE}/mapping/A_RTA_sorted_filtered.bam
-#UNM_FAST5=/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_A_RTA/20230221_1328_X1_ANS648_701f60ca/fast5_pass
-#MOD_BAM=${WORKSPACE}/mapping/m6A_RTA_sorted_filtered.bam
-#MOD_FAST5=/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/20230221_1328_X2_ANS491_f891b4b9/fast5_pass
-#REF=${WORKSPACE}/reference/splint_variations_max_blocks_7.fasta
-#OUTDIR=${WORKSPACE}/MAFIA_classifiers/A_m6A_NoNorm
+DATASET=20230221_WUE_splint_lig
+UNM_BAM=${WORKSPACE}/WUE_splint_lig_A_RTA/mapped.bam
+UNM_FAST5=/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_A_RTA/20230221_1328_X1_ANS648_701f60ca/fast5_*
+MOD_BAM=${WORKSPACE}/WUE_splint_lig_m6A_RTA/mapped.bam
+MOD_FAST5=/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/20230221_1328_X2_ANS491_f891b4b9/fast5_*
+REF=${WORKSPACE}/reference/splint_variations_max_blocks_7.fasta
+OUTDIR=${WORKSPACE}/MAFIA_classifiers/${DATASET}
 
 ### Isabel random 6 ###
-UNM_BAM=${WORKSPACE}/mapping/RL_RG1-6_A_RTA.bam
-UNM_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG1-6_A_RTA/20230418_1325_X1_AOL616_885f620d/fast5
-MOD_BAM=${WORKSPACE}/mapping/RL_RG7-12_m6A_RTA.bam
-MOD_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG7-12_m6A_RTA/20230418_1325_X2_AOC149_8138c168/fast5
-REF=${WORKSPACE}/reference/top6_random_permutation_max_blocks_5.fasta
-OUTDIR=${WORKSPACE}/MAFIA_classifiers/random_ligation_A_m6A_${SCALER}_enforceMotif
+#UNM_BAM=${WORKSPACE}/mapping/RL_RG1-6_A_RTA.bam
+#UNM_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG1-6_A_RTA/20230418_1325_X1_AOL616_885f620d/fast5
+#MOD_BAM=${WORKSPACE}/mapping/RL_RG7-12_m6A_RTA.bam
+#MOD_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG7-12_m6A_RTA/20230418_1325_X2_AOC149_8138c168/fast5
+#REF=${WORKSPACE}/reference/top6_random_permutation_max_blocks_5.fasta
+#OUTDIR=${WORKSPACE}/MAFIA_classifiers/random_ligation_A_m6A_${SCALER}_enforceMotif
 
 python3 oligo_train_binary_classifier.py \
 --unm_bam_file ${UNM_BAM} \
@@ -47,7 +48,6 @@ python3 oligo_train_binary_classifier.py \
 --mod_bam_file ${MOD_BAM} \
 --mod_fast5_dir ${MOD_FAST5} \
 --ref_file ${REF} \
---enforce_motif \
 --backbone_model_path ${BACKBONE_MODEL} \
 --extraction_layer ${EXT_LAYER} \
 --scaler ${SCALER} \
