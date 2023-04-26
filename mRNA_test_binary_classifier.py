@@ -154,5 +154,5 @@ for ind, row in df_mod.iterrows():
         print('=========================================================', flush=True)
 
         counts += 1
-        df_out.to_csv(outfile, sep='\t')
+        df_out.to_csv(outfile, sep='\t', index=False)
 print('Total {} sites'.format(counts))
