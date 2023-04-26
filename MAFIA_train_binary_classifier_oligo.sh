@@ -28,9 +28,9 @@ SCALER=MaxAbs
 ### Claudia first 3 splint ###
 DATASET=20230221_WUE_splint_lig
 UNM_BAM=${WORKSPACE}/WUE_splint_lig_A_RTA/mapped.bam
-UNM_FAST5=/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_A_RTA/20230221_1328_X1_ANS648_701f60ca/fast5_*
+UNM_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_A_RTA/20230221_1328_X1_ANS648_701f60ca/fast5_*"
 MOD_BAM=${WORKSPACE}/WUE_splint_lig_m6A_RTA/mapped.bam
-MOD_FAST5=/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/20230221_1328_X2_ANS491_f891b4b9/fast5_*
+MOD_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/20230221_1328_X2_ANS491_f891b4b9/fast5_*"
 REF=${WORKSPACE}/reference/splint_variations_max_blocks_7.fasta
 OUTDIR=${WORKSPACE}/MAFIA_classifiers/${DATASET}
 
