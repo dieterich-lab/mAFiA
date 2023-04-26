@@ -3,8 +3,8 @@
 #SBATCH --partition=gpu
 #SBATCH --exclude=gpu-g4-1
 #SBATCH --gres=gpu:turing:1
-#SBATCH --cpus-per-task=4
-#SBATCH --mem-per-cpu=4GB
+#SBATCH --cpus-per-task=8
+#SBATCH --mem-per-cpu=8GB
 #SBATCH --verbose
 #SBATCH --job-name=array_basecaller
 #SBATCH --output=/home/achan/slurm/array_basecaller_%A_%02a.out
@@ -22,7 +22,7 @@ python3 ${HOME}/git/renata/basecall_viterbi.py \
 --list_filenames ${LIST_FILENAMES} \
 --arch ${ARCH} \
 --model ${MODEL} \
---batchsize 1024 \
+--batchsize 2048 \
 --decoder viterbi \
 > ${OUTPUT}
 
