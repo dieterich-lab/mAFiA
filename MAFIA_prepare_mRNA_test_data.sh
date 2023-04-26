@@ -15,37 +15,12 @@ DATASET=0_WT_100_IVT_RTA
 FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230419_HEK293_WT_IVT_Mix/${DATASET}/*/fast5_*
 
 #####################################################################################################################################
-#DATASET=HEK293T-WT-0-rep2
-#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-0-rep2/fast5_pass
 
-#DATASET=HEK293T-WT-25-rep1
-#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-25-rep1/fast5_pass
-
-#DATASET=HEK293T-WT-50-rep2
-#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-WT-50-rep2/fast5_pass
-
-#DATASET=HEK293T-WT-50-rep3
-#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-50-rep3/fast5
-
-#DATASET=HEK293T-WT-75-rep4
-#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-75-rep4/fast5
-
-#DATASET=HEK293T-WT-100-rep1
-#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-100-rep1/fast5_pass
-
-#####################################################################################################################################
-#DATASET=HEK293T-Mettl3-KO-rep3
-#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-Mettl3-KO-rep3/fast5
-
-#DATASET=HEK293T-WT-rep3
-#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293T-WT-Mettl3-Mix/HEK293T-WT-rep3/fast5
-
-#####################################################################################################################################
 WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${DATASET}
 mkdir -p ${WORKSPACE}
 
-SAM=${WORKSPACE}/genome_mapped.sam
-BAM=${SAM//.sam/_q50.bam}
+SAM=${WORKSPACE}/mapped.sam
+BAM=${WORKSPACE}/filtered_q50.bam
 
 source ${HOME}/git/renata/virtualenv/bin/activate
 
@@ -73,7 +48,7 @@ samtools flagstats ${SAM}
 ${HOME}/git/renata/accuracy.py ${SAM} ${REF}
 
 #### Convert to BAM and index ###
-samtools view -bST -q50 ${REF} ${SAM} | samtools sort - > ${BAM}
+samtools view -bST ${REF} -q50 ${SAM} | samtools sort - > ${BAM}
 samtools index ${BAM}
 
 ### clean up ###
