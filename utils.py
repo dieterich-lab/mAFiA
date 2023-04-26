@@ -37,6 +37,5 @@ def index_fast5_files(f5_paths, bam):
             print('Error reading {}!'.format(f5_filepath))
         else:
             for read_id in read_ids:
-                if read_id in query_names:
-                    index_read_ids[read_id] = f5_filepath
+                index_read_ids[read_id] = f5_filepath
     return index_read_ids

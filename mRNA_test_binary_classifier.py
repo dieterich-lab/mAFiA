@@ -4,6 +4,7 @@ import sys
 sys.path.append(os.path.join(HOME, 'git/MAFIA'))
 import argparse
 from glob import glob, iglob
+from tqdm import tqdm
 import pandas as pd
 import torch
 from models import objectview
@@ -61,7 +62,7 @@ df_mod = pd.read_csv(mod_file)
 # ref_file = os.path.join(HOME, 'Data/genomes/GRCh38_96.fa')
 ref = {}
 print('Parsing genome...', flush=True)
-for record in SeqIO.parse(ref_file, 'fasta'):
+for record in tqdm(SeqIO.parse(ref_file, 'fasta')):
     if (record.id.isnumeric()) or (record.id in ['X', 'Y']):
         ref[record.id] = str(record.seq)
 
