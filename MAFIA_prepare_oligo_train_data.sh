@@ -2,10 +2,10 @@ ARCH=${HOME}/git/renata/rnaarch
 MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 
 ### Wuerzburg first 3 oligos #########################################################################################################
-REF=${WORKSPACE}/reference/splint_variations_max_blocks_7.fasta
+REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/splint_variations_max_blocks_7.fasta
 
-DATASET=WUE_splint_lig_A_RTA
-#DATASET=WUE_splint_lig_m6A_RTA
+#DATASET=WUE_splint_lig_A_RTA
+DATASET=WUE_splint_lig_m6A_RTA
 FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/${DATASET}/*
 
 #DATASET=m6A_RTA
@@ -37,7 +37,9 @@ python3 ${HOME}/git/renata/basecall_viterbi.py \
 --fast5dir ${FAST5_DIR} \
 --arch ${ARCH} \
 --model ${MODEL} \
-> ${FASTA}
+--batchsize 2048 \
+--decoder viterbi \
+> ${FASTA} &
 
 #### align and check accuracy ###
 module purge
@@ -54,12 +56,12 @@ samtools view -bST ${REF} ${SAM} | samtools sort - > ${BAM}
 samtools index ${BAM}
 
 ### filter reads by max indel ###
-deactivate
-conda activate MAFIA
-
-python3 ${HOME}/git/MAFIA/filter_bam_file_by_max_indel_len.py \
---infile ${BAM} \
---outfile ${BAM}.filtered \
---indel_thresh 10
-
-samtools index ${BAM}.filtered
+#deactivate
+#conda activate MAFIA
+#
+#python3 ${HOME}/git/MAFIA/filter_bam_file_by_max_indel_len.py \
+#--infile ${BAM} \
+#--outfile ${BAM}.filtered \
+#--indel_thresh 10
+#
+#samtools index ${BAM}.filtered

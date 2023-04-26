@@ -36,12 +36,12 @@ sbatch --array=${NUM_ARRAYS} --export=ALL,WORKSPACE=${WORKSPACE},FILENAME_PREFIX
 
 #for f in ${WORKSPACE}/part*.fasta; do echo $f; grep '>' $f | wc -l; done
 
-cat ${WORKSPACE}/part*.fasta > ${WORKSPACE}/merged.fasta
+cat ${WORKSPACE}/part*.fasta > ${WORKSPACE}/basecall_merged.fasta
 
 #### align to genome ###
 module purge
 module load minimap2
-minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF} ${WORKSPACE}/merged.fasta > ${SAM}
+minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF} ${WORKSPACE}/basecall_merged.fasta > ${SAM}
 
 ### check stats and accuracy ###
 samtools flagstats ${SAM}
