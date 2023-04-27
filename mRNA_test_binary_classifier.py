@@ -58,6 +58,7 @@ if not os.path.exists(outdir):
     os.makedirs(outdir, exist_ok=True)
 
 df_mod = pd.read_csv(mod_file)
+df_mod = df_mod.rename(columns={'Unnamed: 0': 'site_index'})
 
 # ref_file = os.path.join(HOME, 'Data/genomes/GRCh38_96.fa')
 ref = {}
