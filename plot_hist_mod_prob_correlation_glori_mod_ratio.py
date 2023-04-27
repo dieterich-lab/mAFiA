@@ -161,7 +161,7 @@ for subplot_ind, ds in enumerate(dict_ds_motif_avg.keys()):
     ds_agg_avg = pd.concat(dict_ds_motif_avg[ds].values())
     glori_ratio = np.float32(ds_agg_avg['Ratio'].values)
     ont_ratio = np.float32(ds_agg_avg['mod_ratio'].values)
-    plt.hist2d(glori_ratio, ont_ratio, bins=25, range=[[0, 1], [0, 1]], density=True, cmap='plasma')
+    plt.hist2d(glori_ratio, ont_ratio, bins=20, range=[[0, 1], [0, 1]], density=True, cmap='plasma')
     plt.xlabel('GLORI', fontsize=15)
     plt.ylabel('ONT mod. ratio', fontsize=15)
     plt.title('{} aggregate\n{} sites'.format(ds, len(ds_agg_avg)), fontsize=15)
