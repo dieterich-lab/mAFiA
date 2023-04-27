@@ -25,7 +25,7 @@ EXTRACTION_LAYER=convlayers.conv21
 TRAIN_DATASET=20230221_WUE_splint_lig
 CLASSIFIER=logistic_regression
 SCALER=MaxAbs
-CLASSIFIER_MODEL_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/MAFIA_classifiers/${DATASET}_${CLASSIFIER}_${SCALER}
+CLASSIFIER_MODEL_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/MAFIA_classifiers/${TRAIN_DATASET}_${CLASSIFIER}_${SCALER}
 OUTFILE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_${DATASET}_${TRAIN_DATASET}_modProbPerRead.tsv
 
 NUM_ARRAYS=""

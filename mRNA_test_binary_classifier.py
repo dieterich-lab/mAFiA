@@ -105,7 +105,8 @@ else:
     print('Starting from scratch', flush=True)
     restart = False
 
-for ind, row in df_mod.iterrows():
+for _, row in df_mod.iterrows():
+    ind = row['index']
     chr = row['Chr'].lstrip('chr')
     start = row['Sites'] - 1   # 0-based
 
