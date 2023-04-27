@@ -38,3 +38,12 @@ EXTRACTION_LAYER=${EXTRACTION_LAYER},\
 CLASSIFIER_MODEL_DIR=${CLASSIFIER_MODEL_DIR},\
 OUTFILE=${OUTFILE} \
 ${HOME}/git/MAFIA/MAFIA_SWARM_test_binary_classifier_mRNA.sh
+
+### concat output ###
+cp ${OUTFILE}.part00 ${OUTFILE}.merged
+for num in ${NUM_ARRAYS//,/ }
+do
+  if [ $num != '00' ]
+  then awk NR\>1 $OUTFILE.part$num >> ${OUTFILE}.merged
+  fi
+  done

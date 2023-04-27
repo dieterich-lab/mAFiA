@@ -28,9 +28,9 @@ PROB_MARGIN = 0.1
 COMMON_SITES_ONLY = False
 
 df_ivt = pd.read_csv(ivt_res_file, sep='\t')
-df_ivt = df_ivt.rename(columns={'Unnamed: 0': 'site_index'})
+df_ivt = df_ivt.rename(columns={'Unnamed: 0': 'index'})
 df_wt = pd.read_csv(wt_res_file, sep='\t')
-df_wt = df_wt.rename(columns={'Unnamed: 0': 'site_index'})
+df_wt = df_wt.rename(columns={'Unnamed: 0': 'index'})
 
 motifs = df_wt['ref_motif'].unique()
 
@@ -90,8 +90,8 @@ for subplot_ind, this_motif in enumerate(motifs):
     ### aggregate mod. ratio per site ###
     # def calc_mod_ratio(in_df_motif, thresh_mod=0.5, thresh_cov=50):
     #     df_motif_avg = pd.DataFrame()
-    #     for site_index in in_df_motif['site_index'].unique():
-    #         df_site = in_df_motif[in_df_motif['site_index']==site_index]
+    #     for index in in_df_motif['index'].unique():
+    #         df_site = in_df_motif[in_df_motif['index']==index]
     #         if len(df_site)<thresh_cov:
     #             continue
     #         num_features = len(df_site)
@@ -108,8 +108,8 @@ for subplot_ind, this_motif in enumerate(motifs):
 
     def calc_mod_ratio_with_margin(in_df_motif, prob_margin, thresh_cov=50):
         df_motif_avg = pd.DataFrame()
-        for site_index in in_df_motif['site_index'].unique():
-            df_site = in_df_motif[in_df_motif['site_index']==site_index]
+        for index in in_df_motif['index'].unique():
+            df_site = in_df_motif[in_df_motif['index']==index]
             df_site_margin = df_site[
                 (df_site['mod_prob']<prob_margin)
                 | (df_site['mod_prob']>=(1-prob_margin))
@@ -130,12 +130,12 @@ for subplot_ind, this_motif in enumerate(motifs):
 
     ### common sites between IVT and WT ###
     if COMMON_SITES_ONLY:
-        common_site_indices = list(set.intersection(set(df_motif_avg_ivt['site_index']), set(df_motif_avg_wt['site_index'])))
-        df_motif_avg_ivt_common_sites = df_motif_avg_ivt[df_motif_avg_ivt['site_index'].isin(common_site_indices)]
+        common_site_indices = list(set.intersection(set(df_motif_avg_ivt['index']), set(df_motif_avg_wt['index'])))
+        df_motif_avg_ivt_common_sites = df_motif_avg_ivt[df_motif_avg_ivt['index'].isin(common_site_indices)]
         glori_ratio_ivt = np.float64(df_motif_avg_ivt_common_sites['Ratio'])
         mod_ratio_ivt = np.float64(df_motif_avg_ivt_common_sites['mod_ratio'])
         corr_ivt = np.corrcoef(glori_ratio_ivt, mod_ratio_ivt)[0, 1]
-        df_motif_avg_wt_common_sites = df_motif_avg_wt[df_motif_avg_wt['site_index'].isin(common_site_indices)]
+        df_motif_avg_wt_common_sites = df_motif_avg_wt[df_motif_avg_wt['index'].isin(common_site_indices)]
         glori_ratio_wt = np.float64(df_motif_avg_wt_common_sites['Ratio'])
         mod_ratio_wt = np.float64(df_motif_avg_wt_common_sites['mod_ratio'])
         corr_wt = np.corrcoef(glori_ratio_wt, mod_ratio_wt)[0, 1]
