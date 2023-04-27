@@ -250,7 +250,7 @@ def get_features_from_collection_of_signals(model, device, config, index_read_id
 #
 #     return features[pos], pred_motif
 
-def extract_features_from_multiple_signals(model, device, config, ext_layer, site_normReads_qPos_motif_sense, batch_size=128):
+def extract_features_from_multiple_signals(model, device, config, ext_layer, site_normReads_qPos_motif_sense, batch_size=256):
     qNames = []
     all_chunks = []
     chunk_sizes = []
