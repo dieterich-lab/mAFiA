@@ -3,7 +3,7 @@
 #SBATCH --exclude=gpu-g4-1
 #SBATCH --gres=gpu:turing:1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem-per-cpu=8GB
+#SBATCH --mem-per-cpu=16GB
 #SBATCH --verbose
 #SBATCH --job-name=MAFIA_SWARM_test_binary_classifier_mRNA
 #SBATCH --output=/home/achan/slurm/MAFIA_SWARM_test_binary_classifier_mRNA_%A_%02a.out
