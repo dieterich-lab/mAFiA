@@ -132,7 +132,7 @@ for ind, row in df_mod.iterrows():
 
     if len(test_site_motif_features)>min_coverage:
         print('\n=========================================================', flush=True)
-        print('chr{}, pos{}'.format(chr, start), flush=True)
+        print('{}, chr{}, pos{}'.format(ind, chr, start), flush=True)
         print('Reference motif {}'.format(ref_motif), flush=True)
         print('{} feature vectors collected'.format(len(test_site_motif_features)), flush=True)
         if output_mod_probs:
@@ -156,4 +156,4 @@ for ind, row in df_mod.iterrows():
 
         counts += 1
         df_out.to_csv(outfile, sep='\t', index=False)
-print('Total {} sites'.format(counts))
+print('Total {} sites'.format(counts), flush=True)
