@@ -23,7 +23,7 @@ BACKBONE_MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-
 EXTRACTION_LAYER=convlayers.conv21
 TRAIN_DATASET=20230221_WUE_splint_lig
 CLASSIFIER_MODEL_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/MAFIA_classifiers/${TRAIN_DATASET}
-OUTFILE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/results/${DATASET}/res_${DATASET}_${TRAIN_DATASET}_modProbPerRead.tsv
+OUTFILE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_${DATASET}_${TRAIN_DATASET}_modProbPerRead.tsv
 
 NUM_ARRAYS=""
 for f in ${MOD_FILE}.part*; do ff=${f##*part}; NUM_ARRAYS+="${ff},"; done
@@ -50,3 +50,4 @@ do
   then awk NR\>1 $OUTFILE.part$num >> ${OUTFILE}.merged
   fi
   done
+rm ${OUTFILE}.part*

@@ -11,7 +11,10 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 
 ### new HEK293 ######################################################################################################################
 #DATASET=100_WT_0_IVT_RTA
-DATASET=0_WT_100_IVT_RTA
+#DATASET=0_WT_100_IVT_RTA
+DATASET=25_WT_75_IVT_RTA
+#DATASET=50_WT_50_IVT_RTA
+#DATASET=75_WT_25_IVT_RTA
 FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230419_HEK293_WT_IVT_Mix/${DATASET}/*/fast5_*
 
 #####################################################################################################################################
