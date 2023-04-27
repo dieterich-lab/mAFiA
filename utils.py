@@ -34,10 +34,10 @@ def index_fast5_files(f5_paths, bam=None):
         #     continue
         try:
             f5 = get_fast5_file(f5_filepath, mode="r")
-            read_ids = f5.get_read_ids()
         except:
             print('Error reading {}!'.format(f5_filepath))
         else:
+            read_ids = f5.get_read_ids()
             if len(query_names)>0:
                 for read_id in read_ids:
                     if read_id in query_names:
