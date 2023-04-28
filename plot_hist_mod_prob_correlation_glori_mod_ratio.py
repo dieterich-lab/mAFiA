@@ -23,7 +23,7 @@ results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
 training_dataset = '20230221_WUE_splint_lig'
 testing_datasets = [
     '0_WT_100_IVT_RTA',
-    # '25_WT_75_IVT_RTA',
+    '25_WT_75_IVT_RTA',
     # '50_WT_50_IVT_RTA',
     # '75_WT_25_IVT_RTA',
     '100_WT_0_IVT_RTA'
@@ -98,7 +98,7 @@ def calc_mod_ratio_with_margin(in_df_motif, prob_margin, thresh_cov=50):
 
 ds_colors = {
     '0_WT_100_IVT_RTA' : 'b',
-    # '25_WT_75_IVT_RTA',
+    '25_WT_75_IVT_RTA' : 'g',
     # '50_WT_50_IVT_RTA',
     # '75_WT_25_IVT_RTA',
     '100_WT_0_IVT_RTA' : 'r'
@@ -115,10 +115,9 @@ fig_hist = plt.figure(figsize=(fig_width, fig_height))
 axes_hist = fig_hist.subplots(num_rows, num_cols).flatten()
 fig_mod_ratio = plt.figure(figsize=(fig_width, fig_height))
 axes_mod_ratio = fig_mod_ratio.subplots(num_rows, num_cols).flatten()
-for subplot_ind, this_motif in enumerate(motifs):
-    for ds, df in dfs.items():
-        dict_ds_motif_avg[ds] = {}
-
+for ds, df in dfs.items():
+    dict_ds_motif_avg[ds] = {}
+    for subplot_ind, this_motif in enumerate(motifs):
         ds_norm_counts, ds_bin_centers, ds_motif = get_norm_counts(df, this_motif)
         axes_hist[subplot_ind].step(ds_bin_centers, ds_norm_counts, color=ds_colors[ds], label='{}, {} features'.format(ds, len(ds_motif)))
 
@@ -129,25 +128,25 @@ for subplot_ind, this_motif in enumerate(motifs):
         mod_ratio = np.float64(df_motif_avg['mod_ratio'])
         corr = np.corrcoef(glori_ratio, mod_ratio)[0, 1]
 
-        axes_mod_ratio[subplot_ind].scatter(glori_ratio, mod_ratio, color=ds_colors[ds], marker='o', label='{}, {} sites, corr. {:.2f}'.format(ds, len(glori_ratio), corr))
+        axes_mod_ratio[subplot_ind].scatter(glori_ratio, mod_ratio, color=ds_colors[ds], marker='.', label='{}, {} sites, corr. {:.2f}'.format(ds, len(glori_ratio), corr))
         # axes_mod_ratio[subplot_ind].plot(glori_ratio_ivt, mod_ratio_ivt, 'b.', label='IVT, {} sites, corr. {:.2f}'.format(len(glori_ratio_ivt), corr_ivt))
         # axes_mod_ratio[subplot_ind].plot(glori_ratio_wt, mod_ratio_wt, 'r.', label='WT, {} sites, corr. {:.2f}'.format(len(glori_ratio_wt), corr_wt))
 
-    axes_hist[subplot_ind].axvspan(xmin=PROB_MARGIN, xmax=1 - PROB_MARGIN, color='gray', alpha=0.5)
-    axes_hist[subplot_ind].set_xlabel('Mod. Prob.', fontsize=15)
-    axes_hist[subplot_ind].set_ylabel('Norm. frequency', fontsize=15)
-    axes_hist[subplot_ind].set_title('{}'.format(this_motif), fontsize=20)
-    axes_hist[subplot_ind].set_xlim([-0.05, 1.05])
-    axes_hist[subplot_ind].set_ylim([0, 0.3])
-    axes_hist[subplot_ind].legend(loc='upper left', fontsize=12)
+        axes_hist[subplot_ind].axvspan(xmin=PROB_MARGIN, xmax=1 - PROB_MARGIN, color='gray', alpha=0.5)
+        axes_hist[subplot_ind].set_xlabel('Mod. Prob.', fontsize=15)
+        axes_hist[subplot_ind].set_ylabel('Norm. frequency', fontsize=15)
+        axes_hist[subplot_ind].set_title('{}'.format(this_motif), fontsize=20)
+        axes_hist[subplot_ind].set_xlim([-0.05, 1.05])
+        axes_hist[subplot_ind].set_ylim([0, 0.3])
+        axes_hist[subplot_ind].legend(loc='upper left', fontsize=12)
 
-    axes_mod_ratio[subplot_ind].plot(np.arange(0, 1.1, 0.1), np.arange(0, 1.1, 0.1), 'k--', alpha=0.5)
-    axes_mod_ratio[subplot_ind].set_xlim([-0.05, 1.05])
-    axes_mod_ratio[subplot_ind].set_ylim([-0.05, 1.05])
-    axes_mod_ratio[subplot_ind].set_xlabel('GLORI mod. ratio', fontsize=15)
-    axes_mod_ratio[subplot_ind].set_ylabel('ONT mod. ratio', fontsize=15)
-    axes_mod_ratio[subplot_ind].set_title('{}'.format(this_motif), fontsize=20)
-    axes_mod_ratio[subplot_ind].legend(loc='upper left', fontsize=12)
+        axes_mod_ratio[subplot_ind].plot(np.arange(0, 1.1, 0.1), np.arange(0, 1.1, 0.1), 'k--', alpha=0.5)
+        axes_mod_ratio[subplot_ind].set_xlim([-0.05, 1.05])
+        axes_mod_ratio[subplot_ind].set_ylim([-0.05, 1.05])
+        axes_mod_ratio[subplot_ind].set_xlabel('GLORI mod. ratio', fontsize=15)
+        axes_mod_ratio[subplot_ind].set_ylabel('ONT mod. ratio', fontsize=15)
+        axes_mod_ratio[subplot_ind].set_title('{}'.format(this_motif), fontsize=20)
+        axes_mod_ratio[subplot_ind].legend(loc='upper left', fontsize=12)
 fig_hist.tight_layout()
 fig_mod_ratio.tight_layout()
 
@@ -155,17 +154,28 @@ fig_hist.savefig(os.path.join(img_out, 'hist_modProbs_pValThresh{:.2E}_marginPro
 fig_mod_ratio.savefig(os.path.join(img_out, 'corr_glori_modRatio_pValThresh{:.2E}_covThresh{}_marginProb{:.2f}.png'.format(P_VAL_THRESH, COV_THRESH, PROB_MARGIN)), bbox_inches='tight')
 
 ### 2D density plots ###
-plt.figure(figsize=(len(testing_datasets)*5, 5))
+num_bins = 20
+interval = 100 / num_bins
+fig = plt.figure(figsize=(len(testing_datasets)*5, 5))
 for subplot_ind, ds in enumerate(dict_ds_motif_avg.keys()):
-    plt.subplot(1, len(testing_datasets), subplot_ind+1)
+    ax = plt.subplot(1, len(testing_datasets), subplot_ind+1)
     ds_agg_avg = pd.concat(dict_ds_motif_avg[ds].values())
     glori_ratio = np.float32(ds_agg_avg['Ratio'].values)
     ont_ratio = np.float32(ds_agg_avg['mod_ratio'].values)
-    plt.hist2d(glori_ratio, ont_ratio, bins=20, range=[[0, 1], [0, 1]], density=True, cmap='plasma')
-    plt.xlabel('GLORI', fontsize=15)
-    plt.ylabel('ONT mod. ratio', fontsize=15)
-    plt.title('{} aggregate\n{} sites'.format(ds, len(ds_agg_avg)), fontsize=15)
-plt.tight_layout()
-plt.savefig(os.path.join(img_out, 'hist2d_glori_modRatio_pValThresh{:.2E}_covThresh{}_marginProb{:.2f}.png'.format(P_VAL_THRESH, COV_THRESH, PROB_MARGIN)), bbox_inches='tight')
+    hist, x_bins, y_bins = np.histogram2d(glori_ratio, ont_ratio, bins=num_bins, range=[[0, 1], [0, 1]], density=True)
+    im = ax.imshow(hist.T, origin='lower', vmin=1, vmax=6, cmap='plasma')
+    ax.set_xticks(np.arange(0, num_bins+1, 5)-0.5, np.int32(np.arange(0, num_bins+1, 5)*interval))
+    ax.set_yticks(np.arange(0, num_bins+1, 5)-0.5, np.int32(np.arange(0, num_bins+1, 5)*interval))
+    for tick in ax.yaxis.get_majorticklabels():
+        tick.set_verticalalignment('bottom')
+    ax.set_xlabel('GLORI', fontsize=15)
+    if subplot_ind==0:
+        ax.set_ylabel('ONT mod. ratio', fontsize=15)
+    ax.set_title('{}\n{} sites'.format(ds, len(ds_agg_avg)), fontsize=15)
+# fig.tight_layout()
+cb_ax = fig.add_axes([0.92, 0.16, 0.02, 0.68])
+cbar = fig.colorbar(im, cax=cb_ax)
+cb_ax.set_ylabel('Norm. site count', fontsize=15, rotation=-90, labelpad=20)
+fig.savefig(os.path.join(img_out, 'hist2d_glori_modRatio_pValThresh{:.2E}_covThresh{}_marginProb{:.2f}.png'.format(P_VAL_THRESH, COV_THRESH, PROB_MARGIN)), bbox_inches='tight')
 
 # plt.close('all')

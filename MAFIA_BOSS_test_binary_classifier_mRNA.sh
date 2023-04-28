@@ -53,4 +53,5 @@ do
   then awk NR\>1 $OUTFILE.part$num >> ${OUTFILE}.merged
   fi
   done
+
 rm ${OUTFILE}.part*
