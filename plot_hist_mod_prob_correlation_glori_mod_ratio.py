@@ -24,10 +24,18 @@ training_dataset = '20230221_WUE_splint_lig'
 testing_datasets = [
     '0_WT_100_IVT_RTA',
     '25_WT_75_IVT_RTA',
-    # '50_WT_50_IVT_RTA',
-    # '75_WT_25_IVT_RTA',
+    '50_WT_50_IVT_RTA',
+    '75_WT_25_IVT_RTA',
     '100_WT_0_IVT_RTA'
 ]
+ds_colors = {
+    '0_WT_100_IVT_RTA' : 'b',
+    '25_WT_75_IVT_RTA' : 'g',
+    '50_WT_50_IVT_RTA' : 'm',
+    '75_WT_25_IVT_RTA' : 'c',
+    '100_WT_0_IVT_RTA' : 'r'
+}
+
 img_out = os.path.join(HOME, 'img_out/MAFIA', os.path.basename('HEK293_mixing_{}'.format(training_dataset)))
 if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
@@ -96,14 +104,6 @@ def calc_mod_ratio_with_margin(in_df_motif, prob_margin, thresh_cov=50):
 # df_motif_avg_ivt = calc_mod_ratio(df_motif_ivt, thresh_mod=crit_thresh, thresh_cov=COV_THRESH)
 # df_motif_avg_wt = calc_mod_ratio(df_motif_wt, thresh_mod=crit_thresh, thresh_cov=COV_THRESH)
 
-ds_colors = {
-    '0_WT_100_IVT_RTA' : 'b',
-    '25_WT_75_IVT_RTA' : 'g',
-    # '50_WT_50_IVT_RTA',
-    # '75_WT_25_IVT_RTA',
-    '100_WT_0_IVT_RTA' : 'r'
-}
-
 dict_ds_motif_avg = {}
 
 ### plots ###
@@ -163,7 +163,7 @@ for subplot_ind, ds in enumerate(dict_ds_motif_avg.keys()):
     glori_ratio = np.float32(ds_agg_avg['Ratio'].values)
     ont_ratio = np.float32(ds_agg_avg['mod_ratio'].values)
     hist, x_bins, y_bins = np.histogram2d(glori_ratio, ont_ratio, bins=num_bins, range=[[0, 1], [0, 1]], density=True)
-    im = ax.imshow(hist.T, origin='lower', vmin=1, vmax=6, cmap='plasma')
+    im = ax.imshow(hist.T, origin='lower', vmin=0.5, vmax=5, cmap='plasma')
     ax.set_xticks(np.arange(0, num_bins+1, 5)-0.5, np.int32(np.arange(0, num_bins+1, 5)*interval))
     ax.set_yticks(np.arange(0, num_bins+1, 5)-0.5, np.int32(np.arange(0, num_bins+1, 5)*interval))
     for tick in ax.yaxis.get_majorticklabels():
