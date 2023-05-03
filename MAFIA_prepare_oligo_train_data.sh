@@ -1,28 +1,35 @@
 ARCH=${HOME}/git/renata/rnaarch
 MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 
-### Wuerzburg first 3 oligos #########################################################################################################
-REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/splint_variations_max_blocks_7.fasta
+########################################################################################################################
+### Wuerzburg batch 1 ##################################################################################################
+########################################################################################################################
+#TRAIN_DATASET=WUE_splint_lig_A_RTA
+#TRAIN_DATASET=WUE_splint_lig_m6A_RTA
+#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/${TRAIN_DATASET}/*
 
-#DATASET=WUE_splint_lig_A_RTA
-DATASET=WUE_splint_lig_m6A_RTA
-FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/${DATASET}/*
+########################################################################################################################
+### Wuerzburg batch 2 ##################################################################################################
+########################################################################################################################
+REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch2_max_blocks_7.fasta
 
-#DATASET=m6A_RTA
-#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/20230221_1328_X2_ANS491_f891b4b9
+#TRAIN_DATASET=WUE_splint_batch2_A_RTA
+TRAIN_DATASET=WUE_splint_batch2_m6A_RTA
+FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230502_WUE_splint_batch2/${TRAIN_DATASET}/*
 
-### Isabel random ligation ###########################################################################################################
+### Isabel random ligation #############################################################################################
 #REF=${WORKSPACE}/reference/top6_random_permutation_max_blocks_5.fasta
 
-#DATASET=RL_RG1-6_A_RTA
+#TRAIN_DATASET=RL_RG1-6_A_RTA
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG1-6_A_RTA/20230418_1325_X1_AOL616_885f620d/fast5
 
-#DATASET=RL_RG7-12_m6A_RTA
+#TRAIN_DATASET=RL_RG7-12_m6A_RTA
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG7-12_m6A_RTA/20230418_1325_X2_AOC149_8138c168/fast5
 
-#####################################################################################################################################
-WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${DATASET}
+########################################################################################################################
+WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${TRAIN_DATASET}
 mkdir -p ${WORKSPACE}
+cd ${WORKSPACE}
 
 FASTA=${WORKSPACE}/basecalled.fasta
 SAM=${WORKSPACE}/mapped.sam
