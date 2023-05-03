@@ -8,12 +8,12 @@
 ### new HEK293 ######################################################################################################################
 #TEST_DATASET=0_WT_100_IVT_RTA
 #TEST_DATASET=25_WT_75_IVT_RTA
-#TEST_DATASET=100_WT_0_IVT_RTA
-#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230419_HEK293_WT_IVT_Mix/${TEST_DATASET}/*/fast5_*
+TEST_DATASET=100_WT_0_IVT_RTA
+FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230419_HEK293_WT_IVT_Mix/${TEST_DATASET}/*/fast5_*
 
 #TEST_DATASET=50_WT_50_IVT_RTA
-TEST_DATASET=75_WT_25_IVT_RTA
-FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230426_HEK293_WT_IVT/${TEST_DATASET}/*/fast5_*
+#TEST_DATASET=75_WT_25_IVT_RTA
+#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230426_HEK293_WT_IVT/${TEST_DATASET}/*/fast5_*
 
 #####################################################################################################################################
 
@@ -23,7 +23,9 @@ BAM=${WORKSPACE}/filtered_q50.bam
 MOD_FILE=${HOME}/Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv
 BACKBONE_MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 EXTRACTION_LAYER=convlayers.conv21
-TRAIN_DATASET=20230221_WUE_splint_lig
+
+#TRAIN_DATASET=20230221_WUE_splint_batch1
+TRAIN_DATASET=20230502_WUE_splint_batch2
 CLASSIFIER=logistic_regression
 SCALER=MaxAbs
 CLASSIFIER_MODEL_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/MAFIA_classifiers/${TRAIN_DATASET}_${CLASSIFIER}_${SCALER}
