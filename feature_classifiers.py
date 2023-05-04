@@ -155,7 +155,7 @@ def train_binary_classifier(unm_dict, mod_dict, classifier, scaler=None, frac_te
         opt_accuracy = np.mean(opt_predictions==y_test)
 
         plt.figure(figsize=(5, 5))
-        plt.plot(recall, precision, '-o-')
+        plt.plot(recall, precision, '-o')
         # plt.axvline(opt_recall, c='g')
         plt.xlabel('Recall')
         plt.ylabel('Precision')
