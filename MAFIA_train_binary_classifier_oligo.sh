@@ -52,12 +52,20 @@ SCALER=MaxAbs
 #OUTDIR=${WORKSPACE}/MAFIA_classifiers/random_ligation_A_m6A_${SCALER}_enforceMotif
 
 ### Isabel RL Mix 1 & 3 ###
-UNM_BAM=${WORKSPACE}/RL_Mix1_A_RTA/mapped.bam
-UNM_FAST5="/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230503_RL_run2/RL_Mix1_A_RTA/*/fast5_*"
-MOD_BAM=${WORKSPACE}/RL_Mix3_m6A_RTA/mapped.bam
-MOD_FAST5="/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230503_RL_run2/RL_Mix3_m6A_RTA/*/fast5_*"
-REF=${WORKSPACE}/reference/RL_Mix1_Mix3_blocks7.fasta
-OUTDIR=${WORKSPACE}/MAFIA_classifiers/RL_run2_Mix1_Mix3_${SCALER}
+#UNM_BAM=${WORKSPACE}/RL_Mix1_A_RTA/mapped.bam
+#UNM_FAST5="/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230503_RL_run2/RL_Mix1_A_RTA/*/fast5_*"
+#MOD_BAM=${WORKSPACE}/RL_Mix3_m6A_RTA/mapped.bam
+#MOD_FAST5="/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230503_RL_run2/RL_Mix3_m6A_RTA/*/fast5_*"
+#REF=${WORKSPACE}/reference/RL_Mix1_Mix3_blocks7.fasta
+#OUTDIR=${WORKSPACE}/MAFIA_classifiers/RL_run2_Mix1_Mix3_${SCALER}
+
+### Isabel RL Mix 2 & 4 ###
+UNM_BAM=${WORKSPACE}/RL_Mix2_A_RTA/mapped.bam
+UNM_FAST5="/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230503_RL_run2/RL_Mix2_A_RTA/*/fast5_*"
+MOD_BAM=${WORKSPACE}/RL_Mix4_m6A_RTA/mapped.bam
+MOD_FAST5="/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230503_RL_run2/RL_Mix4_m6A_RTA/*/fast5_*"
+REF=${WORKSPACE}/reference/RL_Mix2_Mix4_blocks7.fasta
+OUTDIR=${WORKSPACE}/MAFIA_classifiers/RL_run2_Mix2_Mix4_${SCALER}
 
 python3 oligo_train_binary_classifier.py \
 --unm_bam_file ${UNM_BAM} \
