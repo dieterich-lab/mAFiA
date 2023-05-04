@@ -17,7 +17,7 @@ def add_block(base_list, add_list, base_names, add_names):
             )
     return new_list, new_names
 
-max_blocks = 7
+max_blocks = 8
 ref_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/reference'
 ### WUE batch 1 ###
 # base_fasta = os.path.join(ref_dir, 'WUE_batch1_w_splint.fasta')
