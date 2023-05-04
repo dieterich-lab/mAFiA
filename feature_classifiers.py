@@ -155,7 +155,7 @@ def train_binary_classifier(unm_dict, mod_dict, classifier, scaler=None, frac_te
         opt_accuracy = np.mean(opt_predictions==y_test)
 
         plt.figure(figsize=(5, 5))
-        plt.plot(recall, precision)
+        plt.plot(recall, precision, '-o-')
         # plt.axvline(opt_recall, c='g')
         plt.xlabel('Recall')
         plt.ylabel('Precision')
@@ -166,7 +166,7 @@ def train_binary_classifier(unm_dict, mod_dict, classifier, scaler=None, frac_te
         plt.close('all')
 
         ### output precision, recall, thresholds ###
-        thresh_precision_recall = np.vstack((thresholds, precision, recall)).T
+        thresh_precision_recall = np.vstack((np.concatenate([thresholds, [1.0]]), precision, recall)).T
         np.savetxt(debug_img_path.replace('.png', '.txt'), thresh_precision_recall, fmt='%.2f', delimiter='\t', header='threshold\tprecision\trecall')
     ######################################################################
 
