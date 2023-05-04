@@ -1,5 +1,6 @@
 import os
 HOME = os.path.expanduser('~')
+from glob import glob
 import argparse
 import pandas as pd
 import numpy as np
@@ -7,48 +8,6 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
-# parser = argparse.ArgumentParser()
-# parser.add_argument('--df_file')
-# args = parser.parse_args()
-# df_file = args.df_file
-
-# classifier = 'random_ligation_A_m6A_MaxAbs'
-# ivt_res_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/old/results/res_HEK293_IVT_{}_noEnforceMotif_modProbPerRead.tsv'.format(classifier)
-# wt_res_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_HEK293A_WT_{}_modProbThresh0.5.tsv'.format(classifier)
-# ivt_res_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_0_WT_100_IVT_RTA_20230221_WUE_splint_lig_modProbPerRead.tsv.merged'
-# wt_res_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_100_WT_0_IVT_RTA_20230221_WUE_splint_lig_modProbPerRead.tsv.merged'
-# img_out = os.path.join(HOME, 'img_out/MAFIA', os.path.basename('HEK293_WT_vs_IVT_{}'.format(classifier)))
-
-results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
-training_dataset = '20230221_WUE_splint_lig'
-testing_datasets = [
-    '0_WT_100_IVT_RTA',
-    '25_WT_75_IVT_RTA',
-    '50_WT_50_IVT_RTA',
-    '75_WT_25_IVT_RTA',
-    '100_WT_0_IVT_RTA'
-]
-ds_colors = {
-    '0_WT_100_IVT_RTA' : 'b',
-    '25_WT_75_IVT_RTA' : 'g',
-    '50_WT_50_IVT_RTA' : 'm',
-    '75_WT_25_IVT_RTA' : 'c',
-    '100_WT_0_IVT_RTA' : 'r'
-}
-
-img_out = os.path.join(HOME, 'img_out/MAFIA', os.path.basename('HEK293_mixing_{}'.format(training_dataset)))
-if not os.path.exists(img_out):
-    os.makedirs(img_out, exist_ok=True)
-
-P_VAL_THRESH = 1.0E-50
-COV_THRESH = 50
-PROB_MARGIN = 0.2
-COMMON_SITES_ONLY = False
-
-dfs = {
-    ds : pd.read_csv(os.path.join(results_dir, 'res_{}_{}_modProbPerRead.tsv.merged'.format(ds, training_dataset)), sep='\t').rename(columns={'Unnamed: 0': 'index'}) for ds in testing_datasets
-}
-motifs = list(set.intersection(*[set(df['ref_motif'].unique()) for df in dfs.values()]))
 
 def get_norm_counts(in_df, sel_motif):
     df_motif = in_df[
@@ -85,6 +44,61 @@ def calc_mod_ratio_with_margin(in_df_motif, prob_margin, thresh_cov=50):
     df_motif_avg.reset_index(drop=True)
     return df_motif_avg
 
+
+# parser = argparse.ArgumentParser()
+# parser.add_argument('--df_file')
+# args = parser.parse_args()
+# df_file = args.df_file
+
+# classifier = 'random_ligation_A_m6A_MaxAbs'
+# ivt_res_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/old/results/res_HEK293_IVT_{}_noEnforceMotif_modProbPerRead.tsv'.format(classifier)
+# wt_res_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_HEK293A_WT_{}_modProbThresh0.5.tsv'.format(classifier)
+# ivt_res_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_0_WT_100_IVT_RTA_20230221_WUE_splint_lig_modProbPerRead.tsv.merged'
+# wt_res_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_100_WT_0_IVT_RTA_20230221_WUE_splint_lig_modProbPerRead.tsv.merged'
+# img_out = os.path.join(HOME, 'img_out/MAFIA', os.path.basename('HEK293_WT_vs_IVT_{}'.format(classifier)))
+
+results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
+training_dataset = 'WUE_splint_batch*'
+testing_datasets = [
+    '0_WT_100_IVT_RTA',
+    '25_WT_75_IVT_RTA',
+    '50_WT_50_IVT_RTA',
+    '75_WT_25_IVT_RTA',
+    '100_WT_0_IVT_RTA'
+]
+ds_colors = {
+    '0_WT_100_IVT_RTA' : 'b',
+    '25_WT_75_IVT_RTA' : 'g',
+    '50_WT_50_IVT_RTA' : 'm',
+    '75_WT_25_IVT_RTA' : 'c',
+    '100_WT_0_IVT_RTA' : 'r'
+}
+
+img_out = os.path.join(HOME, 'img_out/MAFIA', os.path.basename('HEK293_mixing_{}'.format(training_dataset)))
+if not os.path.exists(img_out):
+    os.makedirs(img_out, exist_ok=True)
+
+P_VAL_THRESH = 1.0E-99
+COV_THRESH = 50
+PROB_MARGIN = 0.2
+COMMON_SITES_ONLY = False
+
+# dfs = {
+#     ds : pd.read_csv(os.path.join(results_dir, 'res_{}_{}_modProbPerRead.tsv.merged'.format(ds, training_dataset)), sep='\t').rename(columns={'Unnamed: 0': 'index'}) for ds in testing_datasets
+# }
+dfs = {}
+for ds in testing_datasets:
+    paths = glob(os.path.join(results_dir, 'res_{}_{}_modProbPerRead.tsv.merged'.format(ds, training_dataset)))
+    if len(paths)==1:
+        df = pd.read_csv(paths[0], sep='\t').rename(columns={'Unnamed: 0': 'index'})
+        dfs[ds] = df
+    elif len(paths)>=2:
+        df = pd.concat([pd.read_csv(path, sep='\t').rename(columns={'Unnamed: 0': 'index'}) for path in paths])
+        dfs[ds] = df
+
+# motifs = list(set.intersection(*[set(df['ref_motif'].unique()) for df in dfs.values()]))
+motifs = ['AGACT', 'GGACA', 'GGACC', 'GAACT', 'GGACT', 'TGACT']
+
 ### aggregate mod. ratio per site ###
 # def calc_mod_ratio(in_df_motif, thresh_mod=0.5, thresh_cov=50):
 #     df_motif_avg = pd.DataFrame()
@@ -104,33 +118,24 @@ def calc_mod_ratio_with_margin(in_df_motif, prob_margin, thresh_cov=50):
 # df_motif_avg_ivt = calc_mod_ratio(df_motif_ivt, thresh_mod=crit_thresh, thresh_cov=COV_THRESH)
 # df_motif_avg_wt = calc_mod_ratio(df_motif_wt, thresh_mod=crit_thresh, thresh_cov=COV_THRESH)
 
-dict_ds_motif_avg = {}
 
 ### plots ###
-num_rows = 1
+num_rows = 2
 num_cols = 3
 fig_width = 16
-fig_height = 6
+fig_height = 10
 fig_hist = plt.figure(figsize=(fig_width, fig_height))
 axes_hist = fig_hist.subplots(num_rows, num_cols).flatten()
 fig_mod_ratio = plt.figure(figsize=(fig_width, fig_height))
 axes_mod_ratio = fig_mod_ratio.subplots(num_rows, num_cols).flatten()
+dict_ds_motif_avg = {}
 for ds, df in dfs.items():
     dict_ds_motif_avg[ds] = {}
     for subplot_ind, this_motif in enumerate(motifs):
+        if this_motif not in df['ref_motif'].unique():
+            continue
         ds_norm_counts, ds_bin_centers, ds_motif = get_norm_counts(df, this_motif)
         axes_hist[subplot_ind].step(ds_bin_centers, ds_norm_counts, color=ds_colors[ds], label='{}, {} features'.format(ds, len(ds_motif)))
-
-        df_motif_avg = calc_mod_ratio_with_margin(ds_motif, prob_margin=PROB_MARGIN, thresh_cov=COV_THRESH)
-        dict_ds_motif_avg[ds][this_motif] = df_motif_avg
-
-        glori_ratio = np.float64(df_motif_avg['Ratio'])
-        mod_ratio = np.float64(df_motif_avg['mod_ratio'])
-        corr = np.corrcoef(glori_ratio, mod_ratio)[0, 1]
-
-        axes_mod_ratio[subplot_ind].scatter(glori_ratio, mod_ratio, color=ds_colors[ds], marker='.', label='{}, {} sites, corr. {:.2f}'.format(ds, len(glori_ratio), corr))
-        # axes_mod_ratio[subplot_ind].plot(glori_ratio_ivt, mod_ratio_ivt, 'b.', label='IVT, {} sites, corr. {:.2f}'.format(len(glori_ratio_ivt), corr_ivt))
-        # axes_mod_ratio[subplot_ind].plot(glori_ratio_wt, mod_ratio_wt, 'r.', label='WT, {} sites, corr. {:.2f}'.format(len(glori_ratio_wt), corr_wt))
 
         axes_hist[subplot_ind].axvspan(xmin=PROB_MARGIN, xmax=1 - PROB_MARGIN, color='gray', alpha=0.5)
         axes_hist[subplot_ind].set_xlabel('Mod. Prob.', fontsize=15)
@@ -140,13 +145,25 @@ for ds, df in dfs.items():
         axes_hist[subplot_ind].set_ylim([0, 0.3])
         axes_hist[subplot_ind].legend(loc='upper left', fontsize=12)
 
-        axes_mod_ratio[subplot_ind].plot(np.arange(0, 1.1, 0.1), np.arange(0, 1.1, 0.1), 'k--', alpha=0.5)
-        axes_mod_ratio[subplot_ind].set_xlim([-0.05, 1.05])
-        axes_mod_ratio[subplot_ind].set_ylim([-0.05, 1.05])
-        axes_mod_ratio[subplot_ind].set_xlabel('GLORI mod. ratio', fontsize=15)
-        axes_mod_ratio[subplot_ind].set_ylabel('ONT mod. ratio', fontsize=15)
-        axes_mod_ratio[subplot_ind].set_title('{}'.format(this_motif), fontsize=20)
-        axes_mod_ratio[subplot_ind].legend(loc='upper left', fontsize=12)
+        df_motif_avg = calc_mod_ratio_with_margin(ds_motif, prob_margin=PROB_MARGIN, thresh_cov=COV_THRESH)
+        dict_ds_motif_avg[ds][this_motif] = df_motif_avg
+
+        glori_ratio = np.float64(df_motif_avg['Ratio'])
+        mod_ratio = np.float64(df_motif_avg['mod_ratio'])
+        corr = np.corrcoef(glori_ratio, mod_ratio)[0, 1]
+
+        if ds=='100_WT_0_IVT_RTA':
+            axes_mod_ratio[subplot_ind].scatter(glori_ratio, mod_ratio, color=ds_colors[ds], marker='.', label='{}, {} sites, corr. {:.2f}'.format(ds, len(glori_ratio), corr))
+            # axes_mod_ratio[subplot_ind].plot(glori_ratio_ivt, mod_ratio_ivt, 'b.', label='IVT, {} sites, corr. {:.2f}'.format(len(glori_ratio_ivt), corr_ivt))
+            # axes_mod_ratio[subplot_ind].plot(glori_ratio_wt, mod_ratio_wt, 'r.', label='WT, {} sites, corr. {:.2f}'.format(len(glori_ratio_wt), corr_wt))
+
+            axes_mod_ratio[subplot_ind].plot(np.arange(0, 1.1, 0.1), np.arange(0, 1.1, 0.1), 'k--', alpha=0.5)
+            axes_mod_ratio[subplot_ind].set_xlim([-0.05, 1.05])
+            axes_mod_ratio[subplot_ind].set_ylim([-0.05, 1.05])
+            axes_mod_ratio[subplot_ind].set_xlabel('GLORI mod. ratio', fontsize=15)
+            axes_mod_ratio[subplot_ind].set_ylabel('ONT mod. ratio', fontsize=15)
+            axes_mod_ratio[subplot_ind].set_title('{}'.format(this_motif), fontsize=20)
+            axes_mod_ratio[subplot_ind].legend(loc='upper left', fontsize=12)
 fig_hist.tight_layout()
 fig_mod_ratio.tight_layout()
 
