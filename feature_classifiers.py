@@ -164,6 +164,10 @@ def train_binary_classifier(unm_dict, mod_dict, classifier, scaler=None, frac_te
 
         plt.savefig(debug_img_path, bbox_inches='tight')
         plt.close('all')
+
+        ### output precision, recall, thresholds ###
+        thresh_precision_recall = np.vstack((thresholds, precision, recall)).T
+        np.savetxt(debug_img_path.replace('.png', '.txt'), thresh_precision_recall, fmt='%.2f', delimiter='\t', header='threshold\tprecision\trecall')
     ######################################################################
 
     return score_auc, binary_model, opt_thresh
