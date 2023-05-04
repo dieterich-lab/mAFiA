@@ -53,9 +53,9 @@ SCALER=MaxAbs
 
 ### Isabel RL Mix 1 & 3 ###
 UNM_BAM=${WORKSPACE}/RL_Mix1_A_RTA/mapped.bam
-UNM_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230503_RL_run2/RL_Mix1_A_RTA/*
+UNM_FAST5="/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230503_RL_run2/RL_Mix1_A_RTA/*/fast5_*"
 MOD_BAM=${WORKSPACE}/RL_Mix3_m6A_RTA/mapped.bam
-MOD_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230503_RL_run2/RL_Mix3_m6A_RTA/*
+MOD_FAST5="/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230503_RL_run2/RL_Mix3_m6A_RTA/*/fast5_*"
 REF=${WORKSPACE}/reference/RL_Mix1_Mix3_blocks7.fasta
 OUTDIR=${WORKSPACE}/MAFIA_classifiers/RL_run2_Mix1_Mix3_${SCALER}
 
