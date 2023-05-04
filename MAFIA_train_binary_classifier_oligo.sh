@@ -34,14 +34,14 @@ SCALER=MaxAbs
 #REF=${WORKSPACE}/reference/splint_variations_max_blocks_7.fasta
 #OUTDIR=${WORKSPACE}/MAFIA_classifiers/${DATASET}_${CLASSIFIER}_${SCALER}
 
-### Claudia batch 2 ###
-DATASET=20230502_WUE_splint_batch2
-UNM_BAM=${WORKSPACE}/WUE_splint_batch2_A_RTA/mapped.bam
-UNM_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/${DATASET}/WUE_splint_batch2_A_RTA/*/fast5_*"
-MOD_BAM=${WORKSPACE}/WUE_splint_batch2_m6A_RTA/mapped.bam
-MOD_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/${DATASET}/WUE_splint_batch2_m6A_RTA/*/fast5_*"
-REF=${WORKSPACE}/reference/WUE_batch2_max_blocks_7.fasta
-OUTDIR=${WORKSPACE}/MAFIA_classifiers/${DATASET}_${CLASSIFIER}_${SCALER}
+#### Claudia batch 2 ###
+#DATASET=20230502_WUE_splint_batch2
+#UNM_BAM=${WORKSPACE}/WUE_splint_batch2_A_RTA/mapped.bam
+#UNM_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/${DATASET}/WUE_splint_batch2_A_RTA/*/fast5_*"
+#MOD_BAM=${WORKSPACE}/WUE_splint_batch2_m6A_RTA/mapped.bam
+#MOD_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/${DATASET}/WUE_splint_batch2_m6A_RTA/*/fast5_*"
+#REF=${WORKSPACE}/reference/WUE_batch2_max_blocks_7.fasta
+#OUTDIR=${WORKSPACE}/MAFIA_classifiers/${DATASET}_${CLASSIFIER}_${SCALER}
 
 ### Isabel random 6 ###
 #UNM_BAM=${WORKSPACE}/mapping/RL_RG1-6_A_RTA.bam
@@ -50,6 +50,14 @@ OUTDIR=${WORKSPACE}/MAFIA_classifiers/${DATASET}_${CLASSIFIER}_${SCALER}
 #MOD_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG7-12_m6A_RTA/20230418_1325_X2_AOC149_8138c168/fast5
 #REF=${WORKSPACE}/reference/top6_random_permutation_max_blocks_5.fasta
 #OUTDIR=${WORKSPACE}/MAFIA_classifiers/random_ligation_A_m6A_${SCALER}_enforceMotif
+
+### Isabel RL Mix 1 & 3 ###
+UNM_BAM=${WORKSPACE}/RL_Mix1_A_RTA/mapped.bam
+UNM_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230503_RL_run2/RL_Mix1_A_RTA/*
+MOD_BAM=${WORKSPACE}/RL_Mix3_m6A_RTA/mapped.bam
+MOD_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230503_RL_run2/RL_Mix3_m6A_RTA/*
+REF=${WORKSPACE}/reference/RL_Mix1_Mix3_blocks7.fasta
+OUTDIR=${WORKSPACE}/MAFIA_classifiers/RL_run2_Mix1_Mix3_${SCALER}
 
 python3 oligo_train_binary_classifier.py \
 --unm_bam_file ${UNM_BAM} \
