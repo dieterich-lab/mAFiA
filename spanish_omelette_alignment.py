@@ -1,14 +1,15 @@
-from Bio import SeqIO, pairwise2
-from Bio.Seq import Seq
-from Bio.pairwise2 import format_alignment
-from Bio.Align.sam import AlignmentWriter
 import numpy as np
 from tqdm import tqdm
-
+from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
 from Bio.Align import PairwiseAligner
+from Bio.Align.sam import AlignmentWriter
 
 ref_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch1_w_splint.fasta'
 query_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_splint_batch1_m6A_RTA/basecalled.fasta'
+sam_file = '/home/adrian/img_out/test.sam'
+recon_ref_file = '/home/adrian/img_out/recon_ref.fasta'
 
 references = list(SeqIO.parse(ref_file, 'fasta'))
 queries = list(SeqIO.parse(query_file, 'fasta'))
@@ -16,7 +17,7 @@ queries = list(SeqIO.parse(query_file, 'fasta'))
 min_segment_len = 10
 
 #########################################
-### local aligner ###
+### local aligner #######################
 local_aligner = PairwiseAligner()
 local_aligner.mode = 'local'
 local_aligner.match_score = 1
@@ -58,9 +59,14 @@ def get_daughter_seq_pos(mother_seq_pos, identified_segments, min_fragment_len=8
         daughter_seq_pos.append((mother_seq[best_end:], mother_pos+best_end))
     return daughter_seq_pos
 
-# query = queries[0]
-with open('/home/adrian/img_out/dummy.sam', 'w') as h:
+for ind, ref in enumerate(references):
+    ref.id = 'block1_{}'.format(ind)
+    references[ind] = ref
+dict_recon_references = {ref.id : ref for ref in references}
+
+with open(sam_file, 'w') as h:
     alignment_writer = AlignmentWriter(h, md=True)
+    # query = queries[0]
     for query in tqdm(queries[:10]):
         if len(query.seq)<min_segment_len:
             continue
@@ -79,14 +85,32 @@ with open('/home/adrian/img_out/dummy.sam', 'w') as h:
 
         ### reconstruct full reference ###
         segment_sequence = [seg[0] for seg in filtered_segments]
-        ref_recon = Seq('').join([references[ind].seq for ind in segment_sequence])
+        ref_id = 'block{}_{}'.format(len(segment_sequence), ''.join([str(s) for s in segment_sequence]))
+        ref_seq = Seq('').join([references[ind].seq for ind in segment_sequence])
+        ref_recon = SeqRecord(
+            seq=ref_seq,
+            id=ref_id,
+            description=''
+        )
+        if ref_id not in dict_recon_references.keys():
+            dict_recon_references[ref_id] = ref_recon
 
         ### global alignment ###
-        # g_align1 = pairwise2.align.globalms(ref_recon, query.seq, 2, -1, -5, -2, one_alignment_only=True)[0]
-        g_align = global_aligner.align(ref_recon, query.seq)[0]
+        g_align = global_aligner.align(ref_recon, query)[0]
 
         # print('\n=====================================================================')
         # print('Segment sequence: {}'.format('-'.join([str(i) for i in segment_sequence])))
         # print(format_alignment(*global_align, full_sequences=True))
 
+        alignment_writer.write_header([g_align])
         alignment_writer.write_single_alignment([g_align])
+
+### output recon ref ###
+sorted_recon_references = [dict_recon_references[k] for k in sorted(dict_recon_references.keys())]
+with open(recon_ref_file, "w") as handle:
+  SeqIO.write(sorted_recon_references, handle, "fasta")
+
+# TODO for SAM output:
+# SAM header
+# MD --> CS tag
+# alignment score
