@@ -64,6 +64,8 @@ def get_daughter_seq_pos(mother_seq_pos, identified_segments, min_fragment_len=8
 
 for ind, ref in enumerate(references):
     ref.id = 'block1_{}'.format(ind)
+    ref.name = ''
+    ref.description = ''
     references[ind] = ref
 dict_recon_references = {ref.id : ref for ref in references}
 
@@ -85,7 +87,7 @@ for query in tqdm(queries):
     all_identified_segments.sort(key=lambda x: x[3])
     filtered_segments = [seg for seg in all_identified_segments if (seg[3]-seg[2])>=min_segment_len]
     # filtered_segments = all_identified_segments.copy()
-    if len(filtered_segments)==0:
+    if (len(filtered_segments)==0) or (len(filtered_segments)>10):
         continue
 
     ### reconstruct full reference ###
@@ -127,8 +129,8 @@ plt.close('all')
 
 ### output sam file ###
 with open(sam_file, 'w') as h:
-    alignment_writer = AlignmentWriter(h, md=True)
-    alignment_writer.write_header(all_alignments)
+    alignment_writer = AlignmentWriter(h)
+    # alignment_writer.write_header(all_alignments)
     alignment_writer.write_multiple_alignments(all_alignments)
 
 ### output recon ref ###
@@ -137,6 +139,6 @@ with open(recon_ref_file, "w") as handle:
   SeqIO.write(sorted_recon_references, handle, "fasta")
 
 # TODO for SAM output:
+# CS tag
+# calcs /home/adrian/img_out/test.sam -r /home/adrian/img_out/recon_ref.fasta > /home/adrian/img_out/test_cs.sam
 # SAM header
-# MD --> CS tag
-# alignment score
