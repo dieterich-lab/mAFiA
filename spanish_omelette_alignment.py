@@ -5,19 +5,19 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Align import PairwiseAligner
 from Bio.Align.sam import AlignmentWriter
-
 import matplotlib.pyplot as plt
+
+min_segment_len = 8
+thresh_mapq = 30
 
 ref_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch1_w_splint.fasta'
 query_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_splint_batch1_m6A_RTA/basecalled.fasta'
-sam_file = '/home/adrian/img_out/test.sam'
-recon_ref_file = '/home/adrian/img_out/recon_ref.fasta'
-out_hist_path = '/home/adrian/img_out/hist_norm_global_scores.png'
+sam_file = '/home/adrian/img_out/spomlette_q{}.sam'.format(thresh_mapq)
+recon_ref_file = '/home/adrian/img_out/spomlette_recon_ref_q{}.fasta'.format(thresh_mapq)
+out_hist_path = '/home/adrian/img_out/hist_norm_global_scores_q{}.png'.format(thresh_mapq)
 
 references = list(SeqIO.parse(ref_file, 'fasta'))
 queries = list(SeqIO.parse(query_file, 'fasta'))
-
-min_segment_len = 10
 
 #########################################
 ### local aligner #######################
@@ -32,8 +32,8 @@ local_aligner.extend_gap_score = -1
 global_aligner = PairwiseAligner()
 global_aligner.mode = 'global'
 global_aligner.match_score = 1
-global_aligner.mismatch_score = -0.5
-global_aligner.open_gap_score = -2
+global_aligner.mismatch_score = -1
+global_aligner.open_gap_score = -5
 global_aligner.extend_gap_score = -1
 #########################################
 
@@ -85,8 +85,8 @@ for query in tqdm(queries):
 
     ### sort by start position ###
     all_identified_segments.sort(key=lambda x: x[3])
-    filtered_segments = [seg for seg in all_identified_segments if (seg[3]-seg[2])>=min_segment_len]
-    # filtered_segments = all_identified_segments.copy()
+    # filtered_segments = [seg for seg in all_identified_segments if (seg[3]-seg[2])>=min_segment_len]
+    filtered_segments = all_identified_segments.copy()
     if (len(filtered_segments)==0) or (len(filtered_segments)>10):
         continue
 
@@ -114,12 +114,11 @@ for query in tqdm(queries):
     all_alignments.append(g_align)
 
 ### plot histogram of mapping scores ###
-thresh_mapq = 30
 all_mapping_scores = np.array([a.mapq for a in all_alignments])
 num_pass = np.sum(all_mapping_scores>=thresh_mapq)
 pass_rate = int(num_pass / len(all_mapping_scores) * 100)
 plt.figure(figsize=(5, 5))
-plt.hist(all_mapping_scores, range=[0, 100], bins=100)
+plt.hist(all_mapping_scores, range=[-100, 100], bins=200)
 plt.xlabel('Norm. Mapping scores', fontsize=12)
 plt.ylabel('Counts', fontsize=12)
 plt.axvline(x=thresh_mapq, c='g')
@@ -127,9 +126,15 @@ plt.title('Pass rate at Q$\geq${}\n{}/{} = {}%'.format(thresh_mapq, num_pass, le
 plt.savefig(out_hist_path, bbox_inches='tight')
 plt.close('all')
 
+### filter alignments by score ###
+filtered_alignments = [a for a in all_alignments if a.mapq>=thresh_mapq]
+filtered_ref_ids = [a.target.id for a in filtered_alignments]
+
 ### output sam file ###
 sorted_recon_references = [
-    dict_recon_references[k] for k in sorted(dict_recon_references.keys(), key=lambda x: (int(x.split('_')[0].lstrip('block')), x.split('_')[1]))
+    dict_recon_references[k] for k in sorted(dict_recon_references.keys(),
+                                             key=lambda x: (int(x.split('_')[0].lstrip('block')), x.split('_')[1]))
+    if k in filtered_ref_ids
 ]
 
 with open(sam_file, 'w') as out_sam:
@@ -137,15 +142,16 @@ with open(sam_file, 'w') as out_sam:
     for ref in sorted_recon_references:
         out_sam.write('@SQ\tSN:{}\tLN:{}\n'.format(ref.id, len(ref.seq)))
 
+    out_sam.write('@PG\tID:spomlette\tPN:spomlette\tVN:0.01\tCL:blah\n')
+
     ### write read alignments ###
     alignment_writer = AlignmentWriter(out_sam)
     # alignment_writer.write_header(all_alignments)
-    alignment_writer.write_multiple_alignments(all_alignments)
+    alignment_writer.write_multiple_alignments(filtered_alignments)
 
 ### output recon ref ###
 with open(recon_ref_file, "w") as handle:
   SeqIO.write(sorted_recon_references, handle, "fasta")
 
-# TODO for SAM output:
-# CS tag
-# calcs /home/adrian/img_out/test.sam -r /home/adrian/img_out/recon_ref.fasta > /home/adrian/img_out/test_cs.sam
+# to generate CS tag:
+# calcs /home/adrian/img_out/spomlette_q50.sam -r /home/adrian/img_out/spomlette_recon_ref_q50.fasta > /home/adrian/img_out/spomlette_q50_cs.sam
