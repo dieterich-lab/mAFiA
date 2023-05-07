@@ -128,17 +128,24 @@ plt.savefig(out_hist_path, bbox_inches='tight')
 plt.close('all')
 
 ### output sam file ###
-with open(sam_file, 'w') as h:
-    alignment_writer = AlignmentWriter(h)
+sorted_recon_references = [
+    dict_recon_references[k] for k in sorted(dict_recon_references.keys(), key=lambda x: (int(x.split('_')[0].lstrip('block')), x.split('_')[1]))
+]
+
+with open(sam_file, 'w') as out_sam:
+    ### write header SQ lines -- old-fashioned way ###
+    for ref in sorted_recon_references:
+        out_sam.write('@SQ\tSN:{}\tLN:{}\n'.format(ref.id, len(ref.seq)))
+
+    ### write read alignments ###
+    alignment_writer = AlignmentWriter(out_sam)
     # alignment_writer.write_header(all_alignments)
     alignment_writer.write_multiple_alignments(all_alignments)
 
 ### output recon ref ###
-sorted_recon_references = [dict_recon_references[k] for k in sorted(dict_recon_references.keys())]
 with open(recon_ref_file, "w") as handle:
   SeqIO.write(sorted_recon_references, handle, "fasta")
 
 # TODO for SAM output:
 # CS tag
 # calcs /home/adrian/img_out/test.sam -r /home/adrian/img_out/recon_ref.fasta > /home/adrian/img_out/test_cs.sam
-# SAM header
