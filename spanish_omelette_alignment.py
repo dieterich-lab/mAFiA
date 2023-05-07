@@ -6,10 +6,13 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Align import PairwiseAligner
 from Bio.Align.sam import AlignmentWriter
 
+import matplotlib.pyplot as plt
+
 ref_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch1_w_splint.fasta'
 query_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_splint_batch1_m6A_RTA/basecalled.fasta'
 sam_file = '/home/adrian/img_out/test.sam'
 recon_ref_file = '/home/adrian/img_out/recon_ref.fasta'
+out_hist_path = '/home/adrian/img_out/hist_norm_global_scores.png'
 
 references = list(SeqIO.parse(ref_file, 'fasta'))
 queries = list(SeqIO.parse(query_file, 'fasta'))
@@ -28,10 +31,10 @@ local_aligner.extend_gap_score = -1
 ### global aligner ######################
 global_aligner = PairwiseAligner()
 global_aligner.mode = 'global'
-global_aligner.match_score = 2
-global_aligner.mismatch_score = -1
-global_aligner.open_gap_score = -5
-global_aligner.extend_gap_score = -2
+global_aligner.match_score = 1
+global_aligner.mismatch_score = -0.5
+global_aligner.open_gap_score = -2
+global_aligner.extend_gap_score = -1
 #########################################
 
 def get_most_likely_segment(in_seq):
@@ -64,46 +67,69 @@ for ind, ref in enumerate(references):
     references[ind] = ref
 dict_recon_references = {ref.id : ref for ref in references}
 
-with open(sam_file, 'w') as h:
-    alignment_writer = AlignmentWriter(h, md=True)
-    # query = queries[0]
-    for query in tqdm(queries[:10]):
-        if len(query.seq)<min_segment_len:
-            continue
-        all_identified_segments = []
-        remaining_seq_start = [(query.seq, 0)]
+all_alignments = []
+# query = queries[0]
+for query in tqdm(queries):
+    if len(query.seq)<min_segment_len:
+        continue
+    all_identified_segments = []
+    remaining_seq_start = [(query.seq, 0)]
 
+    try:
         while len(remaining_seq_start)>0:
             remaining_seq_start = remaining_seq_start[:-1] + get_daughter_seq_pos(remaining_seq_start[-1], all_identified_segments)
+    except:
+        continue
 
-        ### sort by start position ###
-        all_identified_segments.sort(key=lambda x: x[3])
-        filtered_segments = [seg for seg in all_identified_segments if (seg[3]-seg[2])>=min_segment_len]
-        # filtered_segments = all_identified_segments.copy()
-        if len(filtered_segments)==0:
-            continue
+    ### sort by start position ###
+    all_identified_segments.sort(key=lambda x: x[3])
+    filtered_segments = [seg for seg in all_identified_segments if (seg[3]-seg[2])>=min_segment_len]
+    # filtered_segments = all_identified_segments.copy()
+    if len(filtered_segments)==0:
+        continue
 
-        ### reconstruct full reference ###
-        segment_sequence = [seg[0] for seg in filtered_segments]
-        ref_id = 'block{}_{}'.format(len(segment_sequence), ''.join([str(s) for s in segment_sequence]))
-        ref_seq = Seq('').join([references[ind].seq for ind in segment_sequence])
-        ref_recon = SeqRecord(
-            seq=ref_seq,
-            id=ref_id,
-            description=''
-        )
-        if ref_id not in dict_recon_references.keys():
-            dict_recon_references[ref_id] = ref_recon
+    ### reconstruct full reference ###
+    segment_sequence = [seg[0] for seg in filtered_segments]
+    ref_id = 'block{}_{}'.format(len(segment_sequence), ''.join([str(s) for s in segment_sequence]))
+    ref_seq = Seq('').join([references[ind].seq for ind in segment_sequence])
+    ref_recon = SeqRecord(
+        seq=ref_seq,
+        id=ref_id,
+        description=''
+    )
+    if ref_id not in dict_recon_references.keys():
+        dict_recon_references[ref_id] = ref_recon
 
-        ### global alignment ###
-        g_align = global_aligner.align(ref_recon, query)[0]
+    ### global alignment ###
+    g_align = global_aligner.align(ref_recon, query)[0]
 
-        # print('\n=====================================================================')
-        # print('Segment sequence: {}'.format('-'.join([str(i) for i in segment_sequence])))
-        # print(format_alignment(*global_align, full_sequences=True))
+    ### normalized global alignment score, NOT conventional mapq!!! ###
+    g_align.mapq = int(g_align.score / len(query.seq) * 100)
+    # print('\n=====================================================================')
+    # print('Segment sequence: {}'.format('-'.join([str(i) for i in segment_sequence])))
+    # print(format_alignment(*global_align, full_sequences=True))
 
-        alignment_writer.write_header([g_align])
-        alignment_writer.write_single_alignment([g_align])
+    all_alignments.append(g_align)
+
+### plot histogram of mapping scores ###
+thresh_mapq = 30
+all_mapping_scores = np.array([a.mapq for a in all_alignments])
+num_pass = np.sum(all_mapping_scores>=thresh_mapq)
+pass_rate = int(num_pass / len(all_mapping_scores) * 100)
+plt.figure(figsize=(5, 5))
+plt.hist(all_mapping_scores, range=[0, 100], bins=100)
+plt.xlabel('Norm. Mapping scores', fontsize=12)
+plt.ylabel('Counts', fontsize=12)
+plt.axvline(x=thresh_mapq, c='g')
+plt.title('Pass rate at Q$\geq${}\n{}/{} = {}%'.format(thresh_mapq, num_pass, len(all_mapping_scores), pass_rate), fontsize=15)
+plt.savefig(out_hist_path, bbox_inches='tight')
+plt.close('all')
+
+### output sam file ###
+with open(sam_file, 'w') as h:
+    alignment_writer = AlignmentWriter(h, md=True)
+    alignment_writer.write_header(all_alignments)
+    alignment_writer.write_multiple_alignments(all_alignments)
 
 ### output recon ref ###
 sorted_recon_references = [dict_recon_references[k] for k in sorted(dict_recon_references.keys())]
