@@ -54,12 +54,12 @@ def get_local_segment(in_seq):
     query_end = chosen_alignment.coordinates[1][-1]
 
     ### debug ###
-    if DEBUG:
-        chosen_seq = chosen_alignment.query.seq
-        chosen_motif = chosen_seq[len(chosen_seq)//2-2:len(chosen_seq)//2+3]
-        print('Match scores: {}'.format(', '.join([str(score) for score in ref_scores])))
-        print('Chosen reference {} - {}'.format(chosen_ref_ind, chosen_motif))
-        print(chosen_alignment)
+    # if DEBUG:
+    #     chosen_seq = chosen_alignment.query.seq
+    #     chosen_motif = chosen_seq[len(chosen_seq)//2-2:len(chosen_seq)//2+3]
+    #     print('Match scores: {}'.format(', '.join([str(score) for score in ref_scores])))
+    #     print('Chosen reference {} - {}'.format(chosen_ref_ind, chosen_motif))
+    #     print(chosen_alignment)
 
     return chosen_ref_ind, chosen_score, target_start, target_end, chosen_alignment
 
@@ -133,12 +133,12 @@ def get_recon_align_by_chain(in_segments, full_seq):
             recon_query_lines.append(str(full_seq[q_start:q_end]))
             recon_target_lines.append('-'*(q_end-q_start))
 
-    if DEBUG:
-        for i in range(len(padded_segments)):
-            print('\n')
-            print('\t'*4+' '*3, recon_target_lines[i])
-            print('\t'*4+' '*3, recon_query_lines[i])
-            print(padded_segments[i][-1])
+    # if DEBUG:
+    #     for i in range(len(padded_segments)):
+    #         print('\n')
+    #         print('\t'*4+' '*3, recon_target_lines[i])
+    #         print('\t'*4+' '*3, recon_query_lines[i])
+    #         print(padded_segments[i][-1])
 
     recon_query_aligned = ''.join(recon_query_lines)
     recon_target_aligned = ''.join(recon_target_lines)
@@ -150,11 +150,20 @@ def get_recon_align_by_chain(in_segments, full_seq):
     recon_align = Alignment(recon_seqs, recon_coords)
     recon_align.mapq = int(np.mean([seg[1] / (seg[3]-seg[2]) for seg in padded_segments if seg[1]]) * 100)
 
-    if DEBUG:
-        print(recon_align._format_unicode())
-        print('Score {}'.format(recon_align.mapq))
-
     return recon_align
+
+def get_m6A_line(alignment, ref_id, block_size=33):
+    line_aligned = alignment._format_unicode().split('\n')[0]
+    cumsum_non_gap = np.cumsum(np.int32([x!='-' for x in list(line_aligned)])) - 1
+
+    num_blocks = int(ref_id.split('_')[0].lstrip('block'))
+    m6A_pos = block_size // 2 + block_size * np.arange(num_blocks)
+    m6A_line = [' '] * len(line_aligned)
+    for pos in m6A_pos:
+        shifted_pos = np.where(cumsum_non_gap==pos)[0][0]
+        for sp in range(shifted_pos-2, shifted_pos+3):
+            m6A_line[sp] = '*'
+    return ''.join(m6A_line)
 
 for ind, ref in enumerate(references):
     ref.id = 'block1_{}'.format(ind)
@@ -174,25 +183,23 @@ for query in tqdm(queries):
     try:
         while len(remaining_seq_start)>0:
             remaining_seq_start = remaining_seq_start[:-1] + get_daughter_seq_pos(remaining_seq_start[-1], all_identified_segments)
-            if DEBUG:
-                print('Identified segments:', all_identified_segments)
-                print('Remaining segments', remaining_seq_start)
+            # if DEBUG:
+            #     print('Identified segments:', all_identified_segments)
+            #     print('Remaining segments', remaining_seq_start)
     except:
-        print('Error')
         continue
 
     ### sort segments by start position ###
     all_identified_segments.sort(key=lambda x: x[3])
-    if DEBUG:
-        print('All identified segments:', all_identified_segments)
     filtered_segments = [seg for seg in all_identified_segments if (seg[3]-seg[2])>=min_segment_len]
     # filtered_segments = all_identified_segments.copy()
     if (len(filtered_segments)==0) or (len(filtered_segments)>10):
         continue
-    if DEBUG:
-        for seg in filtered_segments:
-            print('Target {} - {}'.format(seg[2], seg[3]))
-            print(seg[-1])
+    # if DEBUG:
+    #     print('All identified segments:', all_identified_segments)
+    #     for seg in filtered_segments:
+    #         print('Target {} - {}'.format(seg[2], seg[3]))
+    #         print(seg[-1])
 
     ### reconstruct full reference ###
     segment_sequence = [seg[0] for seg in filtered_segments]
@@ -207,8 +214,19 @@ for query in tqdm(queries):
         dict_recon_references[ref_id] = ref_recon
 
     ### concatenate local alignments ###
-    # all_alignments.append(get_recon_align_by_global_alignment(filtered_segments))
-    all_alignments.append(get_recon_align_by_chain(filtered_segments, query.seq))
+    # full_alignment = get_recon_align_by_global_alignment(filtered_segments)
+    full_alignment = get_recon_align_by_chain(filtered_segments, query.seq)
+
+    if DEBUG:
+        m6A_line = get_m6A_line(full_alignment, ref_id)
+        print('\n')
+        print(query.id)
+        print('Inferred reference:', ref_id)
+        print(m6A_line)
+        print(full_alignment._format_unicode())
+        print('Score {}'.format(full_alignment.mapq))
+
+    all_alignments.append(full_alignment)
 
 ### plot histogram of mapping scores ###
 all_mapping_scores = np.array([a.mapq for a in all_alignments])
