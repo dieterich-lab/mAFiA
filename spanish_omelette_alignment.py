@@ -144,7 +144,12 @@ def get_recon_align_by_chain(in_segments, full_seq):
     recon_target_aligned = ''.join(recon_target_lines)
 
     ### create alignment object ###
+    recon_lines = [recon_target_aligned, recon_query_aligned]
+    recon_coords = Alignment.infer_coordinates(recon_lines)
+    recon_seqs = [l.replace('-', '') for l in recon_lines]
+    recon_align = Alignment(recon_seqs, recon_coords)
 
+    ### TODO: score ###
 
     return recon_align
 
