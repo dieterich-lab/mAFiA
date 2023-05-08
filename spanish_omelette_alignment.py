@@ -3,11 +3,11 @@ from tqdm import tqdm
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from Bio.Align import PairwiseAligner
+from Bio.Align import PairwiseAligner, Alignment
 from Bio.Align.sam import AlignmentWriter
 import matplotlib.pyplot as plt
 
-min_segment_len = 8
+min_segment_len = 16
 thresh_mapq = 30
 
 ref_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch1_w_splint.fasta'
@@ -24,7 +24,7 @@ queries = list(SeqIO.parse(query_file, 'fasta'))
 local_aligner = PairwiseAligner()
 local_aligner.mode = 'local'
 local_aligner.match_score = 1
-local_aligner.mismatch_score = -1
+local_aligner.mismatch_score = -0.5
 local_aligner.open_gap_score = -1
 local_aligner.extend_gap_score = -1
 
@@ -37,7 +37,9 @@ global_aligner.open_gap_score = -5
 global_aligner.extend_gap_score = -1
 #########################################
 
-def get_most_likely_segment(in_seq):
+DEBUG = True
+
+def get_local_segment(in_seq):
     ref_alignments = [
         local_aligner.align(in_seq, ref)[0]
         for ref in references
@@ -46,21 +48,105 @@ def get_most_likely_segment(in_seq):
     chosen_ref_ind = np.argmax(ref_scores)
     chosen_score = ref_scores[chosen_ref_ind]
     chosen_alignment = ref_alignments[chosen_ref_ind]
-    q_start = chosen_alignment.coordinates[0][0]
-    q_end = chosen_alignment.coordinates[0][-1]
+    target_start = chosen_alignment.coordinates[0][0]
+    target_end = chosen_alignment.coordinates[0][-1]
+    query_start = chosen_alignment.coordinates[1][0]
+    query_end = chosen_alignment.coordinates[1][-1]
 
-    return chosen_ref_ind, chosen_score, q_start, q_end
+    ### debug ###
+    if DEBUG:
+        chosen_seq = chosen_alignment.query.seq
+        chosen_motif = chosen_seq[len(chosen_seq)//2-2:len(chosen_seq)//2+3]
+        print('Match scores: {}'.format(', '.join([str(score) for score in ref_scores])))
+        print('Chosen reference {} - {}'.format(chosen_ref_ind, chosen_motif))
+        print(chosen_alignment)
+
+    return chosen_ref_ind, chosen_score, target_start, target_end, chosen_alignment
 
 def get_daughter_seq_pos(mother_seq_pos, identified_segments, min_fragment_len=8):
     mother_seq, mother_pos = mother_seq_pos
     daughter_seq_pos = []
-    best_ref_ind, best_score, best_start, best_end = get_most_likely_segment(mother_seq)
-    identified_segments.append((best_ref_ind, best_score, best_start+mother_pos, best_end+mother_pos))
+    best_ref_ind, best_score, best_start, best_end, best_alignment = get_local_segment(mother_seq)
+    identified_segments.append((best_ref_ind, best_score, best_start+mother_pos, best_end+mother_pos, best_alignment))
     if best_start >= min_fragment_len:
         daughter_seq_pos.append((mother_seq[:best_start], mother_pos))
     if len(mother_seq)-best_end >= min_fragment_len:
         daughter_seq_pos.append((mother_seq[best_end:], mother_pos+best_end))
     return daughter_seq_pos
+
+def get_recon_align_by_global_alignment(in_filtered_segments):
+    ### global alignment ###
+    recon_align = global_aligner.align(ref_recon, query)[0]
+
+    ### normalized global alignment score, NOT conventional mapq!!! ###
+    recon_align.mapq = int(recon_align.score / len(query.seq) * 100)
+    # print('\n=====================================================================')
+    # print('Segment sequence: {}'.format('-'.join([str(i) for i in segment_sequence])))
+    # print(format_alignment(*global_align, full_sequences=True))
+
+    return recon_align
+
+def get_recon_align_by_chain(in_segments, full_seq):
+    ### pad gaps ###
+    padded_segments = []
+    curr_pos = 0
+    while len(in_segments)>0:
+        seg = in_segments[0]
+        begin, end = seg[2:4]
+        if curr_pos<begin:
+            padded_segments.append(
+                (None, None, curr_pos, begin, None)
+            )
+            curr_pos = begin
+        else:
+            padded_segments.append(seg)
+            curr_pos = end
+            in_segments = in_segments[1:]
+    if curr_pos<len(full_seq):
+        padded_segments.append(
+            (None, None, curr_pos, len(full_seq), None)
+        )
+
+    ### chain together segments ###
+    recon_query_lines = []
+    recon_target_lines = []
+    for seg in padded_segments:
+        ref_ind, local_score, q_start, q_end = seg[:4]
+        seg_alignment = seg[-1]
+
+        if seg_alignment is not None:
+            t_start = seg_alignment.coordinates[1][0]
+            t_end = seg_alignment.coordinates[1][-1]
+            recon_query_lines.append(
+                ''.join(['-' for i in range(t_start)]) \
+                + str(seg_alignment[0]) \
+                + ''.join(['-' for i in range(t_end, len(seg_alignment.query.seq))])
+            )
+
+            recon_target_lines.append(
+                str(seg_alignment.query.seq[:t_start]) \
+                + str(seg_alignment[1]) \
+                + str(seg_alignment.query.seq[t_end:])
+            )
+
+        else:
+            recon_query_lines.append(str(full_seq[q_start:q_end]))
+            recon_target_lines.append('-'*(q_end-q_start))
+
+    if DEBUG:
+        for i in range(len(padded_segments)):
+            print('\n')
+            print('\t'*4+' '*3, recon_target_lines[i])
+            print('\t'*4+' '*3, recon_query_lines[i])
+            print(padded_segments[i][-1])
+
+    recon_query_aligned = ''.join(recon_query_lines)
+    recon_target_aligned = ''.join(recon_target_lines)
+
+    ### create alignment object ###
+
+
+    return recon_align
 
 for ind, ref in enumerate(references):
     ref.id = 'block1_{}'.format(ind)
@@ -80,15 +166,25 @@ for query in tqdm(queries):
     try:
         while len(remaining_seq_start)>0:
             remaining_seq_start = remaining_seq_start[:-1] + get_daughter_seq_pos(remaining_seq_start[-1], all_identified_segments)
+            if DEBUG:
+                print('Identified segments:', all_identified_segments)
+                print('Remaining segments', remaining_seq_start)
     except:
+        print('Error')
         continue
 
-    ### sort by start position ###
+    ### sort segments by start position ###
     all_identified_segments.sort(key=lambda x: x[3])
-    # filtered_segments = [seg for seg in all_identified_segments if (seg[3]-seg[2])>=min_segment_len]
-    filtered_segments = all_identified_segments.copy()
+    if DEBUG:
+        print('All identified segments:', all_identified_segments)
+    filtered_segments = [seg for seg in all_identified_segments if (seg[3]-seg[2])>=min_segment_len]
+    # filtered_segments = all_identified_segments.copy()
     if (len(filtered_segments)==0) or (len(filtered_segments)>10):
         continue
+    if DEBUG:
+        for seg in filtered_segments:
+            print('Target {} - {}'.format(seg[2], seg[3]))
+            print(seg[-1])
 
     ### reconstruct full reference ###
     segment_sequence = [seg[0] for seg in filtered_segments]
@@ -102,16 +198,9 @@ for query in tqdm(queries):
     if ref_id not in dict_recon_references.keys():
         dict_recon_references[ref_id] = ref_recon
 
-    ### global alignment ###
-    g_align = global_aligner.align(ref_recon, query)[0]
-
-    ### normalized global alignment score, NOT conventional mapq!!! ###
-    g_align.mapq = int(g_align.score / len(query.seq) * 100)
-    # print('\n=====================================================================')
-    # print('Segment sequence: {}'.format('-'.join([str(i) for i in segment_sequence])))
-    # print(format_alignment(*global_align, full_sequences=True))
-
-    all_alignments.append(g_align)
+    ### concatenate local alignments ###
+    # all_alignments.append(get_recon_align_by_global_alignment(filtered_segments))
+    all_alignments.append(get_recon_align_by_chain(filtered_segments, query.seq))
 
 ### plot histogram of mapping scores ###
 all_mapping_scores = np.array([a.mapq for a in all_alignments])
