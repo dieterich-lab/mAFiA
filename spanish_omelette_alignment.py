@@ -8,7 +8,7 @@ from Bio.Align.sam import AlignmentWriter
 import matplotlib.pyplot as plt
 
 min_segment_len = 16
-thresh_mapq = 30
+thresh_mapq = 60
 
 ref_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch1_w_splint.fasta'
 query_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_splint_batch1_m6A_RTA/basecalled.fasta'
@@ -37,7 +37,7 @@ global_aligner.open_gap_score = -5
 global_aligner.extend_gap_score = -1
 #########################################
 
-DEBUG = True
+DEBUG = False
 
 def get_local_segment(in_seq):
     ref_alignments = [
@@ -173,7 +173,6 @@ for ind, ref in enumerate(references):
 dict_recon_references = {ref.id : ref for ref in references}
 
 all_alignments = []
-# query = queries[0]
 for query in tqdm(queries):
     if len(query.seq)<min_segment_len:
         continue
@@ -216,6 +215,8 @@ for query in tqdm(queries):
     ### concatenate local alignments ###
     # full_alignment = get_recon_align_by_global_alignment(filtered_segments)
     full_alignment = get_recon_align_by_chain(filtered_segments, query.seq)
+    full_alignment.target = ref_recon
+    full_alignment.query = query
 
     if DEBUG:
         m6A_line = get_m6A_line(full_alignment, ref_id)
@@ -233,8 +234,8 @@ all_mapping_scores = np.array([a.mapq for a in all_alignments])
 num_pass = np.sum(all_mapping_scores>=thresh_mapq)
 pass_rate = int(num_pass / len(all_mapping_scores) * 100)
 plt.figure(figsize=(5, 5))
-plt.hist(all_mapping_scores, range=[-100, 100], bins=200)
-plt.xlabel('Norm. Mapping scores', fontsize=12)
+plt.hist(all_mapping_scores, range=[0, 100], bins=100)
+plt.xlabel('Chain Mapping scores', fontsize=12)
 plt.ylabel('Counts', fontsize=12)
 plt.axvline(x=thresh_mapq, c='g')
 plt.title('Pass rate at Q$\geq${}\n{}/{} = {}%'.format(thresh_mapq, num_pass, len(all_mapping_scores), pass_rate), fontsize=15)
@@ -256,7 +257,6 @@ with open(sam_file, 'w') as out_sam:
     ### write header SQ lines -- old-fashioned way ###
     for ref in sorted_recon_references:
         out_sam.write('@SQ\tSN:{}\tLN:{}\n'.format(ref.id, len(ref.seq)))
-
     out_sam.write('@PG\tID:spomlette\tPN:spomlette\tVN:0.01\tCL:blah\n')
 
     ### write read alignments ###
@@ -269,4 +269,4 @@ with open(recon_ref_file, "w") as handle:
   SeqIO.write(sorted_recon_references, handle, "fasta")
 
 # to generate CS tag:
-# calcs /home/adrian/img_out/spomlette_q50.sam -r /home/adrian/img_out/spomlette_recon_ref_q50.fasta > /home/adrian/img_out/spomlette_q50_cs.sam
+# calcs /home/adrian/img_out/spomlette_q60.sam -r /home/adrian/img_out/spomlette_recon_ref_q60.fasta > /home/adrian/img_out/spomlette_q60_cs.sam
