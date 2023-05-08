@@ -148,8 +148,11 @@ def get_recon_align_by_chain(in_segments, full_seq):
     recon_coords = Alignment.infer_coordinates(recon_lines)
     recon_seqs = [l.replace('-', '') for l in recon_lines]
     recon_align = Alignment(recon_seqs, recon_coords)
+    recon_align.mapq = int(np.mean([seg[1] / (seg[3]-seg[2]) for seg in padded_segments if seg[1]]) * 100)
 
-    ### TODO: score ###
+    if DEBUG:
+        print(recon_align._format_unicode())
+        print('Score {}'.format(recon_align.mapq))
 
     return recon_align
 
