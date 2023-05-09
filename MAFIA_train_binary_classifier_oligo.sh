@@ -26,13 +26,13 @@ SCALER=MaxAbs
 ### source data ############################################################################
 ############################################################################################
 #### Claudia first 3 splint ###
-#DATASET=20230221_WUE_splint_lig
-#UNM_BAM=${WORKSPACE}/WUE_splint_lig_A_RTA/mapped.bam
-#UNM_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/${DATASET}/WUE_splint_lig_A_RTA/*/fast5_*"
-#MOD_BAM=${WORKSPACE}/WUE_splint_lig_m6A_RTA/mapped.bam
-#MOD_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/${DATASET}/WUE_splint_lig_m6A_RTA/*/fast5_*"
-#REF=${WORKSPACE}/reference/splint_variations_max_blocks_7.fasta
-#OUTDIR=${WORKSPACE}/MAFIA_classifiers/${DATASET}_${CLASSIFIER}_${SCALER}
+BATCH=WUE_batch1
+UNM_BAM=${WORKSPACE}/${BATCH}_A/spomlette_q60.bam
+UNM_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_A_RTA/*/fast5_*"
+MOD_BAM=${WORKSPACE}/${BATCH}_m6A/spomlette_q60.bam
+MOD_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/*/fast5_*"
+REF=${WORKSPACE}/reference/${BATCH}_combined.fa
+OUTDIR=${WORKSPACE}/MAFIA_classifiers/${BATCH}_${CLASSIFIER}_${SCALER}
 
 #### Claudia batch 2 ###
 #DATASET=20230502_WUE_splint_batch2
@@ -60,12 +60,12 @@ SCALER=MaxAbs
 #OUTDIR=${WORKSPACE}/MAFIA_classifiers/RL_run2_Mix1_Mix3_${SCALER}
 
 ### Isabel RL Mix 2 & 4 ###
-UNM_BAM=${WORKSPACE}/RL_Mix2_A_RTA/mapped.bam
-UNM_FAST5="/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230503_RL_run2/RL_Mix2_A_RTA/*/fast5_*"
-MOD_BAM=${WORKSPACE}/RL_Mix4_m6A_RTA/mapped.bam
-MOD_FAST5="/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230503_RL_run2/RL_Mix4_m6A_RTA/*/fast5_*"
-REF=${WORKSPACE}/reference/RL_Mix2_Mix4_blocks8.fasta
-OUTDIR=${WORKSPACE}/MAFIA_classifiers/RL_run2_Mix2_Mix4_${SCALER}
+#UNM_BAM=${WORKSPACE}/RL_Mix2_A_RTA/mapped.bam
+#UNM_FAST5="/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230503_RL_run2/RL_Mix2_A_RTA/*/fast5_*"
+#MOD_BAM=${WORKSPACE}/RL_Mix4_m6A_RTA/mapped.bam
+#MOD_FAST5="/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230503_RL_run2/RL_Mix4_m6A_RTA/*/fast5_*"
+#REF=${WORKSPACE}/reference/RL_Mix2_Mix4_blocks8.fasta
+#OUTDIR=${WORKSPACE}/MAFIA_classifiers/RL_run2_Mix2_Mix4_${SCALER}
 
 python3 oligo_train_binary_classifier.py \
 --unm_bam_file ${UNM_BAM} \
