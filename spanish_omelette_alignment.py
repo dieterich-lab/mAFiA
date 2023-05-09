@@ -37,7 +37,7 @@ global_aligner.open_gap_score = -5
 global_aligner.extend_gap_score = -1
 #########################################
 
-DEBUG = False
+DEBUG = True
 
 def get_local_segment(in_seq):
     ref_alignments = [
@@ -86,10 +86,13 @@ def get_recon_align_by_global_alignment(in_filtered_segments):
 
     return recon_align
 
-def get_recon_align_by_chain(in_segments, full_seq):
-    ### pad gaps ###
+def get_recon_align_by_chain(in_segments, in_target, in_query):
+    full_query_seq = in_query.seq
+
+    ### fill gaps ###
     padded_segments = []
     curr_pos = 0
+    # curr_pos = in_segments[0][2]
     while len(in_segments)>0:
         seg = in_segments[0]
         begin, end = seg[2:4]
@@ -102,9 +105,9 @@ def get_recon_align_by_chain(in_segments, full_seq):
             padded_segments.append(seg)
             curr_pos = end
             in_segments = in_segments[1:]
-    if curr_pos<len(full_seq):
+    if curr_pos<len(full_query_seq):
         padded_segments.append(
-            (None, None, curr_pos, len(full_seq), None)
+            (None, None, curr_pos, len(full_query_seq), None)
         )
 
     ### chain together segments ###
@@ -130,7 +133,7 @@ def get_recon_align_by_chain(in_segments, full_seq):
             )
 
         else:
-            recon_query_lines.append(str(full_seq[q_start:q_end]))
+            recon_query_lines.append(str(full_query_seq[q_start:q_end]))
             recon_target_lines.append('-'*(q_end-q_start))
 
     # if DEBUG:
@@ -145,16 +148,26 @@ def get_recon_align_by_chain(in_segments, full_seq):
 
     ### create alignment object ###
     recon_lines = [recon_target_aligned, recon_query_aligned]
+
+    ### full coords ###
     recon_coords = Alignment.infer_coordinates(recon_lines)
     recon_seqs = [l.replace('-', '') for l in recon_lines]
-    recon_align = Alignment(recon_seqs, recon_coords)
+    # recon_align = Alignment(recon_seqs, recon_coords)
+
+    ### reduced coords to generate correct soft-clipping ###
+    reduced_coords = recon_coords[:, (recon_coords[0] != 0) * (recon_coords[0] < np.max(recon_coords[0]))]
+    recon_align = Alignment(recon_seqs, reduced_coords)
+
     recon_align.mapq = int(np.mean([seg[1] / (seg[3]-seg[2]) for seg in padded_segments if seg[1]]) * 100)
+    recon_align.target = in_target
+    recon_align.query = in_query
 
     return recon_align
 
 def get_m6A_line(alignment, ref_id, block_size=33):
     line_aligned = alignment._format_unicode().split('\n')[0]
-    cumsum_non_gap = np.cumsum(np.int32([x!='-' for x in list(line_aligned)])) - 1
+    q_start = alignment.coordinates[0, 0]
+    cumsum_non_gap = q_start + np.cumsum(np.int32([x!='-' for x in list(line_aligned)])) - 1
 
     num_blocks = int(ref_id.split('_')[0].lstrip('block'))
     m6A_pos = block_size // 2 + block_size * np.arange(num_blocks)
@@ -162,7 +175,8 @@ def get_m6A_line(alignment, ref_id, block_size=33):
     for pos in m6A_pos:
         shifted_pos = np.where(cumsum_non_gap==pos)[0][0]
         for sp in range(shifted_pos-2, shifted_pos+3):
-            m6A_line[sp] = '*'
+            if (sp>=0) and (sp<len(m6A_line)):
+                m6A_line[sp] = '*'
     return ''.join(m6A_line)
 
 for ind, ref in enumerate(references):
@@ -214,9 +228,7 @@ for query in tqdm(queries):
 
     ### concatenate local alignments ###
     # full_alignment = get_recon_align_by_global_alignment(filtered_segments)
-    full_alignment = get_recon_align_by_chain(filtered_segments, query.seq)
-    full_alignment.target = ref_recon
-    full_alignment.query = query
+    full_alignment = get_recon_align_by_chain(filtered_segments, ref_recon, query)
 
     if DEBUG:
         m6A_line = get_m6A_line(full_alignment, ref_id)
@@ -260,7 +272,7 @@ with open(sam_file, 'w') as out_sam:
     out_sam.write('@PG\tID:spomlette\tPN:spomlette\tVN:0.01\tCL:blah\n')
 
     ### write read alignments ###
-    alignment_writer = AlignmentWriter(out_sam)
+    alignment_writer = AlignmentWriter(out_sam, md=True)
     # alignment_writer.write_header(all_alignments)
     alignment_writer.write_multiple_alignments(filtered_alignments)
 
@@ -268,5 +280,6 @@ with open(sam_file, 'w') as out_sam:
 with open(recon_ref_file, "w") as handle:
   SeqIO.write(sorted_recon_references, handle, "fasta")
 
-# to generate CS tag:
+# generate CS tag and calculate accuracy:
 # calcs /home/adrian/img_out/spomlette_q60.sam -r /home/adrian/img_out/spomlette_recon_ref_q60.fasta > /home/adrian/img_out/spomlette_q60_cs.sam
+# python3 ~/git/renata/accuracy.py /home/adrian/img_out/spomlette_q60_cs.sam /home/adrian/img_out/spomlette_recon_ref_q60.fasta
