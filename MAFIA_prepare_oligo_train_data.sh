@@ -82,7 +82,7 @@ python3 ${HOME}/git/MAFIA/spanish_omelette_alignment.py \
 ### check read num and accuracy ###
 samtools flagstats ${SAM}
 
-${HOME}/git/renata/accuracy.py ${SAM} ${REF}
+${HOME}/git/renata/accuracy.py ${SAM} ${WORKSPACE}/ref_recon.fa
 
 
 #### Convert to BAM ###

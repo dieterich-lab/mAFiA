@@ -326,6 +326,7 @@ sorted_recon_references = [
     if k in filtered_ref_ids
 ]
 
+print('Writing to samfile...', flush=True)
 with open(args.sam_file, 'w') as out_sam:
     ### write header SQ lines ###
     for ref in sorted_recon_references:
