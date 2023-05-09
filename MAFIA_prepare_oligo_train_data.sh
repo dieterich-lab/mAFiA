@@ -4,9 +4,13 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 ########################################################################################################################
 ### Wuerzburg batch 1 ##################################################################################################
 ########################################################################################################################
+REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch1_w_splint.fasta
+
 #TRAIN_DATASET=WUE_batch1_A
+#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_A_RTA/*
+
 TRAIN_DATASET=WUE_batch1_m6A
-FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/${TRAIN_DATASET}/*
+FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/*
 
 ########################################################################################################################
 ### Wuerzburg batch 2 ##################################################################################################
@@ -70,7 +74,7 @@ python3 ${HOME}/git/renata/basecall_viterbi.py \
 python3 ${HOME}/git/MAFIA/spanish_omelette_alignment.py \
 --ref_file ${REF} \
 --query_file ${FASTA} \
---recon_ref_file ${REF}_${TRAIN_DATASET} \
+--recon_ref_file ${WORKSPACE}/ref_recon.fa \
 --sam_file ${SAM} \
 --thresh_mapq ${THRESH_MAPQ}
 

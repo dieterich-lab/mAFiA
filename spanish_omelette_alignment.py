@@ -19,7 +19,7 @@ parser.add_argument("--query_file", type=str)
 parser.add_argument("--recon_ref_file", type=str)
 parser.add_argument("--sam_file", type=str)
 parser.add_argument("--thresh_mapq", type=int, default=60)
-parser.add_argument("--debug", type=bool, default=False, action="store_true")
+parser.add_argument("--debug", default=False, action="store_true")
 args = parser.parse_args()
 
 THRESH_MAPQ = int(args.thresh_mapq)
