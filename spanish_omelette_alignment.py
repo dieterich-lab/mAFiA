@@ -11,15 +11,18 @@ import matplotlib.pyplot as plt
 from calcs import trim, annotate, call_cstag
 
 MIN_SEGMENT_LEN = 16
-THRESH_MAPQ = 60
+# THRESH_MAPQ = 60
 
 parser = argparse.ArgumentParser(description='Map oligo basecalls through the Spanish omelette method')
 parser.add_argument("--ref_file", type=str)
 parser.add_argument("--query_file", type=str)
 parser.add_argument("--recon_ref_file", type=str)
 parser.add_argument("--sam_file", type=str)
+parser.add_argument("--thresh_mapq", type=int, default=60)
 parser.add_argument("--debug", type=bool, default=False, action="store_true")
 args = parser.parse_args()
+
+THRESH_MAPQ = int(args.thresh_mapq)
 
 # ref_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch1_w_splint.fasta'
 # query_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_splint_batch1_m6A_RTA/basecalled.fasta'
