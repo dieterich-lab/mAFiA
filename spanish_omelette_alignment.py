@@ -1,25 +1,35 @@
 import numpy as np
+import argparse
 from tqdm import tqdm
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Align import PairwiseAligner, Alignment
 from Bio.Align.sam import AlignmentWriter
-import re
+import os, re
 import matplotlib.pyplot as plt
 from calcs import trim, annotate, call_cstag
 
-min_segment_len = 16
-thresh_mapq = 60
+MIN_SEGMENT_LEN = 16
+THRESH_MAPQ = 60
 
-ref_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch1_w_splint.fasta'
-query_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_splint_batch1_m6A_RTA/basecalled.fasta'
-sam_file = '/home/adrian/img_out/spomlette_q{}.sam'.format(thresh_mapq)
-recon_ref_file = '/home/adrian/img_out/spomlette_recon_ref_q{}.fasta'.format(thresh_mapq)
-out_hist_path = '/home/adrian/img_out/hist_norm_global_scores_q{}.png'.format(thresh_mapq)
+parser = argparse.ArgumentParser(description='Map oligo basecalls through the Spanish omelette method')
+parser.add_argument("--ref_file", type=str)
+parser.add_argument("--query_file", type=str)
+parser.add_argument("--recon_ref_file", type=str)
+parser.add_argument("--sam_file", type=str)
+parser.add_argument("--debug", type=bool, default=False, action="store_true")
+args = parser.parse_args()
 
-references = list(SeqIO.parse(ref_file, 'fasta'))
-queries = list(SeqIO.parse(query_file, 'fasta'))
+# ref_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch1_w_splint.fasta'
+# query_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_splint_batch1_m6A_RTA/basecalled.fasta'
+# recon_ref_file = '/home/adrian/img_out/spomlette_recon_ref_q{}.fasta'.format(THRESH_MAPQ)
+# sam_file = '/home/adrian/img_out/spomlette_q{}.sam'.format(THRESH_MAPQ)
+# out_hist_path = '/home/adrian/img_out/hist_norm_global_scores_q{}.png'.format(THRESH_MAPQ)
+out_hist_path = os.path.join(os.path.dirname(args.sam_file), 'hist_spomlette_mapping_scores_q{}.png'.format(THRESH_MAPQ))
+
+references = list(SeqIO.parse(args.ref_file, 'fasta'))
+queries = list(SeqIO.parse(args.query_file, 'fasta'))
 
 #########################################
 ### local aligner #######################
@@ -39,8 +49,6 @@ global_aligner.open_gap_score = -5
 global_aligner.extend_gap_score = -1
 #########################################
 
-DEBUG = False
-
 def get_local_segment(in_seq):
     ref_alignments = [
         local_aligner.align(in_seq, ref)[0]
@@ -56,7 +64,7 @@ def get_local_segment(in_seq):
     query_end = chosen_alignment.coordinates[1][-1]
 
     ### debug ###
-    # if DEBUG:
+    # if args.debug:
     #     chosen_seq = chosen_alignment.query.seq
     #     chosen_motif = chosen_seq[len(chosen_seq)//2-2:len(chosen_seq)//2+3]
     #     print('Match scores: {}'.format(', '.join([str(score) for score in ref_scores])))
@@ -138,7 +146,7 @@ def get_recon_align_by_chain(in_segments, in_target, in_query):
             recon_query_lines.append(str(full_query_seq[q_start:q_end]))
             recon_target_lines.append('-'*(q_end-q_start))
 
-    # if DEBUG:
+    # if args.debug:
     #     for i in range(len(padded_segments)):
     #         print('\n')
     #         print('\t'*4+' '*3, recon_target_lines[i])
@@ -229,8 +237,9 @@ for ind, ref in enumerate(references):
 dict_recon_references = {ref.id : ref for ref in references}
 
 all_alignments = []
+print('Now mapping reads...', flush=True)
 for query in tqdm(queries):
-    if len(query.seq)<min_segment_len:
+    if len(query.seq)<MIN_SEGMENT_LEN:
         continue
     all_identified_segments = []
     remaining_seq_start = [(query.seq, 0)]
@@ -238,7 +247,7 @@ for query in tqdm(queries):
     try:
         while len(remaining_seq_start)>0:
             remaining_seq_start = remaining_seq_start[:-1] + get_daughter_seq_pos(remaining_seq_start[-1], all_identified_segments)
-            # if DEBUG:
+            # if args.debug:
             #     print('Identified segments:', all_identified_segments)
             #     print('Remaining segments', remaining_seq_start)
     except:
@@ -247,11 +256,11 @@ for query in tqdm(queries):
     ### sort segments by start position ###
     all_identified_segments.sort(key=lambda x: x[3])
     filtered_segments = [seg for seg in all_identified_segments
-                         if (((seg[3]-seg[2])>=min_segment_len) and ((seg[1]/(seg[3]-seg[2])*100)>=thresh_mapq))]
+                         if (((seg[3]-seg[2])>=MIN_SEGMENT_LEN) and ((seg[1]/(seg[3]-seg[2])*100)>=THRESH_MAPQ))]
     # filtered_segments = all_identified_segments.copy()
     if (len(filtered_segments)==0) or (len(filtered_segments)>10):
         continue
-    # if DEBUG:
+    # if args.debug:
     #     print('All identified segments:', all_identified_segments)
     #     for seg in filtered_segments:
     #         print('Target {} - {}'.format(seg[2], seg[3]))
@@ -273,7 +282,7 @@ for query in tqdm(queries):
     # full_alignment = get_recon_align_by_global_alignment(filtered_segments)
     full_alignment = get_recon_align_by_chain(filtered_segments, ref_recon, query)
 
-    if DEBUG:
+    if args.debug:
         m6A_line = get_m6A_line(full_alignment, ref_id)
         print('\n')
         print(query.id)
@@ -286,19 +295,19 @@ for query in tqdm(queries):
 
 ### plot histogram of mapping scores ###
 all_mapping_scores = np.array([a.mapq for a in all_alignments])
-num_pass = np.sum(all_mapping_scores>=thresh_mapq)
+num_pass = np.sum(all_mapping_scores>=THRESH_MAPQ)
 pass_rate = int(num_pass / len(all_mapping_scores) * 100)
 plt.figure(figsize=(5, 5))
 plt.hist(all_mapping_scores, range=[0, 100], bins=100)
 plt.xlabel('Chain Mapping scores', fontsize=12)
 plt.ylabel('Counts', fontsize=12)
-plt.axvline(x=thresh_mapq, c='g')
-plt.title('Pass rate at Q$\geq${}\n{}/{} = {}%'.format(thresh_mapq, num_pass, len(all_mapping_scores), pass_rate), fontsize=15)
+plt.axvline(x=THRESH_MAPQ, c='g')
+plt.title('Pass rate at Q$\geq${}\n{}/{} = {}%'.format(THRESH_MAPQ, num_pass, len(all_mapping_scores), pass_rate), fontsize=15)
 plt.savefig(out_hist_path, bbox_inches='tight')
 plt.close('all')
 
 ### filter alignments by score ###
-filtered_alignments = [a for a in all_alignments if a.mapq>=thresh_mapq]
+filtered_alignments = [a for a in all_alignments if a.mapq>=THRESH_MAPQ]
 filtered_ref_ids = [a.target.id for a in filtered_alignments]
 
 ### output sam file ###
@@ -308,7 +317,7 @@ sorted_recon_references = [
     if k in filtered_ref_ids
 ]
 
-with open(sam_file, 'w') as out_sam:
+with open(args.sam_file, 'w') as out_sam:
     ### write header SQ lines ###
     for ref in sorted_recon_references:
         out_sam.write('@SQ\tSN:{}\tLN:{}\n'.format(ref.id, len(ref.seq)))
@@ -320,15 +329,10 @@ with open(sam_file, 'w') as out_sam:
     # alignment_writer.write_multiple_alignments(filtered_alignments)
 
     for this_alignment in filtered_alignments:
-        corrected_sam_line = get_correct_sam_line(this_alignment, alignment_writer)
+        corrected_sam_line = get_correct_sam_line(this_alignment, alignment_writer, write_md=args.write_md, write_cs=args.write_cs)
         # corrected_sam_line = alignment_writer.format_alignment(this_alignment)
         out_sam.write(corrected_sam_line)
 
 ### output recon ref ###
-with open(recon_ref_file, "w") as handle:
+with open(args.recon_ref_file, "w") as handle:
   SeqIO.write(sorted_recon_references, handle, "fasta")
-
-# generate CS tag and calculate accuracy:
-# calcs /home/adrian/img_out/spomlette_q60.sam -r /home/adrian/img_out/spomlette_recon_ref_q60.fasta > /home/adrian/img_out/spomlette_q60_cs.sam
-# samtools faidx /home/adrian/img_out/spomlette_recon_ref_q60.fasta
-# python3 ~/git/renata/accuracy.py /home/adrian/img_out/spomlette_q60_cs.sam /home/adrian/img_out/spomlette_recon_ref_q60.fasta
