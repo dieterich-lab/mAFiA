@@ -5,6 +5,7 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Align import PairwiseAligner, Alignment
 from Bio.Align.sam import AlignmentWriter
+import re
 import matplotlib.pyplot as plt
 
 min_segment_len = 16
@@ -152,11 +153,11 @@ def get_recon_align_by_chain(in_segments, in_target, in_query):
     ### full coords ###
     recon_coords = Alignment.infer_coordinates(recon_lines)
     recon_seqs = [l.replace('-', '') for l in recon_lines]
-    # recon_align = Alignment(recon_seqs, recon_coords)
+    recon_align = Alignment(recon_seqs, recon_coords)
 
     ### reduced coords to generate correct soft-clipping ###
-    reduced_coords = recon_coords[:, (recon_coords[0] != 0) * (recon_coords[0] < np.max(recon_coords[0]))]
-    recon_align = Alignment(recon_seqs, reduced_coords)
+    # reduced_coords = recon_coords[:, (recon_coords[0] != 0) * (recon_coords[0] < np.max(recon_coords[0]))]
+    # recon_align = Alignment(recon_seqs, reduced_coords)
 
     recon_align.mapq = int(np.mean([seg[1] / (seg[3]-seg[2]) for seg in padded_segments if seg[1]]) * 100)
     recon_align.target = in_target
@@ -173,11 +174,33 @@ def get_m6A_line(alignment, ref_id, block_size=33):
     m6A_pos = block_size // 2 + block_size * np.arange(num_blocks)
     m6A_line = [' '] * len(line_aligned)
     for pos in m6A_pos:
-        shifted_pos = np.where(cumsum_non_gap==pos)[0][0]
-        for sp in range(shifted_pos-2, shifted_pos+3):
-            if (sp>=0) and (sp<len(m6A_line)):
-                m6A_line[sp] = '*'
+        if pos in cumsum_non_gap.flatten():
+            shifted_pos = np.where(cumsum_non_gap==pos)[0][0]
+            for sp in range(shifted_pos-2, shifted_pos+3):
+                if (sp>=0) and (sp<len(m6A_line)):
+                    m6A_line[sp] = '*'
     return ''.join(m6A_line)
+
+def get_correct_sam_line(in_alignment, sam_writer, write_md=False):
+    sam_fields = sam_writer.format_alignment(in_alignment, md=write_md).split('\t')
+
+    ### cigar string: change I on both ends to S ###
+    cigar_string = sam_fields[5]
+    match_in_del_sclip = re.findall(r"([0-9]+)M|([0-9]+)I|([0-9]+)D|([0-9]+)S", cigar_string)
+    if len(match_in_del_sclip[0][1]) > 0:
+        match_in_del_sclip[0] = ('', '', '', match_in_del_sclip[0][1])
+    if len(match_in_del_sclip[-1][1]) > 0:
+        match_in_del_sclip[-1] = ('', '', '', match_in_del_sclip[-1][1])
+    correct_cigar_string = ''.join([n+suffix for cs in match_in_del_sclip for n,suffix in zip(cs, ['M', 'I', 'D', 'S']) if len(n)>0])
+    sam_fields[5] = correct_cigar_string
+
+    ### start pos ###
+    str_match_stick = in_alignment._format_unicode().split('\n')[1]
+    correct_pos = in_alignment.indices[0, str_match_stick.find('|')] + 1   # 1-based
+    sam_fields[3] = str(correct_pos)
+
+    correct_sam_line = '\t'.join(sam_fields)
+    return correct_sam_line
 
 for ind, ref in enumerate(references):
     ref.id = 'block1_{}'.format(ind)
@@ -187,7 +210,7 @@ for ind, ref in enumerate(references):
 dict_recon_references = {ref.id : ref for ref in references}
 
 all_alignments = []
-for query in tqdm(queries):
+for query in tqdm(queries[:5]):
     if len(query.seq)<min_segment_len:
         continue
     all_identified_segments = []
@@ -204,7 +227,8 @@ for query in tqdm(queries):
 
     ### sort segments by start position ###
     all_identified_segments.sort(key=lambda x: x[3])
-    filtered_segments = [seg for seg in all_identified_segments if (seg[3]-seg[2])>=min_segment_len]
+    filtered_segments = [seg for seg in all_identified_segments
+                         if (((seg[3]-seg[2])>=min_segment_len) and ((seg[1]/(seg[3]-seg[2])*100)>=thresh_mapq))]
     # filtered_segments = all_identified_segments.copy()
     if (len(filtered_segments)==0) or (len(filtered_segments)>10):
         continue
@@ -266,7 +290,7 @@ sorted_recon_references = [
 ]
 
 with open(sam_file, 'w') as out_sam:
-    ### write header SQ lines -- old-fashioned way ###
+    ### write header SQ lines ###
     for ref in sorted_recon_references:
         out_sam.write('@SQ\tSN:{}\tLN:{}\n'.format(ref.id, len(ref.seq)))
     out_sam.write('@PG\tID:spomlette\tPN:spomlette\tVN:0.01\tCL:blah\n')
@@ -274,7 +298,11 @@ with open(sam_file, 'w') as out_sam:
     ### write read alignments ###
     alignment_writer = AlignmentWriter(out_sam, md=True)
     # alignment_writer.write_header(all_alignments)
-    alignment_writer.write_multiple_alignments(filtered_alignments)
+    # alignment_writer.write_multiple_alignments(filtered_alignments)
+
+    for this_alignment in filtered_alignments:
+        corrected_sam_line = get_correct_sam_line(this_alignment, alignment_writer)
+        out_sam.write(corrected_sam_line)
 
 ### output recon ref ###
 with open(recon_ref_file, "w") as handle:
