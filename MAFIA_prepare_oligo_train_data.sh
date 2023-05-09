@@ -6,11 +6,11 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 ########################################################################################################################
 REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch1_w_splint.fasta
 
-#TRAIN_DATASET=WUE_batch1_A
-#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_A_RTA/*
+TRAIN_DATASET=WUE_batch1_A
+FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_A_RTA/*
 
-TRAIN_DATASET=WUE_batch1_m6A
-FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/*
+#TRAIN_DATASET=WUE_batch1_m6A
+#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/*
 
 ########################################################################################################################
 ### Wuerzburg batch 2 ##################################################################################################
@@ -99,3 +99,6 @@ samtools index ${BAM}
 #--indel_thresh 10
 #
 #samtools index ${BAM}.filtered
+
+### combine recon references ###
+awk '/^>/{p=seen[$0]++}!p' /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_batch1_A/ref_recon.fa /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_batch1_m6A/ref_recon.fa > /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch1_combined.fa
