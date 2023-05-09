@@ -189,8 +189,14 @@ def get_correct_sam_line(in_alignment, sam_writer, write_md=False):
     match_in_del_sclip = re.findall(r"([0-9]+)M|([0-9]+)I|([0-9]+)D|([0-9]+)S", cigar_string)
     if len(match_in_del_sclip[0][1]) > 0:
         match_in_del_sclip[0] = ('', '', '', match_in_del_sclip[0][1])
+        ### remove 'D' after starting 'S' ###
+        if len(match_in_del_sclip[1][2]) > 0:
+            match_in_del_sclip = [match_in_del_sclip[0]] + match_in_del_sclip[2:]
     if len(match_in_del_sclip[-1][1]) > 0:
         match_in_del_sclip[-1] = ('', '', '', match_in_del_sclip[-1][1])
+        ### remove 'D' before ending 'S' ###
+        if len(match_in_del_sclip[-2][2]) > 0:
+            match_in_del_sclip = match_in_del_sclip[:-2] + [match_in_del_sclip[-1]]
     correct_cigar_string = ''.join([n+suffix for cs in match_in_del_sclip for n,suffix in zip(cs, ['M', 'I', 'D', 'S']) if len(n)>0])
     sam_fields[5] = correct_cigar_string
 
@@ -210,7 +216,7 @@ for ind, ref in enumerate(references):
 dict_recon_references = {ref.id : ref for ref in references}
 
 all_alignments = []
-for query in tqdm(queries[:5]):
+for query in tqdm(queries[:1]):
     if len(query.seq)<min_segment_len:
         continue
     all_identified_segments = []
@@ -296,12 +302,13 @@ with open(sam_file, 'w') as out_sam:
     out_sam.write('@PG\tID:spomlette\tPN:spomlette\tVN:0.01\tCL:blah\n')
 
     ### write read alignments ###
-    alignment_writer = AlignmentWriter(out_sam, md=True)
+    alignment_writer = AlignmentWriter(out_sam)
     # alignment_writer.write_header(all_alignments)
     # alignment_writer.write_multiple_alignments(filtered_alignments)
 
     for this_alignment in filtered_alignments:
         corrected_sam_line = get_correct_sam_line(this_alignment, alignment_writer)
+        # corrected_sam_line = alignment_writer.format_alignment(this_alignment)
         out_sam.write(corrected_sam_line)
 
 ### output recon ref ###
