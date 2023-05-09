@@ -76,7 +76,8 @@ python3 ${HOME}/git/MAFIA/spanish_omelette_alignment.py \
 --query_file ${FASTA} \
 --recon_ref_file ${WORKSPACE}/ref_recon.fa \
 --sam_file ${SAM} \
---thresh_mapq ${THRESH_MAPQ}
+--thresh_mapq ${THRESH_MAPQ} \
+--write_cs
 
 ### check read num and accuracy ###
 samtools flagstats ${SAM}

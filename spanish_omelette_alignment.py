@@ -1,3 +1,7 @@
+# requires:
+# pip install biopython==1.81
+# pip install calcs
+
 import numpy as np
 import argparse
 from tqdm import tqdm
@@ -20,6 +24,8 @@ parser.add_argument("--recon_ref_file", type=str)
 parser.add_argument("--sam_file", type=str)
 parser.add_argument("--thresh_mapq", type=int, default=60)
 parser.add_argument("--debug", default=False, action="store_true")
+parser.add_argument("--write_md", default=False, action="store_true")
+parser.add_argument("--write_cs", default=False, action="store_true")
 args = parser.parse_args()
 
 THRESH_MAPQ = int(args.thresh_mapq)
@@ -54,7 +60,7 @@ global_aligner.extend_gap_score = -1
 
 def get_local_segment(in_seq):
     ref_alignments = [
-        local_aligner.align(in_seq, ref)[0]
+        local_aligner.align(in_seq, ref.seq)[0]
         for ref in references
     ]
     ref_scores = [a.score for a in ref_alignments]
