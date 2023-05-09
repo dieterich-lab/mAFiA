@@ -38,7 +38,7 @@ global_aligner.open_gap_score = -5
 global_aligner.extend_gap_score = -1
 #########################################
 
-DEBUG = True
+DEBUG = False
 
 def get_local_segment(in_seq):
     ref_alignments = [
@@ -216,7 +216,7 @@ for ind, ref in enumerate(references):
 dict_recon_references = {ref.id : ref for ref in references}
 
 all_alignments = []
-for query in tqdm(queries[:1]):
+for query in tqdm(queries):
     if len(query.seq)<min_segment_len:
         continue
     all_identified_segments = []
@@ -317,4 +317,5 @@ with open(recon_ref_file, "w") as handle:
 
 # generate CS tag and calculate accuracy:
 # calcs /home/adrian/img_out/spomlette_q60.sam -r /home/adrian/img_out/spomlette_recon_ref_q60.fasta > /home/adrian/img_out/spomlette_q60_cs.sam
+# samtools faidx /home/adrian/img_out/spomlette_recon_ref_q60.fasta
 # python3 ~/git/renata/accuracy.py /home/adrian/img_out/spomlette_q60_cs.sam /home/adrian/img_out/spomlette_recon_ref_q60.fasta
