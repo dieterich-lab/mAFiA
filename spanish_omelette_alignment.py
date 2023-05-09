@@ -146,9 +146,9 @@ def get_recon_align_by_chain(in_segments, in_target, in_query):
             )
 
             recon_target_lines.append(
-                str(seg_alignment.query.seq[:t_start]) \
+                str(seg_alignment.query[:t_start]) \
                 + str(seg_alignment[1]) \
-                + str(seg_alignment.query.seq[t_end:])
+                + str(seg_alignment.query[t_end:])
             )
 
         else:
