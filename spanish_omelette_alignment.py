@@ -7,6 +7,7 @@ from Bio.Align import PairwiseAligner, Alignment
 from Bio.Align.sam import AlignmentWriter
 import re
 import matplotlib.pyplot as plt
+from calcs import trim, annotate, call_cstag
 
 min_segment_len = 16
 thresh_mapq = 60
@@ -181,8 +182,8 @@ def get_m6A_line(alignment, ref_id, block_size=33):
                     m6A_line[sp] = '*'
     return ''.join(m6A_line)
 
-def get_correct_sam_line(in_alignment, sam_writer, write_md=False):
-    sam_fields = sam_writer.format_alignment(in_alignment, md=write_md).split('\t')
+def get_correct_sam_line(in_alignment, sam_writer, write_md=False, write_cs=True):
+    sam_fields = sam_writer.format_alignment(in_alignment, md=write_md).rstrip('\n').split('\t')
 
     ### cigar string: change I on both ends to S ###
     cigar_string = sam_fields[5]
@@ -205,8 +206,20 @@ def get_correct_sam_line(in_alignment, sam_writer, write_md=False):
     correct_pos = in_alignment.indices[0, str_match_stick.find('|')] + 1   # 1-based
     sam_fields[3] = str(correct_pos)
 
-    correct_sam_line = '\t'.join(sam_fields)
-    return correct_sam_line
+    ### generate CS flag ###
+    if write_cs:
+        len_clips = trim.get_softclip_lengths(correct_cigar_string)
+        query_trimmed = trim.softclips(sam_fields[9], len_clips)
+        ref_trimmed = trim.unmapped_region(str(in_alignment.target.seq), correct_pos-1, correct_cigar_string)
+        ref_anno = annotate.insertion(ref_trimmed, correct_cigar_string)
+        query_anno = annotate.deletion(query_trimmed, correct_cigar_string)
+        cs_tag = call_cstag.short_form(call_cstag.long_form(ref_anno, query_anno))
+        sam_fields += [cs_tag]
+
+    ### reassemble ###
+    out_sam_line = '\t'.join(sam_fields) + '\n'
+
+    return out_sam_line
 
 for ind, ref in enumerate(references):
     ref.id = 'block1_{}'.format(ind)
