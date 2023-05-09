@@ -142,7 +142,7 @@ def get_recon_align_by_chain(in_segments, in_target, in_query):
             recon_query_lines.append(
                 ''.join(['-' for i in range(t_start)]) \
                 + str(seg_alignment[0]) \
-                + ''.join(['-' for i in range(t_end, len(seg_alignment.query.seq))])
+                + ''.join(['-' for i in range(t_end, len(seg_alignment.query))])
             )
 
             recon_target_lines.append(
