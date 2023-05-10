@@ -6,11 +6,13 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 ########################################################################################################################
 REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch1_w_splint.fasta
 
-TRAIN_DATASET=WUE_batch1_A
-FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_A_RTA/*
+#TRAIN_DATASET=WUE_batch1_A
+#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_A_RTA/*
+#FILTER_SCORE=80
 
-#TRAIN_DATASET=WUE_batch1_m6A
-#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/*
+TRAIN_DATASET=WUE_batch1_m6A
+FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/*
+FILTER_SCORE=70
 
 ########################################################################################################################
 ### Wuerzburg batch 2 ##################################################################################################
@@ -47,10 +49,7 @@ mkdir -p ${WORKSPACE}
 cd ${WORKSPACE}
 
 FASTA=${WORKSPACE}/basecalled.fasta
-SAM=${WORKSPACE}/spomlette_q${THRESH_MAPQ}.sam
-BAM=${SAM//.sam/.bam}
-
-THRESH_MAPQ=60
+SAM=${WORKSPACE}/spomlette.sam
 
 #### basecall with Rodan IVT ###
 deactivate
@@ -76,17 +75,21 @@ python3 ${HOME}/git/MAFIA/spanish_omelette_alignment.py \
 --query_file ${FASTA} \
 --recon_ref_file ${WORKSPACE}/ref_recon.fa \
 --sam_file ${SAM} \
---thresh_mapq ${THRESH_MAPQ} \
 --write_cs
 
-### check read num and accuracy ###
-samtools flagstats ${SAM}
+### filter by quality ###
+FILTERED_SAM=${SAM/.sam/_q${FILTER_SCORE}.sam}
+samtools view -h -q${FILTER_SCORE} ${SAM} > ${FILTERED_SAM}
 
-${HOME}/git/renata/accuracy.py ${SAM} ${WORKSPACE}/ref_recon.fa
+### check read num and accuracy ###
+samtools flagstats ${FILTERED_SAM}
+
+${HOME}/git/renata/accuracy.py ${FILTERED_SAM} ${WORKSPACE}/ref_recon.fa
 
 
 #### Convert to BAM ###
-samtools view -bST ${REF} ${SAM} | samtools sort - > ${BAM}
+BAM=${FILTERED_SAM//.sam/.bam}
+samtools view -bST ${REF} ${FILTERED_SAM} | samtools sort - > ${BAM}
 samtools index ${BAM}
 
 ### filter reads by max indel ###

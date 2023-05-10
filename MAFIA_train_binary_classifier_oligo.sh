@@ -27,9 +27,9 @@ SCALER=MaxAbs
 ############################################################################################
 #### Claudia first 3 splint ###
 BATCH=WUE_batch1
-UNM_BAM=${WORKSPACE}/${BATCH}_A/spomlette_q60.bam
+UNM_BAM=${WORKSPACE}/${BATCH}_A/spomlette_q80.bam
 UNM_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_A_RTA/*/fast5_*"
-MOD_BAM=${WORKSPACE}/${BATCH}_m6A/spomlette_q60.bam
+MOD_BAM=${WORKSPACE}/${BATCH}_m6A/spomlette_q70.bam
 MOD_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/*/fast5_*"
 REF=${WORKSPACE}/reference/${BATCH}_combined.fa
 OUTDIR=${WORKSPACE}/MAFIA_classifiers/${BATCH}_spomlette_${CLASSIFIER}_${SCALER}
