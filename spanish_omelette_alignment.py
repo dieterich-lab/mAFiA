@@ -335,13 +335,13 @@ for query in tqdm(queries):
 ### plot histogram of mapping scores ###
 all_mapping_scores = np.array([a.mapq for a in all_alignments])
 num_pass = np.sum(all_mapping_scores>=THRESH_MAPQ)
-pass_rate = int(num_pass / len(all_mapping_scores) * 100)
+pass_rate = int(num_pass / len(queries) * 100)
 plt.figure(figsize=(5, 5))
 plt.hist(all_mapping_scores, range=[0, 100], bins=100)
 plt.xlabel('Chain Mapping scores', fontsize=12)
 plt.ylabel('Counts', fontsize=12)
 plt.axvline(x=THRESH_MAPQ, c='g')
-plt.title('Pass rate at Q$\geq${}\n{}/{} = {}%'.format(THRESH_MAPQ, num_pass, len(all_mapping_scores), pass_rate), fontsize=15)
+plt.title('Pass rate at Q$\geq${}\n{}/{} = {}%'.format(THRESH_MAPQ, num_pass, len(queries), pass_rate), fontsize=15)
 plt.savefig(out_hist_path, bbox_inches='tight')
 plt.close('all')
 
