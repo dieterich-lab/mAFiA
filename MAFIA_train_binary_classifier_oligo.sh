@@ -41,7 +41,7 @@ UNM_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230502_WUE_splint_batch
 MOD_BAM=${WORKSPACE}/${BATCH}_m6A/spomlette_q70.bam
 MOD_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230502_WUE_splint_batch2/WUE_splint_batch2_m6A_RTA/*/fast5_*"
 REF=${WORKSPACE}/reference/${BATCH}_combined.fasta
-OUTDIR=${WORKSPACE}/MAFIA_classifiers/${DATASET}_spomlette_${CLASSIFIER}_${SCALER}
+OUTDIR=${WORKSPACE}/MAFIA_classifiers/${BATCH}_spomlette_${CLASSIFIER}_${SCALER}
 
 ### Isabel random 6 ###
 #UNM_BAM=${WORKSPACE}/mapping/RL_RG1-6_A_RTA.bam
