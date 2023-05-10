@@ -45,7 +45,7 @@ MIN_SEGMENT_LEN = BLOCK_SIZE // 2
 local_aligner = PairwiseAligner()
 local_aligner.mode = 'local'
 local_aligner.match_score = 1
-local_aligner.mismatch_score = -0.5
+local_aligner.mismatch_score = -1
 local_aligner.open_gap_score = -1
 local_aligner.extend_gap_score = -1
 
