@@ -316,8 +316,7 @@ def extract_features_from_multiple_signals(model, device, config, ext_layer, sit
 
 
 def collect_all_motif_features(motif_ind, reference, bam_in, predStr_features, block_size, block_center, enforce_motif=False):
-
-    relevant_contigs = [k for k in reference.keys() if motif_ind in k.split('_')[1]]
+    relevant_contigs = [k for k in reference.keys() if motif_ind in k.split('_')[1] if k in bam_in.references]
     motif_features = []
     for contig in relevant_contigs:
         block_str = contig.split('_')[1]
