@@ -17,27 +17,30 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 ########################################################################################################################
 ### Wuerzburg batch 2 ##################################################################################################
 ########################################################################################################################
-REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch2_w_splint.fasta
+#REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch2_w_splint.fasta
 
 #TRAIN_DATASET=WUE_batch2_A
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230502_WUE_splint_batch2/WUE_splint_batch2_A_RTA/*
 #FILTER_SCORE=80
 
-TRAIN_DATASET=WUE_batch2_m6A
-FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230502_WUE_splint_batch2/WUE_splint_batch2_m6A_RTA/*
-FILTER_SCORE=70
+#TRAIN_DATASET=WUE_batch2_m6A
+#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230502_WUE_splint_batch2/WUE_splint_batch2_m6A_RTA/*
+#FILTER_SCORE=70
 
 ########################################################################################################################
 ### Isabel all 6 #######################################################################################################
-#REF=${WORKSPACE}/reference/top6_random_permutation_max_blocks_5.fasta
+########################################################################################################################
+REF=${WORKSPACE}/reference/RL_top6.fasta
 
-#TRAIN_DATASET=RL_RG1-6_A
+#TRAIN_DATASET=RL_top6_A
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG1-6_A_RTA/20230418_1325_X1_AOL616_885f620d/fast5
 
-#TRAIN_DATASET=RL_RG7-12_m6A
-#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG7-12_m6A_RTA/20230418_1325_X2_AOC149_8138c168/fast5
+TRAIN_DATASET=RL_top6_m6A
+FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG7-12_m6A_RTA/20230418_1325_X2_AOC149_8138c168/fast5
 
+########################################################################################################################
 ### Isabel 3+3 #########################################################################################################
+########################################################################################################################
 #REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/RL_Mix1_Mix3_blocks8.fasta
 #TRAIN_DATASET=RL_Mix1_A
 #TRAIN_DATASET=RL_Mix3_m6A
