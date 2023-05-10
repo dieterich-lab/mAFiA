@@ -14,9 +14,6 @@ import os, re
 import matplotlib.pyplot as plt
 from calcs import trim, annotate, call_cstag
 
-MIN_SEGMENT_LEN = 16
-# THRESH_MAPQ = 60
-
 parser = argparse.ArgumentParser(description='Map oligo basecalls through the Spanish omelette method')
 parser.add_argument("--ref_file", type=str)
 parser.add_argument("--query_file", type=str)
@@ -39,6 +36,9 @@ out_hist_path = os.path.join(os.path.dirname(args.sam_file), 'hist_spomlette_map
 
 references = list(SeqIO.parse(args.ref_file, 'fasta'))
 queries = list(SeqIO.parse(args.query_file, 'fasta'))
+
+BLOCK_SIZE = np.min([len(ref.seq) for ref in references])
+MIN_SEGMENT_LEN = BLOCK_SIZE // 2
 
 #########################################
 ### local aligner #######################
@@ -183,7 +183,7 @@ def get_recon_align_by_chain(in_segments, in_target, in_query):
 
     return recon_align
 
-def get_m6A_line(alignment, ref_id, block_size=33):
+def get_m6A_line(alignment, ref_id, block_size):
     line_aligned = alignment._format_unicode().split('\n')[0]
     q_start = alignment.coordinates[0, 0]
     cumsum_non_gap = q_start + np.cumsum(np.int32([x!='-' for x in list(line_aligned)])) - 1
@@ -322,7 +322,7 @@ for query in tqdm(queries):
     full_alignment = get_recon_align_by_chain(filtered_segments, ref_recon, query)
 
     if args.debug:
-        m6A_line = get_m6A_line(full_alignment, ref_id)
+        m6A_line = get_m6A_line(full_alignment, ref_id, block_size=BLOCK_SIZE)
         print('\n')
         print(query.id)
         print('Inferred reference:', ref_id)
