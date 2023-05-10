@@ -25,23 +25,23 @@ SCALER=MaxAbs
 ############################################################################################
 ### source data ############################################################################
 ############################################################################################
-#### Claudia first 3 splint ###
-BATCH=WUE_batch1
-UNM_BAM=${WORKSPACE}/${BATCH}_A/spomlette_q80.bam
-UNM_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_A_RTA/*/fast5_*"
-MOD_BAM=${WORKSPACE}/${BATCH}_m6A/spomlette_q70.bam
-MOD_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/*/fast5_*"
-REF=${WORKSPACE}/reference/${BATCH}_combined.fa
-OUTDIR=${WORKSPACE}/MAFIA_classifiers/${BATCH}_spomlette_${CLASSIFIER}_${SCALER}
+#### Claudia batch 1 ###
+#BATCH=WUE_batch1
+#UNM_BAM=${WORKSPACE}/${BATCH}_A/spomlette_q80.bam
+#UNM_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_A_RTA/*/fast5_*"
+#MOD_BAM=${WORKSPACE}/${BATCH}_m6A/spomlette_q70.bam
+#MOD_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/*/fast5_*"
+#REF=${WORKSPACE}/reference/${BATCH}_combined.fa
+#OUTDIR=${WORKSPACE}/MAFIA_classifiers/${BATCH}_spomlette_${CLASSIFIER}_${SCALER}
 
 #### Claudia batch 2 ###
-#DATASET=20230502_WUE_splint_batch2
-#UNM_BAM=${WORKSPACE}/WUE_splint_batch2_A_RTA/mapped.bam
-#UNM_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/${DATASET}/WUE_splint_batch2_A_RTA/*/fast5_*"
-#MOD_BAM=${WORKSPACE}/WUE_splint_batch2_m6A_RTA/mapped.bam
-#MOD_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/${DATASET}/WUE_splint_batch2_m6A_RTA/*/fast5_*"
-#REF=${WORKSPACE}/reference/WUE_batch2_max_blocks_7.fasta
-#OUTDIR=${WORKSPACE}/MAFIA_classifiers/${DATASET}_${CLASSIFIER}_${SCALER}
+BATCH=WUE_batch2
+UNM_BAM=${WORKSPACE}/${BATCH}_A/spomlette_q80.bam
+UNM_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230502_WUE_splint_batch2/WUE_splint_batch2_A_RTA/*/fast5_*"
+MOD_BAM=${WORKSPACE}/${BATCH}_m6A/spomlette_q70.bam
+MOD_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230502_WUE_splint_batch2/WUE_splint_batch2_m6A_RTA/*/fast5_*"
+REF=${WORKSPACE}/reference/${BATCH}_combined.fasta
+OUTDIR=${WORKSPACE}/MAFIA_classifiers/${DATASET}_spomlette_${CLASSIFIER}_${SCALER}
 
 ### Isabel random 6 ###
 #UNM_BAM=${WORKSPACE}/mapping/RL_RG1-6_A_RTA.bam
