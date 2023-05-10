@@ -4,25 +4,30 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 ########################################################################################################################
 ### Wuerzburg batch 1 ##################################################################################################
 ########################################################################################################################
-REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch1_w_splint.fasta
+#REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch1_w_splint.fasta
 
 #TRAIN_DATASET=WUE_batch1_A
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_A_RTA/*
 #FILTER_SCORE=80
 
-TRAIN_DATASET=WUE_batch1_m6A
-FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/*
-FILTER_SCORE=70
+#TRAIN_DATASET=WUE_batch1_m6A
+#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/*
+#FILTER_SCORE=70
 
 ########################################################################################################################
 ### Wuerzburg batch 2 ##################################################################################################
 ########################################################################################################################
-#REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch2_max_blocks_7.fasta
+REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch2_w_splint.fasta
 
-#TRAIN_DATASET=WUE_splint_batch2_A
-#TRAIN_DATASET=WUE_splint_batch2_m6A
-#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230502_WUE_splint_batch2/${TRAIN_DATASET}/*
+TRAIN_DATASET=WUE_batch2_A
+FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230502_WUE_splint_batch2/WUE_splint_batch2_A/*
+FILTER_SCORE=80
 
+#TRAIN_DATASET=WUE_batch2_m6A
+#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230502_WUE_splint_batch2/WUE_splint_batch2_m6A/*
+#FILTER_SCORE=70
+
+########################################################################################################################
 ### Isabel all 6 #######################################################################################################
 #REF=${WORKSPACE}/reference/top6_random_permutation_max_blocks_5.fasta
 
