@@ -32,7 +32,7 @@ UNM_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/W
 MOD_BAM=${WORKSPACE}/${BATCH}_m6A/spomlette_q60.bam
 MOD_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/*/fast5_*"
 REF=${WORKSPACE}/reference/${BATCH}_combined.fa
-OUTDIR=${WORKSPACE}/MAFIA_classifiers/${BATCH}_${CLASSIFIER}_${SCALER}
+OUTDIR=${WORKSPACE}/MAFIA_classifiers/${BATCH}_spomlette_${CLASSIFIER}_${SCALER}
 
 #### Claudia batch 2 ###
 #DATASET=20230502_WUE_splint_batch2
