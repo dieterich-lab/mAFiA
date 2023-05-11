@@ -268,12 +268,14 @@ def get_correct_sam_line(in_alignment, sam_writer, write_md=False, write_cs=True
 
     return out_sam_line
 
-for ind, ref in enumerate(references):
-    ref.id = 'block1_{}'.format(ind)
+dict_recon_references = {}
+for ref in references.copy():
+    motif_ind = int(re.findall(r"M([0-9]+)", ref.id)[0])
+    ref.id = 'block1_{}'.format(motif_ind)
     ref.name = ''
     ref.description = ''
-    references[ind] = ref
-dict_recon_references = {ref.id : ref for ref in references}
+    dict_recon_references[ref.id] = ref
+# dict_recon_references = {ref.id : ref for ref in references}
 
 all_alignments = []
 print('Now mapping reads...', flush=True)
