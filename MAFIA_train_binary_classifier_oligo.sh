@@ -25,23 +25,16 @@ SCALER=MaxAbs
 ############################################################################################
 ### source data ############################################################################
 ############################################################################################
-#### Claudia batch 1 ###
-#BATCH=WUE_batch1
-#UNM_BAM=${DATA_DIR}/${BATCH}_A/spomlette_q80.bam
-#UNM_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_A_RTA/*/fast5_*"
-#MOD_BAM=${DATA_DIR}/${BATCH}_m6A/spomlette_q70.bam
-#MOD_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/*/fast5_*"
-#REF=${DATA_DIR}/reference/${BATCH}_combined.fa
-#OUTDIR=${DATA_DIR}/MAFIA_classifiers/${BATCH}_spomlette_${CLASSIFIER}_${SCALER}
+#### Claudia batches 1 & 2 ###
+TRAIN_DATASET=WUE_batch1
+#TRAIN_DATASET=WUE_batch2
 
-#### Claudia batch 2 ###
-TRAIN_DATASET=WUE_batch2
 UNM_BAM=${DATA_DIR}/${TRAIN_DATASET}_A/spomelette_q70.bam
 UNM_FAST5=${DATA_DIR}/${TRAIN_DATASET}_A/fast5
 MOD_BAM=${DATA_DIR}/${TRAIN_DATASET}_m6A/spomelette_q70.bam
 MOD_FAST5=${DATA_DIR}/${TRAIN_DATASET}_m6A/fast5
 REF=${DATA_DIR}/reference/${TRAIN_DATASET}_ref_recon.fa
-OUTDIR=${DATA_DIR}/MAFIA_classifiers/${TRAIN_DATASET}_spomlette_${CLASSIFIER}_${SCALER}
+OUTDIR=${DATA_DIR}/MAFIA_classifiers/${TRAIN_DATASET}_spomelette_${CLASSIFIER}_${SCALER}
 
 ### Isabel RL top 6 ###
 #TRAIN_DATASET=RL_top6
