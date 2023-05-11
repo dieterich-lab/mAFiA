@@ -35,22 +35,22 @@ SCALER=MaxAbs
 #OUTDIR=${ROOTDIR}/MAFIA_classifiers/${BATCH}_spomlette_${CLASSIFIER}_${SCALER}
 
 #### Claudia batch 2 ###
-#BATCH=WUE_batch2
-#UNM_BAM=${ROOTDIR}/${BATCH}_A/spomlette_q80.bam
-#UNM_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230502_WUE_splint_batch2/WUE_splint_batch2_A_RTA/*/fast5_*"
-#MOD_BAM=${ROOTDIR}/${BATCH}_m6A/spomlette_q70.bam
-#MOD_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230502_WUE_splint_batch2/WUE_splint_batch2_m6A_RTA/*/fast5_*"
-#REF=${ROOTDIR}/reference/${BATCH}_combined.fa
-#OUTDIR=${ROOTDIR}/MAFIA_classifiers/${BATCH}_spomlette_${CLASSIFIER}_${SCALER}
+TRAIN_DATASET=WUE_batch2
+UNM_BAM=${ROOTDIR}/${TRAIN_DATASET}_A/spomelette_q70.bam
+UNM_FAST5=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_batch2_A/fast5
+MOD_BAM=${ROOTDIR}/${TRAIN_DATASET}_m6A/spomelette_q70.bam
+MOD_FAST5=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_batch2_m6A/fast5
+REF=${ROOTDIR}/reference/${TRAIN_DATASET}_combined.fa
+OUTDIR=${ROOTDIR}/MAFIA_classifiers/${TRAIN_DATASET}_spomlette_${CLASSIFIER}_${SCALER}
 
 ### Isabel RL top 6 ###
-BATCH=RL_top6
-UNM_BAM=${ROOTDIR}/${BATCH}_A/spomlette_q70.bam
-UNM_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG1-6_A_RTA/20230418_1325_X1_AOL616_885f620d/fast5
-MOD_BAM=${ROOTDIR}/${BATCH}_m6A/spomlette_q70.bam
-MOD_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG7-12_m6A_RTA/20230418_1325_X2_AOC149_8138c168/fast5
-REF=${ROOTDIR}/reference/${BATCH}_combined.fa
-OUTDIR=${ROOTDIR}/MAFIA_classifiers/${BATCH}_spomlette_${CLASSIFIER}_${SCALER}
+#TRAIN_DATASET=RL_top6
+#UNM_BAM=${ROOTDIR}/${TRAIN_DATASET}_A/spomlette_q70.bam
+#UNM_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG1-6_A_RTA/20230418_1325_X1_AOL616_885f620d/fast5
+#MOD_BAM=${ROOTDIR}/${TRAIN_DATASET}_m6A/spomlette_q70.bam
+#MOD_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG7-12_m6A_RTA/20230418_1325_X2_AOC149_8138c168/fast5
+#REF=${ROOTDIR}/reference/${TRAIN_DATASET}_combined.fa
+#OUTDIR=${ROOTDIR}/MAFIA_classifiers/${TRAIN_DATASET}_spomlette_${CLASSIFIER}_${SCALER}
 
 ### Isabel RL Mix 1 & 3 ###
 #UNM_BAM=${ROOTDIR}/RL_Mix1_A_RTA/mapped.bam
