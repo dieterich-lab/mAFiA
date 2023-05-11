@@ -269,8 +269,10 @@ def get_correct_sam_line(in_alignment, sam_writer, write_md=False, write_cs=True
     return out_sam_line
 
 dict_recon_references = {}
-for ref in references.copy():
+dict_motifs = {}
+for idx, ref in enumerate(references.copy()):
     motif_ind = int(re.findall(r"M([0-9]+)", ref.id)[0])
+    dict_motifs[idx] = motif_ind
     ref.id = 'block1_{}'.format(motif_ind)
     ref.name = ''
     ref.description = ''
@@ -309,7 +311,7 @@ for query in tqdm(queries):
 
     ### reconstruct full reference ###
     segment_sequence = [seg[0] for seg in filtered_segments]
-    ref_id = 'block{}_{}'.format(len(segment_sequence), ''.join([str(s) for s in segment_sequence]))
+    ref_id = 'block{}_{}'.format(len(segment_sequence), ''.join([str(dict_motifs[s]) for s in segment_sequence]))
     ref_seq = Seq('').join([references[ind].seq for ind in segment_sequence])
     ref_recon = SeqRecord(
         seq=ref_seq,
