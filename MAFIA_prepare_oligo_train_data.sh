@@ -4,16 +4,16 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 ########################################################################################################################
 ### Wuerzburg batch 1 ##################################################################################################
 ########################################################################################################################
-REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_oligos_batch1.fasta
+#REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_oligos_batch1.fasta
 
 #TRAIN_DATASET=WUE_batch1_A
 ##FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_A_RTA/*
 
-TRAIN_DATASET=WUE_batch1_m6A
+#TRAIN_DATASET=WUE_batch1_m6A
 ##FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/*
 
-FILTER_SCORE=70
-FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${TRAIN_DATASET}/fast5
+#FILTER_SCORE=70
+#FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${TRAIN_DATASET}/fast5
 
 ########################################################################################################################
 ### Wuerzburg batch 2 ##################################################################################################
@@ -33,15 +33,17 @@ FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${TRAIN_DATASET}/fast5
 ########################################################################################################################
 ### Isabel all 6 #######################################################################################################
 ########################################################################################################################
-#REF=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/RL_top6.fasta
+REF=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/ISA_run1.fasta
 
-#TRAIN_DATASET=RL_top6_A
+TRAIN_DATASET=ISA_run1_A
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG1-6_A_RTA/20230418_1325_X1_AOL616_885f620d/fast5
-#FILTER_SCORE=70
 
-#TRAIN_DATASET=RL_top6_m6A
+#TRAIN_DATASET=ISA_run1_m6A
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG7-12_m6A_RTA/20230418_1325_X2_AOC149_8138c168/fast5
-#FILTER_SCORE=70
+
+FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${TRAIN_DATASET}/fast5
+FILTER_SCORE=70
+
 ########################################################################################################################
 ### Isabel 3+3 #########################################################################################################
 ########################################################################################################################
@@ -115,7 +117,7 @@ samtools index ${BAM}
 #samtools index ${BAM}.filtered
 
 ### combine recon references ###
-BATCH=1
+#BATCH=1
 #BATCH=2
-awk '/^>/{p=seen[$0]++}!p' /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_batch${BATCH}_A/ref_recon.fa /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_batch${BATCH}_m6A/ref_recon.fa > /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch${BATCH}_ref_recon.fa
-#awk '/^>/{p=seen[$0]++}!p' /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/RL_top6_A/ref_recon.fa /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/RL_top6_m6A/ref_recon.fa > /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/ISA_ref_recon.fa
+#awk '/^>/{p=seen[$0]++}!p' /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_batch${BATCH}_A/ref_recon.fa /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_batch${BATCH}_m6A/ref_recon.fa > /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch${BATCH}_ref_recon.fa
+awk '/^>/{p=seen[$0]++}!p' /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/ISA_run1_A/ref_recon.fa /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/ISA_run1_m6A/ref_recon.fa > /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/ISA_run1_ref_recon.fa
