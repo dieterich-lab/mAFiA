@@ -12,7 +12,7 @@ conda activate MAFIA
 set -e -u -f
 cd ${HOME}/git/MAFIA
 
-ROOTDIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian
+DATA_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 
 ############################################################################################
 ### feature settings #######################################################################
@@ -27,46 +27,46 @@ SCALER=MaxAbs
 ############################################################################################
 #### Claudia batch 1 ###
 #BATCH=WUE_batch1
-#UNM_BAM=${ROOTDIR}/${BATCH}_A/spomlette_q80.bam
+#UNM_BAM=${DATA_DIR}/${BATCH}_A/spomlette_q80.bam
 #UNM_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_A_RTA/*/fast5_*"
-#MOD_BAM=${ROOTDIR}/${BATCH}_m6A/spomlette_q70.bam
+#MOD_BAM=${DATA_DIR}/${BATCH}_m6A/spomlette_q70.bam
 #MOD_FAST5="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/*/fast5_*"
-#REF=${ROOTDIR}/reference/${BATCH}_combined.fa
-#OUTDIR=${ROOTDIR}/MAFIA_classifiers/${BATCH}_spomlette_${CLASSIFIER}_${SCALER}
+#REF=${DATA_DIR}/reference/${BATCH}_combined.fa
+#OUTDIR=${DATA_DIR}/MAFIA_classifiers/${BATCH}_spomlette_${CLASSIFIER}_${SCALER}
 
 #### Claudia batch 2 ###
 TRAIN_DATASET=WUE_batch2
-UNM_BAM=${ROOTDIR}/${TRAIN_DATASET}_A/spomelette_q70.bam
-UNM_FAST5=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_batch2_A/fast5
-MOD_BAM=${ROOTDIR}/${TRAIN_DATASET}_m6A/spomelette_q70.bam
-MOD_FAST5=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_batch2_m6A/fast5
-REF=${ROOTDIR}/reference/${TRAIN_DATASET}_combined.fa
-OUTDIR=${ROOTDIR}/MAFIA_classifiers/${TRAIN_DATASET}_spomlette_${CLASSIFIER}_${SCALER}
+UNM_BAM=${DATA_DIR}/${TRAIN_DATASET}_A/spomelette_q70.bam
+UNM_FAST5=${DATA_DIR}/${TRAIN_DATASET}_A/fast5
+MOD_BAM=${DATA_DIR}/${TRAIN_DATASET}_m6A/spomelette_q70.bam
+MOD_FAST5=${DATA_DIR}/${TRAIN_DATASET}_m6A/fast5
+REF=${DATA_DIR}/reference/${TRAIN_DATASET}_ref_recon.fa
+OUTDIR=${DATA_DIR}/MAFIA_classifiers/${TRAIN_DATASET}_spomlette_${CLASSIFIER}_${SCALER}
 
 ### Isabel RL top 6 ###
 #TRAIN_DATASET=RL_top6
-#UNM_BAM=${ROOTDIR}/${TRAIN_DATASET}_A/spomlette_q70.bam
+#UNM_BAM=${DATA_DIR}/${TRAIN_DATASET}_A/spomlette_q70.bam
 #UNM_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG1-6_A_RTA/20230418_1325_X1_AOL616_885f620d/fast5
-#MOD_BAM=${ROOTDIR}/${TRAIN_DATASET}_m6A/spomlette_q70.bam
+#MOD_BAM=${DATA_DIR}/${TRAIN_DATASET}_m6A/spomlette_q70.bam
 #MOD_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG7-12_m6A_RTA/20230418_1325_X2_AOC149_8138c168/fast5
-#REF=${ROOTDIR}/reference/${TRAIN_DATASET}_combined.fa
-#OUTDIR=${ROOTDIR}/MAFIA_classifiers/${TRAIN_DATASET}_spomlette_${CLASSIFIER}_${SCALER}
+#REF=${DATA_DIR}/reference/${TRAIN_DATASET}_combined.fa
+#OUTDIR=${DATA_DIR}/MAFIA_classifiers/${TRAIN_DATASET}_spomlette_${CLASSIFIER}_${SCALER}
 
 ### Isabel RL Mix 1 & 3 ###
-#UNM_BAM=${ROOTDIR}/RL_Mix1_A_RTA/mapped.bam
+#UNM_BAM=${DATA_DIR}/RL_Mix1_A_RTA/mapped.bam
 #UNM_FAST5="/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230503_RL_run2/RL_Mix1_A_RTA/*/fast5_*"
-#MOD_BAM=${ROOTDIR}/RL_Mix3_m6A_RTA/mapped.bam
+#MOD_BAM=${DATA_DIR}/RL_Mix3_m6A_RTA/mapped.bam
 #MOD_FAST5="/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230503_RL_run2/RL_Mix3_m6A_RTA/*/fast5_*"
-#REF=${ROOTDIR}/reference/RL_Mix1_Mix3_blocks8.fasta
-#OUTDIR=${ROOTDIR}/MAFIA_classifiers/RL_run2_Mix1_Mix3_${SCALER}
+#REF=${DATA_DIR}/reference/RL_Mix1_Mix3_blocks8.fasta
+#OUTDIR=${DATA_DIR}/MAFIA_classifiers/RL_run2_Mix1_Mix3_${SCALER}
 
 ### Isabel RL Mix 2 & 4 ###
-#UNM_BAM=${ROOTDIR}/RL_Mix2_A_RTA/mapped.bam
+#UNM_BAM=${DATA_DIR}/RL_Mix2_A_RTA/mapped.bam
 #UNM_FAST5="/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230503_RL_run2/RL_Mix2_A_RTA/*/fast5_*"
-#MOD_BAM=${ROOTDIR}/RL_Mix4_m6A_RTA/mapped.bam
+#MOD_BAM=${DATA_DIR}/RL_Mix4_m6A_RTA/mapped.bam
 #MOD_FAST5="/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230503_RL_run2/RL_Mix4_m6A_RTA/*/fast5_*"
-#REF=${ROOTDIR}/reference/RL_Mix2_Mix4_blocks8.fasta
-#OUTDIR=${ROOTDIR}/MAFIA_classifiers/RL_run2_Mix2_Mix4_${SCALER}
+#REF=${DATA_DIR}/reference/RL_Mix2_Mix4_blocks8.fasta
+#OUTDIR=${DATA_DIR}/MAFIA_classifiers/RL_run2_Mix2_Mix4_${SCALER}
 
 python3 oligo_train_binary_classifier.py \
 --unm_bam_file ${UNM_BAM} \
