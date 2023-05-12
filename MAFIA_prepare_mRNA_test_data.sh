@@ -3,15 +3,14 @@ ARCH=${HOME}/git/renata/rnaarch
 MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 
 ### new HEK293 ######################################################################################################################
-#DATASET=100_WT_0_IVT_RTA
-#DATASET=0_WT_100_IVT_RTA
-#DATASET=25_WT_75_IVT_RTA
+#DATASET=100_WT_0_IVT
+#DATASET=0_WT_100_IVT
+DATASET=25_WT_75_IVT
+#FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230419_HEK293_WT_IVT_Mix/${DATASET}_RTA/*/fast5_*
 
-#DATASET=50_WT_50_IVT_RTA
-DATASET=75_WT_25_IVT_RTA
-
-FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230419_HEK293_WT_IVT_Mix/${DATASET}/*/fast5_*
-#FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230426_HEK293_WT_IVT/${DATASET}/*/fast5_*
+#DATASET=50_WT_50_IVT
+#DATASET=75_WT_25_IVT
+#FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230426_HEK293_WT_IVT/${DATASET}_RTA/*/fast5_*
 
 #####################################################################################################################################
 
