@@ -2,28 +2,29 @@ REF=${HOME}/Data/genomes/GRCh38_96.fa
 ARCH=${HOME}/git/renata/rnaarch
 MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 
-### old HEK293 ######################################################################################################################
-#DATASET=HEK293A_WT
-#FAST5_DIR=/beegfs/prj/Isabel_IVT_Nanopore/HEK293A_wildtype/Jessica_HEK293/HEK293A_2/20190409_1503_GA10000_FAK10978_2e75d7be/fast5_all
-
-#DATASET=HEK293_IVT
-#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/fast5/HEK293_IVT_2/fast5_pass
-
 ### new HEK293 ######################################################################################################################
 #DATASET=100_WT_0_IVT_RTA
 #DATASET=0_WT_100_IVT_RTA
 #DATASET=25_WT_75_IVT_RTA
-#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230419_HEK293_WT_IVT_Mix/${DATASET}/*/fast5_*
 
 #DATASET=50_WT_50_IVT_RTA
 DATASET=75_WT_25_IVT_RTA
-FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230426_HEK293_WT_IVT/${DATASET}/*/fast5_*
+
+FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230419_HEK293_WT_IVT_Mix/${DATASET}/*/fast5_*
+#FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230426_HEK293_WT_IVT/${DATASET}/*/fast5_*
 
 #####################################################################################################################################
 
 WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${DATASET}
 mkdir -p ${WORKSPACE}
 cd ${WORKSPACE}
+
+if test -f basecall_merged.fasta
+then
+  cp basecall_merged.fasta basecall_merged.fasta.backup
+  mkdir _old
+  mv basecall_merged.fasta.backup filtered_q50.bam filtered_q50.bam.bai mapped.sam _old
+fi
 
 SAM=${WORKSPACE}/mapped.sam
 BAM=${WORKSPACE}/filtered_q50.bam
@@ -42,7 +43,12 @@ sbatch --array=${NUM_ARRAYS} --export=ALL,WORKSPACE=${WORKSPACE},FILENAME_PREFIX
 
 #for f in ${WORKSPACE}/part*.fasta; do echo $f; grep '>' $f | wc -l; done
 
-cat ${WORKSPACE}/part*.fasta > ${WORKSPACE}/basecall_merged.fasta
+if test -f basecall_merged.fasta
+then
+  cat ${WORKSPACE}/part*.fasta >> ${WORKSPACE}/basecall_merged.fasta
+else
+  cat ${WORKSPACE}/part*.fasta > ${WORKSPACE}/basecall_merged.fasta
+fi
 
 #### align to genome ###
 module purge
