@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 #SBATCH --partition=gpu
-#SBATCH --exclude=gpu-g4-1
 #SBATCH --nodelist=gpu-g3-1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=120GB
 #SBATCH --verbose
-#SBATCH --job-name=MAFIA_test_binary_classifier_oligo
+#SBATCH --job-name=MAFIA_test_oligo
 #SBATCH --output=/home/achan/slurm/MAFIA_test_oligo_%A.out
 
 eval "$(conda shell.bash hook)"
@@ -13,7 +12,7 @@ conda activate MAFIA
 
 PRJ_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 TRAIN_DATASET=WUE_combined
-TEST_DATASET=ISA_run1_A
+TEST_DATASET=ISA_run1_m6A
 
 BAM=${PRJ_DIR}/${TEST_DATASET}/spomelette_q70.bam
 FAST5_DIR=${PRJ_DIR}/${TEST_DATASET}/fast5
