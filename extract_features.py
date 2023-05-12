@@ -331,33 +331,6 @@ def collect_all_motif_features(motif_ind, reference, bam_in, predStr_features, b
                 motif_features.append(site_motif_features)
     return {k: v for dic in motif_features for k, v in dic.items()}
 
-def collect_oligo_features(oligo_ind, reference, bam_in, predStr_features):
-    oligo_ind = str(oligo_ind)
-    ref_seq = reference['block1_{}'.format(oligo_ind)]
-    block_size = len(ref_seq)
-    block_span = block_size // 2
-
-    relevant_contigs = [k for k in reference.keys() if ((oligo_ind in k.split('_')[1]) and (k in bam_in.references))]
-    oligo_features = []
-    for contig in relevant_contigs:
-        block_str = contig.split('_')[1]
-        block_positions = np.where(np.array(list(block_str)) == oligo_ind)[0]
-        for bp in block_positions:
-            block_start = bp * block_size
-            block_end = (bp+1) * block_size
-            for alignment in bam_in.fetch(contig=contig, start=block_start, end=block_end):
-                query_name = alignment.query_name
-                if query_name in predStr_features:
-                    print(query_name)
-
-            ### TODO: WIP ###
-            # reference_sequence = reference[contig][block_start:(block_end+1)]
-            read_str_features = collect_span_features(bam_in, contig, (block_start, block_end), predStr_features)
-            if len(read_str_features) > 0:
-                oligo_features.append(read_str_features)
-
-    return {k: v for dic in oligo_features for k, v in dic.items()}
-
 def collect_site_features(alignment, contig, pos, dict_predStr_feature, enforce_motif=None):
     site_motif_features = {}
     for pileupcolumn in alignment.pileup(contig, pos, pos+1, truncate=True):

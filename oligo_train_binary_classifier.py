@@ -96,16 +96,6 @@ else:
     print('Now extracting features from mod...', flush=True)
     mod_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, mod_index_read_ids, extraction_layer, feature_width)
 
-### collect motif features ###
-# motif_ind = '0'
-# motif_name = 'GGACA'
-
-# motif_indices_names = [
-#     ('0', 'GGACA'),
-#     ('1', 'GGACC'),
-#     ('2', 'AGACT')
-# ]
-
 block_index_motif_size_center = []
 for k in ref.keys():
     if k.lstrip('block').split('_')[0] == '1':
