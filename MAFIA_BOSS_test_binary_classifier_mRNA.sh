@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 PRJ_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 REF=${HOME}/Data/genomes/GRCh38_96.fa
 MOD_FILE=${HOME}/Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv
@@ -17,7 +19,10 @@ FAST5_DIR=${WORKSPACE}/fast5
 BAM=${WORKSPACE}/filtered_q50.bam
 TRAIN_DATASET=WUE_combined
 CLASSIFIER_MODEL_DIR=${PRJ_DIR}/MAFIA_classifiers/${TRAIN_DATASET}
-OUTFILE=${PRJ_DIR}/results/res_train_${TRAIN_DATASET}_test_${TEST_DATASET}.tsv
+OUTDIR=${PRJ_DIR}/results/train_${TRAIN_DATASET}_test_${TEST_DATASET}
+OUTFILE=${OUTDIR}/res_train_${TRAIN_DATASET}_test_${TEST_DATASET}.tsv
+
+mkdir -p ${OUTDIR}
 
 NUM_ARRAYS=""
 for f in ${MOD_FILE}.part*; do ff=${f##*part}; NUM_ARRAYS+="${ff},"; done
@@ -37,12 +42,12 @@ OUTFILE=${OUTFILE} \
 ${HOME}/git/MAFIA/MAFIA_SWARM_test_binary_classifier_mRNA.sh
 
 ### concat output ###
-cp ${OUTFILE}.part00 ${OUTFILE}.merged
-for num in ${NUM_ARRAYS//,/ }
-do
-  if [ $num != '00' ]
-  then awk NR\>1 $OUTFILE.part$num >> ${OUTFILE}.merged
-  fi
-  done
-
-rm ${OUTFILE}.part*
+#cp ${OUTFILE}.part00 ${OUTFILE}.merged
+#for num in ${NUM_ARRAYS//,/ }
+#do
+#  if [ $num != '00' ]
+#  then awk NR\>1 $OUTFILE.part$num >> ${OUTFILE}.merged
+#  fi
+#  done
+#
+#rm ${OUTFILE}.part*
