@@ -71,7 +71,7 @@ target_motifs = list(classifier_models.keys())
 print('Target motifs: {}'.format(', '.join(target_motifs)), flush=True)
 restart = False
 if os.path.exists(args.outfile):
-    df_out = pd.read_csv(args.outfile, sep='\t', index_col=0)
+    df_out = pd.read_csv(args.outfile, sep='\t')
     counts = len(df_out)
     if counts>0:
         print('Restarting from {} with {} counts'.format(args.outfile, counts), flush=True)
