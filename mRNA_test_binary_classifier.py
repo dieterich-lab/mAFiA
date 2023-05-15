@@ -137,4 +137,4 @@ for _, row in df_mod.iterrows():
 
         counts += 1
         df_out.to_csv(args.outfile, sep='\t', index=False)
-print('Total {} sites'.format(counts), flush=True)
+print('Total {} sites written to {}'.format(counts, args.outfile), flush=True)
