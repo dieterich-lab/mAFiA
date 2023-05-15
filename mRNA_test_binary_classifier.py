@@ -46,7 +46,7 @@ df_mod = pd.read_csv(args.mod_file)
 df_mod = df_mod.rename(columns={'Unnamed: 0': 'index'})
 
 ref = {}
-print('Parsing genome...', flush=True)
+print('Parsing genome reference {}...'.format(args.ref_file), flush=True)
 for record in tqdm(SeqIO.parse(args.ref_file, 'fasta')):
     if (record.id.isnumeric()) or (record.id in ['X', 'Y']):
         ref[record.id] = str(record.seq)
