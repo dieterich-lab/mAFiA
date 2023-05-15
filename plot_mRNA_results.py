@@ -49,14 +49,14 @@ results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
 train_dataset = 'WUE_combined'
 test_datasets = [
     '0_WT_100_IVT',
-    # '25_WT_75_IVT',
+    '25_WT_75_IVT',
     '50_WT_50_IVT',
     '75_WT_25_IVT',
     '100_WT_0_IVT'
 ]
 ds_colors = {
     '0_WT_100_IVT' : 'b',
-    # '25_WT_75_IVT' : 'g',
+    '25_WT_75_IVT' : 'g',
     '50_WT_50_IVT' : 'm',
     '75_WT_25_IVT' : 'c',
     '100_WT_0_IVT' : 'r'
@@ -68,7 +68,7 @@ if not os.path.exists(img_out):
 
 P_VAL_THRESH = 1.0E-99
 COV_THRESH = 50
-PROB_MARGIN = 0.2
+PROB_MARGIN = 0.5
 COMMON_SITES_ONLY = False
 
 dfs = {}
@@ -165,7 +165,7 @@ for subplot_ind, ds in enumerate(dict_ds_motif_avg.keys()):
     glori_ratio = np.float32(ds_agg_avg['Ratio'].values)
     ont_ratio = np.float32(ds_agg_avg['mod_ratio'].values)
     hist, x_bins, y_bins = np.histogram2d(glori_ratio, ont_ratio, bins=num_bins, range=[[0, 1], [0, 1]], density=True)
-    im = ax.imshow(hist.T, origin='lower', vmin=0.5, vmax=5, cmap='plasma')
+    im = ax.imshow(hist.T, origin='lower', vmin=0.5, vmax=6, cmap='plasma')
     ax.set_xticks(np.arange(0, num_bins+1, 5)-0.5, np.int32(np.arange(0, num_bins+1, 5)*interval))
     ax.set_yticks(np.arange(0, num_bins+1, 5)-0.5, np.int32(np.arange(0, num_bins+1, 5)*interval))
     for tick in ax.yaxis.get_majorticklabels():
