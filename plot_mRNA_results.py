@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 def get_norm_counts(in_df, sel_motif):
     df_motif = in_df[
-        (in_df['P_adjust'] <= P_VAL_THRESH)
+        (np.float32(in_df['P_adjust']) <= P_VAL_THRESH)
         & (in_df['ref_motif']==sel_motif)
         # & (df['pred_motif']==sel_motif)
     ]
@@ -45,36 +45,24 @@ def calc_mod_ratio_with_margin(in_df_motif, prob_margin, thresh_cov=50):
     return df_motif_avg
 
 
-# parser = argparse.ArgumentParser()
-# parser.add_argument('--df_file')
-# args = parser.parse_args()
-# df_file = args.df_file
-
-# classifier = 'random_ligation_A_m6A_MaxAbs'
-# ivt_res_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/old/results/res_HEK293_IVT_{}_noEnforceMotif_modProbPerRead.tsv'.format(classifier)
-# wt_res_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_HEK293A_WT_{}_modProbThresh0.5.tsv'.format(classifier)
-# ivt_res_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_0_WT_100_IVT_RTA_20230221_WUE_splint_lig_modProbPerRead.tsv.merged'
-# wt_res_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_100_WT_0_IVT_RTA_20230221_WUE_splint_lig_modProbPerRead.tsv.merged'
-# img_out = os.path.join(HOME, 'img_out/MAFIA', os.path.basename('HEK293_WT_vs_IVT_{}'.format(classifier)))
-
 results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
-training_dataset = 'WUE_splint_batch*'
-testing_datasets = [
-    '0_WT_100_IVT_RTA',
-    '25_WT_75_IVT_RTA',
-    '50_WT_50_IVT_RTA',
-    '75_WT_25_IVT_RTA',
-    '100_WT_0_IVT_RTA'
+train_dataset = 'WUE_combined'
+test_datasets = [
+    '0_WT_100_IVT',
+    # '25_WT_75_IVT',
+    '50_WT_50_IVT',
+    '75_WT_25_IVT',
+    '100_WT_0_IVT'
 ]
 ds_colors = {
-    '0_WT_100_IVT_RTA' : 'b',
-    '25_WT_75_IVT_RTA' : 'g',
-    '50_WT_50_IVT_RTA' : 'm',
-    '75_WT_25_IVT_RTA' : 'c',
-    '100_WT_0_IVT_RTA' : 'r'
+    '0_WT_100_IVT' : 'b',
+    # '25_WT_75_IVT' : 'g',
+    '50_WT_50_IVT' : 'm',
+    '75_WT_25_IVT' : 'c',
+    '100_WT_0_IVT' : 'r'
 }
 
-img_out = os.path.join(HOME, 'img_out/MAFIA', os.path.basename('HEK293_mixing_{}'.format(training_dataset)))
+img_out = os.path.join(HOME, 'img_out/MAFIA', os.path.basename('HEK293_mixing_{}'.format(train_dataset)))
 if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
 
@@ -83,12 +71,9 @@ COV_THRESH = 50
 PROB_MARGIN = 0.2
 COMMON_SITES_ONLY = False
 
-# dfs = {
-#     ds : pd.read_csv(os.path.join(results_dir, 'res_{}_{}_modProbPerRead.tsv.merged'.format(ds, training_dataset)), sep='\t').rename(columns={'Unnamed: 0': 'index'}) for ds in testing_datasets
-# }
 dfs = {}
-for ds in testing_datasets:
-    paths = glob(os.path.join(results_dir, 'res_{}_{}_modProbPerRead.tsv.merged'.format(ds, training_dataset)))
+for ds in test_datasets:
+    paths = glob(os.path.join(results_dir, 'res_train_{}_test_{}.tsv.merged'.format(train_dataset, ds)))
     if len(paths)==1:
         df = pd.read_csv(paths[0], sep='\t').rename(columns={'Unnamed: 0': 'index'})
         dfs[ds] = df
@@ -152,7 +137,7 @@ for ds, df in dfs.items():
         mod_ratio = np.float64(df_motif_avg['mod_ratio'])
         corr = np.corrcoef(glori_ratio, mod_ratio)[0, 1]
 
-        if ds=='100_WT_0_IVT_RTA':
+        if ds=='100_WT_0_IVT':
             axes_mod_ratio[subplot_ind].scatter(glori_ratio, mod_ratio, color=ds_colors[ds], marker='.', label='{}, {} sites, corr. {:.2f}'.format(ds, len(glori_ratio), corr))
             # axes_mod_ratio[subplot_ind].plot(glori_ratio_ivt, mod_ratio_ivt, 'b.', label='IVT, {} sites, corr. {:.2f}'.format(len(glori_ratio_ivt), corr_ivt))
             # axes_mod_ratio[subplot_ind].plot(glori_ratio_wt, mod_ratio_wt, 'r.', label='WT, {} sites, corr. {:.2f}'.format(len(glori_ratio_wt), corr_wt))
@@ -173,9 +158,9 @@ fig_mod_ratio.savefig(os.path.join(img_out, 'corr_glori_modRatio_pValThresh{:.2E
 ### 2D density plots ###
 num_bins = 20
 interval = 100 / num_bins
-fig = plt.figure(figsize=(len(testing_datasets)*5, 5))
+fig = plt.figure(figsize=(len(test_datasets)*5, 5))
 for subplot_ind, ds in enumerate(dict_ds_motif_avg.keys()):
-    ax = plt.subplot(1, len(testing_datasets), subplot_ind+1)
+    ax = plt.subplot(1, len(test_datasets), subplot_ind+1)
     ds_agg_avg = pd.concat(dict_ds_motif_avg[ds].values())
     glori_ratio = np.float32(ds_agg_avg['Ratio'].values)
     ont_ratio = np.float32(ds_agg_avg['mod_ratio'].values)
