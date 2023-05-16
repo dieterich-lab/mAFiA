@@ -107,8 +107,8 @@ motifs = ['AGACT', 'GGACA', 'GGACC', 'GAACT', 'GGACT', 'TGACT']
 ### plots ###
 num_rows = 2
 num_cols = 3
-fig_width = 16
-fig_height = 10
+fig_width = num_cols*5
+fig_height = num_rows*5
 fig_hist = plt.figure(figsize=(fig_width, fig_height))
 axes_hist = fig_hist.subplots(num_rows, num_cols).flatten()
 fig_mod_ratio = plt.figure(figsize=(fig_width, fig_height))
@@ -123,8 +123,10 @@ for ds, df in dfs.items():
         axes_hist[subplot_ind].step(ds_bin_centers, ds_norm_counts, color=ds_colors[ds], label='{}, {} features'.format(ds, len(ds_motif)))
 
         axes_hist[subplot_ind].axvspan(xmin=PROB_MARGIN, xmax=1 - PROB_MARGIN, color='gray', alpha=0.5)
-        axes_hist[subplot_ind].set_xlabel('Mod. Prob.', fontsize=15)
-        axes_hist[subplot_ind].set_ylabel('Norm. frequency', fontsize=15)
+        if subplot_ind>=num_cols*(num_rows-1):
+            axes_hist[subplot_ind].set_xlabel('Mod. Prob.', fontsize=15)
+        if subplot_ind%num_cols==0:
+            axes_hist[subplot_ind].set_ylabel('Norm. frequency', fontsize=15)
         axes_hist[subplot_ind].set_title('{}'.format(this_motif), fontsize=20)
         axes_hist[subplot_ind].set_xlim([-0.05, 1.05])
         axes_hist[subplot_ind].set_ylim([0, 0.3])
@@ -138,15 +140,17 @@ for ds, df in dfs.items():
         corr = np.corrcoef(glori_ratio, mod_ratio)[0, 1]
 
         if ds=='100_WT_0_IVT':
-            axes_mod_ratio[subplot_ind].scatter(glori_ratio, mod_ratio, color=ds_colors[ds], marker='.', label='{}, {} sites, corr. {:.2f}'.format(ds, len(glori_ratio), corr))
+            axes_mod_ratio[subplot_ind].scatter(glori_ratio, mod_ratio, color=ds_colors[ds], marker='.', label='{} sites, corr. {:.2f}'.format(len(glori_ratio), corr))
             # axes_mod_ratio[subplot_ind].plot(glori_ratio_ivt, mod_ratio_ivt, 'b.', label='IVT, {} sites, corr. {:.2f}'.format(len(glori_ratio_ivt), corr_ivt))
             # axes_mod_ratio[subplot_ind].plot(glori_ratio_wt, mod_ratio_wt, 'r.', label='WT, {} sites, corr. {:.2f}'.format(len(glori_ratio_wt), corr_wt))
 
             axes_mod_ratio[subplot_ind].plot(np.arange(0, 1.1, 0.1), np.arange(0, 1.1, 0.1), 'k--', alpha=0.5)
             axes_mod_ratio[subplot_ind].set_xlim([-0.05, 1.05])
             axes_mod_ratio[subplot_ind].set_ylim([-0.05, 1.05])
-            axes_mod_ratio[subplot_ind].set_xlabel('GLORI mod. ratio', fontsize=15)
-            axes_mod_ratio[subplot_ind].set_ylabel('ONT mod. ratio', fontsize=15)
+            if subplot_ind >= num_cols * (num_rows - 1):
+                axes_mod_ratio[subplot_ind].set_xlabel('GLORI mod. ratio', fontsize=15)
+            if subplot_ind%num_cols==0:
+                axes_mod_ratio[subplot_ind].set_ylabel('ONT mod. ratio', fontsize=15)
             axes_mod_ratio[subplot_ind].set_title('{}'.format(this_motif), fontsize=20)
             axes_mod_ratio[subplot_ind].legend(loc='upper left', fontsize=12)
 fig_hist.tight_layout()
