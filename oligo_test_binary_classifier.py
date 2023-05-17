@@ -45,6 +45,11 @@ print('Parsing test fast5 files from {}'.format(args.test_fast5_dir), flush=True
 test_index_read_ids = index_fast5_files(test_f5_paths, test_bam)
 print('{} test reads indexed'.format(len(test_index_read_ids)), flush=True)
 
+### build dict of read and ref ###
+dict_read_ref = {}
+for read in test_bam.fetch():
+    dict_read_ref[read.query_name] = read.reference_name
+
 ### load backbon model, device ###
 torchdict = torch.load(args.backbone_model_path, map_location="cpu")
 origconfig = torchdict["config"]
@@ -88,17 +93,17 @@ for motif_ind, motif, block_size, block_center in index_motif_size_center:
         continue
     print('Now collecting features for motif {} from test reads...'.format(motif), flush=True)
     if args.enforce_motif:
-        test_readId_motif_features = collect_all_motif_features(motif_ind, ref, test_bam, test_predStr_features, block_size=block_size, block_center=block_center, enforce_motif=motif)
+        readId_qPos_motif_features = collect_all_motif_features(motif_ind, ref, test_bam, test_predStr_features, block_size=block_size, block_center=block_center, enforce_motif=motif)
     else:
-        test_readId_motif_features = collect_all_motif_features(motif_ind, ref, test_bam, test_predStr_features, block_size=block_size, block_center=block_center)
-    print('{} feature vectors collected'.format(len(test_readId_motif_features)), flush=True)
+        readId_qPos_motif_features = collect_all_motif_features(motif_ind, ref, test_bam, test_predStr_features, block_size=block_size, block_center=block_center)
+    print('{} feature vectors collected'.format(len(readId_qPos_motif_features)), flush=True)
 
-    if len(test_readId_motif_features)>args.min_coverage:
-        _, readId_predMotif_modProbs = get_mod_ratio_with_binary_classifier(test_readId_motif_features, classifier_models[motif], output_mod_probs=True)
+    if len(readId_qPos_motif_features)>args.min_coverage:
+        _, readId_qPos_predMotif_modProbs = get_mod_ratio_with_binary_classifier(readId_qPos_motif_features, classifier_models[motif], output_mod_probs=True)
         df_out = pd.concat([
             df_out,
-            pd.DataFrame([(k, motif, v[0], round(v[1], 3)) for k, v in readId_predMotif_modProbs.items()],
-                         columns=['read_id', 'ref_motif', 'pred_motif', 'mod_prob'])
+            pd.DataFrame([(x[0], dict_read_ref[x[0]], x[1], motif, x[2], round(x[3], 3)) for x in readId_qPos_predMotif_modProbs],
+                         columns=['read_id', 'ref_name', 'q_pos', 'ref_motif', 'pred_motif', 'mod_prob'])
         ])
     df_out.to_csv(args.outfile, sep='\t', index=False)
 print('Total number of bases tested {}'.format(len(df_out)), flush=True)

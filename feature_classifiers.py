@@ -227,17 +227,26 @@ def train_svm_ivt_wt(ivt_dict, wt_dict, wanted_motif, site, debug_img_dir=None):
 
     return score_auc, clf, opt_thresh
 
-def get_mod_ratio_with_binary_classifier(dict_motif_feature, clf, mod_thresh=0.5, output_mod_probs=False):
-    test_motifs = [v[0] for k, v in dict_motif_feature.items()]
-    test_features = [v[1] for k, v in dict_motif_feature.items()]
+def get_mod_ratio_with_binary_classifier(id_qPos_motif_feature, clf, mod_thresh=0.5, output_mod_probs=False):
+    # test_motifs = [v[0] for k, v in id_qPos_motif_feature.items()]
+    # test_features = [v[1] for k, v in id_qPos_motif_feature.items()]
+    readIds = []
+    qPos = []
+    test_motifs = []
+    test_features = []
+    for (id, pos, motif, feature) in id_qPos_motif_feature:
+        readIds.append(id)
+        qPos.append(pos)
+        test_motifs.append(motif)
+        test_features.append(feature)
 
     mod_probs = clf.predict_proba(test_features)[:, 1]
-    read_predMotif_modProbs = {read_id: (pred_motif, mod_prob) for read_id, pred_motif, mod_prob in zip(dict_motif_feature.keys(), test_motifs, mod_probs)}
+    id_qPos_predMotif_modProbs = list(zip(readIds, qPos, test_motifs, mod_probs))
     predictions = np.int32(mod_probs > mod_thresh)
     avg_mod_ratio = np.mean(predictions)
 
     if output_mod_probs:
-        return avg_mod_ratio, read_predMotif_modProbs
+        return avg_mod_ratio, id_qPos_predMotif_modProbs
     else:
         return avg_mod_ratio
 

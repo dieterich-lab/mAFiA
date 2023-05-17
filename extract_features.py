@@ -324,15 +324,16 @@ def collect_all_motif_features(motif_ind, reference, bam_in, predStr_features, b
         for pos in site_positions:
             reference_motif = reference[contig][(pos - 2):(pos + 3)]
             if enforce_motif:
-                site_motif_features = collect_site_features(bam_in, contig, pos, predStr_features, reference_motif)
+                id_motif_features_qPos = collect_site_features(bam_in, contig, pos, predStr_features, reference_motif)
             else:
-                site_motif_features = collect_site_features(bam_in, contig, pos, predStr_features)
-            if len(site_motif_features) > 0:
-                motif_features.append(site_motif_features)
-    return {k: v for dic in motif_features for k, v in dic.items()}
+                id_motif_features_qPos = collect_site_features(bam_in, contig, pos, predStr_features)
+            if len(id_motif_features_qPos) > 0:
+                motif_features.append(id_motif_features_qPos)
+
+    return [(k, v[-1], v[0], v[1]) for dic in motif_features for k, v in dic.items()]
 
 def collect_site_features(alignment, contig, pos, dict_predStr_feature, enforce_motif=None):
-    site_motif_features = {}
+    motif_features_qPos = {}
     for pileupcolumn in alignment.pileup(contig, pos, pos+1, truncate=True):
         if pileupcolumn.pos == pos:
             valid_counts = 0
@@ -352,9 +353,9 @@ def collect_site_features(alignment, contig, pos, dict_predStr_feature, enforce_
                         print('!!! Error: Site motif {} =/= query {}!!!'.format(this_site_motif, query_motif))
                         continue
                     this_site_feature = this_read_feature[query_position]
-                    site_motif_features[query_name] = (this_site_motif, this_site_feature)
+                    motif_features_qPos[query_name] = (this_site_motif, this_site_feature, query_position)
                     valid_counts += 1
-    return site_motif_features
+    return motif_features_qPos
 
 # def collect_features_from_aligned_site(model, device, config, alignment, index_read_ids, contig, site, thresh_coverage=0, enforce_motif=None):
 #     MAX_READS_IN_PILEUP = 500

@@ -47,7 +47,7 @@ ds_colors = {
     'ISA_run1_m6A' : 'r'
 }
 
-img_out = os.path.join(HOME, 'img_out/MAFIA', 'oligo_validation_train_{}_test_{}'.format(training_dataset, '_'.join(testing_datasets[0].split('_')[:-1])))
+img_out = os.path.join(HOME, 'img_out/MAFIA', 'oligo_train_{}_test_{}'.format(training_dataset, '_'.join(testing_datasets[0].split('_')[:-1])))
 if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
 
@@ -115,4 +115,4 @@ fig_prc.tight_layout(rect=[0, 0.03, 1, 0.9])
 fig_prc.suptitle('Trained on {}\nTested on {}'.format(training_dataset, '_'.join(testing_datasets[0].split('_')[:-1])), fontsize=25)
 fig_prc.savefig(os.path.join(img_out, 'prc_oligo_modProbs.png'), bbox_inches='tight')
 
-plt.close('all')
+# plt.close('all')
