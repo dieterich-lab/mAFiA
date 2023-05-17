@@ -44,6 +44,8 @@ TRAIN_DATASET=ISA_run1_A
 FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${TRAIN_DATASET}/fast5
 FILTER_SCORE=70
 
+HOMOPOLYMER=1
+
 ########################################################################################################################
 ### Isabel 3+3 #########################################################################################################
 ########################################################################################################################
@@ -89,6 +91,7 @@ python3 ${HOME}/git/MAFIA/spanish_omelette_alignment.py \
 --query_file ${FASTA} \
 --recon_ref_file ${WORKSPACE}/ref_recon.fa \
 --sam_file ${SAM} \
+--homopolymer ${HOMOPOLYMER} \
 --write_cs
 
 ### filter by quality ###

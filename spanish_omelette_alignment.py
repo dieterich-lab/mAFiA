@@ -20,13 +20,16 @@ parser.add_argument("--query_file", type=str)
 parser.add_argument("--recon_ref_file", type=str)
 parser.add_argument("--sam_file", type=str)
 parser.add_argument("--thresh_mapq", type=int, default=50)
-parser.add_argument("--homopolymer", default=False, action="store_true")
+parser.add_argument("--homopolymer", type=int, default=0)
 parser.add_argument("--debug", default=False, action="store_true")
 parser.add_argument("--write_md", default=False, action="store_true")
 parser.add_argument("--write_cs", default=False, action="store_true")
 args = parser.parse_args()
 
 THRESH_MAPQ = int(args.thresh_mapq)
+b_homopolymer = bool(args.homopolymer)
+if b_homopolymer:
+    print('Homopolymer only', flush=True)
 
 # ref_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch1_w_splint.fasta'
 # query_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_splint_batch1_m6A_RTA/basecalled.fasta'
@@ -311,7 +314,7 @@ for query in tqdm(queries):
     #         print(seg[-1])
 
     ### check homopolymer ###
-    if (args.homopolymer) and (len(np.unique([seg[0] for seg in filtered_segments]))>1):
+    if (b_homopolymer) and (len(np.unique([seg[0] for seg in filtered_segments]))>1):
         continue
 
     ### reconstruct full reference ###
