@@ -20,6 +20,7 @@ parser.add_argument("--query_file", type=str)
 parser.add_argument("--recon_ref_file", type=str)
 parser.add_argument("--sam_file", type=str)
 parser.add_argument("--thresh_mapq", type=int, default=50)
+parser.add_argument("--homopolymer", default=False, action="store_true")
 parser.add_argument("--debug", default=False, action="store_true")
 parser.add_argument("--write_md", default=False, action="store_true")
 parser.add_argument("--write_cs", default=False, action="store_true")
@@ -308,6 +309,10 @@ for query in tqdm(queries):
     #     for seg in filtered_segments:
     #         print('Target {} - {}'.format(seg[2], seg[3]))
     #         print(seg[-1])
+
+    ### check homopolymer ###
+    if (args.homopolymer) and (len(np.unique([seg[0] for seg in filtered_segments]))>1):
+        continue
 
     ### reconstruct full reference ###
     segment_sequence = [seg[0] for seg in filtered_segments]
