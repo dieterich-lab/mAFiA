@@ -30,8 +30,8 @@ THRESH_MAPQ = int(args.thresh_mapq)
 b_homopolymer = bool(args.homopolymer)
 if b_homopolymer:
     print('Homopolymer only', flush=True)
-    args.recon_ref_file = args.recon_ref_file.replace('.fa', '_homo.fa')
-    args.sam_file = args.sam_file.replace('.sam', '_homo.sam')
+    # args.recon_ref_file = args.recon_ref_file.replace('.fa', '_homo.fa')
+    # args.sam_file = args.sam_file.replace('.sam', '_homo.sam')
 
 # ref_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch1_w_splint.fasta'
 # query_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_splint_batch1_m6A_RTA/basecalled.fasta'
