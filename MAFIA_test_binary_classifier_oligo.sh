@@ -12,7 +12,8 @@ conda activate MAFIA
 
 PRJ_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 TRAIN_DATASET=WUE_combined
-TEST_DATASET=ISA_run1_m6A
+TEST_DATASET=ISA_run1_A
+#TEST_DATASET=ISA_run1_m6A
 
 BAM=${PRJ_DIR}/${TEST_DATASET}/spomelette_q80.bam
 FAST5_DIR=${PRJ_DIR}/${TEST_DATASET}/fast5
