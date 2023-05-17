@@ -68,7 +68,7 @@ if not os.path.exists(img_out):
 
 P_VAL_THRESH = 1.0E-99
 COV_THRESH = 50
-PROB_MARGIN = 0.5
+PROB_MARGIN = 0.1
 COMMON_SITES_ONLY = False
 
 dfs = {}
