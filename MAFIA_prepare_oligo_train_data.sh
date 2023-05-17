@@ -65,6 +65,7 @@ mkdir -p ${WORKSPACE}
 cd ${WORKSPACE}
 
 FASTA=${WORKSPACE}/renata.fasta
+#SAM=${WORKSPACE}/spomelette.sam
 SAM=${WORKSPACE}/spomelette.sam
 
 #### basecall with Rodan IVT ###
