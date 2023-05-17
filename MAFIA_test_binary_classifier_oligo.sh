@@ -14,7 +14,7 @@ PRJ_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 TRAIN_DATASET=WUE_combined
 TEST_DATASET=ISA_run1_m6A
 
-BAM=${PRJ_DIR}/${TEST_DATASET}/spomelette_q70.bam
+BAM=${PRJ_DIR}/${TEST_DATASET}/spomelette_q80.bam
 FAST5_DIR=${PRJ_DIR}/${TEST_DATASET}/fast5
 REF=${PRJ_DIR}/${TEST_DATASET}/ref_recon.fa
 BACKBONE_MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
