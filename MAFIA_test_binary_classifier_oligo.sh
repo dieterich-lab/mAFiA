@@ -11,7 +11,7 @@ eval "$(conda shell.bash hook)"
 conda activate MAFIA
 
 PRJ_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian
-TRAIN_DATASET=WUE_combined
+TRAIN_DATASET=WUE_batches1+2
 TEST_DATASET=ISA_run1_A
 #TEST_DATASET=ISA_run1_m6A
 
