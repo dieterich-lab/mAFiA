@@ -4,20 +4,14 @@ import sys
 sys.path.append(os.path.join(HOME, 'git/MAFIA'))
 import argparse
 from glob import glob
-import pandas as pd
-import numpy as np
 import torch
 from models import objectview
 import pysam
 from Bio import SeqIO
-from ont_fast5_api.fast5_interface import get_fast5_file
 from utils import index_fast5_files
 from extract_features import load_model
 from extract_features import get_features_from_collection_of_signals, get_single_motif_nucleotides
 from feature_classifiers import train_binary_classifier
-import random
-random.seed(10)
-from random import sample
 from joblib import dump
 
 parser = argparse.ArgumentParser()

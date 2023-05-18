@@ -26,12 +26,13 @@ SCALER=MaxAbs
 ### source data ############################################################################
 ############################################################################################
 #### Claudia batches 1 & 2 ###
-TRAIN_DATASET=WUE_batch1
+#TRAIN_DATASET=WUE_batch1
 #TRAIN_DATASET=WUE_batch2
+TRAIN_DATASET=WUE_batches1+2
 
-UNM_BAM=${DATA_DIR}/${TRAIN_DATASET}_A/spomelette_q70.bam
+UNM_BAM=${DATA_DIR}/${TRAIN_DATASET}_A/spomelette_q80.bam
 UNM_FAST5=${DATA_DIR}/${TRAIN_DATASET}_A/fast5
-MOD_BAM=${DATA_DIR}/${TRAIN_DATASET}_m6A/spomelette_q70.bam
+MOD_BAM=${DATA_DIR}/${TRAIN_DATASET}_m6A/spomelette_q80.bam
 MOD_FAST5=${DATA_DIR}/${TRAIN_DATASET}_m6A/fast5
 REF=${DATA_DIR}/reference/${TRAIN_DATASET}_ref_recon.fa
 OUTDIR=${DATA_DIR}/MAFIA_classifiers/${TRAIN_DATASET}_spomelette_${CLASSIFIER}_${SCALER}
