@@ -64,11 +64,7 @@ print('Target motifs: {}'.format(', '.join(classifier_motifs)), flush=True)
 
 ### extract features ###
 print('Now extracting features from test...', flush=True)
-if args.max_num_reads>0:
-    test_index_read_ids_sample = {id: test_index_read_ids[id] for id in sample(list(test_index_read_ids.keys()), min(len(test_index_read_ids.keys()), args.max_num_reads))}
-    test_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, test_index_read_ids_sample, args.extraction_layer, args.feature_width)
-else:
-    test_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, test_index_read_ids, args.extraction_layer, args.feature_width)
+test_predStr_features = get_features_from_collection_of_signals(fixed_model, fixed_device, fixed_config, test_index_read_ids, args.max_num_reads, args.extraction_layer, args.feature_width)
 
 ### build dict of motif index and block size ###
 index_motif_size_center = []

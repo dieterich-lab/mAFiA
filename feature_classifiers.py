@@ -104,24 +104,17 @@ def debug_features(mat_train, vec_labels, ref_motif):
     plt.savefig(os.path.join(classifier_model_dir, '{}_top_{}_features.png'.format(ref_motif, NUM_TOP_FEATURES)), bbox_inches='tight')
     plt.close('all')
 
-def train_binary_classifier(unm_dict, mod_dict, classifier, scaler=None, frac_test_split=0.25, debug_img_path=None, fig_title=None):
-    import matplotlib
-    # matplotlib.use('tkagg')
-    # import matplotlib.pyplot as plt
+def train_binary_classifier(unm_nts, mod_nts, classifier, scaler=None, frac_test_split=0.25, debug_img_path=None, fig_title=None):
+    max_num_features = min(len(unm_nts), len(mod_nts))
+    sample_unm_nts = sample(unm_nts, max_num_features)
+    sample_mod_nts = sample(mod_nts, max_num_features)
 
-    max_num_features = min(len(unm_dict), len(mod_dict))
-    sample_unm_dict = {k: unm_dict[k] for k in sample(unm_dict.keys(), max_num_features)}
-    sample_mod_dict = {k: mod_dict[k] for k in sample(mod_dict.keys(), max_num_features)}
-
-    labels = np.array([0 for ii in range(len(sample_unm_dict))] + [1 for ii in range(len(sample_mod_dict))])
-    unm_motifs = [v[0] for k, v in sample_unm_dict.items()]
-    mod_motifs = [v[0] for k, v in sample_mod_dict.items()]
-    unm_features = [v[1] for k, v in sample_unm_dict.items()]
-    mod_features = [v[1] for k, v in sample_mod_dict.items()]
+    labels = np.array([0 for ii in range(len(sample_unm_nts))] + [1 for ii in range(len(sample_mod_nts))])
+    unm_features = [nt.feature for nt in sample_unm_nts]
+    mod_features = [nt.feature for nt in sample_mod_nts]
     all_features = np.array(unm_features + mod_features)
 
     X_train, X_test, y_train, y_test = train_test_split(all_features, labels, test_size=frac_test_split)
-    # debug_features(X_train, y_train, ref_motif)
 
     if classifier=='svm':
         clf = SVC(gamma='auto', random_state=0, max_iter=1000)
@@ -136,8 +129,6 @@ def train_binary_classifier(unm_dict, mod_dict, classifier, scaler=None, frac_te
         binary_model = clf
 
     binary_model = binary_model.fit(X_train, y_train)
-    # predictions = binary_model.predict(X_test)
-    # accuracy = binary_model.score(X_test, y_test)
 
     y_score = binary_model.decision_function(X_test)
     precision, recall, thresholds = precision_recall_curve(y_test, y_score)

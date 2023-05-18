@@ -10,6 +10,9 @@ from models import objectview, rodan
 from fast_ctc_decode import beam_search, viterbi_search
 from class_defs import nucleotide
 from time import time
+import random
+random.seed(10)
+from random import sample
 
 CTC_MODE='viterbi'
 if CTC_MODE=='beam':
@@ -178,15 +181,17 @@ def get_features_from_signal(model, device, config, signal, ext_layer, feature_w
     features = np.vstack(features)[::-1]
     return features, pred_label
 
-def get_features_from_collection_of_signals(model, device, config, index_read_ids, layer, feature_width=0):
+def get_features_from_collection_of_signals(model, device, config, in_index_read_ids, max_num_reads, layer, feature_width=0):
+    if max_num_reads>0:
+        index_read_ids = {id: in_index_read_ids[id] for id in sample(list(in_index_read_ids.keys()), min(len(in_index_read_ids.keys()), max_num_reads))}
+    else:
+        index_read_ids = in_index_read_ids
+
     print('Extracting features from {}, width {}...'.format(layer, feature_width))
     id_predStr_feature = {}
     for query_name in tqdm(index_read_ids.keys()):
         this_read_signal = get_norm_signal_from_read_id(query_name, index_read_ids)
-        # tic = time()
         this_read_features, this_read_predStr = get_features_from_signal(model, device, config, this_read_signal, layer, feature_width)
-        # toc = time()
-        # print('Time: {:.3f}'.format(toc-tic))
         id_predStr_feature[query_name] = (this_read_predStr, this_read_features)
     return id_predStr_feature
 
