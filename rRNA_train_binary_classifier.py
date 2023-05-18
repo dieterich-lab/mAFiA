@@ -12,7 +12,7 @@ import pysam
 from Bio import SeqIO
 from ont_fast5_api.fast5_interface import get_fast5_file
 from extract_features import load_model
-from extract_features import get_features_from_collection_of_signals, collect_site_features
+from extract_features import get_features_from_collection_of_signals, get_nucleotides_aligned_to_target_pos
 from feature_classifiers import train_svm_ivt_wt, train_binary_classifier
 import random
 random.seed(10)
@@ -127,8 +127,8 @@ for ind, mod_site in df_mod_sel.iterrows():
     start = int(mod_site['start'])
     mod = mod_site['mod']
     ref_motif = ref[sample][start - 2:start + 3]
-    wt_site_motif_features = collect_site_features(wt_bam, sample, start, wt_predStr_features)
-    ivt_site_motif_features = collect_site_features(ivt_bam, sample, start, ivt_predStr_features, enforce_motif=ref_motif)
+    wt_site_motif_features = get_nucleotides_aligned_to_target_pos(wt_bam, sample, start, wt_predStr_features)
+    ivt_site_motif_features = get_nucleotides_aligned_to_target_pos(ivt_bam, sample, start, ivt_predStr_features, enforce_motif=ref_motif)
 
     if (len(wt_site_motif_features)>min_coverage) and (len(ivt_site_motif_features)>min_coverage):
         print('=========================================================', flush=True)

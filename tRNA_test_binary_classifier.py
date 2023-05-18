@@ -11,7 +11,7 @@ import pysam
 from Bio import SeqIO
 from utils import index_fast5_files
 from extract_features import load_model
-from extract_features import get_features_from_collection_of_signals, collect_site_features
+from extract_features import get_features_from_collection_of_signals, get_nucleotides_aligned_to_target_pos
 from feature_classifiers import get_mod_ratio_with_binary_classifier, get_mod_probs
 import random
 random.seed(10)
@@ -104,7 +104,7 @@ for ind, mod_site in df_mod.iterrows():
         print('=========================================================', flush=True)
         continue
 
-    test_site_motif_features = collect_site_features(test_bam, contig, start, test_predStr_features)
+    test_site_motif_features = get_nucleotides_aligned_to_target_pos(test_bam, contig, start, test_predStr_features)
     print('{} feature vectors collected'.format(len(test_site_motif_features)), flush=True)
 
     if len(test_site_motif_features)>min_coverage:

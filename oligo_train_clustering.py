@@ -12,7 +12,7 @@ import pysam
 from Bio import SeqIO
 from ont_fast5_api.fast5_interface import get_fast5_file
 from extract_features import load_model
-from extract_features import get_features_from_collection_of_signals, collect_all_motif_features
+from extract_features import get_features_from_collection_of_signals, get_single_motif_nucleotides
 # from feature_classifiers import train_binary_classifier
 from unsupervised import train_cluster
 import random
@@ -110,10 +110,10 @@ motif_indices_names = [
 
 for motif_ind, motif_name in motif_indices_names:
     print('Now collecting features for motif {} from unm reads...'.format(motif_name), flush=True)
-    unm_motif_features = collect_all_motif_features(motif_ind, ref, unm_bam, unm_predStr_features, enforce_motif=True)
+    unm_motif_features = get_single_motif_nucleotides(motif_ind, ref, unm_bam, unm_predStr_features, enforce_motif=True)
     print('{} feature vectors collected'.format(len(unm_motif_features)), flush=True)
     print('Now collecting features for motif {} from mod reads...'.format(motif_name), flush=True)
-    mod_motif_features = collect_all_motif_features(motif_ind, ref, mod_bam, mod_predStr_features)
+    mod_motif_features = get_single_motif_nucleotides(motif_ind, ref, mod_bam, mod_predStr_features)
     print('{} feature vectors collected'.format(len(mod_motif_features)), flush=True)
 
     ### train classifier ###

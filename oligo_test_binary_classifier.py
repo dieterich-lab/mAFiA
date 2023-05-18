@@ -11,7 +11,7 @@ from models import objectview
 import pysam
 from Bio import SeqIO
 from utils import index_fast5_files
-from extract_features import load_model, get_features_from_collection_of_signals, collect_all_motif_features
+from extract_features import load_model, get_features_from_collection_of_signals, get_single_motif_nucleotides
 from feature_classifiers import get_mod_ratio_with_binary_classifier
 import random
 random.seed(10)
@@ -24,7 +24,7 @@ parser.add_argument('--test_fast5_dir')
 parser.add_argument('--ref_file')
 parser.add_argument('--max_num_reads', type=int, default=-1)
 parser.add_argument('--min_coverage', type=int, default=0)
-parser.add_argument('--enforce_motif', action='store_true')
+parser.add_argument('--enforce_ref_5mer', action='store_true')
 parser.add_argument('--backbone_model_path')
 parser.add_argument('--extraction_layer', default='convlayers.conv21')
 parser.add_argument('--feature_width', type=int, default=0)
@@ -88,22 +88,16 @@ if not os.path.exists(outdir):
 
 df_out = pd.DataFrame([])
 for motif_ind, motif, block_size, block_center in index_motif_size_center:
-    if motif not in classifier_motifs:
-        print('Classifier for {} not available. Skipping...'.format(motif), flush=True)
-        continue
-    print('Now collecting features for motif {} from test reads...'.format(motif), flush=True)
-    if args.enforce_motif:
-        readId_qPos_motif_features = collect_all_motif_features(motif_ind, ref, test_bam, test_predStr_features, block_size=block_size, block_center=block_center, enforce_motif=motif)
-    else:
-        readId_qPos_motif_features = collect_all_motif_features(motif_ind, ref, test_bam, test_predStr_features, block_size=block_size, block_center=block_center)
-    print('{} feature vectors collected'.format(len(readId_qPos_motif_features)), flush=True)
+    print('Now collecting nucleotides for motif {}'.format(motif), flush=True)
+    this_motif_nts = get_single_motif_nucleotides(motif_ind, ref, test_bam, test_predStr_features, block_size=block_size, block_center=block_center, enforce_ref_5mer=args.enforce_ref_5mer)
+    print('{} NTs collected'.format(len(this_motif_nts)), flush=True)
 
-    if len(readId_qPos_motif_features)>args.min_coverage:
-        _, readId_qPos_predMotif_modProbs = get_mod_ratio_with_binary_classifier(readId_qPos_motif_features, classifier_models[motif], output_mod_probs=True)
-        df_out = pd.concat([
-            df_out,
-            pd.DataFrame([(x[0], dict_read_ref[x[0]], x[1], motif, x[2], round(x[3], 3)) for x in readId_qPos_predMotif_modProbs],
-                         columns=['read_id', 'ref_name', 'q_pos', 'ref_motif', 'pred_motif', 'mod_prob'])
-        ])
+    _ = get_mod_ratio_with_binary_classifier(this_motif_nts, classifier_models[motif], output_mod_probs=True)
+
+    df_out = pd.concat([
+        df_out,
+        pd.DataFrame([(nt.read_id, dict_read_ref[nt.read_id], nt.pos, motif, nt.pred_5mer, round(nt.mod_prob, 3)) for nt in this_motif_nts],
+                     columns=['read_id', 'contig', 'q_pos', 'ref_motif', 'pred_motif', 'mod_prob'])
+    ])
     df_out.to_csv(args.outfile, sep='\t', index=False)
-print('Total number of bases tested {}'.format(len(df_out)), flush=True)
+print('Total number of nucleotides tested {}'.format(len(df_out)), flush=True)

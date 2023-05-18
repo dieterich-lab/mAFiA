@@ -53,7 +53,8 @@ if not os.path.exists(img_out):
 
 dfs = {}
 for ds in testing_datasets:
-    path = os.path.join(results_dir, 'res_train_{}_test_{}.tsv'.format(training_dataset, ds))
+    # path = os.path.join(results_dir, 'res_train_{}_test_{}.tsv'.format(training_dataset, ds))
+    path = os.path.join(results_dir, 'debug_res_train_{}_test_{}.tsv'.format(training_dataset, ds))
     df = pd.read_csv(path, sep='\t').rename(columns={'Unnamed: 0': 'index'})
     dfs[ds] = df
 

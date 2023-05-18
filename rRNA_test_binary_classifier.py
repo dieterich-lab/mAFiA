@@ -11,7 +11,7 @@ import pysam
 from Bio import SeqIO
 from ont_fast5_api.fast5_interface import get_fast5_file
 from extract_features import load_model
-from extract_features import get_features_from_collection_of_signals, collect_site_features
+from extract_features import get_features_from_collection_of_signals, get_nucleotides_aligned_to_target_pos
 from feature_classifiers import get_mod_ratio_with_binary_classifier
 import random
 random.seed(10)
@@ -107,7 +107,7 @@ for ind, row in df_mod_sel.iterrows():
     start = int(row['start'])
     mod = row['mod']
     ref_motif = ref[sample][start - 2:start + 3]
-    test_site_motif_features = collect_site_features(test_bam, sample, start, test_predStr_features)
+    test_site_motif_features = get_nucleotides_aligned_to_target_pos(test_bam, sample, start, test_predStr_features)
 
     opt_thresh = row['opt_thresh']
 

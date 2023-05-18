@@ -13,7 +13,7 @@ from Bio import SeqIO
 from ont_fast5_api.fast5_interface import get_fast5_file
 from utils import index_fast5_files
 from extract_features import load_model
-from extract_features import get_features_from_collection_of_signals, collect_all_motif_features
+from extract_features import get_features_from_collection_of_signals, get_single_motif_nucleotides
 from feature_classifiers import train_binary_classifier
 import random
 random.seed(10)
@@ -109,15 +109,15 @@ for k in ref.keys():
 for motif_ind, motif, block_size, block_center in block_index_motif_size_center:
     print('Now collecting features for motif {} from unm reads...'.format(motif), flush=True)
     if enforce_motif:
-        unm_motif_features = collect_all_motif_features(motif_ind, ref, unm_bam, unm_predStr_features, block_size=block_size, block_center=block_center, enforce_motif=motif)
+        unm_motif_features = get_single_motif_nucleotides(motif_ind, ref, unm_bam, unm_predStr_features, block_size=block_size, block_center=block_center, enforce_motif=motif)
     else:
-        unm_motif_features = collect_all_motif_features(motif_ind, ref, unm_bam, unm_predStr_features, block_size=block_size, block_center=block_center)
+        unm_motif_features = get_single_motif_nucleotides(motif_ind, ref, unm_bam, unm_predStr_features, block_size=block_size, block_center=block_center)
     print('{} feature vectors collected'.format(len(unm_motif_features)), flush=True)
     print('Now collecting features for motif {} from mod reads...'.format(motif), flush=True)
     if enforce_motif:
-        mod_motif_features = collect_all_motif_features(motif_ind, ref, mod_bam, mod_predStr_features, block_size=block_size, block_center=block_center, enforce_motif=motif)
+        mod_motif_features = get_single_motif_nucleotides(motif_ind, ref, mod_bam, mod_predStr_features, block_size=block_size, block_center=block_center, enforce_motif=motif)
     else:
-        mod_motif_features = collect_all_motif_features(motif_ind, ref, mod_bam, mod_predStr_features, block_size=block_size, block_center=block_center)
+        mod_motif_features = get_single_motif_nucleotides(motif_ind, ref, mod_bam, mod_predStr_features, block_size=block_size, block_center=block_center)
     print('{} feature vectors collected'.format(len(mod_motif_features)), flush=True)
 
     ### train classifier ###
