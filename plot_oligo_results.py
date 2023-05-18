@@ -158,4 +158,6 @@ for subplot_ind, ds in enumerate(['ISA_run1_A', 'ISA_run1_m6A']):
         ax.set_xlabel('Read pos (NTs)', fontsize=20)
     ax.set_ylabel(ds, fontsize=20, rotation=-90, labelpad=20)
     ax.yaxis.set_label_position('right')
+fig_prc.tight_layout(rect=[0, 0.03, 1, 0.9])
 fig_single_read.suptitle('m6A prob.', fontsize=25)
+fig_single_read.savefig(os.path.join(img_out, 'single_read_oligo_modProbs.png'), bbox_inches='tight')
