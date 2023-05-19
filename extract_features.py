@@ -315,7 +315,7 @@ def get_nucleotides_aligned_to_site(model, device, config, ext_layer, alignment,
                         query_position = pileupread.alignment.query_length - query_position - 1
                     query_sequence = pileupread.alignment.get_forward_sequence()
                     query_5mer = query_sequence[(query_position - 2):(query_position + 3)]
-                    print('Strand {}, Flag {}, Ref 5mer: {}, Query 5-mer: {}'.format(strand, flag, ref_5mer, query_5mer))
+                    # print('Strand {}, Flag {}, Ref 5mer: {}, Query 5-mer: {}'.format(strand, flag, ref_5mer, query_5mer))
                     if enforce_ref_5mer and (query_5mer!=ref_5mer):
                         continue
                     if (query_name in index_read_ids.keys()):
