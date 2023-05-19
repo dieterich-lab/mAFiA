@@ -11,14 +11,10 @@ from models import objectview
 import pysam
 from Bio import SeqIO
 from Bio.Seq import Seq
-from ont_fast5_api.fast5_interface import get_fast5_file
 from utils import index_fast5_files
 from extract_features import load_model
-from extract_features import collect_features_from_aligned_site_v2
+from extract_features import get_nucleotides_aligned_to_site
 from feature_classifiers import get_mod_ratio_with_binary_classifier
-import random
-random.seed(10)
-from random import sample
 from joblib import load
 
 parser = argparse.ArgumentParser()
@@ -28,6 +24,7 @@ parser.add_argument('--ref_file')
 parser.add_argument('--mod_file')
 parser.add_argument('--max_num_reads', type=int, default=-1)
 parser.add_argument('--min_coverage', type=int, default=0)
+parser.add_argument('--enforce_ref_5mer', action='store_true')
 parser.add_argument('--backbone_model_path')
 parser.add_argument('--extraction_layer', default='convlayers.conv21')
 parser.add_argument('--feature_width', type=int, default=0)
@@ -64,11 +61,13 @@ origconfig = torchdict["config"]
 fixed_config = objectview(origconfig)
 fixed_model, fixed_device = load_model(args.backbone_model_path, fixed_config, args.extraction_layer)
 
-### loop through sites ###
+### load classifiers ###
 classifier_model_paths = glob(os.path.join(args.classifier_model_dir, '{}_*.joblib'.format(args.classifier)))
 classifier_models = {os.path.basename(this_path).rstrip('.joblib').split('_')[-1] : load(this_path) for this_path in classifier_model_paths}
 target_motifs = list(classifier_models.keys())
 print('Target motifs: {}'.format(', '.join(target_motifs)), flush=True)
+
+### check for existing output ###
 restart = False
 if os.path.exists(args.outfile):
     df_out = pd.read_csv(args.outfile, sep='\t')
@@ -85,6 +84,7 @@ else:
     print('Starting from scratch', flush=True)
     restart = False
 
+### iterate over mod sites ###
 for _, row in df_mod.iterrows():
     ind = row['index']
     chr = row['Chr'].lstrip('chr')
@@ -109,32 +109,29 @@ for _, row in df_mod.iterrows():
     if ref_motif not in target_motifs:
         continue
 
-    test_site_motif_features = collect_features_from_aligned_site_v2(fixed_model, fixed_device, fixed_config, args.extraction_layer, test_bam, test_index_read_ids, chr, start, args.min_coverage, args.max_num_reads)
+    test_site_nucleotides = get_nucleotides_aligned_to_site(fixed_model, fixed_device, fixed_config, args.extraction_layer, test_bam, test_index_read_ids, chr, start, strand, args.min_coverage, args.max_num_reads, enforce_ref_5mer=args.enforce_ref_5mer, ref_5mer=ref_motif)
 
-    if len(test_site_motif_features)>args.min_coverage:
-        print('\n=========================================================', flush=True)
-        print('{}, chr{}, pos{}'.format(ind, chr, start), flush=True)
+    if len(test_site_nucleotides)>args.min_coverage:
+        print('=========================================================', flush=True)
+        print('{}, chr{}, pos{}, strand{}'.format(ind, chr, start, strand), flush=True)
         print('Reference motif {}'.format(ref_motif), flush=True)
-        print('{} feature vectors collected'.format(len(test_site_motif_features)), flush=True)
+        print('{} feature vectors collected'.format(len(test_site_nucleotides)), flush=True)
+        mod_ratio = get_mod_ratio_with_binary_classifier(test_site_nucleotides, classifier_models[ref_motif],
+                                                         args.mod_prob_thresh)
+        new_row = row.copy()
+        new_row['ref_motif'] = ref_motif
         if args.output_mod_probs:
-            mod_ratio, read_predMotif_modProbs = get_mod_ratio_with_binary_classifier(test_site_motif_features, classifier_models[ref_motif], args.mod_prob_thresh, output_mod_probs=args.output_mod_probs)
-            for read_id, (pred_motif, mod_prob) in read_predMotif_modProbs.items():
-                new_row = row.copy()
-                new_row['ref_motif'] = ref_motif
-                new_row['pred_motif'] = pred_motif
-                new_row['read_id'] = read_id
-                new_row['mod_prob'] = round(mod_prob, 3)
+            for nt in test_site_nucleotides:
+                new_row['pred_motif'] = nt.pred_5mer
+                new_row['read_id'] = nt.read_id
+                new_row['mod_prob'] = round(nt.mod_prob, 3)
                 df_out = pd.concat([df_out, new_row.to_frame().T])
         else:
-            mod_ratio = get_mod_ratio_with_binary_classifier(test_site_motif_features, classifier_models[ref_motif], args.mod_prob_thresh, output_mod_probs=args.output_mod_probs)
-            new_row = row.copy()
-            new_row['ref_motif'] = ref_motif
             new_row['mod_ratio'] = round(mod_ratio, 3)
-            new_row['num_test_features'] = len(test_site_motif_features)
+            new_row['num_test_features'] = len(test_site_nucleotides)
             df_out = pd.concat([df_out, new_row.to_frame().T])
         print('Predicted mod ratio {:.2f} [GLORI {:.2f}]'.format(mod_ratio, glori_ratio), flush=True)
-        print('=========================================================', flush=True)
-
+        print('=========================================================\n', flush=True)
         counts += 1
         df_out.to_csv(args.outfile, sep='\t', index=False)
 print('Total {} sites written to {}'.format(counts, args.outfile), flush=True)

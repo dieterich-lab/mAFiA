@@ -12,7 +12,7 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from ont_fast5_api.fast5_interface import get_fast5_file
 from extract_features import load_model
-from extract_features import collect_features_from_aligned_site_v2
+from extract_features import get_nucleotides_aligned_to_site
 from unsupervised import train_cluster, calculate_outlier_ratio_with_ivt_distance
 
 parser = argparse.ArgumentParser()
@@ -106,9 +106,9 @@ for ind, row in df_mod.iterrows():
         print('Aligned motif {} =/= BID-seq motif {}!'.format(ref_motif, bidseq_motif), flush=True)
         continue
 
-    unm_motif_features = collect_features_from_aligned_site_v2(fixed_model, fixed_device, fixed_config, extraction_layer, unm_bam, unm_index_read_ids, chr, pos, min_coverage, max_num_reads, enforce_motif=ref_motif)
+    unm_motif_features = get_nucleotides_aligned_to_site(fixed_model, fixed_device, fixed_config, extraction_layer, unm_bam, unm_index_read_ids, chr, pos, min_coverage, max_num_reads, enforce_motif=ref_motif)
     print('{} IVT feature vectors collected'.format(len(unm_motif_features)), flush=True)
-    mod_motif_features = collect_features_from_aligned_site_v2(fixed_model, fixed_device, fixed_config, extraction_layer, mod_bam, mod_index_read_ids, chr, pos, min_coverage, max_num_reads)
+    mod_motif_features = get_nucleotides_aligned_to_site(fixed_model, fixed_device, fixed_config, extraction_layer, mod_bam, mod_index_read_ids, chr, pos, min_coverage, max_num_reads)
     print('{} WT feature vectors collected'.format(len(mod_motif_features)), flush=True)
 
     ### train classifier ###

@@ -29,9 +29,6 @@ def index_fast5_files(f5_paths, bam=None):
     if bam is not None:
         query_names = [alignment.query_name for alignment in bam.fetch()]
     for f5_filepath in tqdm(f5_paths):
-        # if 'fail' in f5_filepath:
-        #     print('Skipping {}'.format(f5_filepath))
-        #     continue
         try:
             f5 = get_fast5_file(f5_filepath, mode="r")
         except:

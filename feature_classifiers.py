@@ -218,7 +218,7 @@ def train_svm_ivt_wt(ivt_dict, wt_dict, wanted_motif, site, debug_img_dir=None):
 
     return score_auc, clf, opt_thresh
 
-def get_mod_ratio_with_binary_classifier(collection_nucleotides, clf, mod_thresh=0.5, output_mod_probs=False):
+def get_mod_ratio_with_binary_classifier(collection_nucleotides, clf, mod_thresh=0.5):
     test_features = [nt.feature for nt in collection_nucleotides]
 
     mod_probs = clf.predict_proba(test_features)[:, 1]
