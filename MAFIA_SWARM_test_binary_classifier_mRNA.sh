@@ -23,7 +23,6 @@ python3 ${HOME}/git/MAFIA/mRNA_test_binary_classifier.py \
 --max_num_reads 1000 \
 --min_coverage 50 \
 --backbone_model_path ${BACKBONE_MODEL} \
---extraction_layer ${EXTRACTION_LAYER} \
 --classifier logistic_regression \
 --classifier_model_dir ${CLASSIFIER_MODEL_DIR} \
 --outfile ${OUTFILE}.part${PART} \
