@@ -46,7 +46,7 @@ def calc_mod_ratio_with_margin(in_df_motif, prob_margin, thresh_cov=50):
 
 
 results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
-train_dataset = 'WUE_combined'
+train_dataset = 'WUE_batches1+2'
 test_datasets = [
     '0_WT_100_IVT',
     '25_WT_75_IVT',
@@ -68,7 +68,7 @@ if not os.path.exists(img_out):
 
 P_VAL_THRESH = 1.0E-99
 COV_THRESH = 50
-PROB_MARGIN = 0.1
+PROB_MARGIN = 0.5
 COMMON_SITES_ONLY = False
 
 dfs = {}
