@@ -216,7 +216,7 @@ def get_single_motif_nucleotides(motif_ind, reference, bam_in, predStr_features,
 def get_nucleotides_aligned_to_target_pos(alignment, contig, target_pos, dict_predStr_feature, ref_motif=None, enforce_ref_5mer=False):
     all_nts = []
     for pileupcolumn in alignment.pileup(contig, target_pos, target_pos+1, truncate=True):
-        if pileupcolumn.pos == target_pos:
+        if pileupcolumn.reference_pos == target_pos:
             valid_counts = 0
             for ind, pileupread in enumerate(pileupcolumn.pileups):
                 flag = pileupread.alignment.flag
@@ -238,7 +238,14 @@ def get_nucleotides_aligned_to_target_pos(alignment, contig, target_pos, dict_pr
                         continue
                     this_site_feature = this_read_feature[query_position]
                     # motif_features_qPos[query_name] = (this_site_motif, this_site_feature, query_position)
-                    all_nts.append(nucleotide(query_name, query_position, this_site_motif, this_site_feature))
+                    all_nts.append(nucleotide(
+                        read_id=query_name,
+                        read_pos=query_position,
+                        ref_pos=target_pos,
+                        pred_5mer=this_site_motif,
+                        ref_5mer=ref_motif,
+                        feature=this_site_feature)
+                    )
                     valid_counts += 1
     return all_nts
 
@@ -280,14 +287,14 @@ def get_nucleotides_from_multiple_reads(model, device, config, ext_layer, in_ali
         pred_str = ''.join(pred_str)[::-1]
         str_features = np.vstack(str_features)[::-1]
 
-        pred_motif = ''.join(pred_str[aligned_read.pos-2:aligned_read.pos+3])
+        pred_motif = ''.join(pred_str[aligned_read.read_pos - 2:aligned_read.read_pos + 3])
 
         if pred_motif!=aligned_read.query_5mer:
             print('\n!!! Error: Predicted motif {} =/= aligned {} !!!\n'.format(pred_motif, aligned_read.query_5mer))
             continue
 
         str_features = np.vstack(str_features)
-        nt_feature = str_features[aligned_read.pos]
+        nt_feature = str_features[aligned_read.read_pos]
 
         all_nts.append(aligned_read.create_nucleotide(in_pred_5mer=pred_motif, in_feature=nt_feature))
 
@@ -296,7 +303,7 @@ def get_nucleotides_from_multiple_reads(model, device, config, ext_layer, in_ali
 def get_nucleotides_aligned_to_site(model, device, config, ext_layer, alignment, index_read_ids, contig, site, strand, thresh_coverage=0, max_num_reads=1000, enforce_ref_5mer=False, ref_5mer='NNNNN'):
     all_aligned_reads = []
     for pileupcolumn in alignment.pileup(contig, site, site + 1, truncate=True):
-        if pileupcolumn.pos == site:
+        if pileupcolumn.read_pos == site:
             coverage = pileupcolumn.get_num_aligned()
             if coverage>thresh_coverage:
                 valid_counts = 0
@@ -323,7 +330,7 @@ def get_nucleotides_aligned_to_site(model, device, config, ext_layer, alignment,
                         this_read_signal = get_norm_signal_from_read_id(query_name, index_read_ids)
                         all_aligned_reads.append(aligned_read(
                             read_id=query_name,
-                            pos=query_position,
+                            read_pos=query_position,
                             query_5mer=query_5mer,
                             norm_signal=this_read_signal,
                             flag=flag

@@ -88,12 +88,12 @@ for motif_ind, motif, block_size, block_center in index_motif_size_center:
     this_motif_nts = get_single_motif_nucleotides(motif_ind, ref, test_bam, test_predStr_features, block_size=block_size, block_center=block_center, enforce_ref_5mer=args.enforce_ref_5mer)
     print('{} NTs collected'.format(len(this_motif_nts)), flush=True)
 
-    _ = get_mod_ratio_with_binary_classifier(this_motif_nts, classifier_models[motif], output_mod_probs=True)
+    _ = get_mod_ratio_with_binary_classifier(this_motif_nts, classifier_models[motif])
 
     df_out = pd.concat([
         df_out,
-        pd.DataFrame([(nt.read_id, dict_read_ref[nt.read_id], nt.pos, motif, nt.pred_5mer, round(nt.mod_prob, 3)) for nt in this_motif_nts],
-                     columns=['read_id', 'contig', 'q_pos', 'ref_motif', 'pred_motif', 'mod_prob'])
+        pd.DataFrame([(nt.read_id, dict_read_ref[nt.read_id], nt.read_pos, nt.ref_pos, motif, nt.pred_5mer, round(nt.mod_prob, 3)) for nt in this_motif_nts],
+                     columns=['read_id', 'contig', 'q_pos', 't_pos', 'ref_motif', 'pred_motif', 'mod_prob'])
     ])
     df_out.to_csv(args.outfile, sep='\t', index=False)
 print('Total number of nucleotides tested {}'.format(len(df_out)), flush=True)
