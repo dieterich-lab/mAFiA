@@ -7,6 +7,9 @@ import numpy as np
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+import random
+random.seed(0)
+from random import sample
 
 
 def get_norm_counts(in_df, sel_motif):
@@ -119,30 +122,29 @@ fig_prc.savefig(os.path.join(img_out, 'prc_oligo_modProbs.png'), bbox_inches='ti
 # plt.close('all')
 
 ### visualize single-read ###
-fig_single_read = plt.figure(figsize=(20, 20))
+num_samples = 50
+max_pos = 150
+first_pos = 10
+block_size = 21
+xticks = np.arange(first_pos, max_pos, block_size)
+vmin = 0.8
+cax_yticks = np.arange(vmin, 1.01, 0.1)
 
+fig_single_read = plt.figure(figsize=(16, 9))
 for subplot_ind, ds in enumerate(['ISA_run1_A', 'ISA_run1_m6A']):
     df = dfs[ds]
     read_ids = df['read_id'].unique()
     pos_modProb = {}
     for read_id in read_ids:
-        mask = df['read_id']==read_id
-        if mask.sum()>=8:
-            df_read = df[mask]
-            pos_modProb[read_id] = df_read[['q_pos', 'mod_prob']].values
-
-    num_samples = 50
-    max_pos = 100
-    first_pos = 10
-    block_size = 20
-    xticks = np.arange(first_pos, max_pos, block_size)
+        df_read = df[df['read_id']==read_id]
+        if (len(df_read)>=6) and (int(df_read['contig'].unique()[0].split('_')[0].lstrip('block'))==len(df_read)):
+            pos_modProb[read_id] = df_read[['t_pos', 'mod_prob']].values
 
     mat_mod_prob = np.zeros([num_samples, max_pos])
     ids = []
-    for i in range(num_samples):
-        this_item = list(pos_modProb.items())[i]
-        ids.append(this_item[0].split('-')[-1])
-        qp = this_item[1]
+    for i, k in enumerate(sample(list(pos_modProb.keys()), num_samples)):
+        ids.append(k.split('-')[-1])
+        qp = pos_modProb[k]
         qs = np.int32(qp[:, 0])
         ps = qp[:, 1]
         qs = qs - np.min(qs) + first_pos
@@ -151,13 +153,18 @@ for subplot_ind, ds in enumerate(['ISA_run1_A', 'ISA_run1_m6A']):
         mat_mod_prob[i, qs] = ps
 
     ax = fig_single_read.add_subplot(2, 1, subplot_ind+1)
-    ax.imshow(mat_mod_prob, vmin=0.8, vmax=1)
+    im = ax.imshow(mat_mod_prob, vmin=vmin, vmax=1)
     ax.set_xticks(xticks, fontsize=8)
     ax.set_yticks(np.arange(num_samples), ids)
     if subplot_ind==1:
-        ax.set_xlabel('Read pos (NTs)', fontsize=20)
-    ax.set_ylabel(ds, fontsize=20, rotation=-90, labelpad=20)
+        ax.set_xlabel('Aligned pos (NTs)', fontsize=20)
+    ax.set_ylabel(' '.join(ds.split('_')), fontsize=25, rotation=-90, labelpad=30)
     ax.yaxis.set_label_position('right')
-fig_prc.tight_layout(rect=[0, 0.03, 1, 0.9])
-fig_single_read.suptitle('m6A prob.', fontsize=25)
-fig_single_read.savefig(os.path.join(img_out, 'single_read_oligo_modProbs.png'), bbox_inches='tight')
+fig_prc.tight_layout(rect=[0.1, 0.2, 0.8, 0.8])
+fig_single_read.subplots_adjust(left=0.1, bottom=0.1, right=0.8, top=0.9)
+cax = fig_single_read.add_axes([0.85, 0.35, 0.02, 0.3])
+plt.colorbar(im, cax=cax)
+plt.ylabel('P(m6A)', fontsize=20, rotation=-90, labelpad=30)
+plt.yticks(cax_yticks, cax_yticks)
+
+fig_single_read.savefig(os.path.join(img_out, 'single_read_oligo_modProbs.png'))
