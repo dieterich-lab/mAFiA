@@ -120,7 +120,7 @@ for ds, df in dfs.items():
         if this_motif not in df['ref_motif'].unique():
             continue
         ds_norm_counts, ds_bin_centers, ds_motif = get_norm_counts(df, this_motif)
-        axes_hist[subplot_ind].step(ds_bin_centers, ds_norm_counts, color=ds_colors[ds], label='{}, {} features'.format(ds, len(ds_motif)))
+        axes_hist[subplot_ind].step(ds_bin_centers, ds_norm_counts, color=ds_colors[ds], label='{}'.format(ds))
 
         axes_hist[subplot_ind].axvspan(xmin=PROB_MARGIN, xmax=1 - PROB_MARGIN, color='gray', alpha=0.5)
         if subplot_ind>=num_cols*(num_rows-1):
@@ -169,7 +169,7 @@ for subplot_ind, ds in enumerate(dict_ds_motif_avg.keys()):
     glori_ratio = np.float32(ds_agg_avg['Ratio'].values)
     ont_ratio = np.float32(ds_agg_avg['mod_ratio'].values)
     hist, x_bins, y_bins = np.histogram2d(glori_ratio, ont_ratio, bins=num_bins, range=[[0, 1], [0, 1]], density=True)
-    im = ax.imshow(hist.T, origin='lower', vmin=0.5, vmax=6, cmap='plasma')
+    im = ax.imshow(hist.T, origin='lower', vmin=1, vmax=6, cmap='plasma')
     ax.set_xticks(np.arange(0, num_bins+1, 5)-0.5, np.int32(np.arange(0, num_bins+1, 5)*interval))
     ax.set_yticks(np.arange(0, num_bins+1, 5)-0.5, np.int32(np.arange(0, num_bins+1, 5)*interval))
     for tick in ax.yaxis.get_majorticklabels():
