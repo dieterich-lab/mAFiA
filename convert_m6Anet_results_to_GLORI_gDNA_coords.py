@@ -89,6 +89,7 @@ for ind, row in tqdm(df_m6Anet_filtered.iterrows()):
     if len(sel_row)>0:
         # print(sel_row)
         collected_sites.append((ind, dict_chr[contig], gpos, sel_row['Ratio'].values[0], mod_ratio, sel_row['Pvalue'].values[0]))
+print('{} GLORI sites collected'.format(len(collected_sites)))
 
 ### slice df and check against ensembl API ###
 df_m6Anet_glori = df_m6Anet.loc[[site[0] for site in collected_sites]]
@@ -118,6 +119,7 @@ for ind, row in tqdm(df_m6Anet_glori.iterrows()):
         print('{}: ensembl gpos {} != my gpos {}\n'.format(ind, ens_start, row['Sites']))
     # else:
     #     print('Okay\n')
+print('{} bad cDNA->gDNA conversions out of {}'.format(len(bad_indices), len(df_m6Anet_glori)))
 
 df_m6Anet_glori_filtered = df_m6Anet_glori.drop(bad_indices)
 df_m6Anet_glori_filtered.to_csv(m6Anet_file.replace('.csv', '_glori_filtered.csv'))
