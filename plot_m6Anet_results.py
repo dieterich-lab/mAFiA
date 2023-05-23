@@ -54,7 +54,7 @@ def get_cDNA_coords(in_tid, in_tpos, tx):
 
     return out_chr, out_gpos
 
-test_dataset = '0_WT_100_IVT'
+test_dataset = '50_WT_50_IVT'
 m6Anet_file = os.path.join(PRJ, 'TRR319_RMaP/Project_BaseCalling/Christoph/m6anet/workflow_tx/inference/{}/data.site_proba.csv'.format(test_dataset))
 tx_file = os.path.join(HOME, 'Data/transcriptomes/GRCh38_102.bed')
 glori_file = os.path.join(HOME, 'Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv')
@@ -98,6 +98,7 @@ df_m6Anet_glori = df_m6Anet.loc[[site[0] for site in collected_sites]]
 df_m6Anet_glori['Chr'] = [site[1] for site in collected_sites]
 df_m6Anet_glori['Sites'] = [site[2] for site in collected_sites]
 df_m6Anet_glori['GLORI'] = [site[3] for site in collected_sites]
+df_m6Anet_glori['Pvalue'] = [site[5] for site in collected_sites]
 df_m6Anet_glori.to_csv(m6Anet_file.replace('.csv', '_glori.csv'))
 
 bad_indices = []
