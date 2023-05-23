@@ -15,12 +15,12 @@ def get_genomic_coord_from_cDNA(id, pos):
     try:
         r = requests.get(server + ext, headers={"Content-Type": "application/json"})
     except:
-        print('Request failed')
+        # print('Request failed')
         return None
     if not r.ok:
         # r.raise_for_status()
         # sys.exit()
-        print('Request failed')
+        # print('Request failed')
         return None
     decoded = r.json()
     # print(repr(decoded))
@@ -51,7 +51,7 @@ def get_cDNA_coords(in_tid, in_tpos, tx):
 
     return out_chr, out_gpos
 
-test_dataset = '50_WT_50_IVT'
+test_dataset = '75_WT_25_IVT'
 m6Anet_file = os.path.join(PRJ, 'TRR319_RMaP/Project_BaseCalling/Christoph/m6anet/workflow_tx/inference/{}/data.site_proba.csv'.format(test_dataset))
 tx_file = os.path.join(HOME, 'Data/transcriptomes/GRCh38_102.bed')
 glori_file = os.path.join(HOME, 'Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv')
@@ -59,7 +59,9 @@ out_dir = os.path.join(HOME, 'img_out/m6Anet')
 os.makedirs(out_dir, exist_ok=True)
 
 df_m6Anet = pd.read_csv(m6Anet_file)
-df_tx = pd.read_csv(tx_file, sep='\t', usecols=list(range(4))+[5]+list(range(9, 12)), names=['chr', 'start', 'stop', 'transcript_id', 'strand', 'num_blocks', 'block_sizes', 'block_starts'])
+df_tx = pd.read_csv(tx_file, sep='\t', usecols=list(range(4))+[5]+list(range(9, 12)),
+                    names=['chr', 'start', 'stop', 'transcript_id', 'strand', 'num_blocks', 'block_sizes', 'block_starts'],
+                    dtype={'chr': str})
 df_glori = pd.read_csv(glori_file)
 
 df_m6Anet_filtered = df_m6Anet
@@ -116,7 +118,7 @@ for ind, row in tqdm(df_m6Anet_glori.iterrows()):
     ens_start = mapping['start']
     if ens_start!=row['Sites']:
         bad_indices.append(ind)
-        print('{}: ensembl gpos {} != my gpos {}\n'.format(ind, ens_start, row['Sites']))
+        # print('{}: ensembl gpos {} != my gpos {}\n'.format(ind, ens_start, row['Sites']))
     # else:
     #     print('Okay\n')
 print('{} bad cDNA->gDNA conversions out of {}'.format(len(bad_indices), len(df_m6Anet_glori)))
