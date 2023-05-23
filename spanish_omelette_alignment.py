@@ -41,7 +41,11 @@ if b_homopolymer:
 out_hist_path = os.path.join(os.path.dirname(args.sam_file), 'hist_spomlette_mapping_scores_q{}.png'.format(THRESH_MAPQ))
 
 references = list(SeqIO.parse(args.ref_file, 'fasta'))
-queries = list(SeqIO.parse(args.query_file, format=os.path.basename(args.query_file).split('.')[-1]))
+format = os.path.basename(args.query_file).split('.')[-1]
+queries = list(SeqIO.parse(args.query_file, format=format))
+if format=='fastq':
+    for query in queries:
+        query.letter_annotations = {}
 
 BLOCK_SIZE = np.min([len(ref.seq) for ref in references])
 MIN_SEGMENT_LEN = BLOCK_SIZE // 2
