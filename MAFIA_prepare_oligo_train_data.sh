@@ -55,16 +55,29 @@ FILTER_SCORE=80
 #FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230503_RL_run2/${TRAIN_DATASET}/*
 
 ########################################################################################################################
+### Isabel hetero ######################################################################################################
+########################################################################################################################
+REF=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/ISA_M4_M5.fasta
+HOMOPOLYMER=0
+
+#TRAIN_DATASET=RL_M4_M5
+#TRAIN_DATASET=RL_M4_M5star
+#TRAIN_DATASET=RL_M4star_M5
+TRAIN_DATASET=RL_M4star_M5star
+
+FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230523_RL_M4_M5/${TRAIN_DATASET}_RTA/*
+
+########################################################################################################################
+
 WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${TRAIN_DATASET}
 mkdir -p ${WORKSPACE}
 cd ${WORKSPACE}
 
 FASTA=${WORKSPACE}/renata.fasta
-#SAM=${WORKSPACE}/spomelette.sam
 SAM=${WORKSPACE}/spomelette.sam
 
 #### basecall with Rodan IVT ###
-deactivate
+#deactivate
 source ${HOME}/git/renata/virtualenv/bin/activate
 
 srun --partition=gpu --gres=gpu:turing:1 --cpus-per-task=8 --mem-per-cpu=8GB \
@@ -119,4 +132,4 @@ samtools index ${BAM}
 #BATCH=1
 #BATCH=2
 #awk '/^>/{p=seen[$0]++}!p' /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_batch${BATCH}_A/ref_recon.fa /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_batch${BATCH}_m6A/ref_recon.fa > /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch${BATCH}_ref_recon.fa
-awk '/^>/{p=seen[$0]++}!p' /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/ISA_run1_A/ref_recon.fa /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/ISA_run1_m6A/ref_recon.fa > /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/ISA_run1_ref_recon.fa
+#awk '/^>/{p=seen[$0]++}!p' /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/ISA_run1_A/ref_recon.fa /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/ISA_run1_m6A/ref_recon.fa > /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/ISA_run1_ref_recon.fa

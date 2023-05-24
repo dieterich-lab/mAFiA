@@ -12,15 +12,22 @@ conda activate MAFIA
 
 PRJ_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 TRAIN_DATASET=WUE_batches1+2
-TEST_DATASET=ISA_run1_A
+########################################################################################################################
+#TEST_DATASET=ISA_run1_A
 #TEST_DATASET=ISA_run1_m6A
-
+########################################################################################################################
+TEST_DATASET=RL_M4_M5
+#TEST_DATASET=RL_M4_M5star
+#TEST_DATASET=RL_M4star_M5
+#TEST_DATASET=RL_M4star_M5star
+########################################################################################################################
 BAM=${PRJ_DIR}/${TEST_DATASET}/spomelette_q80.bam
 FAST5_DIR=${PRJ_DIR}/${TEST_DATASET}/fast5
 REF=${PRJ_DIR}/${TEST_DATASET}/ref_recon.fa
 BACKBONE_MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 CLASSIFIER_MODEL_DIR=${PRJ_DIR}/MAFIA_classifiers/${TRAIN_DATASET}
 OUTFILE=${PRJ_DIR}/results/res_train_${TRAIN_DATASET}_test_${TEST_DATASET}.tsv
+########################################################################################################################
 
 set -e -u -f
 
