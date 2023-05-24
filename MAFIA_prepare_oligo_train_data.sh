@@ -65,7 +65,7 @@ HOMOPOLYMER=0
 #TRAIN_DATASET=RL_M4star_M5
 TRAIN_DATASET=RL_M4star_M5star
 
-FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230523_RL_M4_M5/${TRAIN_DATASET}_RTA/*
+FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${TRAIN_DATASET}/fast5
 
 ########################################################################################################################
 
