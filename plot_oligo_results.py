@@ -86,7 +86,7 @@ for subplot_ind, this_motif in enumerate(motifs):
         this_motif_bin_A_m6A_counts['{}_counts'.format(A_m6A)] = ds_real_counts
 
         y_max = max(y_max, (ds_norm_counts.max() // 0.05 + 1) * 0.05)
-        axes_hist[subplot_ind].step(ds_bin_centers, ds_norm_counts, color=ds_colors[ds], label='{}, {} bases'.format(ds.split('_')[-1], len(ds_motif)))
+        axes_hist[subplot_ind].step(ds_bin_centers, ds_norm_counts, color=ds_colors[ds], label='{}, {} NTs'.format(ds.split('_')[-1], len(ds_motif)))
     if subplot_ind>=(num_rows-1)*num_cols:
         axes_hist[subplot_ind].set_xlabel('Mod. Prob.', fontsize=15)
     if subplot_ind%num_cols==0:
@@ -130,7 +130,7 @@ xticks = np.arange(first_pos, max_pos, block_size)
 vmin = 0.8
 cax_yticks = np.arange(vmin, 1.01, 0.1)
 
-fig_single_read = plt.figure(figsize=(16, 9))
+fig_single_read = plt.figure(figsize=(16, 10))
 for subplot_ind, ds in enumerate(['ISA_run1_A', 'ISA_run1_m6A']):
     df = dfs[ds]
     read_ids = df['read_id'].unique()
@@ -155,12 +155,12 @@ for subplot_ind, ds in enumerate(['ISA_run1_A', 'ISA_run1_m6A']):
     ax = fig_single_read.add_subplot(2, 1, subplot_ind+1)
     im = ax.imshow(mat_mod_prob, vmin=vmin, vmax=1)
     ax.set_xticks(xticks, fontsize=8)
-    ax.set_yticks(np.arange(num_samples), ids)
+    ax.set_yticks(np.arange(num_samples), ids, fontsize=8)
     if subplot_ind==1:
         ax.set_xlabel('Aligned pos (NTs)', fontsize=20)
     ax.set_ylabel(' '.join(ds.split('_')), fontsize=25, rotation=-90, labelpad=30)
     ax.yaxis.set_label_position('right')
-fig_prc.tight_layout(rect=[0.1, 0.2, 0.8, 0.8])
+fig_single_read.tight_layout(rect=[0.1, 0.2, 0.8, 0.8])
 fig_single_read.subplots_adjust(left=0.1, bottom=0.1, right=0.8, top=0.9)
 cax = fig_single_read.add_axes([0.85, 0.35, 0.02, 0.3])
 plt.colorbar(im, cax=cax)
