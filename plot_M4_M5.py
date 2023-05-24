@@ -68,6 +68,7 @@ for test_ds in test_datasets:
                         sub_df[sub_df['q_pos']==ref_pos_first]['mod_prob'].values[0],
                         sub_df[sub_df['q_pos']==ref_pos_second]['mod_prob'].values[0],
                     ))
+        print('Mean pair mod. probs:', np.mean(np.vstack(mod_prob_pairs), axis=0))
         ds_pattern_modProbs[test_ds][c_pattern] = mod_prob_pairs
 
 ### dump to pickle ###
@@ -79,38 +80,40 @@ with open(out_pickle, 'wb') as handle:
 ### visualize patterns ###
 num_samples = 50
 min_pos = 10
-vmin = 0.95
-
-cax_yticks = np.arange(vmin, 1.01, 0.1)
 extent = 40
-
+vmin = 0.8
+cax_yticks = np.arange(vmin, 1.01, 0.1)
 num_rows = 4
 num_cols = 4
-
 fig_single_read = plt.figure(figsize=(10, 10))
 for row_ind, test_ds in enumerate(test_datasets):
     for col_ind, c_pattern in enumerate(contig_patterns):
-            print(test_ds, c_pattern, np.mean(np.vstack(ds_pattern_modProbs[test_ds][c_pattern]), axis=0))
-            sample_modProb_pairs = sample(ds_pattern_modProbs[test_ds][c_pattern], num_samples)
-            mat_mod_prob = np.zeros([num_samples, extent])
-            for i, prob_pair in enumerate(sample_modProb_pairs):
-                mat_mod_prob[i, min_pos] = prob_pair[0]
-                mat_mod_prob[i, min_pos+block_size] = prob_pair[1]
+        mod_probs = np.vstack(ds_pattern_modProbs[test_ds][c_pattern])
+        print(test_ds, c_pattern, len(mod_probs), np.mean(np.vstack(mod_probs), axis=0))
+        # sample_mod_probs = sample(mod_probs, min(len(mod_probs), num_samples))
+        if num_samples>=len(mod_probs):
+            sample_mod_probs = mod_probs
+        else:
+            # todo: check argparitition
+            sample_mod_probs = mod_probs[np.argpartition(np.max(mod_probs, axis=1), num_samples)[-num_samples:]]
+        mat_mod_prob = np.zeros([num_samples, extent])
+        for i, prob_pair in enumerate(sample_mod_probs):
+            mat_mod_prob[i, min_pos] = prob_pair[0]
+            mat_mod_prob[i, min_pos+block_size] = prob_pair[1]
 
-                xtick_pos = [min_pos, min_pos+block_size]
-                xticks = ['P{}'.format(p) for p in c_pattern]
+            xtick_pos = [min_pos, min_pos+block_size]
+            xticks = ['P{}'.format(p) for p in c_pattern]
 
-                ax = fig_single_read.add_subplot(num_rows, num_cols, row_ind * num_cols + col_ind + 1)
-                im = ax.imshow(mat_mod_prob, vmin=vmin, vmax=1)
-                if row_ind==(num_rows-1):
-                    ax.set_xticks(xtick_pos, xticks, fontsize=8)
-                    ax.set_xlabel('Aligned pattern', fontsize=12)
-                else:
-                    ax.set_xticks([])
-                if col_ind==0:
-                    ax.set_ylabel(ds_names[test_ds], fontsize=12)
-                ax.set_yticks([])
-
+            ax = fig_single_read.add_subplot(num_rows, num_cols, row_ind * num_cols + col_ind + 1)
+            im = ax.imshow(mat_mod_prob, vmin=vmin, vmax=1)
+            if row_ind==(num_rows-1):
+                ax.set_xticks(xtick_pos, xticks, fontsize=8)
+                ax.set_xlabel('Aligned pattern', fontsize=12)
+            else:
+                ax.set_xticks([])
+            if col_ind==0:
+                ax.set_ylabel(ds_names[test_ds], fontsize=12)
+            ax.set_yticks([])
 fig_single_read.tight_layout(rect=[0.1, 0.2, 0.8, 0.8])
 fig_single_read.subplots_adjust(left=0.1, bottom=0.1, right=0.8, top=0.9)
 cax = fig_single_read.add_axes([0.75, 0.3, 0.05, 0.4])
