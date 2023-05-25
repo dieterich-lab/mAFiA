@@ -21,12 +21,12 @@ TEST_DATASET=RL_M4_M5
 #TEST_DATASET=RL_M4star_M5
 #TEST_DATASET=RL_M4star_M5star
 ########################################################################################################################
-BAM=${PRJ_DIR}/${TEST_DATASET}/spomelette_q80.bam
+BAM=${PRJ_DIR}/${TEST_DATASET}/spomelette_q70.bam
 FAST5_DIR=${PRJ_DIR}/${TEST_DATASET}/fast5
 REF=${PRJ_DIR}/${TEST_DATASET}/ref_recon.fa
 BACKBONE_MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 CLASSIFIER_MODEL_DIR=${PRJ_DIR}/MAFIA_classifiers/${TRAIN_DATASET}
-OUTFILE=${PRJ_DIR}/results/res_train_${TRAIN_DATASET}_test_${TEST_DATASET}.tsv
+OUTFILE=${PRJ_DIR}/results/res_train_${TRAIN_DATASET}_test_${TEST_DATASET}_q70.tsv
 ########################################################################################################################
 
 set -e -u -f

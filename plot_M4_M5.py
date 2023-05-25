@@ -78,7 +78,7 @@ with open(out_pickle, 'wb') as handle:
 #     ds_pattern_modProbs = pickle.load(handle)
 
 ### visualize patterns ###
-num_samples = 50
+num_samples = 40
 min_pos = 10
 extent = 40
 vmin = 0.8
@@ -88,14 +88,12 @@ num_cols = 4
 fig_single_read = plt.figure(figsize=(10, 10))
 for row_ind, test_ds in enumerate(test_datasets):
     for col_ind, c_pattern in enumerate(contig_patterns):
-        mod_probs = np.vstack(ds_pattern_modProbs[test_ds][c_pattern])
-        print(test_ds, c_pattern, len(mod_probs), np.mean(np.vstack(mod_probs), axis=0))
-        # sample_mod_probs = sample(mod_probs, min(len(mod_probs), num_samples))
+        mod_probs = ds_pattern_modProbs[test_ds][c_pattern]
+        # print(test_ds, c_pattern, len(mod_probs), np.mean(np.vstack(mod_probs), axis=0))
         if num_samples>=len(mod_probs):
             sample_mod_probs = mod_probs
         else:
-            # todo: check argparitition
-            sample_mod_probs = mod_probs[np.argpartition(np.max(mod_probs, axis=1), num_samples)[-num_samples:]]
+            sample_mod_probs = sample(mod_probs, num_samples)
         mat_mod_prob = np.zeros([num_samples, extent])
         for i, prob_pair in enumerate(sample_mod_probs):
             mat_mod_prob[i, min_pos] = prob_pair[0]

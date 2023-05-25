@@ -1,6 +1,6 @@
 ARCH=${HOME}/git/renata/rnaarch
 MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
-FILTER_SCORE=80
+FILTER_SCORE=70
 
 ########################################################################################################################
 ### Wuerzburg batch 1 ##################################################################################################
@@ -60,10 +60,10 @@ FILTER_SCORE=80
 REF=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/ISA_M4_M5.fasta
 HOMOPOLYMER=0
 
-#TRAIN_DATASET=RL_M4_M5
+TRAIN_DATASET=RL_M4_M5
 #TRAIN_DATASET=RL_M4_M5star
 #TRAIN_DATASET=RL_M4star_M5
-TRAIN_DATASET=RL_M4star_M5star
+#TRAIN_DATASET=RL_M4star_M5star
 
 FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${TRAIN_DATASET}/fast5
 
