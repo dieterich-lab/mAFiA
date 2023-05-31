@@ -47,13 +47,13 @@ reference, motif_dims = parse_reference_and_motif_dims(args.ref_file)
 for motif_ind, motif, block_size, block_center in motif_dims:
     print('Now collecting nucleotides for motif {}'.format(motif))
     print('Unm')
-    unm_container.collect_motif_nucleotides(motif_ind, reference, block_size=block_size, block_center=block_center, enforce_ref_5mer=args.enforce_ref_5mer)
+    unm_container.collect_motif_nucleotides(motif_ind, motif, reference, block_size=block_size, block_center=block_center, enforce_ref_5mer=args.enforce_ref_5mer)
     print('Mod')
-    mod_container.collect_motif_nucleotides(motif_ind, reference, block_size=block_size, block_center=block_center, enforce_ref_5mer=args.enforce_ref_5mer)
+    mod_container.collect_motif_nucleotides(motif_ind, motif, reference, block_size=block_size, block_center=block_center, enforce_ref_5mer=args.enforce_ref_5mer)
 
-    if min(len(unm_container.motif_nts[motif_ind]), len(mod_container.motif_nts[motif_ind]))>=args.min_coverage:
+    if min(len(unm_container.motif_nts[motif]), len(mod_container.motif_nts[motif]))>=args.min_coverage:
         this_motif_classifier = motif_classifier(motif=motif, classifier_type=args.classifier_type, scaler=args.scaler)
-        this_motif_classifier.train(unm_container.motif_nts[motif_ind], mod_container.motif_nts[motif_ind])
+        this_motif_classifier.train(unm_container.motif_nts[motif], mod_container.motif_nts[motif])
         this_motif_classifier.save(
             out_model_path=os.path.join(classifier_model_dir, '{}.pkl'.format(motif)),
             draw_prc=True

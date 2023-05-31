@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import pandas as pd
 import pysam
 from glob import glob
 from utils import index_fast5_files
@@ -46,6 +47,11 @@ class data_container:
         self.indexed_read_ids = index_fast5_files(self.f5_paths, self.bam)
         print('{} reads indexed'.format(len(self.indexed_read_ids)))
 
+    def build_dict_read_ref(self):
+        self.dict_read_ref = {}
+        for read in self.bam.fetch():
+            self.dict_read_ref[read.query_name] = read.reference_name
+
 class oligo_data_container(data_container):
     def __init__(self, bam_path, fast5_dir):
         super().__init__(bam_path, fast5_dir)
@@ -65,7 +71,9 @@ class oligo_data_container(data_container):
             read_bases_features[query_name] = (this_read_bases, this_read_features)
         self.read_bases_features = read_bases_features
 
-    def collect_motif_nucleotides(self, motif_ind, ref, block_size, block_center, enforce_ref_5mer=False):
+    def collect_motif_nucleotides(self, motif_ind, motif, ref, block_size, block_center, enforce_ref_5mer=False):
+        print('Collecting nucleotides for motif {}...'.format(motif))
+
         relevant_contigs = [k for k in ref.keys() if ((motif_ind in k.split('_')[1]) and (k in self.bam.references))]
         this_motif_nts = []
         for contig in relevant_contigs:
@@ -77,8 +85,8 @@ class oligo_data_container(data_container):
                 if len(this_tPos_nts) > 0:
                     this_motif_nts.extend(this_tPos_nts)
 
-        self.motif_nts[motif_ind] = this_motif_nts
-        print('{} NTs collected'.format(len(self.motif_nts[motif_ind])))
+        self.motif_nts[motif] = this_motif_nts
+        print('{} NTs collected'.format(len(self.motif_nts[motif])))
 
     def collect_nucleotides_aligned_to_target_pos(self, contig, target_pos, ref_motif=None, enforce_ref_5mer=False):
         all_nts = []
@@ -114,6 +122,19 @@ class oligo_data_container(data_container):
                         )
                         valid_counts += 1
         return all_nts
+
+    def flush_nts_to_dataframe(self):
+        dfs = []
+        for this_motif in self.motif_nts.keys():
+            for nt in self.motif_nts[this_motif]:
+                dfs.append(
+                    pd.DataFrame(
+                        [(nt.read_id, self.dict_read_ref[nt.read_id], nt.read_pos, nt.ref_pos, this_motif, nt.pred_5mer, round(nt.mod_prob, 3))],
+                        columns=['read_id', 'contig', 'q_pos', 't_pos', 'ref_motif', 'pred_motif', 'mod_prob']
+                    )
+                )
+        self.motif_nts = {}
+        return pd.concat(dfs)
 
 class mRNA_data_container(data_container):
     def __init__(self, bam_path, fast5_dir):
