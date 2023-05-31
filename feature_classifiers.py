@@ -56,6 +56,17 @@ class motif_classifier:
 
         print('AUC {:.2f}'.format(self.auc))
 
+    def test(self, test_nts, mod_thresh=0.5):
+        print('Testing {} NTs...'.format(len(test_nts)))
+        test_features = [nt.feature for nt in test_nts]
+        mod_probs = self.binary_model.predict_proba(test_features)[:, 1]
+        for this_nt, this_mod_prob in zip(test_nts, mod_probs):
+            this_nt.mod_prob = this_mod_prob
+        predictions = np.int32(mod_probs > mod_thresh)
+        avg_mod_ratio = np.mean(predictions)
+        print('Mean mod. ratio {:.2f}'.format(avg_mod_ratio))
+        return avg_mod_ratio
+
     def save(self, out_model_path, draw_prc=False):
         with open(out_model_path, 'wb') as h_out:
             pickle.dump(self, h_out, pickle.HIGHEST_PROTOCOL)
@@ -76,16 +87,6 @@ class motif_classifier:
             plt.savefig(out_img_path, bbox_inches='tight')
             plt.close('all')
 
-    def test(self, test_nts, mod_thresh=0.5):
-        print('Testing {} NTs...'.format(len(test_nts)))
-        test_features = [nt.feature for nt in test_nts]
-        mod_probs = self.binary_model.predict_proba(test_features)[:, 1]
-        for this_nt, this_mod_prob in zip(test_nts, mod_probs):
-            this_nt.mod_prob = this_mod_prob
-        predictions = np.int32(mod_probs > mod_thresh)
-        avg_mod_ratio = np.mean(predictions)
-        print('Mean mod. ratio {:.2f}'.format(avg_mod_ratio))
-        return avg_mod_ratio
 
 def load_motif_classifiers(classifier_dir):
     classifier_paths = glob(os.path.join(classifier_dir, '*.pkl'))
@@ -98,21 +99,3 @@ def load_motif_classifiers(classifier_dir):
     print('Target motifs: {}'.format(', '.join(classifier_motifs)))
 
     return motif_classifiers
-
-def get_mod_ratio_with_binary_classifier(collection_nucleotides, clf, mod_thresh=0.5):
-    test_features = [nt.feature for nt in collection_nucleotides]
-
-    mod_probs = clf.predict_proba(test_features)[:, 1]
-    for this_nt, this_mod_prob in zip(collection_nucleotides, mod_probs):
-        this_nt.mod_prob = this_mod_prob
-    predictions = np.int32(mod_probs > mod_thresh)
-    avg_mod_ratio = np.mean(predictions)
-
-    return avg_mod_ratio
-
-def get_mod_probs(dict_motif_feature, clf):
-    test_motifs = [v[0] for k, v in dict_motif_feature.items()]
-    test_features = [v[1] for k, v in dict_motif_feature.items()]
-    mod_probs = clf.predict_proba(test_features)[:, 1]
-    read_mod_probs = {k: v for k, v in zip(dict_motif_feature.keys(), mod_probs)}
-    return read_mod_probs
