@@ -11,7 +11,7 @@ from models import objectview
 import pysam
 from Bio import SeqIO
 from utils import index_fast5_files
-from extract_features import load_model, get_features_from_collection_of_signals, get_single_motif_nucleotides
+from feature_extractors import load_model, get_features_from_collection_of_signals, get_single_motif_nucleotides
 from feature_classifiers import get_mod_ratio_with_binary_classifier
 import random
 random.seed(10)

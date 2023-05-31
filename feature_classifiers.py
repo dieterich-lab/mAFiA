@@ -2,7 +2,7 @@ import os
 HOME = os.path.expanduser('~')
 import numpy as np
 import random
-random.seed(10)
+random.seed(0)
 from random import sample
 from scipy.spatial.distance import pdist, cdist, squareform
 from scipy.sparse import coo_matrix
@@ -16,11 +16,10 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler, MaxAbsScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import PrecisionRecallDisplay, precision_recall_curve, auc
-# import matplotlib
-# matplotlib.use('tkagg')
+import matplotlib
+matplotlib.use('tkagg')
 import matplotlib.pyplot as plt
-
-img_out = os.path.join(HOME, 'img_out')
+import pickle
 
 def cluster_by_connected_components(vec_s, dim, threshold=0.5):
     vec_i, vec_j = np.triu_indices(dim, k=1)
@@ -104,6 +103,66 @@ def debug_features(mat_train, vec_labels, ref_motif):
     plt.savefig(os.path.join(classifier_model_dir, '{}_top_{}_features.png'.format(ref_motif, NUM_TOP_FEATURES)), bbox_inches='tight')
     plt.close('all')
 
+class motif_classifier:
+    def __init__(self, motif, classifier_type, scaler):
+        self.motif = motif
+        self.classifier_type = classifier_type
+        self.scaler = scaler
+        if classifier_type == 'svm':
+            clf = SVC(gamma='auto', random_state=0, max_iter=1000)
+        elif classifier_type == 'logistic_regression':
+            clf = LogisticRegression(random_state=0, max_iter=1000)
+        else:
+            clf = None
+
+        if scaler == 'MaxAbs':
+            self.binary_model = make_pipeline(MaxAbsScaler(), clf)
+        elif scaler == 'Standard':
+            self.binary_model = make_pipeline(StandardScaler(), clf)
+        else:
+            self.binary_model = clf
+
+    def train(self, unm_nts, mod_nts, frac_test_split=0.25):
+        max_num_features = min(len(unm_nts), len(mod_nts))
+        sample_unm_nts = sample(unm_nts, max_num_features)
+        sample_mod_nts = sample(mod_nts, max_num_features)
+
+        labels = np.array([0 for ii in range(len(sample_unm_nts))] + [1 for ii in range(len(sample_mod_nts))])
+        unm_features = [nt.feature for nt in sample_unm_nts]
+        mod_features = [nt.feature for nt in sample_mod_nts]
+        all_features = np.array(unm_features + mod_features)
+
+        X_train, X_test, y_train, y_test, train_nts, test_nts = train_test_split(all_features, labels, sample_unm_nts+sample_mod_nts, test_size=frac_test_split)
+        self.train_nts = train_nts
+        self.test_nts = test_nts
+
+        self.binary_model = self.binary_model.fit(X_train, y_train)
+        y_score = self.binary_model.decision_function(X_test)
+        self.precision, self.recall, self.thresholds = precision_recall_curve(y_test, y_score)
+        self.auc = auc(self.recall, self.precision)
+
+        print('AUC {:.2f}'.format(self.auc))
+
+    def save(self, out_model_path, draw_prc=False):
+        with open(out_model_path, 'wb') as h_out:
+            pickle.dump(self, h_out, pickle.HIGHEST_PROTOCOL)
+
+        if draw_prc:
+            out_img_path = out_model_path.replace('.pkl', 'png')
+            plt.figure(figsize=(5, 5))
+            plt.plot(self.recall, self.precision, '-')
+            plt.xlabel('Recall')
+            plt.ylabel('Precision')
+            plt.ylim([0, 1.05])
+            plt.title('{}\n{} train NTs, {} test NTs\n AUC = {:.2f}'.format(
+                self.motif,
+                len(self.train_nts),
+                len(self.test_nts),
+                self.auc
+            ))
+            plt.savefig(out_img_path, bbox_inches='tight')
+            plt.close('all')
+
 def train_binary_classifier(unm_nts, mod_nts, classifier, scaler=None, frac_test_split=0.25, debug_img_path=None, fig_title=None):
     max_num_features = min(len(unm_nts), len(mod_nts))
     sample_unm_nts = sample(unm_nts, max_num_features)
@@ -115,18 +174,6 @@ def train_binary_classifier(unm_nts, mod_nts, classifier, scaler=None, frac_test
     all_features = np.array(unm_features + mod_features)
 
     X_train, X_test, y_train, y_test = train_test_split(all_features, labels, test_size=frac_test_split)
-
-    if classifier=='svm':
-        clf = SVC(gamma='auto', random_state=0, max_iter=1000)
-    elif classifier=='logistic_regression':
-        clf = LogisticRegression(random_state=0, max_iter=1000)
-
-    if scaler=='MaxAbs':
-        binary_model = make_pipeline(MaxAbsScaler(), clf)
-    elif scaler=='Standard':
-        binary_model = make_pipeline(StandardScaler(), clf)
-    else:
-        binary_model = clf
 
     binary_model = binary_model.fit(X_train, y_train)
 

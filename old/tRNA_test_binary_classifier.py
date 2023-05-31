@@ -10,8 +10,8 @@ from models import objectview
 import pysam
 from Bio import SeqIO
 from utils import index_fast5_files
-from extract_features import load_model
-from extract_features import get_features_from_collection_of_signals, get_nucleotides_aligned_to_target_pos
+from feature_extractors import load_model
+from feature_extractors import get_features_from_collection_of_signals, get_nucleotides_aligned_to_target_pos
 from feature_classifiers import get_mod_ratio_with_binary_classifier, get_mod_probs
 import random
 random.seed(10)

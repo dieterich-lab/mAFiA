@@ -1,6 +1,7 @@
 import numpy as np
 from tqdm import tqdm
 from ont_fast5_api.fast5_interface import get_fast5_file
+from Bio import SeqIO
 
 def med_mad(x, factor=1.4826):
     med = np.median(x)
@@ -43,3 +44,20 @@ def index_fast5_files(f5_paths, bam=None):
                 for read_id in read_ids:
                     index_read_ids[read_id] = f5_filepath
     return index_read_ids
+
+
+def parse_reference_and_motif_dims(ref_file):
+    ref = {}
+    for record in SeqIO.parse(ref_file, 'fasta'):
+        ref[record.id] = str(record.seq)
+    block_index_motif_size_center = []
+    for k in ref.keys():
+        if k.lstrip('block').split('_')[0] == '1':
+            block_index = k.split('_')[1]
+            block_seq = ref[k]
+            block_size = len(block_seq)
+            block_center = block_size // 2
+            motif = block_seq[block_center - 2:block_center + 3]
+            block_index_motif_size_center.append((block_index, motif, block_size, block_center))
+
+    return ref, block_index_motif_size_center

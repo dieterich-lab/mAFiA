@@ -11,8 +11,8 @@ from models import objectview
 import pysam
 from Bio import SeqIO
 from ont_fast5_api.fast5_interface import get_fast5_file
-from extract_features import load_model
-from extract_features import get_features_from_collection_of_signals, get_single_motif_nucleotides
+from feature_extractors import load_model
+from feature_extractors import get_features_from_collection_of_signals, get_single_motif_nucleotides
 # from feature_classifiers import train_binary_classifier
 from unsupervised import train_cluster
 import random

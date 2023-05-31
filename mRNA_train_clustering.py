@@ -11,8 +11,8 @@ import pysam
 from Bio import SeqIO
 from Bio.Seq import Seq
 from ont_fast5_api.fast5_interface import get_fast5_file
-from extract_features import load_model
-from extract_features import get_nucleotides_aligned_to_site
+from feature_extractors import load_model
+from feature_extractors import get_nucleotides_aligned_to_site
 from unsupervised import train_cluster, calculate_outlier_ratio_with_ivt_distance
 
 parser = argparse.ArgumentParser()

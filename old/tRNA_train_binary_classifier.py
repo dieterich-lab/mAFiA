@@ -11,8 +11,8 @@ from models import objectview
 import pysam
 from Bio import SeqIO
 from ont_fast5_api.fast5_interface import get_fast5_file
-from extract_features import load_model
-from extract_features import get_features_from_collection_of_signals, get_nucleotides_aligned_to_target_pos
+from feature_extractors import load_model
+from feature_extractors import get_features_from_collection_of_signals, get_nucleotides_aligned_to_target_pos
 from feature_classifiers import train_svm_ivt_wt, train_binary_classifier
 import random
 random.seed(10)

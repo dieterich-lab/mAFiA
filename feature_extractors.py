@@ -4,14 +4,12 @@ from utils import segment
 from tqdm import tqdm
 import torch
 import numpy as np
-from Bio.Seq import Seq
 from utils import get_norm_signal_from_read_id
 from models import objectview, rodan
 from fast_ctc_decode import beam_search, viterbi_search
-from class_defs import nucleotide, aligned_read
-from time import time
+from data_containers import nucleotide, aligned_read
 import random
-random.seed(10)
+random.seed(0)
 from random import sample
 
 CTC_MODE='viterbi'
@@ -19,6 +17,10 @@ if CTC_MODE=='beam':
     ctc_decoder = beam_search
 elif CTC_MODE=='viterbi':
     ctc_decoder = viterbi_search
+
+vocab = { 1:"A", 2:"C", 3:"G", 4:"T" }
+alphabet = "".join(["N"] + list(vocab.values()))
+alphabet_to_num = {v: k for k, v in enumerate(list(alphabet))}
 
 def convert_statedict(state_dict):
     from collections import OrderedDict
@@ -40,146 +42,164 @@ def get_freer_device():
         free_mem = -1
     return freer_device, free_mem
 
-activation = {}
-def get_activation(name):
-    def hook(model, input, output):
-        activation[name] = output.detach()
-    return hook
+class backbone_network:
+    def __init__(self, model_path, extraction_layer, feature_width):
+        torchdict = torch.load(model_path, map_location="cpu")
+        self.config = objectview(torchdict["config"])
+        self.extraction_layer = extraction_layer
+        self.feature_width = feature_width
+        self.activation = {}
+        self._load_model(model_path)
+        print('Using device {}, model {} at extraction layer {}'.format(self.device, os.path.basename(model_path), extraction_layer))
 
-def load_model(modelfile, config, ext_layer):
-    if modelfile == None:
-        sys.stderr.write("No model file specified!")
-        sys.exit(1)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print("Using device:", device)
-    # device, mem = get_freer_device()
-    # print("Using device {} with free memory {}MB".format(device, mem), flush=True)
-    model = rodan(config=config).to(device)
-    state_dict = torch.load(modelfile, map_location=device)["state_dict"]
-    if "state_dict" in state_dict:
-        model.load_state_dict(convert_statedict(state_dict["state_dict"]))
-    else:
-        model.load_state_dict(torch.load(modelfile, map_location=device)["state_dict"])
-    # model.convlayers.conv21.register_forward_hook(get_activation('conv21'))
-    # model.convlayers.conv20.register_forward_hook(get_activation('conv20'))
-    model.get_submodule(ext_layer).register_forward_hook(get_activation(ext_layer))
-
-    # print(model)
-    model.eval()
-    torch.set_grad_enabled(False)
-
-    return model, device
-
-vocab = { 1:"A", 2:"C", 3:"G", 4:"T" }
-alphabet = "".join(["N"] + list(vocab.values()))
-alphabet_to_num = {v: k for k, v in enumerate(list(alphabet))}
-
-def ctcdecoder(logits, label, blank=False, beam_size=5, alphabet=alphabet, pre=None):
-    ret = np.zeros((label.shape[0], label.shape[1]+50))
-    retstr = []
-    for i in range(logits.shape[0]):
-        if pre is not None:
-            beamcur = ctc_decoder(torch.softmax(torch.tensor(pre[:,i,:]), dim=-1).cpu().detach().numpy(), alphabet=alphabet, beam_size=beam_size)[0]
-        prev = None
-        cur = []
-        pos = 0
-        for j in range(logits.shape[1]):
-            if not blank:
-                if logits[i,j] != prev:
-                    prev = logits[i,j]
-                    try:
-                        if prev != 0:
-                            ret[i, pos] = prev
-                            pos+=1
-                            cur.append(vocab[prev])
-                    except:
-                        sys.stderr.write("ctcdecoder: fail on i:", i, "pos:", pos)
-            else:
-                if logits[i,j] == 0: break
-                ret[i, pos] = logits[i,j] # is this right?
-                cur.append(vocab[logits[i,pos]])
-                pos+=1
-        if pre is not None:
-            retstr.append(beamcur)
+    def _load_model(self, modelfile):
+        if modelfile == None:
+            sys.stderr.write("No model file specified!")
+            sys.exit(1)
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        model = rodan(config=self.config).to(device)
+        state_dict = torch.load(modelfile, map_location=device)["state_dict"]
+        if "state_dict" in state_dict:
+            model.load_state_dict(convert_statedict(state_dict["state_dict"]))
         else:
-            retstr.append("".join(cur))
-    return ret, retstr
+            model.load_state_dict(torch.load(modelfile, map_location=device)["state_dict"])
+        model.get_submodule(self.extraction_layer).register_forward_hook(self._get_activation(self.extraction_layer))
+        model.eval()
+        torch.set_grad_enabled(False)
 
-def get_features_from_signal(model, device, config, signal, ext_layer, feature_width=0):
-    chunks = segment(signal, config.seqlen)
-    event = torch.unsqueeze(torch.FloatTensor(chunks), 1).to(device, non_blocking=True)
-    event_size = event.shape[0]
-    batch_size = config.batchsize
-    if event_size<=batch_size:
-        out = model.forward(event)
-        layer_activation = activation[ext_layer].detach().cpu().numpy()
-    else:
-        break_pts = np.arange(0, event_size, batch_size)
-        start_stop_pts = [(start, stop) for start, stop in zip(break_pts, list(break_pts[1:]) + [event_size])]
-        batch_out = []
-        batch_layer_activation = []
-        for (start, stop) in start_stop_pts:
-            batch_out.append(model.forward(event[start:stop]))
-            batch_layer_activation.append(activation[ext_layer].detach().cpu().numpy())
-        out = torch.concat(batch_out, 1)
-        layer_activation = np.concatenate(batch_layer_activation, axis=0)
-    num_locs = layer_activation.shape[-1]
-    pred_labels = []
-    features = []
-    for i in range(out.shape[1]):
-        probs = torch.softmax(out[:, i, :], dim=-1).cpu().detach().numpy()
-        this_pred_label, pred_locs = ctc_decoder(probs, alphabet=alphabet)
+        self.model, self.device = model, device
 
-        pred_labels.append(this_pred_label)
+    def _get_activation(self, name):
+        def hook(model, input, output):
+            self.activation[name] = output.detach()
+        return hook
 
-        pred_locs_corrected = []
-        for loc_ind in range(len(this_pred_label)):
-            start_loc = pred_locs[loc_ind]
-            if loc_ind<(len(this_pred_label)-1):
-                end_loc = pred_locs[loc_ind+1]
-            else:
-                end_loc = probs.shape[0]
-            pred_locs_corrected.append(start_loc + np.argmax(probs[start_loc:end_loc, alphabet_to_num[this_pred_label[loc_ind]]]))
-
-        ### debug feature loc ###
-        # import matplotlib
-        # matplotlib.use('tkagg')
-        # import matplotlib.pyplot as plt
-        # alphabet_colors = {a: c for (a, c) in zip(alphabet, ['black', 'blue', 'red', 'green', 'purple'])}
-        #
-        # plt.figure(figsize=(20, 10))
-        # plt.subplot(2, 1, 1)
-        # for i in range(probs.shape[1]):
-        #     plt.plot(probs[:, i], label=alphabet[i], color=alphabet_colors[alphabet[i]])
-        #     plt.legend(loc='upper left')
-        # for i, loc in enumerate(pred_locs):
-        #     plt.axvline(loc, color=alphabet_colors[this_pred_label[i]])
-        # plt.xticks(pred_locs, this_pred_label)
-        # plt.title('Original')
-        # plt.subplot(2, 1, 2)
-        # for i in range(probs.shape[1]):
-        #     plt.plot(probs[:, i], label=alphabet[i], color=alphabet_colors[alphabet[i]])
-        #     plt.legend(loc='upper left')
-        # for i, loc in enumerate(pred_locs_corrected):
-        #     plt.axvline(loc, color=alphabet_colors[this_pred_label[i]])
-        # plt.xticks(pred_locs_corrected, this_pred_label)
-        # plt.title('Corrected')
-
-        #########################
-
-        if feature_width==0:
-            this_feature = layer_activation[i, :, pred_locs_corrected]
+    def get_features_from_signal(self, signal):
+        chunks = segment(signal, self.config.seqlen)
+        event = torch.unsqueeze(torch.FloatTensor(chunks), 1).to(self.device, non_blocking=True)
+        event_size = event.shape[0]
+        batch_size = self.config.batchsize
+        if event_size <= batch_size:
+            out = self.model.forward(event)
+            layer_activation = self.activation[self.extraction_layer].detach().cpu().numpy()
         else:
-            this_feature = []
-            for loc_shift in range(-feature_width, feature_width+1):
-                shifted_locs = [max(min(x+loc_shift, num_locs-1), 0) for x in pred_locs_corrected]
-                this_feature.append(layer_activation[i, :, shifted_locs])
-            this_feature = np.hstack(this_feature)
-            # this_feature = np.mean(np.stack(this_feature, axis=-1), axis=-1)
-        features.append(this_feature)
-    pred_label = ''.join(pred_labels)[::-1]
-    features = np.vstack(features)[::-1]
-    return features, pred_label
+            break_pts = np.arange(0, event_size, batch_size)
+            start_stop_pts = [(start, stop) for start, stop in zip(break_pts, list(break_pts[1:]) + [event_size])]
+            batch_out = []
+            batch_layer_activation = []
+            for (start, stop) in start_stop_pts:
+                batch_out.append(self.model.forward(event[start:stop]))
+                batch_layer_activation.append(self.activation[self.extraction_layer].detach().cpu().numpy())
+            out = torch.concat(batch_out, 1)
+            layer_activation = np.concatenate(batch_layer_activation, axis=0)
+        num_locs = layer_activation.shape[-1]
+        pred_labels = []
+        features = []
+        for i in range(out.shape[1]):
+            probs = torch.softmax(out[:, i, :], dim=-1).cpu().detach().numpy()
+            this_pred_label, pred_locs = ctc_decoder(probs, alphabet=alphabet)
+
+            pred_labels.append(this_pred_label)
+
+            pred_locs_corrected = []
+            for loc_ind in range(len(this_pred_label)):
+                start_loc = pred_locs[loc_ind]
+                if loc_ind < (len(this_pred_label) - 1):
+                    end_loc = pred_locs[loc_ind + 1]
+                else:
+                    end_loc = probs.shape[0]
+                pred_locs_corrected.append(
+                    start_loc + np.argmax(probs[start_loc:end_loc, alphabet_to_num[this_pred_label[loc_ind]]]))
+
+            if self.feature_width == 0:
+                this_feature = layer_activation[i, :, pred_locs_corrected]
+            else:
+                this_feature = []
+                for loc_shift in range(-self.feature_width, self.feature_width + 1):
+                    shifted_locs = [max(min(x + loc_shift, num_locs - 1), 0) for x in pred_locs_corrected]
+                    this_feature.append(layer_activation[i, :, shifted_locs])
+                this_feature = np.hstack(this_feature)
+                # this_feature = np.mean(np.stack(this_feature, axis=-1), axis=-1)
+            features.append(this_feature)
+        pred_label = ''.join(pred_labels)[::-1]
+        features = np.vstack(features)[::-1]
+        return features, pred_label
+
+# def get_features_from_signal(model, device, config, signal, ext_layer, feature_width=0):
+#     chunks = segment(signal, config.seqlen)
+#     event = torch.unsqueeze(torch.FloatTensor(chunks), 1).to(device, non_blocking=True)
+#     event_size = event.shape[0]
+#     batch_size = config.batchsize
+#     if event_size<=batch_size:
+#         out = model.forward(event)
+#         layer_activation = activation[ext_layer].detach().cpu().numpy()
+#     else:
+#         break_pts = np.arange(0, event_size, batch_size)
+#         start_stop_pts = [(start, stop) for start, stop in zip(break_pts, list(break_pts[1:]) + [event_size])]
+#         batch_out = []
+#         batch_layer_activation = []
+#         for (start, stop) in start_stop_pts:
+#             batch_out.append(model.forward(event[start:stop]))
+#             batch_layer_activation.append(activation[ext_layer].detach().cpu().numpy())
+#         out = torch.concat(batch_out, 1)
+#         layer_activation = np.concatenate(batch_layer_activation, axis=0)
+#     num_locs = layer_activation.shape[-1]
+#     pred_labels = []
+#     features = []
+#     for i in range(out.shape[1]):
+#         probs = torch.softmax(out[:, i, :], dim=-1).cpu().detach().numpy()
+#         this_pred_label, pred_locs = ctc_decoder(probs, alphabet=alphabet)
+#
+#         pred_labels.append(this_pred_label)
+#
+#         pred_locs_corrected = []
+#         for loc_ind in range(len(this_pred_label)):
+#             start_loc = pred_locs[loc_ind]
+#             if loc_ind<(len(this_pred_label)-1):
+#                 end_loc = pred_locs[loc_ind+1]
+#             else:
+#                 end_loc = probs.shape[0]
+#             pred_locs_corrected.append(start_loc + np.argmax(probs[start_loc:end_loc, alphabet_to_num[this_pred_label[loc_ind]]]))
+#
+#         ### debug feature loc ###
+#         # import matplotlib
+#         # matplotlib.use('tkagg')
+#         # import matplotlib.pyplot as plt
+#         # alphabet_colors = {a: c for (a, c) in zip(alphabet, ['black', 'blue', 'red', 'green', 'purple'])}
+#         #
+#         # plt.figure(figsize=(20, 10))
+#         # plt.subplot(2, 1, 1)
+#         # for i in range(probs.shape[1]):
+#         #     plt.plot(probs[:, i], label=alphabet[i], color=alphabet_colors[alphabet[i]])
+#         #     plt.legend(loc='upper left')
+#         # for i, loc in enumerate(pred_locs):
+#         #     plt.axvline(loc, color=alphabet_colors[this_pred_label[i]])
+#         # plt.xticks(pred_locs, this_pred_label)
+#         # plt.title('Original')
+#         # plt.subplot(2, 1, 2)
+#         # for i in range(probs.shape[1]):
+#         #     plt.plot(probs[:, i], label=alphabet[i], color=alphabet_colors[alphabet[i]])
+#         #     plt.legend(loc='upper left')
+#         # for i, loc in enumerate(pred_locs_corrected):
+#         #     plt.axvline(loc, color=alphabet_colors[this_pred_label[i]])
+#         # plt.xticks(pred_locs_corrected, this_pred_label)
+#         # plt.title('Corrected')
+#
+#         #########################
+#
+#         if feature_width==0:
+#             this_feature = layer_activation[i, :, pred_locs_corrected]
+#         else:
+#             this_feature = []
+#             for loc_shift in range(-feature_width, feature_width+1):
+#                 shifted_locs = [max(min(x+loc_shift, num_locs-1), 0) for x in pred_locs_corrected]
+#                 this_feature.append(layer_activation[i, :, shifted_locs])
+#             this_feature = np.hstack(this_feature)
+#             # this_feature = np.mean(np.stack(this_feature, axis=-1), axis=-1)
+#         features.append(this_feature)
+#     pred_label = ''.join(pred_labels)[::-1]
+#     features = np.vstack(features)[::-1]
+#     return features, pred_label
 
 def get_features_from_collection_of_signals(model, device, config, in_index_read_ids, max_num_reads, layer, feature_width=0):
     if max_num_reads>0:

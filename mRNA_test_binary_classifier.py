@@ -12,8 +12,8 @@ import pysam
 from Bio import SeqIO
 from Bio.Seq import Seq
 from utils import index_fast5_files
-from extract_features import load_model
-from extract_features import get_nucleotides_aligned_to_site
+from feature_extractors import load_model
+from feature_extractors import get_nucleotides_aligned_to_site
 from feature_classifiers import get_mod_ratio_with_binary_classifier
 from joblib import load
 
