@@ -85,7 +85,7 @@ class data_container:
                     )
                 )
         self.nucleotides.clear()
-        return pd.concat(dfs)
+        return pd.concat(dfs).reset_index(drop=True)
 
 class oligo_data_container(data_container):
     def collect_features_from_reads(self, extractor, max_num_reads):
