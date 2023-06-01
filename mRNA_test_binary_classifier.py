@@ -1,30 +1,14 @@
-import os, sys, argparse
+import os, sys
 HOME = os.path.expanduser('~')
 sys.path.append(os.path.join(HOME, 'git/MAFIA'))
 import pandas as pd
-from utils import load_reference, mRNA_output_writer
+from utils import mRNA_test_args_parser, load_reference, mRNA_output_writer
 from data_containers import mRNA_site, mRNA_data_container
 from feature_extractors import backbone_network
 from feature_classifiers import load_motif_classifiers
 
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--test_bam_file')
-    parser.add_argument('--test_fast5_dir')
-    parser.add_argument('--ref_file')
-    parser.add_argument('--mod_file')
-    parser.add_argument('--max_num_reads', type=int, default=-1)
-    parser.add_argument('--min_coverage', type=int, default=0)
-    parser.add_argument('--enforce_ref_5mer', action='store_true')
-    parser.add_argument('--backbone_model_path')
-    parser.add_argument('--extraction_layer', default='convlayers.conv21')
-    parser.add_argument('--feature_width', type=int, default=0)
-    parser.add_argument('--classifier_type', default='logistic_regression')
-    parser.add_argument('--classifier_model_dir')
-    parser.add_argument('--mod_prob_thresh', type=float, default=0.5)
-    parser.add_argument('--outfile')
-    parser.add_argument('--output_mod_probs', action='store_true')
-    return parser.parse_args()
+parser = mRNA_test_args_parser()
+parser.parse_and_print()
 
 def main(args):
     test_container = mRNA_data_container('test', args.test_bam_file, args.test_fast5_dir)
@@ -67,4 +51,4 @@ def main(args):
     print('Total {} sites written to {}'.format(writer.site_counts, writer.out_path))
 
 if __name__ == "__main__":
-    main(parse_args())
+    main(parser.args)
