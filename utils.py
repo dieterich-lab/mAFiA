@@ -69,16 +69,19 @@ def parse_motif_dims(ref):
     return block_index_motif_size_center
 
 class output_writer:
-    def __init__(self, out_path, output_mod_probs=True):
+    def __init__(self, out_path, output_mod_probs=True, fmt_precision=6):
         self.out_path = out_path
         self.output_mod_probs = output_mod_probs
+        self.fmt_precision = fmt_precision
         outdir = os.path.dirname(self.out_path)
         if not os.path.exists(outdir):
             os.makedirs(outdir, exist_ok=True)
         self.df_out = pd.DataFrame()
 
-    def write_nucleotides(self, nts):
-        self.df_out = pd.concat([self.df_out, nts])
+    def update_df_out(self, nts):
+        self.df_out = pd.concat([self.df_out, nts]).round(self.fmt_precision)
+
+    def write_df(self):
         self.df_out.to_csv(self.out_path, sep='\t', index=False)
 
 class mRNA_output_writer(output_writer):
@@ -97,10 +100,9 @@ class mRNA_output_writer(output_writer):
         self.last_ind = -1
         print('Starting from scratch')
 
-    def write_nucleotides_with_glori(self, glori, nts, pred_ratio):
+    def update_df_out(self, glori, nts, pred_ratio):
         df_glori = pd.concat([glori.to_frame().T] * len(nts), ignore_index=True)
         df_glori_nts = pd.concat([df_glori, nts], axis=1)
-        df_glori_nts['pred_mod_ratio'] = round(pred_ratio, 3)
-        self.df_out = pd.concat([self.df_out, df_glori_nts])
-        self.df_out.to_csv(self.out_path, sep='\t', index=False)
+        df_glori_nts['pred_mod_ratio'] = pred_ratio
         self.site_counts += 1
+        self.df_out = pd.concat([self.df_out, df_glori_nts])

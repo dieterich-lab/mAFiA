@@ -48,5 +48,6 @@ for motif_ind, motif, block_size, block_center in motif_dims:
     _ = motif_classifiers[motif].test(test_container.nucleotides[motif])
 
     df_nts = test_container.flush_nts_to_dataframe()
-    writer.write_nucleotides(df_nts)
+    writer.update_df_out(df_nts)
+    writer.write_df()
 print('Total number of nucleotides tested {}'.format(len(writer.df_out)), flush=True)
