@@ -72,6 +72,19 @@ class output_writer:
     def __init__(self, out_path, output_mod_probs=True):
         self.out_path = out_path
         self.output_mod_probs = output_mod_probs
+        outdir = os.path.dirname(self.out_path)
+        if not os.path.exists(outdir):
+            os.makedirs(outdir, exist_ok=True)
+        self.df_out = pd.DataFrame()
+
+    def write_nucleotides(self, nts):
+        self.df_out = pd.concat([self.df_out, nts])
+        self.df_out.to_csv(self.out_path, sep='\t', index=False)
+
+class mRNA_output_writer(output_writer):
+    def __init__(self, out_path, output_mod_probs=True):
+        super().__init__(out_path, output_mod_probs)
+
         if os.path.exists(out_path):
             self.df_out = pd.read_csv(out_path, sep='\t')
             self.site_counts = len(self.df_out['index'].unique())
@@ -79,17 +92,12 @@ class output_writer:
                 self.last_ind = self.df_out.tail(1)['index'].values[0]
                 print('Restarting from {}, index {}, {} sites'.format(out_path, self.last_ind, self.site_counts))
                 return
-
         self.df_out = pd.DataFrame()
         self.site_counts = 0
         self.last_ind = -1
         print('Starting from scratch')
 
-        outdir = os.path.dirname(self.out_path)
-        if not os.path.exists(outdir):
-            os.makedirs(outdir, exist_ok=True)
-
-    def write_nucleotides(self, glori, nts, pred_ratio):
+    def write_nucleotides_with_glori(self, glori, nts, pred_ratio):
         df_glori = pd.concat([glori.to_frame().T] * len(nts), ignore_index=True)
         df_glori_nts = pd.concat([df_glori, nts], axis=1)
         df_glori_nts['pred_mod_ratio'] = round(pred_ratio, 3)

@@ -1,8 +1,7 @@
 import os, sys, argparse
 HOME = os.path.expanduser('~')
 sys.path.append(os.path.join(HOME, 'git/MAFIA'))
-import pandas as pd
-from utils import load_reference, parse_motif_dims
+from utils import load_reference, parse_motif_dims, output_writer
 from data_containers import oligo_data_container
 from feature_extractors import backbone_network
 from feature_classifiers import load_motif_classifiers
@@ -21,10 +20,6 @@ parser.add_argument('--classifier_model_dir')
 parser.add_argument('--outfile')
 args = parser.parse_args()
 
-outdir = os.path.dirname(args.outfile)
-if not os.path.exists(outdir):
-    os.makedirs(outdir, exist_ok=True)
-
 test_container = oligo_data_container('test', args.test_bam_file, args.test_fast5_dir)
 test_container.build_dict_read_ref()
 
@@ -37,7 +32,8 @@ motif_dims = parse_motif_dims(reference)
 
 motif_classifiers = load_motif_classifiers(args.classifier_model_dir)
 
-df_out = pd.DataFrame([])
+writer = output_writer(out_path=args.outfile)
+
 for motif_ind, motif, block_size, block_center in motif_dims:
     if motif not in motif_classifiers.keys():
         print('No classifier available for {}. Skipping...'.format(motif))
@@ -51,6 +47,6 @@ for motif_ind, motif, block_size, block_center in motif_dims:
 
     _ = motif_classifiers[motif].test(test_container.nucleotides[motif])
 
-    df_out = pd.concat([df_out, test_container.flush_nts_to_dataframe()])
-    df_out.to_csv(args.outfile, sep='\t', index=False)
-print('Total number of nucleotides tested {}'.format(len(df_out)), flush=True)
+    df_nts = test_container.flush_nts_to_dataframe()
+    writer.write_nucleotides(df_nts)
+print('Total number of nucleotides tested {}'.format(len(writer.df_out)), flush=True)

@@ -4,7 +4,7 @@ import sys
 sys.path.append(os.path.join(HOME, 'git/MAFIA'))
 import argparse
 import pandas as pd
-from utils import load_reference, output_writer
+from utils import load_reference, mRNA_output_writer
 from data_containers import mRNA_site, mRNA_data_container
 from feature_extractors import backbone_network
 from feature_classifiers import load_motif_classifiers
@@ -36,7 +36,7 @@ reference = load_reference(args.ref_file)
 
 motif_classifiers = load_motif_classifiers(args.classifier_model_dir)
 
-writer = output_writer(out_path=args.outfile, output_mod_probs=args.output_mod_probs)
+writer = mRNA_output_writer(out_path=args.outfile, output_mod_probs=args.output_mod_probs)
 
 df_mod = pd.read_csv(args.mod_file)
 df_mod = df_mod.rename(columns={'Unnamed: 0': 'index'})
@@ -60,7 +60,7 @@ for _, glori_row in df_mod[df_mod['index']>writer.last_ind].iterrows():
         mod_ratio = motif_classifiers[this_mRNA_site.ref_motif].test(test_container.nucleotides[this_mRNA_site.ind])
         print('=========================================================\n')
         df_nts = test_container.flush_nts_to_dataframe()
-        writer.write_nucleotides(glori_row, df_nts, mod_ratio)
+        writer.write_nucleotides_with_glori(glori_row, df_nts, mod_ratio)
     else:
         test_container.nucleotides.clear()
 print('Total {} sites written to {}'.format(writer.site_counts, writer.out_path))
