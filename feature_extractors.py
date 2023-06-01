@@ -1,13 +1,10 @@
 import os, sys
 HOME = os.path.expanduser('~')
 from utils import segment
-from tqdm import tqdm
 import torch
 import numpy as np
-from utils import get_norm_signal_from_read_id
 from models import objectview, rodan
 from fast_ctc_decode import beam_search, viterbi_search
-from data_containers import nucleotide, aligned_read
 
 CTC_MODE='viterbi'
 if CTC_MODE=='beam':
@@ -41,6 +38,7 @@ def get_freer_device():
 
 class backbone_network:
     def __init__(self, model_path, extraction_layer, feature_width):
+        print('Finding my backbone...')
         torchdict = torch.load(model_path, map_location="cpu")
         self.config = objectview(torchdict["config"])
         self.extraction_layer = extraction_layer
@@ -122,94 +120,53 @@ class backbone_network:
         features = np.vstack(features)[::-1]
         return features, pred_label
 
-########################################################################################################################
-### mRNA ###############################################################################################################
-########################################################################################################################
-def get_nucleotides_from_multiple_reads(model, device, config, ext_layer, in_aligned_reads, batch_size=256):
-    all_chunks = []
-    chunk_sizes = []
-    for this_aligned_read in in_aligned_reads:
-        this_chunk = segment(this_aligned_read.norm_signal, config.seqlen)
-        all_chunks.append(this_chunk)
-        chunk_sizes.append(this_chunk.shape[0])
-    if len(all_chunks)==0:
-        return {}
-    all_chunks = np.vstack(all_chunks)
-    cum_chunk_sizes = np.cumsum([0] + chunk_sizes)
+    def get_nucleotides_from_multiple_reads(self, in_aligned_reads):
+        batch_size = self.config.batchsize
+        all_chunks = []
+        chunk_sizes = []
+        for this_aligned_read in in_aligned_reads:
+            this_chunk = segment(this_aligned_read.norm_signal, self.config.seqlen)
+            all_chunks.append(this_chunk)
+            chunk_sizes.append(this_chunk.shape[0])
+        if len(all_chunks) == 0:
+            return {}
+        all_chunks = np.vstack(all_chunks)
+        cum_chunk_sizes = np.cumsum([0] + chunk_sizes)
 
-    event = torch.unsqueeze(torch.FloatTensor(all_chunks), 1).to(device, non_blocking=True)
-    outs = []
-    features = []
-    for start in np.arange(0, event.shape[0], batch_size):
-        stop = min(start+batch_size, event.shape[0])
-        outs.append(model.forward(event[start:stop]))
-        features.append(activation[ext_layer].detach().cpu().numpy())
-    outs = torch.cat(outs, 1)
-    features = np.vstack(features)
+        event = torch.unsqueeze(torch.FloatTensor(all_chunks), 1).to(self.device, non_blocking=True)
+        outs = []
+        features = []
+        for start in np.arange(0, event.shape[0], batch_size):
+            stop = min(start + batch_size, event.shape[0])
+            outs.append(self.model.forward(event[start:stop]))
+            features.append(self.activation[self.extraction_layer].detach().cpu().numpy())
+        outs = torch.cat(outs, 1)
+        features = np.vstack(features)
 
-    all_nts = []
-    for i, aligned_read in enumerate(in_aligned_reads):
-        this_out = outs[:, cum_chunk_sizes[i]:cum_chunk_sizes[i+1], :]
-        pred_str = []
-        str_features = []
-        for j in range(this_out.shape[1]):
-            this_pred_label, pred_locs = ctc_decoder(torch.softmax(this_out[:, j, :], dim=-1).cpu().detach().numpy(), alphabet=alphabet)
-            pred_str.extend(this_pred_label)
-            str_features.append(features[cum_chunk_sizes[i]:cum_chunk_sizes[i + 1]][j][:, pred_locs].T)
+        all_nts = []
+        for i, aligned_read in enumerate(in_aligned_reads):
+            this_out = outs[:, cum_chunk_sizes[i]:cum_chunk_sizes[i + 1], :]
+            pred_str = []
+            str_features = []
+            for j in range(this_out.shape[1]):
+                this_pred_label, pred_locs = ctc_decoder(
+                    torch.softmax(this_out[:, j, :], dim=-1).cpu().detach().numpy(), alphabet=alphabet)
+                pred_str.extend(this_pred_label)
+                str_features.append(features[cum_chunk_sizes[i]:cum_chunk_sizes[i + 1]][j][:, pred_locs].T)
 
-        pred_str = ''.join(pred_str)[::-1]
-        str_features = np.vstack(str_features)[::-1]
+            pred_str = ''.join(pred_str)[::-1]
+            str_features = np.vstack(str_features)[::-1]
 
-        pred_motif = ''.join(pred_str[aligned_read.read_pos - 2:aligned_read.read_pos + 3])
+            pred_motif = ''.join(pred_str[aligned_read.read_pos - 2:aligned_read.read_pos + 3])
 
-        if pred_motif!=aligned_read.query_5mer:
-            print('\n!!! Error: Predicted motif {} =/= aligned {} !!!\n'.format(pred_motif, aligned_read.query_5mer))
-            continue
+            if pred_motif != aligned_read.query_5mer:
+                print(
+                    '\n!!! Error: Predicted motif {} =/= aligned {} !!!\n'.format(pred_motif, aligned_read.query_5mer))
+                continue
 
-        str_features = np.vstack(str_features)
-        nt_feature = str_features[aligned_read.read_pos]
+            str_features = np.vstack(str_features)
+            nt_feature = str_features[aligned_read.read_pos]
 
-        all_nts.append(aligned_read.create_nucleotide(in_pred_5mer=pred_motif, in_feature=nt_feature))
+            all_nts.append(aligned_read.create_nucleotide(in_pred_5mer=pred_motif, in_feature=nt_feature))
 
-    return all_nts
-
-def get_nucleotides_aligned_to_site(model, device, config, ext_layer, alignment, index_read_ids, contig, site, strand, thresh_coverage=0, max_num_reads=1000, enforce_ref_5mer=False, ref_5mer='NNNNN'):
-    all_aligned_reads = []
-    for pileupcolumn in alignment.pileup(contig, site, site + 1, truncate=True):
-        if pileupcolumn.read_pos == site:
-            coverage = pileupcolumn.get_num_aligned()
-            if coverage>thresh_coverage:
-                valid_counts = 0
-                for pileupread in pileupcolumn.pileups:
-                    flag = pileupread.alignment.flag
-                    if not (
-                            ((strand=='+') and (flag==0))
-                            or ((strand=='-') and (flag==16))
-                    ):
-                        continue
-                    query_name = pileupread.alignment.query_name
-                    query_position = pileupread.query_position
-                    if query_position is None:
-                        continue
-                    if flag==16:
-                        query_position = pileupread.alignment.query_length - query_position - 1
-                    query_sequence = pileupread.alignment.get_forward_sequence()
-                    query_5mer = query_sequence[(query_position - 2):(query_position + 3)]
-                    # print('Strand {}, Flag {}, Ref 5mer: {}, Query 5-mer: {}'.format(strand, flag, ref_5mer, query_5mer))
-                    if enforce_ref_5mer and (query_5mer!=ref_5mer):
-                        continue
-                    if (query_name in index_read_ids.keys()):
-                        valid_counts += 1
-                        this_read_signal = get_norm_signal_from_read_id(query_name, index_read_ids)
-                        all_aligned_reads.append(aligned_read(
-                            read_id=query_name,
-                            read_pos=query_position,
-                            query_5mer=query_5mer,
-                            norm_signal=this_read_signal,
-                            flag=flag
-                        ))
-                    if (max_num_reads>0) and (len(all_aligned_reads)>=max_num_reads):
-                        break
-    if len(all_aligned_reads)==0:
-        return []
-    return get_nucleotides_from_multiple_reads(model, device, config, ext_layer, all_aligned_reads)
+        return all_nts

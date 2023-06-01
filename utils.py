@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from tqdm import tqdm
 from ont_fast5_api.fast5_interface import get_fast5_file
@@ -46,10 +47,15 @@ def index_fast5_files(f5_paths, bam=None):
     return index_read_ids
 
 
-def parse_reference_and_motif_dims(ref_file):
+def load_reference(ref_file):
+    print('Parsing reference {}...'.format(os.path.basename(ref_file)))
     ref = {}
     for record in SeqIO.parse(ref_file, 'fasta'):
         ref[record.id] = str(record.seq)
+
+    return ref
+
+def parse_motif_dims(ref):
     block_index_motif_size_center = []
     for k in ref.keys():
         if k.lstrip('block').split('_')[0] == '1':
@@ -59,5 +65,4 @@ def parse_reference_and_motif_dims(ref_file):
             block_center = block_size // 2
             motif = block_seq[block_center - 2:block_center + 3]
             block_index_motif_size_center.append((block_index, motif, block_size, block_center))
-
-    return ref, block_index_motif_size_center
+    return block_index_motif_size_center

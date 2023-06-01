@@ -2,13 +2,13 @@ import os
 import numpy as np
 import pandas as pd
 import pysam
+from Bio.Seq import Seq
 from glob import glob
-from utils import index_fast5_files
+from utils import index_fast5_files, get_norm_signal_from_read_id
 import random
 random.seed(0)
 from random import sample
 from tqdm import tqdm
-from utils import get_norm_signal_from_read_id
 
 class nucleotide:
     def __init__(self, read_id='', read_pos=-1, ref_pos=-1, pred_5mer='NNNNN', ref_5mer='NNNNN', feature=[], mod_prob=-1):
@@ -39,25 +39,57 @@ class aligned_read:
             feature = in_feature,
         )
 
+class mRNA_site:
+    def __init__(self, row, ref):
+        self.ind = row['index']
+        self.chr = row['Chr'].lstrip('chr')
+        self.start = row['Sites'] - 1  # 0-based
+        self.strand = row['Strand']
+        self.glori_ratio = row['Ratio']
+
+        ref_5mer = ref[self.chr][self.start-2:self.start+3]
+        if self.strand == '-':
+            self.ref_motif = str(Seq(ref_5mer).reverse_complement())
+        else:
+            self.ref_motif = ref_5mer
+
+    def print(self):
+        print('site{}, chr{}, start{}, strand{}'.format(self.ind, self.chr, self.start, self.strand))
+        print('Reference motif {}'.format(self.ref_motif))
+        print('GLORI ratio {}'.format(self.glori_ratio))
+
 class data_container:
-    def __init__(self, bam_path, fast5_dir):
+    def __init__(self, name, bam_path, fast5_dir):
+        print('Loading data {}'.format(name))
+        self.name = name
         self.bam = pysam.AlignmentFile(bam_path, 'rb')
         self.f5_paths = glob(os.path.join(fast5_dir, '*.fast5'), recursive=True)
         print('Indexing fast5 files from {}'.format(fast5_dir))
         self.indexed_read_ids = index_fast5_files(self.f5_paths, self.bam)
         print('{} reads indexed'.format(len(self.indexed_read_ids)))
+        self.nucleotides = {}
 
     def build_dict_read_ref(self):
         self.dict_read_ref = {}
         for read in self.bam.fetch():
             self.dict_read_ref[read.query_name] = read.reference_name
 
-class oligo_data_container(data_container):
-    def __init__(self, bam_path, fast5_dir):
-        super().__init__(bam_path, fast5_dir)
-        self.motif_nts = {}
+    def flush_nts_to_dataframe(self):
+        dfs = []
+        for this_motif in self.nucleotides.keys():
+            for nt in self.nucleotides[this_motif]:
+                dfs.append(
+                    pd.DataFrame(
+                        [(nt.read_id, self.dict_read_ref[nt.read_id], nt.read_pos, nt.ref_pos, nt.ref_5mer, nt.pred_5mer, round(nt.mod_prob, 3))],
+                        columns=['read_id', 'contig', 'read_pos', 'ref_pos', 'ref_motif', 'pred_motif', 'mod_prob']
+                    )
+                )
+        self.nucleotides.clear()
+        return pd.concat(dfs)
 
+class oligo_data_container(data_container):
     def collect_features_from_reads(self, extractor, max_num_reads):
+        print('Now extracting features from {}'.format(self.name))
         if max_num_reads > 0:
             sample_read_ids = {id: self.indexed_read_ids[id] for id in
                               sample(list(self.indexed_read_ids.keys()), min(len(self.indexed_read_ids.keys()), max_num_reads))}
@@ -72,7 +104,7 @@ class oligo_data_container(data_container):
         self.read_bases_features = read_bases_features
 
     def collect_motif_nucleotides(self, motif_ind, motif, ref, block_size, block_center, enforce_ref_5mer=False):
-        print('Collecting nucleotides for motif {}...'.format(motif))
+        print('Collecting nucleotides for motif {}'.format(motif))
 
         relevant_contigs = [k for k in ref.keys() if ((motif_ind in k.split('_')[1]) and (k in self.bam.references))]
         this_motif_nts = []
@@ -85,8 +117,8 @@ class oligo_data_container(data_container):
                 if len(this_tPos_nts) > 0:
                     this_motif_nts.extend(this_tPos_nts)
 
-        self.motif_nts[motif] = this_motif_nts
-        print('{} NTs collected'.format(len(self.motif_nts[motif])))
+        self.nucleotides[motif] = this_motif_nts
+        print('{} NTs collected'.format(len(self.nucleotides[motif])))
 
     def collect_nucleotides_aligned_to_target_pos(self, contig, target_pos, ref_motif=None, enforce_ref_5mer=False):
         all_nts = []
@@ -123,19 +155,49 @@ class oligo_data_container(data_container):
                         valid_counts += 1
         return all_nts
 
-    def flush_nts_to_dataframe(self):
-        dfs = []
-        for this_motif in self.motif_nts.keys():
-            for nt in self.motif_nts[this_motif]:
-                dfs.append(
-                    pd.DataFrame(
-                        [(nt.read_id, self.dict_read_ref[nt.read_id], nt.read_pos, nt.ref_pos, this_motif, nt.pred_5mer, round(nt.mod_prob, 3))],
-                        columns=['read_id', 'contig', 'q_pos', 't_pos', 'ref_motif', 'pred_motif', 'mod_prob']
-                    )
-                )
-        self.motif_nts = {}
-        return pd.concat(dfs)
-
 class mRNA_data_container(data_container):
-    def __init__(self, bam_path, fast5_dir):
-        super().__init__(bam_path, fast5_dir)
+    def __init__(self, name, bam_path, fast5_dir):
+        super().__init__(name, bam_path, fast5_dir)
+
+    def collect_nucleotides_aligned_to_mRNA_site(self, extractor, site, thresh_coverage=1, max_num_reads=1000, enforce_ref_5mer=False):
+        all_aligned_reads = []
+        for pileupcolumn in self.bam.pileup(site.chr, site.start, site.start + 1, truncate=True):
+            if pileupcolumn.reference_pos == site.start:
+                coverage = pileupcolumn.get_num_aligned()
+                if coverage > thresh_coverage:
+                    valid_counts = 0
+                    for pileupread in pileupcolumn.pileups:
+                        flag = pileupread.alignment.flag
+                        if not (
+                                ((site.strand == '+') and (flag == 0))
+                                or ((site.strand == '-') and (flag == 16))
+                        ):
+                            continue
+                        query_name = pileupread.alignment.query_name
+                        query_position = pileupread.query_position
+                        if query_position is None:
+                            continue
+                        if flag == 16:
+                            query_position = pileupread.alignment.query_length - query_position - 1
+                        query_sequence = pileupread.alignment.get_forward_sequence()
+                        query_5mer = query_sequence[(query_position - 2):(query_position + 3)]
+                        if enforce_ref_5mer and (query_5mer != site.ref_motif):
+                            continue
+                        if (query_name in self.indexed_read_ids.keys()):
+                            valid_counts += 1
+                            this_read_signal = get_norm_signal_from_read_id(query_name, self.indexed_read_ids)
+                            all_aligned_reads.append(aligned_read(
+                                read_id=query_name,
+                                read_pos=query_position,
+                                query_5mer=query_5mer,
+                                ref_pos=pileupcolumn.reference_pos,
+                                norm_signal=this_read_signal,
+                                flag=flag
+                            ))
+                        if (max_num_reads > 0) and (len(all_aligned_reads) >= max_num_reads):
+                            break
+        site_nts = extractor.get_nucleotides_from_multiple_reads(all_aligned_reads)
+        for nt in site_nts:
+            nt.ref_5mer = site.ref_motif
+        if len(site_nts)>0:
+            self.nucleotides[site.ind] = site_nts

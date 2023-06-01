@@ -64,7 +64,7 @@ class motif_classifier:
             this_nt.mod_prob = this_mod_prob
         predictions = np.int32(mod_probs > mod_thresh)
         avg_mod_ratio = np.mean(predictions)
-        print('Mean mod. ratio {:.2f}'.format(avg_mod_ratio))
+        print('Predicted mod. ratio {:.2f}'.format(avg_mod_ratio))
         return avg_mod_ratio
 
     def save(self, out_model_path, draw_prc=False):
@@ -89,6 +89,7 @@ class motif_classifier:
 
 
 def load_motif_classifiers(classifier_dir):
+    print('Loading motif classifiers...')
     classifier_paths = glob(os.path.join(classifier_dir, '*.pkl'))
     motif_classifiers = {}
     for this_path in classifier_paths:
