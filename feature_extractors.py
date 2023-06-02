@@ -69,16 +69,14 @@ class backbone_network:
             self.activation[name] = output.detach()
         return hook
 
-    def get_features_from_signal(self, signal):
-        chunks = segment(signal, self.config.seqlen)
-        event = torch.unsqueeze(torch.FloatTensor(chunks), 1).to(self.device, non_blocking=True)
+    def _get_base_probs_and_activations(self, in_chunks):
+        event = torch.unsqueeze(torch.FloatTensor(in_chunks), 1).to(self.device, non_blocking=True)
         event_size = event.shape[0]
-        batch_size = self.config.batchsize
-        if event_size <= batch_size:
+        if event_size <= self.config.batchsize:
             out = self.model.forward(event)
             layer_activation = self.activation[self.extraction_layer].detach().cpu().numpy()
         else:
-            break_pts = np.arange(0, event_size, batch_size)
+            break_pts = np.arange(0, event_size, self.config.batchsize)
             start_stop_pts = [(start, stop) for start, stop in zip(break_pts, list(break_pts[1:]) + [event_size])]
             batch_out = []
             batch_layer_activation = []
@@ -87,11 +85,15 @@ class backbone_network:
                 batch_layer_activation.append(self.activation[self.extraction_layer].detach().cpu().numpy())
             out = torch.concat(batch_out, 1)
             layer_activation = np.concatenate(batch_layer_activation, axis=0)
+        return out, layer_activation
+
+
+    def _get_basecall_and_features(self, in_base_probs, layer_activation):
         num_locs = layer_activation.shape[-1]
         pred_labels = []
-        features = []
-        for i in range(out.shape[1]):
-            probs = torch.softmax(out[:, i, :], dim=-1).cpu().detach().numpy()
+        out_features = []
+        for i in range(in_base_probs.shape[1]):
+            probs = torch.softmax(in_base_probs[:, i, :], dim=-1).cpu().detach().numpy()
             this_pred_label, pred_locs = ctc_decoder(probs, alphabet=alphabet)
 
             pred_labels.append(this_pred_label)
@@ -114,59 +116,55 @@ class backbone_network:
                     shifted_locs = [max(min(x + loc_shift, num_locs - 1), 0) for x in pred_locs_corrected]
                     this_feature.append(layer_activation[i, :, shifted_locs])
                 this_feature = np.hstack(this_feature)
-                # this_feature = np.mean(np.stack(this_feature, axis=-1), axis=-1)
-            features.append(this_feature)
+            out_features.append(this_feature)
         pred_label = ''.join(pred_labels)[::-1]
-        features = np.vstack(features)[::-1]
-        return features, pred_label
+        out_features = np.vstack(out_features)[::-1]
 
-    def get_nucleotides_from_multiple_reads(self, in_aligned_reads):
-        batch_size = self.config.batchsize
-        all_chunks = []
+        return pred_label, out_features
+
+    def get_features_from_signal(self, signal):
+        chunks = segment(signal, self.config.seqlen)
+
+        base_probs, activations = self._get_base_probs_and_activations(chunks)
+        basecalls, features = self._get_basecall_and_features(base_probs, activations)
+
+        return features, basecalls
+
+    def _get_chunks_and_sizes_from_multiple_aligned_reads(self, in_aligned_reads):
+        out_chunks = []
         chunk_sizes = []
         for this_aligned_read in in_aligned_reads:
             this_chunk = segment(this_aligned_read.norm_signal, self.config.seqlen)
-            all_chunks.append(this_chunk)
+            out_chunks.append(this_chunk)
             chunk_sizes.append(this_chunk.shape[0])
-        if len(all_chunks) == 0:
-            return {}
-        all_chunks = np.vstack(all_chunks)
+        if len(out_chunks) == 0:
+            return [], -1
+
+        out_chunks = np.vstack(out_chunks)
         cum_chunk_sizes = np.cumsum([0] + chunk_sizes)
 
-        event = torch.unsqueeze(torch.FloatTensor(all_chunks), 1).to(self.device, non_blocking=True)
-        outs = []
-        features = []
-        for start in np.arange(0, event.shape[0], batch_size):
-            stop = min(start + batch_size, event.shape[0])
-            outs.append(self.model.forward(event[start:stop]))
-            features.append(self.activation[self.extraction_layer].detach().cpu().numpy())
-        outs = torch.cat(outs, 1)
-        features = np.vstack(features)
+        return out_chunks, cum_chunk_sizes
+
+    def get_nucleotides_from_multiple_reads(self, in_aligned_reads):
+        chunks, chunk_sizes = self._get_chunks_and_sizes_from_multiple_aligned_reads(in_aligned_reads)
+        if len(chunks)==0:
+            return []
+
+        base_probs, activations = self._get_base_probs_and_activations(chunks)
 
         all_nts = []
         for i, aligned_read in enumerate(in_aligned_reads):
-            this_out = outs[:, cum_chunk_sizes[i]:cum_chunk_sizes[i + 1], :]
-            pred_str = []
-            str_features = []
-            for j in range(this_out.shape[1]):
-                this_pred_label, pred_locs = ctc_decoder(
-                    torch.softmax(this_out[:, j, :], dim=-1).cpu().detach().numpy(), alphabet=alphabet)
-                pred_str.extend(this_pred_label)
-                str_features.append(features[cum_chunk_sizes[i]:cum_chunk_sizes[i + 1]][j][:, pred_locs].T)
+            this_chunk_base_probs = base_probs[:, chunk_sizes[i]:chunk_sizes[i + 1], :]
+            this_chunk_activations = activations[chunk_sizes[i]:chunk_sizes[i + 1], :, :]
+            this_chunk_basecalls, this_chunk_features = self._get_basecall_and_features(this_chunk_base_probs, this_chunk_activations)
 
-            pred_str = ''.join(pred_str)[::-1]
-            str_features = np.vstack(str_features)[::-1]
-
-            pred_motif = ''.join(pred_str[aligned_read.read_pos - 2:aligned_read.read_pos + 3])
-
+            pred_motif = this_chunk_basecalls[aligned_read.read_pos-2 : aligned_read.read_pos+3]
             if pred_motif != aligned_read.query_5mer:
                 print(
                     '\n!!! Error: Predicted motif {} =/= aligned {} !!!\n'.format(pred_motif, aligned_read.query_5mer))
                 continue
 
-            str_features = np.vstack(str_features)
-            nt_feature = str_features[aligned_read.read_pos]
-
+            nt_feature = this_chunk_features[aligned_read.read_pos]
             all_nts.append(aligned_read.create_nucleotide(in_pred_5mer=pred_motif, in_feature=nt_feature))
 
         return all_nts
