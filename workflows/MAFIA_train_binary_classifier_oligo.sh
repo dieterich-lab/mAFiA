@@ -69,8 +69,6 @@ python3 oligo_train_binary_classifier.py \
 --mod_fast5_dir ${MOD_FAST5} \
 --ref_file ${REF} \
 --backbone_model_path ${BACKBONE_MODEL} \
---extraction_layer ${EXT_LAYER} \
 --scaler ${SCALER} \
 --min_coverage 10 \
---classifier ${CLASSIFIER} \
 --classifier_model_dir ${OUTDIR}
