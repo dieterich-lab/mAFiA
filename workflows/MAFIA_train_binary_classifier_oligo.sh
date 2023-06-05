@@ -28,23 +28,23 @@ SCALER=MaxAbs
 #### Claudia batches 1 & 2 ###
 #TRAIN_DATASET=WUE_batch1
 #TRAIN_DATASET=WUE_batch2
-TRAIN_DATASET=WUE_batches1+2
+#TRAIN_DATASET=WUE_batches1+2
 
-UNM_BAM=${DATA_DIR}/${TRAIN_DATASET}_A/spomelette_q80.bam
-UNM_FAST5=${DATA_DIR}/${TRAIN_DATASET}_A/fast5
-MOD_BAM=${DATA_DIR}/${TRAIN_DATASET}_m6A/spomelette_q80.bam
-MOD_FAST5=${DATA_DIR}/${TRAIN_DATASET}_m6A/fast5
-REF=${DATA_DIR}/reference/${TRAIN_DATASET}_ref_recon.fa
-OUTDIR=${DATA_DIR}/MAFIA_classifiers/${TRAIN_DATASET}_spomelette_${CLASSIFIER}_${SCALER}
+#UNM_BAM=${DATA_DIR}/${TRAIN_DATASET}_A/spomelette_q80.bam
+#UNM_FAST5=${DATA_DIR}/${TRAIN_DATASET}_A/fast5
+#MOD_BAM=${DATA_DIR}/${TRAIN_DATASET}_m6A/spomelette_q80.bam
+#MOD_FAST5=${DATA_DIR}/${TRAIN_DATASET}_m6A/fast5
+#REF=${DATA_DIR}/reference/${TRAIN_DATASET}_ref_recon.fa
+#OUTDIR=${DATA_DIR}/MAFIA_classifiers/${TRAIN_DATASET}_spomelette_${CLASSIFIER}_${SCALER}
 
 ### Isabel RL top 6 ###
-#TRAIN_DATASET=RL_top6
-#UNM_BAM=${DATA_DIR}/${TRAIN_DATASET}_A/spomlette_q70.bam
-#UNM_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG1-6_A_RTA/20230418_1325_X1_AOL616_885f620d/fast5
-#MOD_BAM=${DATA_DIR}/${TRAIN_DATASET}_m6A/spomlette_q70.bam
-#MOD_FAST5=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230418_Random_Ligation_A_m6A/RL_RG7-12_m6A_RTA/20230418_1325_X2_AOC149_8138c168/fast5
-#REF=${DATA_DIR}/reference/${TRAIN_DATASET}_combined.fa
-#OUTDIR=${DATA_DIR}/MAFIA_classifiers/${TRAIN_DATASET}_spomlette_${CLASSIFIER}_${SCALER}
+TRAIN_DATASET=ISA_run1
+UNM_BAM=${DATA_DIR}/${TRAIN_DATASET}_A/spomlette_q70.bam
+UNM_FAST5=${DATA_DIR}/${TRAIN_DATASET}_A/fast5
+MOD_BAM=${DATA_DIR}/${TRAIN_DATASET}_m6A/spomlette_q70.bam
+MOD_FAST5=${DATA_DIR}/${TRAIN_DATASET}_m6A/fast5
+REF=${DATA_DIR}/reference/${TRAIN_DATASET}_ligation_ref.fa
+OUTDIR=${DATA_DIR}/MAFIA_classifiers/${TRAIN_DATASET}_spomlette_${CLASSIFIER}_${SCALER}
 
 ### Isabel RL Mix 1 & 3 ###
 #UNM_BAM=${DATA_DIR}/RL_Mix1_A_RTA/mapped.bam
