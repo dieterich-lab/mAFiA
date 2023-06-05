@@ -103,22 +103,21 @@ class oligo_data_container(data_container):
             read_bases_features[query_name] = (this_read_bases, this_read_features)
         self.read_bases_features = read_bases_features
 
-    def collect_motif_nucleotides(self, motif_ind, motif, ref, block_size, block_center, enforce_ref_5mer=False):
-        print('Collecting nucleotides for motif {}'.format(motif))
+    def collect_motif_nucleotides(self, reference_motif, reference_generator, enforce_ref_5mer=False):
+        print('Collecting nucleotides for motif {}'.format(reference_motif))
 
-        relevant_contigs = [k for k in ref.keys() if ((motif_ind in k.split('_')[1]) and (k in self.bam.references))]
+        motif_relevant_ligation_ref_ids_and_positions = reference_generator.get_motif_relevant_ligation_ref_ids_and_positions(reference_motif)
+        relevant_contigs = [k for k in motif_relevant_ligation_ref_ids_and_positions.keys() if k in self.bam.references]
+
         this_motif_nts = []
         for contig in relevant_contigs:
-            block_str = contig.split('_')[1]
-            site_positions = np.where(np.array(list(block_str)) == motif_ind)[0] * block_size + block_center
-            for pos in site_positions:
-                reference_motif = ref[contig][(pos - 2):(pos + 3)]
+            for pos in motif_relevant_ligation_ref_ids_and_positions[contig]:
                 this_tPos_nts = self.collect_nucleotides_aligned_to_target_pos(contig, pos, reference_motif, enforce_ref_5mer)
                 if len(this_tPos_nts) > 0:
                     this_motif_nts.extend(this_tPos_nts)
 
-        self.nucleotides[motif] = this_motif_nts
-        print('{} NTs collected'.format(len(self.nucleotides[motif])))
+        self.nucleotides[reference_motif] = this_motif_nts
+        print('{} NTs collected'.format(len(self.nucleotides[reference_motif])))
 
     def collect_nucleotides_aligned_to_target_pos(self, contig, target_pos, ref_motif=None, enforce_ref_5mer=False):
         all_nts = []

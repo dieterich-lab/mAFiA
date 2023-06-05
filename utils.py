@@ -56,18 +56,6 @@ def load_reference(ref_file):
 
     return ref
 
-def parse_motif_dims(ref):
-    block_index_motif_size_center = []
-    for k in ref.keys():
-        if k.lstrip('block').split('_')[0] == '1':
-            block_index = k.split('_')[1]
-            block_seq = ref[k]
-            block_size = len(block_seq)
-            block_center = block_size // 2
-            motif = block_seq[block_center - 2:block_center + 3]
-            block_index_motif_size_center.append((block_index, motif, block_size, block_center))
-    return block_index_motif_size_center
-
 class args_parser(argparse.ArgumentParser):
     def __init__(self):
         super().__init__()

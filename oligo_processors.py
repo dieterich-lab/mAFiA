@@ -8,15 +8,24 @@ from Bio.Align import PairwiseAligner, Alignment
 from Bio.Align.sam import AlignmentWriter
 
 class Oligo_Reference_Generator:
-    def __init__(self, in_ref):
-        self.oligo_ref = list(SeqIO.parse(in_ref, 'fasta'))
+    def __init__(self, oligo_ref_file=None, ligation_ref_file=None, oligo_fmt='-M([0-9]+)S([0-9]+)'):
+        self.oligo_fmt = oligo_fmt
+        if ligation_ref_file:
+            self.ligation_ref = {}
+            for ligation_ref in list(SeqIO.parse(ligation_ref_file, 'fasta')):
+                ligation_ref.name = ''
+                ligation_ref.description = ''
+                self.ligation_ref[ligation_ref.id] = ligation_ref
+            self.oligo_ref = [self.ligation_ref[k] for k, v in self.ligation_ref.items() if len(re.findall(self.oligo_fmt, v.id))==1]
+        else:
+            self.oligo_ref = list(SeqIO.parse(oligo_ref_file, 'fasta'))
+            self.ligation_ref = {}
+            for idx, ref in enumerate(self.oligo_ref.copy()):
+                ref.id = self._generate_ligation_ref_id([idx])
+                ref.name = ''
+                ref.description = ''
+                self.ligation_ref[ref.id] = ref
         self.oligo_lens = [len(ref.seq) for ref in self.oligo_ref]
-        self.ligation_ref = {}
-        for idx, ref in enumerate(self.oligo_ref.copy()):
-            ref.id = self._generate_ligation_ref_id([idx])
-            ref.name = ''
-            ref.description = ''
-            self.ligation_ref[ref.id] = ref
         self.min_segment_len = min([len(ref.seq) for ref in self.oligo_ref]) // 2
 
     def _generate_ligation_ref_id(self, seg_seq):
@@ -32,7 +41,6 @@ class Oligo_Reference_Generator:
 
     def get_ligation_reference(self, segments):
         segment_sequence = [seg[0] for seg in segments]
-        # ligation_ref_id = 'block{}_{}'.format(len(segment_sequence), ''.join([str(dict_motifs[s]) for s in segment_sequence]))
         ligation_ref_id = self._generate_ligation_ref_id(segment_sequence)
         ligation_ref_seq = Seq('').join([self.oligo_ref[ind].seq for ind in segment_sequence])
         ligation_ref_record = SeqRecord(
@@ -44,6 +52,46 @@ class Oligo_Reference_Generator:
             self.ligation_ref[ligation_ref_id] = ligation_ref_record
 
         return ligation_ref_record
+
+    def collect_motif_oligos(self):
+        motif_oligo_name_size_center = {}
+        for this_oligo_ref in self.oligo_ref:
+            motif_seq_indices = re.findall(self.oligo_fmt, this_oligo_ref.id)
+            if len(motif_seq_indices) == 1:
+                this_oligo_name = this_oligo_ref.id
+                # this_oligo_index = motif_seq_indices[0][0]
+                this_oligo_size = len(this_oligo_ref.seq)
+                this_oligo_center = this_oligo_size // 2
+                this_oligo_motif = str(this_oligo_ref.seq[this_oligo_center-2 : this_oligo_center+3])
+                if this_oligo_motif not in motif_oligo_name_size_center.keys():
+                    motif_oligo_name_size_center[this_oligo_motif] = {}
+                motif_oligo_name_size_center[this_oligo_motif][this_oligo_name] = (this_oligo_size, this_oligo_center)
+        self.motif_oligos = motif_oligo_name_size_center
+        self.flat_oligo_dims = {kk: vv for k, v in self.motif_oligos.items() for kk, vv in v.items()}
+
+    def get_motif_relevant_ligation_ref_ids_and_positions(self, in_motif):
+        relevant_oligos = self.motif_oligos[in_motif]
+        relevant_ligation_ref_ids_positions = {}
+        for ref_id in self.ligation_ref.keys():
+            for this_oligo_id in relevant_oligos.keys():
+                oligo_origin, oligo_suffix = this_oligo_id.split('-')
+                lig_ref_decomposed = ref_id.split('-')
+                lig_ref_origin = lig_ref_decomposed[0]
+                lig_ref_suffices = lig_ref_decomposed[1:]
+                if (lig_ref_origin==oligo_origin) and (oligo_suffix in lig_ref_suffices):
+                    site_positions = []
+                    for lig_ind, this_lig_ref_suffix in enumerate(lig_ref_suffices):
+                        if this_lig_ref_suffix==oligo_suffix:
+                            if lig_ind>0:
+                                previous_suffices = lig_ref_suffices[:lig_ind] if lig_ind>0 else 0
+                                inter_block_shifts = sum([self.flat_oligo_dims['{}-{}'.format(lig_ref_origin, block)][0] for block in previous_suffices])
+                            else:
+                                inter_block_shifts = 0
+                            intra_block_shift = self.flat_oligo_dims['{}-{}'.format(lig_ref_origin, this_lig_ref_suffix)][1]
+                            site_positions.append(inter_block_shifts+intra_block_shift)
+                    relevant_ligation_ref_ids_positions[ref_id] = site_positions
+
+        return relevant_ligation_ref_ids_positions
 
 class Query_Container:
     def __init__(self, query_file):

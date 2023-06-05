@@ -1,7 +1,8 @@
 import os, sys
 HOME = os.path.expanduser('~')
 sys.path.append(os.path.join(HOME, 'git/MAFIA'))
-from utils import train_args_parser, load_reference, parse_motif_dims
+from utils import train_args_parser, load_reference
+from oligo_processors import Oligo_Reference_Generator
 from data_containers import oligo_data_container
 from feature_extractors import backbone_network
 from feature_classifiers import motif_classifier
@@ -20,21 +21,20 @@ def main(args):
     unm_container.collect_features_from_reads(ivt_backbone, args.max_num_reads)
     mod_container.collect_features_from_reads(ivt_backbone, args.max_num_reads)
 
-    reference = load_reference(args.ref_file)
-    motif_dims = parse_motif_dims(reference)
+    oligo_ref_generator = Oligo_Reference_Generator(ligation_ref_file=args.ref_file)
+    oligo_ref_generator.collect_motif_oligos()
 
-    for motif_ind, motif, block_size, block_center in motif_dims:
-        unm_container.collect_motif_nucleotides(motif_ind, motif, reference, block_size=block_size, block_center=block_center, enforce_ref_5mer=args.enforce_ref_5mer)
-        mod_container.collect_motif_nucleotides(motif_ind, motif, reference, block_size=block_size, block_center=block_center, enforce_ref_5mer=args.enforce_ref_5mer)
+    for this_motif in oligo_ref_generator.motif_oligos.keys():
+        unm_container.collect_motif_nucleotides(this_motif, oligo_ref_generator, enforce_ref_5mer=args.enforce_ref_5mer)
+        mod_container.collect_motif_nucleotides(this_motif, oligo_ref_generator, enforce_ref_5mer=args.enforce_ref_5mer)
 
-        if min(len(unm_container.nucleotides[motif]), len(mod_container.nucleotides[motif]))>=args.min_coverage:
-            this_motif_classifier = motif_classifier(motif=motif, classifier_type=args.classifier_type, scaler=args.scaler)
-            this_motif_classifier.train(unm_container.nucleotides[motif], mod_container.nucleotides[motif])
+        if min(len(unm_container.nucleotides[this_motif]), len(mod_container.nucleotides[this_motif]))>=args.min_coverage:
+            this_motif_classifier = motif_classifier(motif=this_motif, classifier_type=args.classifier_type, scaler=args.scaler)
+            this_motif_classifier.train(unm_container.nucleotides[this_motif], mod_container.nucleotides[this_motif])
             this_motif_classifier.save(
-                out_model_path=os.path.join(args.classifier_model_dir, '{}.pkl'.format(motif)),
+                out_model_path=os.path.join(args.classifier_model_dir, '{}.pkl'.format(this_motif)),
                 draw_prc=True
             )
 
 if __name__ == "__main__":
     main(parser.args)
-
