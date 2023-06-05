@@ -72,7 +72,7 @@ class motif_classifier:
             pickle.dump(self, h_out, pickle.HIGHEST_PROTOCOL)
 
         if draw_prc:
-            out_img_path = out_model_path.replace('.pkl', 'png')
+            out_img_path = out_model_path.replace('.pkl', '.png')
             plt.figure(figsize=(5, 5))
             plt.plot(self.recall, self.precision, '-')
             plt.xlabel('Recall')

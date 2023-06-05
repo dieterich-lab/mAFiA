@@ -5,15 +5,14 @@ FILTER_SCORE=70
 ########################################################################################################################
 ### Wuerzburg batch 1 ##################################################################################################
 ########################################################################################################################
-#REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_oligos_batch1.fasta
+REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_oligos_batch1.fasta
 
 #TRAIN_DATASET=WUE_batch1_A
-##FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_A_RTA/*
+TRAIN_DATASET=WUE_batch1_m6A
 
-#TRAIN_DATASET=WUE_batch1_m6A
-##FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230221_WUE_splint_lig/WUE_splint_lig_m6A_RTA/*
+FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${TRAIN_DATASET}/fast5
 
-#FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${TRAIN_DATASET}/fast5
+HOMOPOLYMER=0
 
 ########################################################################################################################
 ### Wuerzburg batch 2 ##################################################################################################
@@ -30,19 +29,19 @@ FILTER_SCORE=70
 #FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${TRAIN_DATASET}/fast5
 
 ########################################################################################################################
-### Isabel all 6 #######################################################################################################
+### Isabel run 1 #######################################################################################################
 ########################################################################################################################
-REF=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/ISA_run1.fasta
-
-#TRAIN_DATASET=ISA_run1_A
-TRAIN_DATASET=ISA_run1_m6A
-
-FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${TRAIN_DATASET}/fast5
-
-HOMOPOLYMER=1
+#REF=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/ISA_run1.fasta
+#
+##TRAIN_DATASET=ISA_run1_A
+#TRAIN_DATASET=ISA_run1_m6A
+#
+#FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${TRAIN_DATASET}/fast5
+#
+#HOMOPOLYMER=1
 
 ########################################################################################################################
-### Isabel 3+3 #########################################################################################################
+### Isabel run 2 #######################################################################################################
 ########################################################################################################################
 #REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/RL_Mix1_Mix3_blocks8.fasta
 #TRAIN_DATASET=RL_Mix1_A
@@ -115,7 +114,7 @@ ${HOME}/git/renata/accuracy.py ${FILTERED_SAM} ${LIGATION_REF}
 
 #### Convert to BAM ###
 BAM=${FILTERED_SAM//.sam/.bam}
-samtools view -bST ${REF} ${FILTERED_SAM} | samtools sort - > ${BAM}
+samtools view -bST ${LIGATION_REF} ${FILTERED_SAM} | samtools sort - > ${BAM}
 samtools index ${BAM}
 
 ### filter reads by max indel ###
@@ -130,7 +129,7 @@ samtools index ${BAM}
 #samtools index ${BAM}.filtered
 
 ### combine recon references ###
-#BATCH=1
+BATCH=1
 #BATCH=2
-#awk '/^>/{p=seen[$0]++}!p' /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_batch${BATCH}_A/ref_recon.fa /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_batch${BATCH}_m6A/ref_recon.fa > /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch${BATCH}_ref_recon.fa
-awk '/^>/{p=seen[$0]++}!p' /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/ISA_run1_A/ligation_ref.fa /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/ISA_run1_m6A/ligation_ref.fa > /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/ISA_run1_ligation_ref.fa
+awk '/^>/{p=seen[$0]++}!p' /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_batch${BATCH}_A/ligation_ref.fa /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_batch${BATCH}_m6A/ligation_ref.fa > /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch${BATCH}_ligation_ref.fa
+#awk '/^>/{p=seen[$0]++}!p' /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/ISA_run1_A/ligation_ref.fa /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/ISA_run1_m6A/ligation_ref.fa > /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/ISA_run1_ligation_ref.fa
