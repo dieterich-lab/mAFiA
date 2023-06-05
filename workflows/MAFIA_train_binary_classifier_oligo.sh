@@ -39,12 +39,12 @@ SCALER=MaxAbs
 
 ### Isabel RL top 6 ###
 TRAIN_DATASET=ISA_run1
-UNM_BAM=${DATA_DIR}/${TRAIN_DATASET}_A/spomlette_q70.bam
+UNM_BAM=${DATA_DIR}/${TRAIN_DATASET}_A/spomelette_q70.bam
 UNM_FAST5=${DATA_DIR}/${TRAIN_DATASET}_A/fast5
-MOD_BAM=${DATA_DIR}/${TRAIN_DATASET}_m6A/spomlette_q70.bam
+MOD_BAM=${DATA_DIR}/${TRAIN_DATASET}_m6A/spomelette_q70.bam
 MOD_FAST5=${DATA_DIR}/${TRAIN_DATASET}_m6A/fast5
 REF=${DATA_DIR}/reference/${TRAIN_DATASET}_ligation_ref.fa
-OUTDIR=${DATA_DIR}/MAFIA_classifiers/${TRAIN_DATASET}_spomlette_${CLASSIFIER}_${SCALER}
+OUTDIR=${DATA_DIR}/MAFIA_classifiers/${TRAIN_DATASET}_spomelette_${CLASSIFIER}_${SCALER}
 
 ### Isabel RL Mix 1 & 3 ###
 #UNM_BAM=${DATA_DIR}/RL_Mix1_A_RTA/mapped.bam
