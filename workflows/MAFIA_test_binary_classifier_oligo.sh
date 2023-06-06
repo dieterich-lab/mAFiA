@@ -25,7 +25,7 @@ TEST_DATASET=WUE_batch1_A
 ########################################################################################################################
 BAM=${PRJ_DIR}/${TEST_DATASET}/spomelette_q70.bam
 FAST5_DIR=${PRJ_DIR}/${TEST_DATASET}/fast5
-REF=${PRJ_DIR}/${TEST_DATASET}/ref_recon.fa
+LIG_REF=${PRJ_DIR}/${TEST_DATASET}/ligation_ref.fa
 BACKBONE_MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 CLASSIFIER_MODEL_DIR=${PRJ_DIR}/MAFIA_classifiers/${TRAIN_DATASET}
 OUTFILE=${PRJ_DIR}/results/res_train_${TRAIN_DATASET}_test_${TEST_DATASET}_q70.tsv
@@ -36,7 +36,7 @@ set -e -u -f
 python3 ${HOME}/git/MAFIA/oligo_test_binary_classifier.py \
 --test_bam_file ${BAM} \
 --test_fast5_dir ${FAST5_DIR} \
---ref_file ${REF} \
+--ref_file ${LIG_REF} \
 --backbone_model_path ${BACKBONE_MODEL} \
 --classifier_model_dir ${CLASSIFIER_MODEL_DIR} \
 --outfile ${OUTFILE}

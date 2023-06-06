@@ -37,12 +37,13 @@ def get_freer_device():
     return freer_device, free_mem
 
 class backbone_network:
-    def __init__(self, model_path, extraction_layer, feature_width):
+    def __init__(self, model_path, extraction_layer, feature_width, batchsize=1024):
         print('Finding my backbone...')
         torchdict = torch.load(model_path, map_location="cpu")
         self.config = objectview(torchdict["config"])
         self.extraction_layer = extraction_layer
         self.feature_width = feature_width
+        self.batchsize = batchsize
         self.activation = {}
         self._load_model(model_path)
         print('Using device {}, model {} at extraction layer {}'.format(self.device, os.path.basename(model_path), extraction_layer))
@@ -72,11 +73,11 @@ class backbone_network:
     def _get_base_probs_and_activations(self, in_chunks):
         event = torch.unsqueeze(torch.FloatTensor(in_chunks), 1).to(self.device, non_blocking=True)
         event_size = event.shape[0]
-        if event_size <= self.config.batchsize:
+        if event_size <= self.batchsize:
             out = self.model.forward(event)
             layer_activation = self.activation[self.extraction_layer].detach().cpu().numpy()
         else:
-            break_pts = np.arange(0, event_size, self.config.batchsize)
+            break_pts = np.arange(0, event_size, self.batchsize)
             start_stop_pts = [(start, stop) for start, stop in zip(break_pts, list(break_pts[1:]) + [event_size])]
             batch_out = []
             batch_layer_activation = []
