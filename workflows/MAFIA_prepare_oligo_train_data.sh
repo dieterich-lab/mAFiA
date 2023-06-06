@@ -74,7 +74,7 @@ cd ${WORKSPACE}
 
 FASTA=${WORKSPACE}/renata.fasta
 SAM=${WORKSPACE}/spomelette.sam
-LIGATION_REF=${WORKSPACE}/ligation_ref.fa
+LIGATION_REF=${WORKSPACE}/ligation_ref.fasta
 
 #### basecall with Rodan IVT ###
 #deactivate
@@ -129,7 +129,7 @@ samtools index ${BAM}
 #samtools index ${BAM}.filtered
 
 ### combine recon references ###
-BATCH=1
+#BATCH=1
 #BATCH=2
-awk '/^>/{p=seen[$0]++}!p' /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_batch${BATCH}_A/ligation_ref.fa /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_batch${BATCH}_m6A/ligation_ref.fa > /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_batch${BATCH}_ligation_ref.fa
-#awk '/^>/{p=seen[$0]++}!p' /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/ISA_run1_A/ligation_ref.fa /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/ISA_run1_m6A/ligation_ref.fa > /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/ISA_run1_ligation_ref.fa
+#awk '/^>/{p=seen[$0]++}!p' /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_batch${BATCH}_A/ligation_ref.fasta /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_batch${BATCH}_m6A/ligation_ref.fasta > /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_ligation_ref_batch${BATCH}.fasta
+#awk '/^>/{p=seen[$0]++}!p' /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/ISA_run1_A/ligation_ref.fasta /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/ISA_run1_m6A/ligation_ref.fasta > /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/ISA_ligation_ref_run1.fasta

@@ -106,6 +106,7 @@ class Data_Container:
         return (signal[signal_start:signal_end] - med) / mad
 
     def build_dict_read_ref(self):
+        print('Building dictionary of reads to mapped references')
         self.dict_read_ref = {}
         for read in self.bam.fetch():
             self.dict_read_ref[read.query_name] = read.reference_name

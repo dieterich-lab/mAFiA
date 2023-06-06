@@ -11,8 +11,6 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler, MaxAbsScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import precision_recall_curve, auc
-# import matplotlib
-# matplotlib.use('tkagg')
 import matplotlib.pyplot as plt
 import pickle
 
