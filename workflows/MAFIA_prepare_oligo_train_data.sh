@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 ARCH=${HOME}/git/renata/rnaarch
 MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 FILTER_SCORE=70
@@ -5,17 +7,20 @@ FILTER_SCORE=70
 ########################################################################################################################
 ### Wuerzburg ##########################################################################################################
 ########################################################################################################################
+HOMOPOLYMER=0
+
 WUE_BATCH=2
-A_m6A=A
+A_m6A=m6A
 
 REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_oligo_ref_batch${WUE_BATCH}.fasta
 TRAIN_DATASET=WUE_batch${WUE_BATCH}_${A_m6A}
 FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${TRAIN_DATASET}/fast5
-HOMOPOLYMER=0
 
 ########################################################################################################################
 ### Isabel run 1 #######################################################################################################
 ########################################################################################################################
+#HOMOPOLYMER=1
+
 #REF=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/ISA_run1.fasta
 #
 ##TRAIN_DATASET=ISA_run1_A
@@ -23,8 +28,6 @@ HOMOPOLYMER=0
 #
 #FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${TRAIN_DATASET}/fast5
 #
-#HOMOPOLYMER=1
-
 ########################################################################################################################
 ### Isabel run 2 #######################################################################################################
 ########################################################################################################################
@@ -65,14 +68,14 @@ LIGATION_REF=${WORKSPACE}/ligation_ref.fasta
 #deactivate
 source ${HOME}/git/renata/virtualenv/bin/activate
 
-srun --partition=gpu --gres=gpu:turing:1 --cpus-per-task=8 --mem-per-cpu=8GB \
-python3 ${HOME}/git/renata/basecall_viterbi.py \
---fast5dir ${FAST5_DIR} \
---arch ${ARCH} \
---model ${MODEL} \
---batchsize 2048 \
---decoder viterbi \
-> ${FASTA} &
+#srun --partition=gpu --gres=gpu:turing:1 --cpus-per-task=8 --mem-per-cpu=8GB \
+#python3 -u ${HOME}/git/renata/basecall_viterbi.py \
+#--fast5dir ${FAST5_DIR} \
+#--arch ${ARCH} \
+#--model ${MODEL} \
+#--batchsize 2048 \
+#--decoder viterbi \
+#> ${FASTA} &
 
 #### align with minimap ###
 #module purge
@@ -80,7 +83,7 @@ python3 ${HOME}/git/renata/basecall_viterbi.py \
 #minimap2 --secondary=no -ax map-ont -t 36 --cs ${REF} ${FASTA} > ${SAM}
 
 ### align with spomlette ###
-python3 ${HOME}/git/MAFIA/spanish_omelette_alignment.py \
+python3 -u ${HOME}/git/MAFIA/spanish_omelette_alignment.py \
 --ref_file ${REF} \
 --query_file ${FASTA} \
 --recon_ref_file ${LIGATION_REF} \
