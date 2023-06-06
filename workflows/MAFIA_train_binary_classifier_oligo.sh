@@ -9,7 +9,7 @@
 eval "$(conda shell.bash hook)"
 #eval "$(/home/achan/miniconda3/condabin/conda shell.bash hook)"
 conda activate MAFIA
-set -e -u -f
+set -e -f
 cd ${HOME}/git/MAFIA
 
 DATA_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian
@@ -62,7 +62,7 @@ OUTDIR=${DATA_DIR}/MAFIA_classifiers/${TRAIN_DATASET}_spomelette_${CLASSIFIER}_$
 #REF=${DATA_DIR}/reference/RL_Mix2_Mix4_blocks8.fasta
 #OUTDIR=${DATA_DIR}/MAFIA_classifiers/RL_run2_Mix2_Mix4_${SCALER}
 
-python3 oligo_train_binary_classifier.py \
+python3 -u oligo_train_binary_classifier.py \
 --unm_bam_file ${UNM_BAM} \
 --unm_fast5_dir ${UNM_FAST5} \
 --mod_bam_file ${MOD_BAM} \

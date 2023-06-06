@@ -11,11 +11,11 @@
 eval "$(conda shell.bash hook)"
 conda activate MAFIA
 
-set -e -u -f
+set -e -f
 
 printf -v PART '%02d' "${SLURM_ARRAY_TASK_ID}"
 
-python3 ${HOME}/git/MAFIA/mRNA_test_binary_classifier.py \
+python3 -u ${HOME}/git/MAFIA/mRNA_test_binary_classifier.py \
 --test_bam_file ${BAM} \
 --test_fast5_dir ${FAST5_DIR} \
 --ref_file ${REF} \

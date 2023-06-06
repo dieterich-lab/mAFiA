@@ -31,9 +31,9 @@ CLASSIFIER_MODEL_DIR=${PRJ_DIR}/MAFIA_classifiers/${TRAIN_DATASET}
 OUTFILE=${PRJ_DIR}/results/res_train_${TRAIN_DATASET}_test_${TEST_DATASET}_q70.tsv
 ########################################################################################################################
 
-set -e -u -f
+set -e -f
 
-python3 ${HOME}/git/MAFIA/oligo_test_binary_classifier.py \
+python3 -u ${HOME}/git/MAFIA/oligo_test_binary_classifier.py \
 --test_bam_file ${BAM} \
 --test_fast5_dir ${FAST5_DIR} \
 --ref_file ${LIG_REF} \
