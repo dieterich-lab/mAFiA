@@ -3,30 +3,15 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 FILTER_SCORE=70
 
 ########################################################################################################################
-### Wuerzburg batch 1 ##################################################################################################
+### Wuerzburg ##########################################################################################################
 ########################################################################################################################
-REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_oligos_batch1.fasta
+WUE_BATCH=2
+A_m6A=A
 
-#TRAIN_DATASET=WUE_batch1_A
-TRAIN_DATASET=WUE_batch1_m6A
-
+REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_oligo_ref_batch${WUE_BATCH}.fasta
+TRAIN_DATASET=WUE_batch${WUE_BATCH}_${A_m6A}
 FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${TRAIN_DATASET}/fast5
-
 HOMOPOLYMER=0
-
-########################################################################################################################
-### Wuerzburg batch 2 ##################################################################################################
-########################################################################################################################
-#REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_oligos_batch2.fasta
-
-#TRAIN_DATASET=WUE_batch2_A
-##FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230502_WUE_splint_batch2/WUE_splint_batch2_A_RTA/*
-
-#TRAIN_DATASET=WUE_batch2_m6A
-##FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230502_WUE_splint_batch2/WUE_splint_batch2_m6A_RTA/*
-##FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/${RUN}/WUE_splint_m6A_batch2_RTA_*/*
-
-#FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${TRAIN_DATASET}/fast5
 
 ########################################################################################################################
 ### Isabel run 1 #######################################################################################################

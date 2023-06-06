@@ -66,4 +66,4 @@ def main(args):
     writer.write_sam(filtered_alignments, filtered_ref_ids, oligo_ref_generator)
 
 if __name__ == "__main__":
-    main(parser.args)
+    main(args)
