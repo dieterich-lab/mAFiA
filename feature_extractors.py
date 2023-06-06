@@ -1,9 +1,8 @@
 import os, sys
 HOME = os.path.expanduser('~')
-from utils import segment
 import torch
 import numpy as np
-from models import objectview, rodan
+from models import Objectview, Rodan
 from fast_ctc_decode import beam_search, viterbi_search
 
 CTC_MODE='viterbi'
@@ -36,23 +35,30 @@ def get_freer_device():
         free_mem = -1
     return freer_device, free_mem
 
-class backbone_network:
-    def __init__(self, model_path, extraction_layer, feature_width):
+class Backbone_Network:
+    def __init__(self, model_path, extraction_layer, feature_width, batchsize=1024):
         print('Finding my backbone...')
         torchdict = torch.load(model_path, map_location="cpu")
-        self.config = objectview(torchdict["config"])
+        self.config = Objectview(torchdict["config"])
         self.extraction_layer = extraction_layer
         self.feature_width = feature_width
+        self.batchsize = batchsize
         self.activation = {}
         self._load_model(model_path)
         print('Using device {}, model {} at extraction layer {}'.format(self.device, os.path.basename(model_path), extraction_layer))
+
+    def _segment(self, seg, s):
+        seg = np.concatenate((seg, np.zeros((-len(seg) % s))))
+        nrows = ((seg.size - s) // s) + 1
+        n = seg.strides[0]
+        return np.lib.stride_tricks.as_strided(seg, shape=(nrows, s), strides=(s * n, n))
 
     def _load_model(self, modelfile):
         if modelfile == None:
             sys.stderr.write("No model file specified!")
             sys.exit(1)
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        model = rodan(config=self.config).to(device)
+        model = Rodan(config=self.config).to(device)
         state_dict = torch.load(modelfile, map_location=device)["state_dict"]
         if "state_dict" in state_dict:
             model.load_state_dict(convert_statedict(state_dict["state_dict"]))
@@ -72,11 +78,11 @@ class backbone_network:
     def _get_base_probs_and_activations(self, in_chunks):
         event = torch.unsqueeze(torch.FloatTensor(in_chunks), 1).to(self.device, non_blocking=True)
         event_size = event.shape[0]
-        if event_size <= self.config.batchsize:
+        if event_size <= self.batchsize:
             out = self.model.forward(event)
             layer_activation = self.activation[self.extraction_layer].detach().cpu().numpy()
         else:
-            break_pts = np.arange(0, event_size, self.config.batchsize)
+            break_pts = np.arange(0, event_size, self.batchsize)
             start_stop_pts = [(start, stop) for start, stop in zip(break_pts, list(break_pts[1:]) + [event_size])]
             batch_out = []
             batch_layer_activation = []
@@ -123,7 +129,7 @@ class backbone_network:
         return pred_label, out_features
 
     def get_features_from_signal(self, signal):
-        chunks = segment(signal, self.config.seqlen)
+        chunks = self._segment(signal, self.config.seqlen)
 
         base_probs, activations = self._get_base_probs_and_activations(chunks)
         basecalls, features = self._get_basecall_and_features(base_probs, activations)
@@ -134,7 +140,7 @@ class backbone_network:
         out_chunks = []
         chunk_sizes = []
         for this_aligned_read in in_aligned_reads:
-            this_chunk = segment(this_aligned_read.norm_signal, self.config.seqlen)
+            this_chunk = self._segment(this_aligned_read.norm_signal, self.config.seqlen)
             out_chunks.append(this_chunk)
             chunk_sizes.append(this_chunk.shape[0])
         if len(out_chunks) == 0:

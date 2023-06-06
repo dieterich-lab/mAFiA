@@ -11,12 +11,10 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler, MaxAbsScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import precision_recall_curve, auc
-import matplotlib
-matplotlib.use('tkagg')
 import matplotlib.pyplot as plt
 import pickle
 
-class motif_classifier:
+class Motif_Classifier:
     def __init__(self, motif, classifier_type, scaler):
         self.motif = motif
         self.classifier_type = classifier_type
@@ -72,7 +70,7 @@ class motif_classifier:
             pickle.dump(self, h_out, pickle.HIGHEST_PROTOCOL)
 
         if draw_prc:
-            out_img_path = out_model_path.replace('.pkl', 'png')
+            out_img_path = out_model_path.replace('.pkl', '.png')
             plt.figure(figsize=(5, 5))
             plt.plot(self.recall, self.precision, '-')
             plt.xlabel('Recall')

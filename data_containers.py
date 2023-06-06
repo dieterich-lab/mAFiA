@@ -4,13 +4,13 @@ import pandas as pd
 import pysam
 from Bio.Seq import Seq
 from glob import glob
-from utils import index_fast5_files, get_norm_signal_from_read_id
+from ont_fast5_api.fast5_interface import get_fast5_file
 import random
 random.seed(0)
 from random import sample
 from tqdm import tqdm
 
-class nucleotide:
+class Nucleotide:
     def __init__(self, read_id='', read_pos=-1, ref_pos=-1, pred_5mer='NNNNN', ref_5mer='NNNNN', feature=[], mod_prob=-1):
         self.read_id = str(read_id)
         self.read_pos = int(read_pos)
@@ -20,7 +20,7 @@ class nucleotide:
         self.feature = np.array(feature)
         self.mod_prob = float(mod_prob)
 
-class aligned_read:
+class Aligned_Read:
     def __init__(self, read_id='', read_pos=-1, ref_pos=-1, query_5mer='NNNNN', pred_5mer='NNNNN', norm_signal=[], flag=-1):
         self.read_id = str(read_id)
         self.read_pos = int(read_pos)
@@ -31,7 +31,7 @@ class aligned_read:
         self.flag = int(flag)
 
     def create_nucleotide(self, in_pred_5mer, in_feature):
-        return nucleotide(
+        return Nucleotide(
             read_id = self.read_id,
             read_pos = self.read_pos,
             ref_pos = self.ref_pos,
@@ -39,7 +39,7 @@ class aligned_read:
             feature = in_feature,
         )
 
-class mRNA_site:
+class mRNA_Site:
     def __init__(self, row, ref):
         self.ind = row['index']
         self.chr = row['Chr'].lstrip('chr')
@@ -58,18 +58,55 @@ class mRNA_site:
         print('Reference motif {}'.format(self.ref_motif))
         print('GLORI ratio {}'.format(self.glori_ratio))
 
-class data_container:
+class Data_Container:
     def __init__(self, name, bam_path, fast5_dir):
         print('Loading data {}'.format(name))
         self.name = name
         self.bam = pysam.AlignmentFile(bam_path, 'rb')
-        self.f5_paths = glob(os.path.join(fast5_dir, '*.fast5'), recursive=True)
-        print('Indexing fast5 files from {}'.format(fast5_dir))
-        self.indexed_read_ids = index_fast5_files(self.f5_paths, self.bam)
-        print('{} reads indexed'.format(len(self.indexed_read_ids)))
         self.nucleotides = {}
 
+    def _index_fast5_files(self, fast5_dir, index_bam_queries_only=False):
+        print('Indexing fast5 files from {}'.format(fast5_dir))
+        f5_paths = glob(os.path.join(fast5_dir, '*.fast5'), recursive=True)
+        self.indexed_read_ids = {}
+        if index_bam_queries_only:
+            bam_query_names = [alignment.query_name for alignment in self.bam.fetch()]
+        else:
+            bam_query_names = []
+        for f5_filepath in tqdm(f5_paths):
+            try:
+                f5 = get_fast5_file(f5_filepath, mode="r")
+            except:
+                print('Error reading {}!'.format(f5_filepath))
+            else:
+                read_ids = f5.get_read_ids()
+                if len(bam_query_names) > 0:
+                    for read_id in read_ids:
+                        if read_id in bam_query_names:
+                            self.indexed_read_ids[read_id] = f5_filepath
+                else:
+                    for read_id in read_ids:
+                        self.indexed_read_ids[read_id] = f5_filepath
+
+        print('{} reads indexed'.format(len(self.indexed_read_ids)))
+
+    def _med_mad(self, x, factor=1.4826):
+        med = np.median(x)
+        mad = np.median(np.absolute(x - med)) * factor
+        return med, mad
+
+    def _get_norm_signal_from_read_id(self, id, index_paths):
+        filepath = index_paths[id]
+        f5 = get_fast5_file(filepath, mode="r")
+        read = f5.get_read(id)
+        signal = read.get_raw_data(scale=True)
+        signal_start = 0
+        signal_end = len(signal)
+        med, mad = self._med_mad(signal[signal_start:signal_end])
+        return (signal[signal_start:signal_end] - med) / mad
+
     def build_dict_read_ref(self):
+        print('Building dictionary of reads to mapped references')
         self.dict_read_ref = {}
         for read in self.bam.fetch():
             self.dict_read_ref[read.query_name] = read.reference_name
@@ -87,7 +124,11 @@ class data_container:
         self.nucleotides.clear()
         return pd.concat(dfs).reset_index(drop=True)
 
-class oligo_data_container(data_container):
+class Oligo_Data_Container(Data_Container):
+    def __init__(self, name, bam_path, fast5_dir):
+        super().__init__(name, bam_path, fast5_dir)
+        self._index_fast5_files(fast5_dir, index_bam_queries_only=True)
+
     def collect_features_from_reads(self, extractor, max_num_reads):
         print('Now extracting features from {}'.format(self.name))
         if max_num_reads > 0:
@@ -98,27 +139,26 @@ class oligo_data_container(data_container):
 
         read_bases_features = {}
         for query_name in tqdm(sample_read_ids.keys()):
-            this_read_signal = get_norm_signal_from_read_id(query_name, sample_read_ids)
+            this_read_signal = self._get_norm_signal_from_read_id(query_name, sample_read_ids)
             this_read_features, this_read_bases = extractor.get_features_from_signal(this_read_signal)
             read_bases_features[query_name] = (this_read_bases, this_read_features)
         self.read_bases_features = read_bases_features
 
-    def collect_motif_nucleotides(self, motif_ind, motif, ref, block_size, block_center, enforce_ref_5mer=False):
-        print('Collecting nucleotides for motif {}'.format(motif))
+    def collect_motif_nucleotides(self, reference_motif, reference_generator, enforce_ref_5mer=False):
+        print('Collecting nucleotides for motif {}'.format(reference_motif))
 
-        relevant_contigs = [k for k in ref.keys() if ((motif_ind in k.split('_')[1]) and (k in self.bam.references))]
+        motif_relevant_ligation_ref_ids_and_positions = reference_generator.get_motif_relevant_ligation_ref_ids_and_positions(reference_motif)
+        relevant_contigs = [k for k in motif_relevant_ligation_ref_ids_and_positions.keys() if k in self.bam.references]
+
         this_motif_nts = []
         for contig in relevant_contigs:
-            block_str = contig.split('_')[1]
-            site_positions = np.where(np.array(list(block_str)) == motif_ind)[0] * block_size + block_center
-            for pos in site_positions:
-                reference_motif = ref[contig][(pos - 2):(pos + 3)]
+            for pos in motif_relevant_ligation_ref_ids_and_positions[contig]:
                 this_tPos_nts = self.collect_nucleotides_aligned_to_target_pos(contig, pos, reference_motif, enforce_ref_5mer)
                 if len(this_tPos_nts) > 0:
                     this_motif_nts.extend(this_tPos_nts)
 
-        self.nucleotides[motif] = this_motif_nts
-        print('{} NTs collected'.format(len(self.nucleotides[motif])))
+        self.nucleotides[reference_motif] = this_motif_nts
+        print('{} NTs collected'.format(len(self.nucleotides[reference_motif])))
 
     def collect_nucleotides_aligned_to_target_pos(self, contig, target_pos, ref_motif=None, enforce_ref_5mer=False):
         all_nts = []
@@ -144,7 +184,7 @@ class oligo_data_container(data_container):
                             print('Flag {}'.format(flag))
                             continue
                         this_site_feature = this_read_feature[query_position]
-                        all_nts.append(nucleotide(
+                        all_nts.append(Nucleotide(
                             read_id=query_name,
                             read_pos=query_position,
                             ref_pos=target_pos,
@@ -155,9 +195,10 @@ class oligo_data_container(data_container):
                         valid_counts += 1
         return all_nts
 
-class mRNA_data_container(data_container):
+class mRNA_Data_Container(Data_Container):
     def __init__(self, name, bam_path, fast5_dir):
         super().__init__(name, bam_path, fast5_dir)
+        self._index_fast5_files(fast5_dir, index_bam_queries_only=False)
 
     def collect_nucleotides_aligned_to_mRNA_site(self, extractor, site, thresh_coverage=1, max_num_reads=1000, enforce_ref_5mer=False):
         all_aligned_reads = []
@@ -185,8 +226,8 @@ class mRNA_data_container(data_container):
                             continue
                         if (query_name in self.indexed_read_ids.keys()):
                             valid_counts += 1
-                            this_read_signal = get_norm_signal_from_read_id(query_name, self.indexed_read_ids)
-                            all_aligned_reads.append(aligned_read(
+                            this_read_signal = self._get_norm_signal_from_read_id(query_name, self.indexed_read_ids)
+                            all_aligned_reads.append(Aligned_Read(
                                 read_id=query_name,
                                 read_pos=query_position,
                                 query_5mer=query_5mer,
