@@ -38,7 +38,7 @@ MOD_FILE=${MOD_FILE},\
 BACKBONE_MODEL=${BACKBONE_MODEL},\
 CLASSIFIER_MODEL_DIR=${CLASSIFIER_MODEL_DIR},\
 OUTFILE=${OUTFILE} \
-${HOME}/git/MAFIA/MAFIA_SWARM_test_binary_classifier_mRNA.sh
+${HOME}/git/MAFIA/workflows/MAFIA_SWARM_test_binary_classifier_mRNA.sh
 
 ### concat output ###
 #cp ${OUTFILE}.part00 ${OUTFILE}.merged
