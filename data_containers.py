@@ -63,31 +63,31 @@ class Data_Container:
         print('Loading data {}'.format(name))
         self.name = name
         self.bam = pysam.AlignmentFile(bam_path, 'rb')
-        self._index_fast5_files(fast5_dir, self.bam)
         self.nucleotides = {}
 
-    def _index_fast5_files(self, fast5_dir, bam=None):
+    def _index_fast5_files(self, fast5_dir, index_bam_queries_only=False):
         print('Indexing fast5 files from {}'.format(fast5_dir))
-        self.f5_paths = glob(os.path.join(fast5_dir, '*.fast5'), recursive=True)
-
+        f5_paths = glob(os.path.join(fast5_dir, '*.fast5'), recursive=True)
         self.indexed_read_ids = {}
-        query_names = []
-        if bam is not None:
-            query_names = [alignment.query_name for alignment in bam.fetch()]
-        for f5_filepath in tqdm(self.f5_paths):
+        if index_bam_queries_only:
+            bam_query_names = [alignment.query_name for alignment in self.bam.fetch()]
+        else:
+            bam_query_names = []
+        for f5_filepath in tqdm(f5_paths):
             try:
                 f5 = get_fast5_file(f5_filepath, mode="r")
             except:
                 print('Error reading {}!'.format(f5_filepath))
             else:
                 read_ids = f5.get_read_ids()
-                if len(query_names) > 0:
+                if len(bam_query_names) > 0:
                     for read_id in read_ids:
-                        if read_id in query_names:
+                        if read_id in bam_query_names:
                             self.indexed_read_ids[read_id] = f5_filepath
                 else:
                     for read_id in read_ids:
                         self.indexed_read_ids[read_id] = f5_filepath
+
         print('{} reads indexed'.format(len(self.indexed_read_ids)))
 
     def _med_mad(self, x, factor=1.4826):
@@ -124,6 +124,10 @@ class Data_Container:
         return pd.concat(dfs).reset_index(drop=True)
 
 class Oligo_Data_Container(Data_Container):
+    def __init__(self, name, bam_path, fast5_dir):
+        super().__init__(name, bam_path, fast5_dir)
+        self._index_fast5_files(fast5_dir, index_bam_queries_only=True)
+
     def collect_features_from_reads(self, extractor, max_num_reads):
         print('Now extracting features from {}'.format(self.name))
         if max_num_reads > 0:
@@ -193,6 +197,7 @@ class Oligo_Data_Container(Data_Container):
 class mRNA_Data_Container(Data_Container):
     def __init__(self, name, bam_path, fast5_dir):
         super().__init__(name, bam_path, fast5_dir)
+        self._index_fast5_files(fast5_dir, index_bam_queries_only=False)
 
     def collect_nucleotides_aligned_to_mRNA_site(self, extractor, site, thresh_coverage=1, max_num_reads=1000, enforce_ref_5mer=False):
         all_aligned_reads = []
