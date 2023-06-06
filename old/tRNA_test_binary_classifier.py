@@ -9,7 +9,7 @@ import torch
 from models import Objectview
 import pysam
 from Bio import SeqIO
-from utils import index_fast5_files
+from arg_parsers import index_fast5_files
 from feature_extractors import load_model
 from feature_extractors import get_features_from_collection_of_signals, get_nucleotides_aligned_to_target_pos
 from feature_classifiers import get_mod_ratio_with_binary_classifier, get_mod_probs

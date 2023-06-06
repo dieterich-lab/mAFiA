@@ -4,7 +4,7 @@ import pandas as pd
 import pysam
 from Bio.Seq import Seq
 from glob import glob
-from utils import index_fast5_files, get_norm_signal_from_read_id
+from ont_fast5_api.fast5_interface import get_fast5_file
 import random
 random.seed(0)
 from random import sample
@@ -63,11 +63,47 @@ class Data_Container:
         print('Loading data {}'.format(name))
         self.name = name
         self.bam = pysam.AlignmentFile(bam_path, 'rb')
-        self.f5_paths = glob(os.path.join(fast5_dir, '*.fast5'), recursive=True)
-        print('Indexing fast5 files from {}'.format(fast5_dir))
-        self.indexed_read_ids = index_fast5_files(self.f5_paths, self.bam)
-        print('{} reads indexed'.format(len(self.indexed_read_ids)))
+        self._index_fast5_files(fast5_dir, self.bam)
         self.nucleotides = {}
+
+    def _index_fast5_files(self, fast5_dir, bam=None):
+        print('Indexing fast5 files from {}'.format(fast5_dir))
+        self.f5_paths = glob(os.path.join(fast5_dir, '*.fast5'), recursive=True)
+
+        self.indexed_read_ids = {}
+        query_names = []
+        if bam is not None:
+            query_names = [alignment.query_name for alignment in bam.fetch()]
+        for f5_filepath in tqdm(self.f5_paths):
+            try:
+                f5 = get_fast5_file(f5_filepath, mode="r")
+            except:
+                print('Error reading {}!'.format(f5_filepath))
+            else:
+                read_ids = f5.get_read_ids()
+                if len(query_names) > 0:
+                    for read_id in read_ids:
+                        if read_id in query_names:
+                            self.indexed_read_ids[read_id] = f5_filepath
+                else:
+                    for read_id in read_ids:
+                        self.indexed_read_ids[read_id] = f5_filepath
+        print('{} reads indexed'.format(len(self.indexed_read_ids)))
+
+    def _med_mad(self, x, factor=1.4826):
+        med = np.median(x)
+        mad = np.median(np.absolute(x - med)) * factor
+        return med, mad
+
+    def _get_norm_signal_from_read_id(self, id, index_paths):
+        filepath = index_paths[id]
+        f5 = get_fast5_file(filepath, mode="r")
+        read = f5.get_read(id)
+        signal = read.get_raw_data(scale=True)
+        signal_start = 0
+        signal_end = len(signal)
+        med, mad = self._med_mad(signal[signal_start:signal_end])
+        return (signal[signal_start:signal_end] - med) / mad
 
     def build_dict_read_ref(self):
         self.dict_read_ref = {}
@@ -98,7 +134,7 @@ class Oligo_Data_Container(Data_Container):
 
         read_bases_features = {}
         for query_name in tqdm(sample_read_ids.keys()):
-            this_read_signal = get_norm_signal_from_read_id(query_name, sample_read_ids)
+            this_read_signal = self._get_norm_signal_from_read_id(query_name, sample_read_ids)
             this_read_features, this_read_bases = extractor.get_features_from_signal(this_read_signal)
             read_bases_features[query_name] = (this_read_bases, this_read_features)
         self.read_bases_features = read_bases_features
@@ -184,7 +220,7 @@ class mRNA_Data_Container(Data_Container):
                             continue
                         if (query_name in self.indexed_read_ids.keys()):
                             valid_counts += 1
-                            this_read_signal = get_norm_signal_from_read_id(query_name, self.indexed_read_ids)
+                            this_read_signal = self._get_norm_signal_from_read_id(query_name, self.indexed_read_ids)
                             all_aligned_reads.append(Aligned_Read(
                                 read_id=query_name,
                                 read_pos=query_position,

@@ -1,7 +1,7 @@
 import os, sys
 HOME = os.path.expanduser('~')
 sys.path.append(os.path.join(HOME, 'git/MAFIA'))
-from utils import Train_Args_Parser
+from arg_parsers import Train_Args_Parser
 from oligo_processors import Oligo_Reference_Generator
 from data_containers import Oligo_Data_Container
 from feature_extractors import Backbone_Network

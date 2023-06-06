@@ -2,7 +2,8 @@ import os, sys
 HOME = os.path.expanduser('~')
 sys.path.append(os.path.join(HOME, 'git/MAFIA'))
 import pandas as pd
-from utils import mRNA_Test_Args_Parser, load_reference, mRNA_Output_Writer
+from Bio import SeqIO
+from arg_parsers import mRNA_Test_Args_Parser, mRNA_Output_Writer
 from data_containers import mRNA_Site, mRNA_Data_Container
 from feature_extractors import Backbone_Network
 from feature_classifiers import load_motif_classifiers
@@ -10,16 +11,21 @@ from feature_classifiers import load_motif_classifiers
 parser = mRNA_Test_Args_Parser()
 parser.parse_and_print()
 
+def load_reference(ref_file):
+    print('Parsing reference {}...'.format(os.path.basename(ref_file)))
+    ref = {}
+    for record in SeqIO.parse(ref_file, 'fasta'):
+        ref[record.id] = str(record.seq)
+
+    return ref
+
 def main(args):
     test_container = mRNA_Data_Container('test', args.test_bam_file, args.test_fast5_dir)
     test_container.build_dict_read_ref()
 
     ivt_backbone = Backbone_Network(args.backbone_model_path, args.extraction_layer, args.feature_width)
-
     reference = load_reference(args.ref_file)
-
     motif_classifiers = load_motif_classifiers(args.classifier_model_dir)
-
     writer = mRNA_Output_Writer(out_path=args.outfile, output_mod_probs=args.output_mod_probs)
 
     df_mod = pd.read_csv(args.mod_file)

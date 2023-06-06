@@ -1,6 +1,5 @@
 import os, sys
 HOME = os.path.expanduser('~')
-from utils import segment
 import torch
 import numpy as np
 from models import Objectview, Rodan
@@ -47,6 +46,12 @@ class Backbone_Network:
         self.activation = {}
         self._load_model(model_path)
         print('Using device {}, model {} at extraction layer {}'.format(self.device, os.path.basename(model_path), extraction_layer))
+
+    def _segment(self, seg, s):
+        seg = np.concatenate((seg, np.zeros((-len(seg) % s))))
+        nrows = ((seg.size - s) // s) + 1
+        n = seg.strides[0]
+        return np.lib.stride_tricks.as_strided(seg, shape=(nrows, s), strides=(s * n, n))
 
     def _load_model(self, modelfile):
         if modelfile == None:
@@ -124,7 +129,7 @@ class Backbone_Network:
         return pred_label, out_features
 
     def get_features_from_signal(self, signal):
-        chunks = segment(signal, self.config.seqlen)
+        chunks = self._segment(signal, self.config.seqlen)
 
         base_probs, activations = self._get_base_probs_and_activations(chunks)
         basecalls, features = self._get_basecall_and_features(base_probs, activations)
@@ -135,7 +140,7 @@ class Backbone_Network:
         out_chunks = []
         chunk_sizes = []
         for this_aligned_read in in_aligned_reads:
-            this_chunk = segment(this_aligned_read.norm_signal, self.config.seqlen)
+            this_chunk = self._segment(this_aligned_read.norm_signal, self.config.seqlen)
             out_chunks.append(this_chunk)
             chunk_sizes.append(this_chunk.shape[0])
         if len(out_chunks) == 0:
