@@ -11,12 +11,14 @@ from feature_classifiers import load_motif_classifiers
 parser = mRNA_Test_Args_Parser()
 parser.parse_and_print()
 
-def load_reference(ref_file):
-    print('Parsing reference {}...'.format(os.path.basename(ref_file)))
+def load_genome_reference(ref_file):
+    print('Parsing genome reference {}...'.format(os.path.basename(ref_file)))
     ref = {}
     for record in SeqIO.parse(ref_file, 'fasta'):
-        ref[record.id] = str(record.seq)
-
+        if (record.id.isnumeric()) or (record.id in ['X', 'Y']):
+            ref[record.id] = str(record.seq)
+        elif record.id=='MT':
+            ref['M'] = str(record.seq)
     return ref
 
 def main(args):
@@ -24,7 +26,7 @@ def main(args):
     test_container.build_dict_read_ref()
 
     ivt_backbone = Backbone_Network(args.backbone_model_path, args.extraction_layer, args.feature_width)
-    reference = load_reference(args.ref_file)
+    reference = load_genome_reference(args.ref_file)
     motif_classifiers = load_motif_classifiers(args.classifier_model_dir)
     writer = mRNA_Output_Writer(out_path=args.outfile, output_mod_probs=args.output_mod_probs)
 
@@ -32,8 +34,6 @@ def main(args):
     df_mod = df_mod.rename(columns={'Unnamed: 0': 'index'})
     for _, glori_row in df_mod[df_mod['index']>writer.last_ind].iterrows():
         this_mRNA_site = mRNA_Site(glori_row, reference)
-        if (this_mRNA_site.chr.isnumeric()==False) and (this_mRNA_site.chr not in ['X', 'Y']):
-            continue
         if this_mRNA_site.ref_motif not in motif_classifiers.keys():
             continue
 
