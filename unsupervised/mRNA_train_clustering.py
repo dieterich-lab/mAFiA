@@ -6,7 +6,7 @@ import argparse
 from glob import glob
 import pandas as pd
 import torch
-from models import objectview
+from models import Objectview
 import pysam
 from Bio import SeqIO
 from Bio.Seq import Seq
@@ -80,7 +80,7 @@ print('{} WT reads indexed'.format(len(mod_index_read_ids)), flush=True)
 ### load model, device ###
 torchdict = torch.load(backbone_model_path, map_location="cpu")
 origconfig = torchdict["config"]
-fixed_config = objectview(origconfig)
+fixed_config = Objectview(origconfig)
 fixed_model, fixed_device = load_model(backbone_model_path, fixed_config, extraction_layer)
 
 ### loop through BID-seq sites ###

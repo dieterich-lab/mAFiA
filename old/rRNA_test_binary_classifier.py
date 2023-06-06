@@ -6,7 +6,7 @@ import argparse
 from glob import glob
 import pandas as pd
 import torch
-from models import objectview
+from models import Objectview
 import pysam
 from Bio import SeqIO
 from ont_fast5_api.fast5_interface import get_fast5_file
@@ -87,7 +87,7 @@ print('{} test reads indexed'.format(len(test_index_read_ids)), flush=True)
 ### load model, device ###
 torchdict = torch.load(model_path, map_location="cpu")
 origconfig = torchdict["config"]
-fixed_config = objectview(origconfig)
+fixed_config = Objectview(origconfig)
 fixed_model, fixed_device = load_model(model_path, fixed_config, extraction_layer)
 
 ### extract features ###

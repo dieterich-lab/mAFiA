@@ -3,7 +3,7 @@ HOME = os.path.expanduser('~')
 from utils import segment
 import torch
 import numpy as np
-from models import objectview, rodan
+from models import Objectview, Rodan
 from fast_ctc_decode import beam_search, viterbi_search
 
 CTC_MODE='viterbi'
@@ -36,11 +36,11 @@ def get_freer_device():
         free_mem = -1
     return freer_device, free_mem
 
-class backbone_network:
+class Backbone_Network:
     def __init__(self, model_path, extraction_layer, feature_width, batchsize=1024):
         print('Finding my backbone...')
         torchdict = torch.load(model_path, map_location="cpu")
-        self.config = objectview(torchdict["config"])
+        self.config = Objectview(torchdict["config"])
         self.extraction_layer = extraction_layer
         self.feature_width = feature_width
         self.batchsize = batchsize
@@ -53,7 +53,7 @@ class backbone_network:
             sys.stderr.write("No model file specified!")
             sys.exit(1)
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        model = rodan(config=self.config).to(device)
+        model = Rodan(config=self.config).to(device)
         state_dict = torch.load(modelfile, map_location=device)["state_dict"]
         if "state_dict" in state_dict:
             model.load_state_dict(convert_statedict(state_dict["state_dict"]))

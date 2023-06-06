@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import torch
 import torch.nn as nn
@@ -5,7 +6,7 @@ import torch.nn as nn
 rna_default = [[-1, 256, 0, 3, 1, 1, 0], [-1, 256, 1, 10, 1, 1, 1], [-1, 256, 1, 10, 10, 1, 1], [-1, 320, 1, 10, 1, 1, 1], [-1, 384, 1, 15, 1, 1, 1], [-1, 448, 1, 20, 1, 1, 1], [-1, 512, 1, 25, 1, 1, 1], [-1, 512, 1, 30, 1, 1, 1], [-1, 512, 1, 35, 1, 1, 1], [-1, 512, 1, 40, 1, 1, 1], [-1, 512, 1, 45, 1, 1, 1], [-1, 512, 1, 50, 1, 1, 1], [-1, 768, 1, 55, 1, 1, 1], [-1, 768, 1, 60, 1, 1, 1], [-1, 768, 1, 65, 1, 1, 1], [-1, 768, 1, 70, 1, 1, 1], [-1, 768, 1, 75, 1, 1, 1], [-1, 768, 1, 80, 1, 1, 1], [-1, 768, 1, 85, 1, 1, 1], [-1, 768, 1, 90, 1, 1, 1], [-1, 768, 1, 95, 1, 1, 1], [-1, 768, 1, 100, 1, 1, 1]]
 dna_default = [[-1, 320, 0, 3, 1, 1, 0], [-1, 320, 1, 3, 3, 1, 1], [-1, 384, 1, 6, 1, 1, 1], [-1, 448, 1, 9, 1, 1, 1], [-1, 512, 1, 12, 1, 1, 1], [-1, 576, 1, 15, 1, 1, 1], [-1, 640, 1, 18, 1, 1, 1], [-1, 704, 1, 21, 1, 1, 1], [-1, 768, 1, 24, 1, 1, 1], [-1, 832, 1, 27, 1, 1, 1], [-1, 896, 1, 30, 1, 1, 1], [-1, 960, 1, 33, 1, 1, 1]]
 
-class objectview(object):
+class Objectview(object):
     def __init__(self, d):
         self.__dict__ = d
         self.orig = d
@@ -33,9 +34,9 @@ class Mish(nn.Module):
         return x * (torch.tanh(torch.nn.functional.softplus(x)))
 
 
-class squeeze_excite(torch.nn.Module):
+class Squeeze_Excite(torch.nn.Module):
     def __init__(self, in_channels=512, size=1, reduction="/16", activation=torch.nn.GELU):
-        super(squeeze_excite, self).__init__()
+        super(Squeeze_Excite, self).__init__()
         self.in_channels = in_channels
         self.avg = torch.nn.AdaptiveAvgPool1d(1)
         if type(reduction) == str:
@@ -56,12 +57,12 @@ class squeeze_excite(torch.nn.Module):
         return input * x.permute(0, 2, 1)
 
 
-class convblock(torch.nn.Module):
+class Convblock(torch.nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=False,
                  seperable=True, expansion=True, batchnorm=True, dropout=0.1, activation=torch.nn.GELU, sqex=True,
                  squeeze=32, sqex_activation=torch.nn.GELU, residual=True):
         # no bias?
-        super(convblock, self).__init__()
+        super(Convblock, self).__init__()
         self.seperable = seperable
         self.batchnorm = batchnorm
         self.dropout = dropout
@@ -89,7 +90,7 @@ class convblock(torch.nn.Module):
                 self.bn1 = torch.nn.BatchNorm1d(out_channels)
             self.act1 = self.activation()
             if self.squeeze:
-                self.sqex = squeeze_excite(in_channels=out_channels, reduction=self.squeeze, activation=sqex_activation)
+                self.sqex = Squeeze_Excite(in_channels=out_channels, reduction=self.squeeze, activation=sqex_activation)
             self.pointwise = torch.nn.Conv1d(out_channels, out_channels, kernel_size=1, dilation=dilation, bias=bias,
                                              padding=0)
             if self.batchnorm:
@@ -104,7 +105,7 @@ class convblock(torch.nn.Module):
                 self.bn1 = torch.nn.BatchNorm1d(out_channels)
             self.act1 = self.activation()
             if self.squeeze:
-                self.sqex = squeeze_excite(in_channels=out_channels, reduction=self.squeeze, activation=sqex_activation)
+                self.sqex = Squeeze_Excite(in_channels=out_channels, reduction=self.squeeze, activation=sqex_activation)
             if self.dropout:
                 self.drop = torch.nn.Dropout(self.dropout)
         if self.residual and self.stride == 1:
@@ -140,7 +141,7 @@ class convblock(torch.nn.Module):
             return x
 
 
-def activation_function(activation):
+def Activation_Function(activation):
     if activation == "mish":
         return Mish
     elif activation == "swish":
@@ -154,7 +155,7 @@ def activation_function(activation):
         sys.exit(1)
 
 
-class rodan(nn.Module):
+class Rodan(nn.Module):
     def __init__(self, config=None, arch=None, debug=False):
         super().__init__()
         if debug: print("Initializing network")
@@ -173,8 +174,8 @@ class rodan(nn.Module):
         # dropout = 0 False, 1 True
         if arch == None: arch = rna_default
 
-        activation = activation_function(config.activation.lower())
-        sqex_activation = activation_function(config.sqex_activation.lower())
+        activation = Activation_Function(config.activation.lower())
+        sqex_activation = Activation_Function(config.sqex_activation.lower())
 
         self.convlayers = nn.Sequential()
         in_channels = 1
@@ -211,7 +212,7 @@ class rodan(nn.Module):
                       "sqex:", sqex, "drop:", dropout, "expansion:", expansion)
                 print("convsize:", convsize)
             self.convlayers.add_module("conv" + str(i),
-                                       convblock(in_channels, out_channels, kernel, stride=stride, padding=padding,
+                                       Convblock(in_channels, out_channels, kernel, stride=stride, padding=padding,
                                                  seperable=seperable, activation=activation, expansion=expansion,
                                                  dropout=dropout, squeeze=squeeze, sqex_activation=sqex_activation,
                                                  residual=True))
@@ -236,7 +237,7 @@ class rodan(nn.Module):
         x = torch.nn.functional.log_softmax(x, 2)
         return x.permute(1, 0, 2)
 
-class renata(nn.Module):
+class Renata(nn.Module):
     def __init__(self, config=None, arch=None, seqlen=1024, num_lstm_layers=4, debug=False):
         super().__init__()
         if debug: print("Initializing network")
@@ -247,8 +248,8 @@ class renata(nn.Module):
 
         if arch == None: arch = rna_default
 
-        activation = activation_function(config.activation.lower())
-        sqex_activation = activation_function(config.sqex_activation.lower())
+        activation = Activation_Function(config.activation.lower())
+        sqex_activation = Activation_Function(config.sqex_activation.lower())
 
         self.convlayers = nn.Sequential()
         in_channels = 1
@@ -285,7 +286,7 @@ class renata(nn.Module):
                       "sqex:", sqex, "drop:", dropout, "expansion:", expansion)
                 print("convsize:", convsize)
             self.convlayers.add_module("conv" + str(i),
-                                       convblock(in_channels, out_channels, kernel, stride=stride, padding=padding,
+                                       Convblock(in_channels, out_channels, kernel, stride=stride, padding=padding,
                                                  seperable=seperable, activation=activation, expansion=expansion,
                                                  dropout=dropout, squeeze=squeeze, sqex_activation=sqex_activation,
                                                  residual=True))

@@ -7,7 +7,7 @@ from tqdm import tqdm
 from glob import glob
 import pandas as pd
 import torch
-from models import objectview
+from models import Objectview
 import pysam
 from Bio import SeqIO
 from ont_fast5_api.fast5_interface import get_fast5_file
@@ -61,7 +61,7 @@ print('{} IVT reads collected'.format(len(ivt_index_read_ids)), flush=True)
 model_path = os.path.join(HOME, 'pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch')
 torchdict = torch.load(model_path, map_location="cpu")
 origconfig = torchdict["config"]
-fixed_config = objectview(origconfig)
+fixed_config = Objectview(origconfig)
 fixed_model, fixed_device = load_model(model_path, fixed_config)
 
 ### search by GLORI sites ###

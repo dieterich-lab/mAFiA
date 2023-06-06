@@ -10,7 +10,7 @@ random.seed(0)
 from random import sample
 from tqdm import tqdm
 
-class nucleotide:
+class Nucleotide:
     def __init__(self, read_id='', read_pos=-1, ref_pos=-1, pred_5mer='NNNNN', ref_5mer='NNNNN', feature=[], mod_prob=-1):
         self.read_id = str(read_id)
         self.read_pos = int(read_pos)
@@ -20,7 +20,7 @@ class nucleotide:
         self.feature = np.array(feature)
         self.mod_prob = float(mod_prob)
 
-class aligned_read:
+class Aligned_Read:
     def __init__(self, read_id='', read_pos=-1, ref_pos=-1, query_5mer='NNNNN', pred_5mer='NNNNN', norm_signal=[], flag=-1):
         self.read_id = str(read_id)
         self.read_pos = int(read_pos)
@@ -31,7 +31,7 @@ class aligned_read:
         self.flag = int(flag)
 
     def create_nucleotide(self, in_pred_5mer, in_feature):
-        return nucleotide(
+        return Nucleotide(
             read_id = self.read_id,
             read_pos = self.read_pos,
             ref_pos = self.ref_pos,
@@ -39,7 +39,7 @@ class aligned_read:
             feature = in_feature,
         )
 
-class mRNA_site:
+class mRNA_Site:
     def __init__(self, row, ref):
         self.ind = row['index']
         self.chr = row['Chr'].lstrip('chr')
@@ -58,7 +58,7 @@ class mRNA_site:
         print('Reference motif {}'.format(self.ref_motif))
         print('GLORI ratio {}'.format(self.glori_ratio))
 
-class data_container:
+class Data_Container:
     def __init__(self, name, bam_path, fast5_dir):
         print('Loading data {}'.format(name))
         self.name = name
@@ -87,7 +87,7 @@ class data_container:
         self.nucleotides.clear()
         return pd.concat(dfs).reset_index(drop=True)
 
-class oligo_data_container(data_container):
+class Oligo_Data_Container(Data_Container):
     def collect_features_from_reads(self, extractor, max_num_reads):
         print('Now extracting features from {}'.format(self.name))
         if max_num_reads > 0:
@@ -143,7 +143,7 @@ class oligo_data_container(data_container):
                             print('Flag {}'.format(flag))
                             continue
                         this_site_feature = this_read_feature[query_position]
-                        all_nts.append(nucleotide(
+                        all_nts.append(Nucleotide(
                             read_id=query_name,
                             read_pos=query_position,
                             ref_pos=target_pos,
@@ -154,7 +154,7 @@ class oligo_data_container(data_container):
                         valid_counts += 1
         return all_nts
 
-class mRNA_data_container(data_container):
+class mRNA_Data_Container(Data_Container):
     def __init__(self, name, bam_path, fast5_dir):
         super().__init__(name, bam_path, fast5_dir)
 
@@ -185,7 +185,7 @@ class mRNA_data_container(data_container):
                         if (query_name in self.indexed_read_ids.keys()):
                             valid_counts += 1
                             this_read_signal = get_norm_signal_from_read_id(query_name, self.indexed_read_ids)
-                            all_aligned_reads.append(aligned_read(
+                            all_aligned_reads.append(Aligned_Read(
                                 read_id=query_name,
                                 read_pos=query_position,
                                 query_5mer=query_5mer,

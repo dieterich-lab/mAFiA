@@ -56,7 +56,7 @@ def load_reference(ref_file):
 
     return ref
 
-class args_parser(argparse.ArgumentParser):
+class Args_Parser(argparse.ArgumentParser):
     def __init__(self):
         super().__init__()
         self.add_argument('--ref_file')
@@ -76,14 +76,14 @@ class args_parser(argparse.ArgumentParser):
             print('{} : {}'.format(k, v))
         print('=========================================================')
 
-class test_args_parser(args_parser):
+class Test_Args_Parser(Args_Parser):
     def __init__(self):
         super().__init__()
         self.add_argument('--test_bam_file')
         self.add_argument('--test_fast5_dir')
         self.add_argument('--outfile')
 
-class train_args_parser(args_parser):
+class Train_Args_Parser(Args_Parser):
     def __init__(self):
         super().__init__()
         self.add_argument('--unm_bam_file')
@@ -92,14 +92,14 @@ class train_args_parser(args_parser):
         self.add_argument('--mod_fast5_dir')
         self.add_argument('--scaler', default=None)
 
-class mRNA_test_args_parser(test_args_parser):
+class mRNA_Test_Args_Parser(Test_Args_Parser):
     def __init__(self):
         super().__init__()
         self.add_argument('--mod_file')
         self.add_argument('--mod_prob_thresh', type=float, default=0.5)
         self.add_argument('--output_mod_probs', action='store_true')
 
-class output_writer:
+class Output_Writer:
     def __init__(self, out_path, output_mod_probs=True, fmt_precision=6):
         self.out_path = out_path
         self.output_mod_probs = output_mod_probs
@@ -115,7 +115,7 @@ class output_writer:
     def write_df(self):
         self.df_out.to_csv(self.out_path, sep='\t', index=False)
 
-class mRNA_output_writer(output_writer):
+class mRNA_Output_Writer(Output_Writer):
     def __init__(self, out_path, output_mod_probs=True):
         super().__init__(out_path, output_mod_probs)
 
