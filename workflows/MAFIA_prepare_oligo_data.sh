@@ -49,7 +49,7 @@ FILTER_SCORE=70
 HOMOPOLYMER=1
 
 ORIG=ISA
-RUN=run3_1
+RUN=run3_2
 MOD=A
 
 REF=${PRJ_DIR}/reference/${ORIG}_oligo_ref_${RUN}.fasta
