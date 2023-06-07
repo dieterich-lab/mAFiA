@@ -50,11 +50,8 @@ HOMOPOLYMER=1
 
 ORIG=ISA
 RUN=run3_2
-<<<<<<< HEAD
 MOD=A
-=======
-MOD=m6A
->>>>>>> 09a658d (remove umlaut)
+#MOD=m6A
 
 REF=${PRJ_DIR}/reference/${ORIG}_oligo_ref_${RUN}.fasta
 DATASET=${ORIG}_${RUN}_${MOD}
