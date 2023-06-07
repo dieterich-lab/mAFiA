@@ -46,19 +46,20 @@ def calc_mod_ratio_with_margin(in_df_motif, prob_margin, thresh_cov=50):
 
 
 results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
-train_dataset = 'WUE_batches1+2'
+# train_dataset = 'WUE_batches1+2'
+train_dataset = 'ISA_run1'
 test_datasets = [
-    '0_WT_100_IVT',
-    '25_WT_75_IVT',
-    '50_WT_50_IVT',
-    '75_WT_25_IVT',
+    # '0_WT_100_IVT',
+    # '25_WT_75_IVT',
+    # '50_WT_50_IVT',
+    # '75_WT_25_IVT',
     '100_WT_0_IVT'
 ]
 ds_colors = {
-    '0_WT_100_IVT' : 'b',
-    '25_WT_75_IVT' : 'g',
-    '50_WT_50_IVT' : 'm',
-    '75_WT_25_IVT' : 'c',
+    # '0_WT_100_IVT' : 'b',
+    # '25_WT_75_IVT' : 'g',
+    # '50_WT_50_IVT' : 'm',
+    # '75_WT_25_IVT' : 'c',
     '100_WT_0_IVT' : 'r'
 }
 

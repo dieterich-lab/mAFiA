@@ -5,7 +5,7 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 FILTER_SCORE=70
 
 ########################################################################################################################
-### Wuerzburg ##########################################################################################################
+### Würzburg ###########################################################################################################
 ########################################################################################################################
 HOMOPOLYMER=0
 
@@ -82,7 +82,7 @@ source ${HOME}/git/renata/virtualenv/bin/activate
 #module load minimap2
 #minimap2 --secondary=no -ax map-ont -t 36 --cs ${REF} ${FASTA} > ${SAM}
 
-### align with spomlette ###
+### align with spomelette ###
 python3 -u ${HOME}/git/MAFIA/spanish_omelette_alignment.py \
 --ref_file ${REF} \
 --query_file ${FASTA} \
@@ -104,20 +104,3 @@ ${HOME}/git/renata/accuracy.py ${FILTERED_SAM} ${LIGATION_REF}
 BAM=${FILTERED_SAM//.sam/.bam}
 samtools view -bST ${LIGATION_REF} ${FILTERED_SAM} | samtools sort - > ${BAM}
 samtools index ${BAM}
-
-### filter reads by max indel ###
-#deactivate
-#conda activate MAFIA
-#
-#python3 ${HOME}/git/MAFIA/filter_bam_file_by_max_indel_len.py \
-#--infile ${BAM} \
-#--outfile ${BAM}.filtered \
-#--indel_thresh 10
-#
-#samtools index ${BAM}.filtered
-
-### combine recon references ###
-#BATCH=1
-#BATCH=2
-#awk '/^>/{p=seen[$0]++}!p' /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_batch${BATCH}_A/ligation_ref.fasta /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/WUE_batch${BATCH}_m6A/ligation_ref.fasta > /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_ligation_ref_batch${BATCH}.fasta
-#awk '/^>/{p=seen[$0]++}!p' /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/ISA_run1_A/ligation_ref.fasta /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/ISA_run1_m6A/ligation_ref.fasta > /beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/ISA_ligation_ref_run1.fasta

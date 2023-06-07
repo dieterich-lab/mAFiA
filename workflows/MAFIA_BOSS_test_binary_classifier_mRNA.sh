@@ -48,5 +48,3 @@ ${HOME}/git/MAFIA/workflows/MAFIA_SWARM_test_binary_classifier_mRNA.sh
 #  then awk NR\>1 $OUTFILE.part$num >> ${OUTFILE}.merged
 #  fi
 #  done
-#
-#rm ${OUTFILE}.part*
