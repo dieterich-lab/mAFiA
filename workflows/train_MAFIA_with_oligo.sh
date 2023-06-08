@@ -4,6 +4,7 @@
 #SBATCH --mem=120GB
 #SBATCH --nodes=1
 #SBATCH --verbose
+#SBATCH --job-name=train_MAFIA
 #SBATCH --output=/home/achan/slurm/train_MAFIA_%A.out
 
 eval "$(conda shell.bash hook)"
@@ -21,7 +22,7 @@ DATA_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/oligo
 TRAIN_DATASET=ISA_runs1-3
 
 ### WUE ###
-#TRAIN_DATASET=WUE_batch1_batch2
+#TRAIN_DATASET=WUE_batches1-2
 
 ############################################################################################
 ### Backbone settings ######################################################################
