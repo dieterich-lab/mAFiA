@@ -55,6 +55,7 @@ LIGATION_REF=${WORKSPACE}/ligation_ref.fasta
 #deactivate
 source ${HOME}/git/renata/virtualenv/bin/activate
 
+echo "Basecalling ${FAST5_DIR}"
 srun --partition=gpu --gres=gpu:turing:1 --cpus-per-task=8 --mem-per-cpu=8GB \
 python3 -u ${HOME}/git/renata/basecall_viterbi.py \
 --fast5dir ${FAST5_DIR} \
@@ -70,6 +71,7 @@ python3 -u ${HOME}/git/renata/basecall_viterbi.py \
 #minimap2 --secondary=no -ax map-ont -t 36 --cs ${REF} ${FASTA} > ${SAM}
 
 ### align with spomelette ###
+echo "Basecalling finished. Now aligning reads to ${REF}"
 python3 -u ${HOME}/git/MAFIA/spanish_omelette_alignment.py \
 --ref_file ${REF} \
 --query_file ${FASTA} \
@@ -79,6 +81,7 @@ python3 -u ${HOME}/git/MAFIA/spanish_omelette_alignment.py \
 --write_cs
 
 ### filter by quality ###
+echo "Filtering and converting ${SAM}"
 FILTERED_SAM=${SAM/.sam/_q${FILTER_SCORE}.sam}
 samtools view -h -q${FILTER_SCORE} ${SAM} > ${FILTERED_SAM}
 
@@ -88,6 +91,7 @@ ${HOME}/git/renata/accuracy.py ${FILTERED_SAM} ${LIGATION_REF}
 
 
 #### Convert to BAM ###
+echo "Converting ${BAM}"
 BAM=${FILTERED_SAM//.sam/.bam}
 samtools view -bST ${LIGATION_REF} ${FILTERED_SAM} | samtools sort - > ${BAM}
 samtools index ${BAM}
