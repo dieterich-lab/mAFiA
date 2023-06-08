@@ -4,31 +4,28 @@ cd ${PRJ_DIR}
 #############################################################################
 ### WUE #####################################################################
 #############################################################################
-#ORIG=WUE
-#INPUT_RUNS="batch1 batch2"
+#INPUT_RUNS="WUE_batch1 WUE_batch2"
 #INPUT_MODS="A m6A"
-#OUTPUT_RUN="batches1-2"
+#OUTPUT_RUN="WUE_batches1-2"
 #############################################################################
 ### ISA #####################################################################
 #############################################################################
-#ORIG=ISA
-#INPUT_RUNS="run1 run2_1 run2_2 run3_1 run3_2"
+#INPUT_RUNS="ISA_run1 ISA_run2_1 ISA_run2_2 ISA_run3_1 ISA_run3_2"
 #INPUT_MODS="A m6A"
-#OUTPUT_RUN="runs1-3"
+#OUTPUT_RUN="ISA_runs1-3"
 #############################################################################
 ### ISA-WUE #################################################################
 #############################################################################
-ORIG=
 INPUT_RUNS="ISA_runs1-3 WUE_batches1-2"
 INPUT_MODS="A m6A"
 OUTPUT_RUN="ISA-WUE"
 #############################################################################
 #############################################################################
-echo "Merging ${ORIG} runs: ${INPUT_RUNS// /, }"
+echo "Merging runs: ${INPUT_RUNS// /, }"
 
 for MOD in $INPUT_MODS
 do
-  OUTDIR=${PRJ_DIR}/${ORIG}_${OUTPUT_RUN}_${MOD}
+  OUTDIR=${PRJ_DIR}/${OUTPUT_RUN}_${MOD}
 
   ### fast5 ###
   echo "Merging fast5 files"
@@ -36,7 +33,7 @@ do
   cd ${OUTDIR}/fast5
   for RUN in ${INPUT_RUNS}
   do
-    for f in ${PRJ_DIR}/${ORIG}_${RUN}_${MOD}/fast5/*.fast5
+    for f in ${PRJ_DIR}/${RUN}_${MOD}/fast5/*.fast5
     do
       ln -s ${f}
     done
@@ -49,7 +46,7 @@ do
   BAM_OUTPUT=${OUTDIR}/spomelette_q70.bam
   for RUN in ${INPUT_RUNS}
   do
-    BAM_INPUTS+="${PRJ_DIR}/${ORIG}_${RUN}_${MOD}/spomelette_q70.bam "
+    BAM_INPUTS+="${PRJ_DIR}/${RUN}_${MOD}/spomelette_q70.bam "
   done
   samtools merge - ${BAM_INPUTS} | samtools sort - > ${BAM_OUTPUT}
   samtools index ${BAM_OUTPUT}
@@ -60,7 +57,7 @@ do
   REF_OUTPUT=${OUTDIR}/ligation_ref.fasta
   for RUN in ${INPUT_RUNS}
   do
-    REF_INPUTS+="${PRJ_DIR}/${ORIG}_${RUN}_${MOD}/ligation_ref.fasta "
+    REF_INPUTS+="${PRJ_DIR}/${RUN}_${MOD}/ligation_ref.fasta "
   done
   awk '/^>/{p=seen[$0]++}!p' ${REF_INPUTS} > ${REF_OUTPUT}
 done
@@ -68,7 +65,7 @@ done
 ###############################################################################
 ### merge A and m6A ###########################################################
 ###############################################################################
-MERGE_DIR=${PRJ_DIR}/${ORIG}_${OUTPUT_RUN}_${INPUT_MODS/ /_}
+MERGE_DIR=${PRJ_DIR}/${OUTPUT_RUN}_${INPUT_MODS/ /_}
 MERGE_BAM_INPUTS=""
 MERGE_BAM_OUTPUT=${MERGE_DIR}/spomelette_q70.bam
 MERGE_REF_INPUTS=""
@@ -79,14 +76,14 @@ cd ${MERGE_DIR}/fast5
 echo "Merging A and m6A"
 for MOD in ${INPUT_MODS}
 do
-  for f in ${PRJ_DIR}/${ORIG}_${OUTPUT_RUN}_${MOD}/fast5/*.fast5
+  for f in ${PRJ_DIR}/${OUTPUT_RUN}_${MOD}/fast5/*.fast5
   do
     ln -s ${f}
   done
 
-  MERGE_BAM_INPUTS+="${PRJ_DIR}/${ORIG}_${OUTPUT_RUN}_${MOD}/spomelette_q70.bam "
+  MERGE_BAM_INPUTS+="${PRJ_DIR}/${OUTPUT_RUN}_${MOD}/spomelette_q70.bam "
 
-  MERGE_REF_INPUTS+="${PRJ_DIR}/${ORIG}_${OUTPUT_RUN}_${MOD}/ligation_ref.fasta "
+  MERGE_REF_INPUTS+="${PRJ_DIR}/${OUTPUT_RUN}_${MOD}/ligation_ref.fasta "
 done
 
 cd ${MERGE_DIR}
