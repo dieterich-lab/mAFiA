@@ -11,13 +11,13 @@ do
   esac
 done
 
-PRJ_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian
+PRJ_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/oligo
 ARCH=${HOME}/git/renata/rnaarch
 MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 FILTER_SCORE=70
 REF=${PRJ_DIR}/reference/${ORIG}_oligo_ref_${RUN}.fasta
 DATASET=${ORIG}_${RUN}_${MOD}
-WORKSPACE=${PRJ_DIR}/oligo/${DATASET}
+WORKSPACE=${PRJ_DIR}/${DATASET}
 FAST5_DIR=${WORKSPACE}/fast5
 FASTA=${WORKSPACE}/renata.fasta
 SAM=${WORKSPACE}/spomelette.sam
@@ -62,8 +62,8 @@ samtools view -h -q${FILTER_SCORE} ${SAM} > ${FILTERED_SAM}
 
 ### check read num and accuracy ###
 echo "Quality control"
-samtools flagstats ${FILTERED_SAM} > ${WORKSPACE}/flagstats_q${FILTER_SCORE}.txt
-${HOME}/git/renata/accuracy.py ${FILTERED_SAM} ${LIGATION_REF} > ${WORKSPACE}/accuracy_q${FILTER_SCORE}.txt
+samtools flagstats ${FILTERED_SAM} > ${WORKSPACE}/qc_q${FILTER_SCORE}.txt
+${HOME}/git/renata/accuracy.py ${FILTERED_SAM} ${LIGATION_REF} >> ${WORKSPACE}/qc_q${FILTER_SCORE}.txt
 
 
 #### Convert to BAM ###
@@ -71,3 +71,5 @@ BAM=${FILTERED_SAM//.sam/.bam}
 echo "Converting to ${BAM}"
 samtools view -bST ${LIGATION_REF} ${FILTERED_SAM} | samtools sort - > ${BAM}
 samtools index ${BAM}
+
+echo "${DATASET} finished"
