@@ -11,39 +11,6 @@ do
   esac
 done
 
-########################################################################################################################
-### WUE batches 1-2 ####################################################################################################
-########################################################################################################################
-#HOMOPOLYMER=0
-#
-#ORIG=WUE
-#RUN=batch2
-#MOD=A
-
-########################################################################################################################
-### ISA runs 1-3 #######################################################################################################
-########################################################################################################################
-#HOMOPOLYMER=1
-#
-#ORIG=ISA
-#RUN=run3_2
-#MOD=A
-#MOD=m6A
-
-########################################################################################################################
-### Isabel hetero ######################################################################################################
-########################################################################################################################
-#REF=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/ISA_M4_M5.fasta
-#HOMOPOLYMER=0
-#
-#DATASET=RL_M4_M5
-##DATASET=RL_M4_M5star
-##DATASET=RL_M4star_M5
-##DATASET=RL_M4star_M5star
-#
-#FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${DATASET}/fast5
-
-########################################################################################################################
 PRJ_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 ARCH=${HOME}/git/renata/rnaarch
 MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
@@ -66,7 +33,6 @@ done
 cd ${WORKSPACE}
 
 #### basecall with Rodan IVT ###
-#deactivate
 source ${HOME}/git/renata/virtualenv/bin/activate
 
 echo "Basecalling ${FAST5_DIR}"
@@ -78,11 +44,6 @@ python3 -u ${HOME}/git/renata/basecall_viterbi.py \
 --batchsize 2048 \
 --decoder viterbi \
 > ${FASTA}
-
-#### align with minimap ###
-#module purge
-#module load minimap2
-#minimap2 --secondary=no -ax map-ont -t 36 --cs ${REF} ${FASTA} > ${SAM}
 
 ### align with spomelette ###
 echo "Basecalling finished. Now aligning ${FASTA} to ${REF}"
@@ -101,8 +62,8 @@ samtools view -h -q${FILTER_SCORE} ${SAM} > ${FILTERED_SAM}
 
 ### check read num and accuracy ###
 echo "Quality control"
-samtools flagstats ${FILTERED_SAM} > ${WORKSPACE}/flagstats.txt
-${HOME}/git/renata/accuracy.py ${FILTERED_SAM} ${LIGATION_REF} > ${WORKSPACE}/flagstats.txt
+samtools flagstats ${FILTERED_SAM} > ${WORKSPACE}/flagstats_q${FILTER_SCORE}.txt
+${HOME}/git/renata/accuracy.py ${FILTERED_SAM} ${LIGATION_REF} > ${WORKSPACE}/accuracy_q${FILTER_SCORE}.txt
 
 
 #### Convert to BAM ###
