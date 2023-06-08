@@ -42,7 +42,7 @@ UNM_BAM=${DATA_DIR}/${TRAIN_DATASET}_A/spomelette_q70.bam
 UNM_FAST5=${DATA_DIR}/${TRAIN_DATASET}_A/fast5
 MOD_BAM=${DATA_DIR}/${TRAIN_DATASET}_m6A/spomelette_q70.bam
 MOD_FAST5=${DATA_DIR}/${TRAIN_DATASET}_m6A/fast5
-REF=${DATA_DIR}/${TRAIN_DATASET}_A_m6A/ligation_ref.fa
+REF=${DATA_DIR}/${TRAIN_DATASET}_A_m6A/ligation_ref.fasta
 OUTDIR=${PRJ_DIR}/MAFIA_classifiers/${TRAIN_DATASET}
 
 python3 -u oligo_train_binary_classifier.py \
