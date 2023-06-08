@@ -7,55 +7,23 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 FILTER_SCORE=70
 
 ########################################################################################################################
-### Wuerzburg ##########################################################################################################
+### WUE batches 1-2 ####################################################################################################
 ########################################################################################################################
-#HOMOPOLYMER=0
-#
-#WUE_BATCH=2
-#A_m6A=m6A
-#
-#REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/WUE_oligo_ref_batch${WUE_BATCH}.fasta
-#DATASET=WUE_batch${WUE_BATCH}_${A_m6A}
-#FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${DATASET}/fast5
+HOMOPOLYMER=0
+
+ORIG=WUE
+RUN=batch2
+A_m6A=A
 
 ########################################################################################################################
-### Isabel run 1 #######################################################################################################
+### ISA runs 1-3 #######################################################################################################
 ########################################################################################################################
 #HOMOPOLYMER=1
-
-#REF=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/ISA_run1.fasta
 #
-##DATASET=ISA_run1_A
-#DATASET=ISA_run1_m6A
-#
-#FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${DATASET}/fast5
-#
-########################################################################################################################
-### Isabel run 2 #######################################################################################################
-########################################################################################################################
-#REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/RL_Mix1_Mix3_blocks8.fasta
-#DATASET=RL_Mix1_A
-#DATASET=RL_Mix3_m6A
-
-#REF=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/reference/RL_Mix2_Mix4_blocks8.fasta
-#DATASET=RL_Mix2_A
-#DATASET=RL_Mix4_m6A
-
-#FAST5_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230503_RL_run2/${DATASET}/*
-
-########################################################################################################################
-### ISA run 3 ##########################################################################################################
-########################################################################################################################
-HOMOPOLYMER=1
-
-ORIG=ISA
-RUN=run3_2
-MOD=A
+#ORIG=ISA
+#RUN=run3_2
+#MOD=A
 #MOD=m6A
-
-REF=${PRJ_DIR}/reference/${ORIG}_oligo_ref_${RUN}.fasta
-DATASET=${ORIG}_${RUN}_${MOD}
-FAST5_DIR=${PRJ_DIR}/${DATASET}/fast5
 
 ########################################################################################################################
 ### Isabel hetero ######################################################################################################
@@ -72,10 +40,13 @@ FAST5_DIR=${PRJ_DIR}/${DATASET}/fast5
 
 ########################################################################################################################
 
+REF=${PRJ_DIR}/reference/${ORIG}_oligo_ref_${RUN}.fasta
+DATASET=${ORIG}_${RUN}_${MOD}
+
 WORKSPACE=${PRJ_DIR}/${DATASET}
-mkdir -p ${WORKSPACE}
 cd ${WORKSPACE}
 
+FAST5_DIR=${WORKSPACE}/fast5
 FASTA=${WORKSPACE}/renata.fasta
 SAM=${WORKSPACE}/spomelette.sam
 LIGATION_REF=${WORKSPACE}/ligation_ref.fasta
