@@ -21,7 +21,7 @@ echo "Merging ${ORIG} runs: ${INPUT_RUNS// /, }"
 
 for MOD in $INPUT_MODS
 do
-  OUTDIR=${PRJ_DIR}/${OUTPUT_RUN}_${MOD}
+  OUTDIR=${PRJ_DIR}/${ORIG}_${OUTPUT_RUN}_${MOD}
 
   ### fast5 ###
   echo "Merging fast5 files"
@@ -44,7 +44,7 @@ do
   do
     BAM_INPUTS+="${PRJ_DIR}/${ORIG}_${RUN}_${MOD}/spomelette_q70.bam "
   done
-  samtools merge ${BAM_OUTPUT} ${BAM_INPUTS}
+  samtools merge - ${BAM_INPUTS} | samtools sort - > ${BAM_OUTPUT}
   samtools index ${BAM_OUTPUT}
 
   ### reference ###
@@ -77,9 +77,9 @@ do
     ln -s ${f}
   done
 
-  MERGE_BAM_INPUTS+="${PRJ_DIR}/${OUTPUT_RUN}_${MOD}/spomelette_q70.bam "
+  MERGE_BAM_INPUTS+="${PRJ_DIR}/${ORIG}_${OUTPUT_RUN}_${MOD}/spomelette_q70.bam "
 
-  MERGE_REF_INPUTS+="${PRJ_DIR}/${OUTPUT_RUN}_${MOD}/ligation_ref.fasta "
+  MERGE_REF_INPUTS+="${PRJ_DIR}/${ORIG}_${OUTPUT_RUN}_${MOD}/ligation_ref.fasta "
 done
 
 cd ${MERGE_DIR}
