@@ -13,7 +13,8 @@ conda activate MAFIA
 set -e -f
 cd ${HOME}/git/MAFIA
 
-DATA_DIR=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/oligo
+PRJ_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian
+DATA_DIR=${PRJ_DIR}/oligo
 
 ############################################################################################
 ### Training data ##########################################################################
@@ -39,7 +40,7 @@ UNM_FAST5=${DATA_DIR}/${TRAIN_DATASET}_A/fast5
 MOD_BAM=${DATA_DIR}/${TRAIN_DATASET}_m6A/spomelette_q70.bam
 MOD_FAST5=${DATA_DIR}/${TRAIN_DATASET}_m6A/fast5
 REF=${DATA_DIR}/${TRAIN_DATASET}_A_m6A/ligation_ref.fa
-OUTDIR=${DATA_DIR}/MAFIA_classifiers/${TRAIN_DATASET}
+OUTDIR=${PRJ_DIR}/MAFIA_classifiers/${TRAIN_DATASET}
 
 python3 -u oligo_train_binary_classifier.py \
 --unm_bam_file ${UNM_BAM} \
