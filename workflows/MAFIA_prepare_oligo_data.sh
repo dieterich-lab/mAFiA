@@ -13,7 +13,7 @@ HOMOPOLYMER=0
 
 ORIG=WUE
 RUN=batch2
-A_m6A=A
+MOD=A
 
 ########################################################################################################################
 ### ISA runs 1-3 #######################################################################################################
@@ -71,7 +71,7 @@ python3 -u ${HOME}/git/renata/basecall_viterbi.py \
 #minimap2 --secondary=no -ax map-ont -t 36 --cs ${REF} ${FASTA} > ${SAM}
 
 ### align with spomelette ###
-echo "Basecalling finished. Now aligning reads to ${REF}"
+echo "Basecalling finished. Now aligning ${FASTA} to ${REF}"
 python3 -u ${HOME}/git/MAFIA/spanish_omelette_alignment.py \
 --ref_file ${REF} \
 --query_file ${FASTA} \
