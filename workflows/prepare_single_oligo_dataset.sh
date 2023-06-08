@@ -32,6 +32,25 @@ do
 done
 cd ${WORKSPACE}
 
+### check links ###
+#for my_link in ${FAST5_DIR}/*.fast5
+#do
+#  if [ -L ${my_link} ]
+#  then
+#     if [ -e ${my_link} ]
+#     then
+#        echo "${my_link} Good link"
+#     else
+#        echo "${my_link} Broken link"
+#     fi
+#  elif [ -e ${my_link} ]
+#  then
+#     echo "${my_link} Not a link"
+#  else
+#     echo "${my_link} Missing"
+#  fi
+#done
+
 #### basecall with Rodan IVT ###
 source ${HOME}/git/renata/virtualenv/bin/activate
 
