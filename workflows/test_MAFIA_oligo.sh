@@ -4,8 +4,8 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=120GB
 #SBATCH --verbose
-#SBATCH --job-name=MAFIA_test_oligo
-#SBATCH --output=/home/achan/slurm/MAFIA_test_oligo_%A.out
+#SBATCH --job-name=test_MAFIA_oligo
+#SBATCH --output=/home/achan/slurm/test_MAFIA_oligo_%A.out
 
 eval "$(conda shell.bash hook)"
 conda activate MAFIA
