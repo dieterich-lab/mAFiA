@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+shopt -s globstar
 
 while getopts o:r:m:h:l: flag
 do
@@ -26,7 +27,7 @@ LIGATION_REF=${WORKSPACE}/ligation_ref.fasta
 ### softlink fast5 files ###
 mkdir -p ${FAST5_DIR} && cd "$_"
 echo "Creating softlinks from ${LOC}"
-for f in ${LOC}/*/fast5_*/*.fast5
+for f in ${LOC}/**/*.fast5
 do
   ln -s $f
 done
