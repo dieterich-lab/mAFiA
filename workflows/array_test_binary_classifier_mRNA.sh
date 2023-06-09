@@ -5,8 +5,8 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=120GB
 #SBATCH --verbose
-#SBATCH --job-name=MAFIA_SWARM_test_binary_classifier_mRNA
-#SBATCH --output=/home/achan/slurm/MAFIA_SWARM_test_binary_classifier_mRNA_%A_%02a.out
+#SBATCH --job-name=array_test_binary_classifier_mRNA
+#SBATCH --output=/home/achan/slurm/array_test_binary_classifier_mRNA_%A_%02a.out
 
 eval "$(conda shell.bash hook)"
 conda activate MAFIA
