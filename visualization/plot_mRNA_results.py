@@ -46,8 +46,8 @@ def calc_mod_ratio_with_margin(in_df_motif, prob_margin, thresh_cov=50):
 
 
 results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
-# train_dataset = 'WUE_batches1+2'
-train_dataset = 'ISA_run1'
+# train_dataset = 'WUE_batches1-2'
+train_dataset = 'ISA_runs1-3'
 test_datasets = [
     # '0_WT_100_IVT',
     # '25_WT_75_IVT',
@@ -154,8 +154,10 @@ for ds, df in dfs.items():
                 axes_mod_ratio[subplot_ind].set_ylabel('ONT mod. ratio', fontsize=15)
             axes_mod_ratio[subplot_ind].set_title('{}'.format(this_motif), fontsize=20)
             axes_mod_ratio[subplot_ind].legend(loc='upper left', fontsize=12)
+
 fig_hist.tight_layout()
-fig_mod_ratio.tight_layout()
+# fig_mod_ratio.tight_layout()
+fig_mod_ratio.suptitle('Train: {}\nTest: {}'.format(train_dataset, 'HEK293 WT'), fontsize=25)
 
 fig_hist.savefig(os.path.join(img_out, 'hist_modProbs_pValThresh{:.2E}_marginProb{:.2f}.png'.format(P_VAL_THRESH, PROB_MARGIN)), bbox_inches='tight')
 fig_mod_ratio.savefig(os.path.join(img_out, 'corr_glori_modRatio_pValThresh{:.2E}_covThresh{}_marginProb{:.2f}.png'.format(P_VAL_THRESH, COV_THRESH, PROB_MARGIN)), bbox_inches='tight')
