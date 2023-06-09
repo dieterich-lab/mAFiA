@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #SBATCH --partition=gpu
 #SBATCH --nodelist=gpu-g3-1
-#SBATCH --mem=120GB
+#SBATCH --mem=180GB
 #SBATCH --nodes=1
 #SBATCH --verbose
-#SBATCH --job-name=train_MAFIA
-#SBATCH --output=/home/achan/slurm/train_MAFIA_%A.out
+#SBATCH --job-name=train_MAFIA_oligo
+#SBATCH --output=/home/achan/slurm/train_MAFIA_oligo_%A.out
 
 eval "$(conda shell.bash hook)"
 #eval "$(/home/achan/miniconda3/condabin/conda shell.bash hook)"
