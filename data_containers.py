@@ -99,7 +99,7 @@ class Data_Container:
             i_stop = min(i_start+batch_size, total_num_indexed_reads)
             new_container = self.__class__(name='{}_clone{}'.format(self.name, clone_num))
             new_container.indexed_read_ids = {k:self.indexed_read_ids[k] for k in list(self.indexed_read_ids.keys())[i_start:i_stop]}
-            new_container.bam = self.bam
+            # new_container.bam = self.bam
             split_containers.append(new_container)
         return split_containers
 

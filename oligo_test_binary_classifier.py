@@ -34,14 +34,14 @@ if __name__ == "__main__":
     for process in processes:
         process.join()
     print('Processes finished')
+    print('{} daughters:'.format(len(daughter_containers)))
     for container in daughter_containers:
-        print('Daughters:')
         print('{}: {}'.format(container.name, len(container.read_bases_features)))
     women_containers = []
     while not queue.empty():
         women_containers.append(queue.get())
+    print('{} women:'.format(len(women_containers)))
     for container in women_containers:
-        print('Women:')
         print('{}: {}'.format(container.name, len(container.read_bases_features)))
     test_container.merge_basecalls_features(daughter_containers)
 
