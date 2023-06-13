@@ -30,11 +30,11 @@ if __name__ == "__main__":
     daughter_containers = test_container.get_split_containers(args.num_processes)
     processes = [Process(target=task, args=(i, daughter_containers, ivt_backbones, args,)) for i in range(args.num_processes)]
 
-    for process in processes:
-        process.start()
     print(f'X1 queue: {queue.qsize()}')
     for process in processes:
-        process.join()
+        process.start()
+    # for process in processes:
+    #     process.join()
     print('Processes finished')
     print(f'X2 queue: {queue.qsize()}')
     women_containers = []
