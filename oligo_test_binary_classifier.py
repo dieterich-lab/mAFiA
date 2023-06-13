@@ -15,9 +15,9 @@ args = parser.args
 
 def task(in_queue, ind, containers, backbones, in_args):
     print(f"Task {containers[ind].name} started ...", flush=True)
-    in_queue.put(containers[ind])
     containers[ind].collect_features_from_reads(backbones[ind], in_args.max_num_reads)
     print(f"Task {containers[ind].name} terminated with {len(containers[ind].read_bases_features)} features", flush=True)
+    in_queue.put(containers[ind])
 
 if __name__ == "__main__":
     test_container = Oligo_Data_Container('test', args.test_bam_file, args.test_fast5_dir)
