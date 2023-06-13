@@ -8,16 +8,15 @@ from feature_extractors import Backbone_Network
 from feature_classifiers import load_motif_classifiers
 # from multiprocessing import Process
 from torch.multiprocessing import Process
-from threading import Thread
 
 parser = Test_Args_Parser()
 parser.parse_and_print()
 args = parser.args
 
-def task(container, backbone, in_args):
-    print(f"Task {container.name} started ...")
-    container.collect_features_from_reads(backbone, in_args.max_num_reads)
-    print(f"Task {container.name} terminated.")
+def task(ind, containers, backbones, in_args):
+    print(f"Task {containers[ind].name} started ...", flush=True)
+    containers[ind].collect_features_from_reads(backbones[ind], in_args.max_num_reads)
+    print(f"Task {containers[ind].name} terminated.", flush=True)
 
 if __name__ == "__main__":
     test_container = Oligo_Data_Container('test', args.test_bam_file, args.test_fast5_dir)
@@ -25,8 +24,7 @@ if __name__ == "__main__":
 
     ivt_backbones = [Backbone_Network(args.backbone_model_path, args.extraction_layer, args.feature_width) for i in range(args.num_processes)]
     daughter_containers = test_container.get_split_containers(args.num_processes)
-    processes = [Process(target=task, args=(daughter_containers[i], ivt_backbones[i], args,)) for i in range(args.num_processes)]
-    # processes = [Thread(target=task, args=(daughter_containers[i], ivt_backbones[i], args,)) for i in range(args.num_processes)]
+    processes = [Process(target=task, args=(i, daughter_containers, ivt_backbones, args,)) for i in range(args.num_processes)]
 
     for process in processes:
         process.start()
