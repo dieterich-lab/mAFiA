@@ -37,7 +37,7 @@ if __name__ == "__main__":
     print(f'X2 queue: {queue.qsize()}')
     women_containers = []
     for proc in processes:
-        print('Y1 queue: {queue.qsize()}', flush=True)
+        print(f'Y1 queue: {queue.qsize()}', flush=True)
         women_containers.append(queue.get())
     print(f'X3 queue: {queue.qsize()}')
     print('{} daughters:'.format(len(daughter_containers)))
@@ -49,7 +49,7 @@ if __name__ == "__main__":
     for proc in processes:
         proc.join()
 
-    test_container.merge_basecalls_features(daughter_containers)
+    test_container.merge_basecalls_features(women_containers)
 
     oligo_ref_generator = Oligo_Reference_Generator(ligation_ref_file=args.ref_file)
     oligo_ref_generator.collect_motif_oligos()
