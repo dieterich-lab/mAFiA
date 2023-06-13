@@ -6,17 +6,33 @@ from oligo_processors import Oligo_Reference_Generator
 from data_containers import Oligo_Data_Container
 from feature_extractors import Backbone_Network
 from feature_classifiers import load_motif_classifiers
+# from multiprocessing import Process
+from torch.multiprocessing import Process
+from threading import Thread
 
 parser = Test_Args_Parser()
 parser.parse_and_print()
+args = parser.args
 
-def main(args):
+def task(container, backbone, in_args):
+    print(f"Task {container.name} started ...")
+    container.collect_features_from_reads(backbone, in_args.max_num_reads)
+    print(f"Task {container.name} terminated.")
+
+if __name__ == "__main__":
     test_container = Oligo_Data_Container('test', args.test_bam_file, args.test_fast5_dir)
     test_container.build_dict_read_ref()
 
-    ivt_backbone = Backbone_Network(args.backbone_model_path, args.extraction_layer, args.feature_width)
+    ivt_backbones = [Backbone_Network(args.backbone_model_path, args.extraction_layer, args.feature_width) for i in range(args.num_processes)]
+    daughter_containers = test_container.get_split_containers(args.num_processes)
+    processes = [Process(target=task, args=(daughter_containers[i], ivt_backbones[i], args,)) for i in range(args.num_processes)]
+    # processes = [Thread(target=task, args=(daughter_containers[i], ivt_backbones[i], args,)) for i in range(args.num_processes)]
 
-    test_container.collect_features_from_reads(ivt_backbone, args.max_num_reads)
+    for process in processes:
+        process.start()
+    for process in processes:
+        process.join()
+    test_container.merge_basecalls_features(daughter_containers)
 
     oligo_ref_generator = Oligo_Reference_Generator(ligation_ref_file=args.ref_file)
     oligo_ref_generator.collect_motif_oligos()
@@ -42,6 +58,3 @@ def main(args):
         writer.update_df_out(df_nts)
         writer.write_df()
     print('Total number of nucleotides tested {}'.format(len(writer.df_out)), flush=True)
-
-if __name__ == "__main__":
-    main(parser.args)

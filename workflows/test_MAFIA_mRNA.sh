@@ -27,13 +27,13 @@ REF=${HOME}/Data/genomes/GRCh38_96.fa
 MOD_FILE=${HOME}/Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv
 BACKBONE_MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 CLASSIFIER_MODEL_DIR=${PRJ_DIR}/MAFIA_classifiers/${TRAIN_DATASET}
-########################################################################################################################
-########################################################################################################################
-mkdir -p ${OUTDIR}
 
 NUM_ARRAYS=""
 for f in ${MOD_FILE}.part*; do ff=${f##*part}; NUM_ARRAYS+="${ff},"; done
 NUM_ARRAYS=${NUM_ARRAYS%,*}
+########################################################################################################################
+########################################################################################################################
+mkdir -p ${OUTDIR}
 
 sbatch --array=${NUM_ARRAYS} \
 --export=ALL,\

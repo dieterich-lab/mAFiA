@@ -9,10 +9,10 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
 
-def get_norm_counts(in_df, sel_motif):
+def get_norm_counts(in_df, sel_motifs):
     df_motif = in_df[
         (np.float32(in_df['P_adjust']) <= P_VAL_THRESH)
-        & (in_df['ref_motif']==sel_motif)
+        & (in_df['ref_motif'].isin(sel_motifs))
         # & (df['pred_motif']==sel_motif)
     ]
 
@@ -46,8 +46,9 @@ def calc_mod_ratio_with_margin(in_df_motif, prob_margin, thresh_cov=50):
 
 
 results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
+# train_dataset = 'ISA_runs1-3'
 # train_dataset = 'WUE_batches1-2'
-train_dataset = 'ISA_runs1-3'
+train_dataset = 'ISA-WUE'
 test_datasets = [
     # '0_WT_100_IVT',
     # '25_WT_75_IVT',
@@ -83,7 +84,7 @@ for ds in test_datasets:
         dfs[ds] = df
 
 # motifs = list(set.intersection(*[set(df['ref_motif'].unique()) for df in dfs.values()]))
-motifs = ['AGACT', 'GGACA', 'GGACC', 'GAACT', 'GGACT', 'TGACT']
+motifs = ['GGACT', 'GGACA', 'GAACT', 'AGACT', 'GGACC', 'TGACT']
 
 ### aggregate mod. ratio per site ###
 # def calc_mod_ratio(in_df_motif, thresh_mod=0.5, thresh_cov=50):
@@ -112,7 +113,7 @@ fig_width = num_cols*5
 fig_height = num_rows*5
 fig_hist = plt.figure(figsize=(fig_width, fig_height))
 axes_hist = fig_hist.subplots(num_rows, num_cols).flatten()
-fig_mod_ratio = plt.figure(figsize=(fig_width, fig_height))
+fig_mod_ratio = plt.figure(figsize=(fig_width, fig_height+3))
 axes_mod_ratio = fig_mod_ratio.subplots(num_rows, num_cols).flatten()
 dict_ds_motif_avg = {}
 for ds, df in dfs.items():
@@ -120,7 +121,7 @@ for ds, df in dfs.items():
     for subplot_ind, this_motif in enumerate(motifs):
         if this_motif not in df['ref_motif'].unique():
             continue
-        ds_norm_counts, ds_bin_centers, ds_motif = get_norm_counts(df, this_motif)
+        ds_norm_counts, ds_bin_centers, ds_motif = get_norm_counts(df, [this_motif])
         axes_hist[subplot_ind].step(ds_bin_centers, ds_norm_counts, color=ds_colors[ds], label='{}'.format(ds))
 
         axes_hist[subplot_ind].axvspan(xmin=PROB_MARGIN, xmax=1 - PROB_MARGIN, color='gray', alpha=0.5)
@@ -155,9 +156,15 @@ for ds, df in dfs.items():
             axes_mod_ratio[subplot_ind].set_title('{}'.format(this_motif), fontsize=20)
             axes_mod_ratio[subplot_ind].legend(loc='upper left', fontsize=12)
 
+            _, _, ds_all = get_norm_counts(df, motifs)
+            df_all_avg = calc_mod_ratio_with_margin(ds_all, prob_margin=PROB_MARGIN, thresh_cov=COV_THRESH)
+            glori_ratio_all = np.float64(df_all_avg['Ratio'])
+            mod_ratio_all = np.float64(df_all_avg['mod_ratio'])
+            corr_all = np.corrcoef(glori_ratio_all, mod_ratio_all)[0, 1]
+
 fig_hist.tight_layout()
-# fig_mod_ratio.tight_layout()
-fig_mod_ratio.suptitle('Train: {}\nTest: {}'.format(train_dataset, 'HEK293 WT'), fontsize=25)
+fig_mod_ratio.tight_layout(rect=[0, 0.03, 1, 0.85])
+fig_mod_ratio.suptitle('Train: {}\nTest: {}\nOverall corr. {:.2f}'.format(train_dataset, 'HEK293 WT', corr_all), fontsize=25)
 
 fig_hist.savefig(os.path.join(img_out, 'hist_modProbs_pValThresh{:.2E}_marginProb{:.2f}.png'.format(P_VAL_THRESH, PROB_MARGIN)), bbox_inches='tight')
 fig_mod_ratio.savefig(os.path.join(img_out, 'corr_glori_modRatio_pValThresh{:.2E}_covThresh{}_marginProb{:.2f}.png'.format(P_VAL_THRESH, COV_THRESH, PROB_MARGIN)), bbox_inches='tight')

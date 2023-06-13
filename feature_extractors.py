@@ -76,21 +76,30 @@ class Backbone_Network:
         return hook
 
     def _get_base_probs_and_activations(self, in_chunks):
-        event = torch.unsqueeze(torch.FloatTensor(in_chunks), 1).to(self.device, non_blocking=True)
+        print('A1')
+        # event = torch.unsqueeze(torch.FloatTensor(in_chunks), 1).to(self.device, non_blocking=True)
+        event = torch.unsqueeze(torch.FloatTensor(in_chunks), 1).to(self.device, non_blocking=False)
         event_size = event.shape[0]
         if event_size <= self.batchsize:
+            print('A2')
             out = self.model.forward(event)
+            print("A2a")
             layer_activation = self.activation[self.extraction_layer].detach().cpu().numpy()
         else:
+            print('A3')
             break_pts = np.arange(0, event_size, self.batchsize)
             start_stop_pts = [(start, stop) for start, stop in zip(break_pts, list(break_pts[1:]) + [event_size])]
             batch_out = []
             batch_layer_activation = []
+            print('A4')
             for (start, stop) in start_stop_pts:
+                print('A5')
                 batch_out.append(self.model.forward(event[start:stop]))
                 batch_layer_activation.append(self.activation[self.extraction_layer].detach().cpu().numpy())
+                print('A6')
             out = torch.concat(batch_out, 1)
             layer_activation = np.concatenate(batch_layer_activation, axis=0)
+        print('A7')
         return out, layer_activation
 
 
@@ -129,18 +138,25 @@ class Backbone_Network:
         return pred_label, out_features
 
     def get_features_from_signal(self, signal):
+        print('ZZ0')
         chunks = self._segment(signal, self.config.seqlen)
+        print('ZZ1')
 
         base_probs, activations = self._get_base_probs_and_activations(chunks)
+        print('ZZ2')
         basecalls, features = self._get_basecall_and_features(base_probs, activations)
+        print('ZZ3')
 
         return features, basecalls
 
     def _get_chunks_and_sizes_from_multiple_aligned_reads(self, in_aligned_reads):
         out_chunks = []
         chunk_sizes = []
+        print('Z0')
         for this_aligned_read in in_aligned_reads:
+            print('Z1')
             this_chunk = self._segment(this_aligned_read.norm_signal, self.config.seqlen)
+            print('Z2')
             out_chunks.append(this_chunk)
             chunk_sizes.append(this_chunk.shape[0])
         if len(out_chunks) == 0:

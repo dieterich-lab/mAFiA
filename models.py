@@ -224,7 +224,9 @@ class Rodan(nn.Module):
 
     def forward(self, x):
         # x = self.embedding(x)
+        print("B1")
         x = self.convlayers(x)
+        print('B1a')
         x = x.permute(0, 2, 1)
         x = self.final(x)
 
@@ -234,7 +236,9 @@ class Rodan(nn.Module):
         # plt.plot(x[0, :, 5], c='r')
         # plt.show()
 
+        print('B2')
         x = torch.nn.functional.log_softmax(x, 2)
+        print('B3')
         return x.permute(1, 0, 2)
 
 class Renata(nn.Module):

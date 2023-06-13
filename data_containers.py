@@ -59,10 +59,11 @@ class mRNA_Site:
         print('GLORI ratio {}'.format(self.glori_ratio))
 
 class Data_Container:
-    def __init__(self, name, bam_path, fast5_dir):
+    def __init__(self, name, bam_path=None):
         print('Loading data {}'.format(name))
         self.name = name
-        self.bam = pysam.AlignmentFile(bam_path, 'rb')
+        if bam_path:
+            self.bam = pysam.AlignmentFile(bam_path, 'rb')
         self.nucleotides = {}
 
     def _index_fast5_files(self, fast5_dir, index_bam_queries_only=False):
@@ -89,6 +90,21 @@ class Data_Container:
                         self.indexed_read_ids[read_id] = f5_filepath
 
         print('{} reads indexed'.format(len(self.indexed_read_ids)))
+
+    def get_split_containers(self, num_batches):
+        total_num_indexed_reads = len(self.indexed_read_ids)
+        batch_size = total_num_indexed_reads // num_batches + 1
+        split_containers = []
+        for clone_num, i_start in enumerate(range(0, total_num_indexed_reads, batch_size)):
+            i_stop = min(i_start+batch_size, total_num_indexed_reads)
+            new_container = self.__class__(name='{}_clone{}'.format(self.name, clone_num))
+            new_container.indexed_read_ids = {k:self.indexed_read_ids[k] for k in list(self.indexed_read_ids.keys())[i_start:i_stop]}
+            new_container.bam = self.bam
+            split_containers.append(new_container)
+        return split_containers
+
+    def merge_basecalls_features(self, split_containers):
+        self.read_bases_features = {k: v for container in split_containers for k, v in container.read_bases_features.items()}
 
     def _med_mad(self, x, factor=1.4826):
         med = np.median(x)
@@ -125,9 +141,10 @@ class Data_Container:
         return pd.concat(dfs).reset_index(drop=True)
 
 class Oligo_Data_Container(Data_Container):
-    def __init__(self, name, bam_path, fast5_dir):
-        super().__init__(name, bam_path, fast5_dir)
-        self._index_fast5_files(fast5_dir, index_bam_queries_only=True)
+    def __init__(self, name, bam_path=None, fast5_dir=None):
+        super().__init__(name, bam_path)
+        if fast5_dir:
+            self._index_fast5_files(fast5_dir, index_bam_queries_only=True)
 
     def collect_features_from_reads(self, extractor, max_num_reads):
         print('Now extracting features from {}'.format(self.name))
@@ -136,13 +153,16 @@ class Oligo_Data_Container(Data_Container):
                               sample(list(self.indexed_read_ids.keys()), min(len(self.indexed_read_ids.keys()), max_num_reads))}
         else:
             sample_read_ids = self.indexed_read_ids
-
-        read_bases_features = {}
+        print(f"Task {self.name} - X1")
+        self.read_bases_features = {}
         for query_name in tqdm(sample_read_ids.keys()):
+            print(f"Task {self.name} - query {query_name}")
             this_read_signal = self._get_norm_signal_from_read_id(query_name, sample_read_ids)
+            print(f"Task {self.name} - query {query_name} Y1")
             this_read_features, this_read_bases = extractor.get_features_from_signal(this_read_signal)
-            read_bases_features[query_name] = (this_read_bases, this_read_features)
-        self.read_bases_features = read_bases_features
+            print(f"Task {self.name} - query {query_name} Y2")
+            self.read_bases_features[query_name] = (this_read_bases, this_read_features)
+            print(f"Task {self.name} - query {query_name} Y3")
 
     def collect_motif_nucleotides(self, reference_motif, reference_generator, enforce_ref_5mer=False):
         print('Collecting nucleotides for motif {}'.format(reference_motif))

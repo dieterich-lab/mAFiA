@@ -13,6 +13,7 @@ class Args_Parser(argparse.ArgumentParser):
         self.add_argument('--feature_width', type=int, default=0)
         self.add_argument('--classifier_type', default='logistic_regression')
         self.add_argument('--classifier_model_dir')
+        self.add_argument('--num_processes', type=int, default=4)
 
     def parse_and_print(self):
         self.args = self.parse_args()
