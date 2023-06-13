@@ -159,7 +159,6 @@ class Oligo_Data_Container(Data_Container):
             this_read_features, this_read_bases = extractor.get_features_from_signal(this_read_signal)
             self.read_bases_features[query_name] = (this_read_bases, this_read_features)
             print(len(self.read_bases_features))
-            print('{}: {}'.format(query_name, self.read_bases_features[query_name][0]))
 
     def collect_motif_nucleotides(self, reference_motif, reference_generator, enforce_ref_5mer=False):
         print('Collecting nucleotides for motif {}'.format(reference_motif))
