@@ -33,14 +33,14 @@ if __name__ == "__main__":
     for process in processes:
         process.start()
     print(f'X1 queue: {queue.qsize()}')
+    for process in processes:
+        process.join()
+    print('Processes finished')
+    print(f'X2 queue: {queue.qsize()}')
     women_containers = []
     while not queue.empty():
         print(queue, flush=True)
         women_containers.append(queue.get())
-    print(f'X2 queue: {queue.qsize()}')
-    for process in processes:
-        process.join()
-    print('Processes finished')
     print(f'X3 queue: {queue.qsize()}')
     print('{} daughters:'.format(len(daughter_containers)))
     for container in daughter_containers:
