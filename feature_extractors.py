@@ -138,25 +138,17 @@ class Backbone_Network:
         return pred_label, out_features
 
     def get_features_from_signal(self, signal):
-        print('ZZ0')
         chunks = self._segment(signal, self.config.seqlen)
-        print('ZZ1')
-
         base_probs, activations = self._get_base_probs_and_activations(chunks)
-        print('ZZ2')
         basecalls, features = self._get_basecall_and_features(base_probs, activations)
-        print('ZZ3')
 
         return features, basecalls
 
     def _get_chunks_and_sizes_from_multiple_aligned_reads(self, in_aligned_reads):
         out_chunks = []
         chunk_sizes = []
-        print('Z0')
         for this_aligned_read in in_aligned_reads:
-            print('Z1')
             this_chunk = self._segment(this_aligned_read.norm_signal, self.config.seqlen)
-            print('Z2')
             out_chunks.append(this_chunk)
             chunk_sizes.append(this_chunk.shape[0])
         if len(out_chunks) == 0:
