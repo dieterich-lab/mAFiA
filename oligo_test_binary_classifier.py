@@ -31,15 +31,13 @@ if __name__ == "__main__":
     processes = [Process(target=task, args=(i, daughter_containers, ivt_backbones, args,)) for i in range(args.num_processes)]
 
     print(f'X1 queue: {queue.qsize()}')
-    for process in processes:
-        process.start()
-    # for process in processes:
-    #     process.join()
+    for proc in processes:
+        proc.start()
     print('Processes finished')
     print(f'X2 queue: {queue.qsize()}')
     women_containers = []
-    while not queue.empty():
-        print(queue, flush=True)
+    for proc in processes:
+        print('Y1 queue: {queue.qsize()}', flush=True)
         women_containers.append(queue.get())
     print(f'X3 queue: {queue.qsize()}')
     print('{} daughters:'.format(len(daughter_containers)))
@@ -48,6 +46,9 @@ if __name__ == "__main__":
     print('{} women:'.format(len(women_containers)))
     for container in women_containers:
         print('{}: {}'.format(container.name, len(container.read_bases_features)))
+    for proc in processes:
+        proc.join()
+
     test_container.merge_basecalls_features(daughter_containers)
 
     oligo_ref_generator = Oligo_Reference_Generator(ligation_ref_file=args.ref_file)
