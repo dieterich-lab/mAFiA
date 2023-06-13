@@ -32,6 +32,7 @@ if __name__ == "__main__":
     for process in processes:
         process.start()
         print(f'Empty queue: {queue.empty()}')
+    print(f'Final empty queue: {queue.empty()}')
     women_containers = []
     while not queue.empty():
         print(queue, flush=True)
