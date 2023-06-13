@@ -17,7 +17,7 @@ def task(in_queue, ind, containers, backbones, in_args):
     print(f"Task {containers[ind].name} started ...", flush=True)
     in_queue.put(containers[ind])
     containers[ind].collect_features_from_reads(backbones[ind], in_args.max_num_reads)
-    print(f"Task {containers[ind].name} terminated with {containers[ind].read_bases_features} features", flush=True)
+    print(f"Task {containers[ind].name} terminated with {len(containers[ind].read_bases_features)} features", flush=True)
 
 if __name__ == "__main__":
     test_container = Oligo_Data_Container('test', args.test_bam_file, args.test_fast5_dir)
@@ -31,15 +31,15 @@ if __name__ == "__main__":
 
     for process in processes:
         process.start()
+    women_containers = []
+    while not queue.empty():
+        women_containers.append(queue.get())
     for process in processes:
         process.join()
     print('Processes finished')
     print('{} daughters:'.format(len(daughter_containers)))
     for container in daughter_containers:
         print('{}: {}'.format(container.name, len(container.read_bases_features)))
-    women_containers = []
-    while not queue.empty():
-        women_containers.append(queue.get())
     print('{} women:'.format(len(women_containers)))
     for container in women_containers:
         print('{}: {}'.format(container.name, len(container.read_bases_features)))
