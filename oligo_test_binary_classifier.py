@@ -17,6 +17,7 @@ def task(in_queue, ind, containers, backbones, in_args):
     print(f"Task {containers[ind].name} started, queue length {in_queue.qsize()} ...", flush=True)
     containers[ind].collect_features_from_reads(backbones[ind], in_args.max_num_reads)
     in_queue.put(containers[ind])
+    print(f"After put, ueue length {in_queue.qsize()} ...", flush=True)
     print(f"Task {containers[ind].name} terminated with {len(containers[ind].read_bases_features)} features", flush=True)
 
 if __name__ == "__main__":
