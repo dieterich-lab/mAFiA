@@ -13,11 +13,11 @@ parser = Test_Args_Parser()
 parser.parse_and_print()
 args = parser.args
 
-def task(in_queue, ind, containers, backbones, in_args):
-    print(f"Task {containers[ind].name} started, queue length {in_queue.qsize()} ...", flush=True)
+def task(ind, containers, backbones, in_args):
+    print(f"Task {containers[ind].name} started, queue length {queue.qsize()} ...", flush=True)
     containers[ind].collect_features_from_reads(backbones[ind], in_args.max_num_reads)
-    in_queue.put(containers[ind])
-    print(f"After put, ueue length {in_queue.qsize()} ...", flush=True)
+    queue.put(containers[ind])
+    print(f"After put, queue length {queue.qsize()} ...", flush=True)
     print(f"Task {containers[ind].name} terminated with {len(containers[ind].read_bases_features)} features", flush=True)
 
 if __name__ == "__main__":
@@ -28,19 +28,20 @@ if __name__ == "__main__":
 
     ivt_backbones = [Backbone_Network(args.backbone_model_path, args.extraction_layer, args.feature_width) for i in range(args.num_processes)]
     daughter_containers = test_container.get_split_containers(args.num_processes)
-    processes = [Process(target=task, args=(queue, i, daughter_containers, ivt_backbones, args,)) for i in range(args.num_processes)]
+    processes = [Process(target=task, args=(i, daughter_containers, ivt_backbones, args,)) for i in range(args.num_processes)]
 
     for process in processes:
         process.start()
-        print(f'Empty queue: {queue.empty()}')
-    print(f'Final empty queue: {queue.empty()}')
+    print(f'X1 queue: {queue.qsize()}')
     women_containers = []
     while not queue.empty():
         print(queue, flush=True)
         women_containers.append(queue.get())
+    print(f'X2 queue: {queue.qsize()}')
     for process in processes:
         process.join()
     print('Processes finished')
+    print(f'X3 queue: {queue.qsize()}')
     print('{} daughters:'.format(len(daughter_containers)))
     for container in daughter_containers:
         print('{}: {}'.format(container.name, len(container.read_bases_features)))
