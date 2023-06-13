@@ -33,7 +33,7 @@ if __name__ == "__main__":
         process.start()
     women_containers = []
     while not queue.empty():
-        print(queue)
+        print(queue, flush=True)
         women_containers.append(queue.get())
     for process in processes:
         process.join()
