@@ -25,31 +25,18 @@ if __name__ == "__main__":
     test_container.build_dict_read_ref()
 
     queue = Queue()
-
     ivt_backbones = [Backbone_Network(args.backbone_model_path, args.extraction_layer, args.feature_width) for i in range(args.num_processes)]
     daughter_containers = test_container.get_split_containers(args.num_processes)
     processes = [Process(target=task, args=(i, daughter_containers, ivt_backbones, args,)) for i in range(args.num_processes)]
-
-    print(f'X1 queue: {queue.qsize()}')
     for proc in processes:
         proc.start()
-    print('Processes finished')
-    print(f'X2 queue: {queue.qsize()}')
     women_containers = []
     for proc in processes:
-        print(f'Y1 queue: {queue.qsize()}', flush=True)
         women_containers.append(queue.get())
-    print(f'X3 queue: {queue.qsize()}')
-    print('{} daughters:'.format(len(daughter_containers)))
-    for container in daughter_containers:
-        print('{}: {}'.format(container.name, len(container.read_bases_features)))
-    print('{} women:'.format(len(women_containers)))
-    for container in women_containers:
-        print('{}: {}'.format(container.name, len(container.read_bases_features)))
     for proc in processes:
         proc.join()
-
     test_container.merge_basecalls_features(women_containers)
+    print(f'After merging, collected {len(test_container.read_bases_features)} read features')
 
     oligo_ref_generator = Oligo_Reference_Generator(ligation_ref_file=args.ref_file)
     oligo_ref_generator.collect_motif_oligos()
