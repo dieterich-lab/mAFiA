@@ -6,7 +6,7 @@ from oligo_processors import Oligo_Reference_Generator
 from data_containers import Oligo_Data_Container
 from feature_extractors import Backbone_Network
 from feature_classifiers import load_motif_classifiers
-# from multiprocessing import Process
+import torch
 from torch.multiprocessing import Process, Queue
 
 parser = Test_Args_Parser()
@@ -18,6 +18,8 @@ def task(ind, containers, backbones, in_args):
     queue.put(containers[ind])
 
 if __name__ == "__main__":
+    torch.multiprocessing.set_start_method('spawn')
+
     test_container = Oligo_Data_Container('test', args.test_bam_file, args.test_fast5_dir)
     test_container.build_dict_read_ref()
 
