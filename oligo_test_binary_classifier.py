@@ -13,11 +13,11 @@ parser = Test_Args_Parser()
 parser.parse_and_print()
 args = parser.args
 
-def task(in_queue, container, backbone, in_args):
-    print(f"Task {container.name} started ...", flush=True)
-    in_queue.put(container)
-    container.collect_features_from_reads(backbone, in_args.max_num_reads)
-    print(f"Task {container.name} terminated.", flush=True)
+def task(in_queue, ind, containers, backbones, in_args):
+    print(f"Task {containers[ind].name} started ...", flush=True)
+    in_queue.put(containers[ind])
+    containers[ind].collect_features_from_reads(backbones[ind], in_args.max_num_reads)
+    print(f"Task {containers[ind].name} terminated with {containers[ind].read_bases_features} features", flush=True)
 
 if __name__ == "__main__":
     test_container = Oligo_Data_Container('test', args.test_bam_file, args.test_fast5_dir)
@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     ivt_backbones = [Backbone_Network(args.backbone_model_path, args.extraction_layer, args.feature_width) for i in range(args.num_processes)]
     daughter_containers = test_container.get_split_containers(args.num_processes)
-    processes = [Process(target=task, args=(queue, daughter_containers[i], ivt_backbones[i], args,)) for i in range(args.num_processes)]
+    processes = [Process(target=task, args=(queue, i, daughter_containers, ivt_backbones, args,)) for i in range(args.num_processes)]
 
     for process in processes:
         process.start()
