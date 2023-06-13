@@ -14,11 +14,8 @@ parser.parse_and_print()
 args = parser.args
 
 def task(ind, containers, backbones, in_args):
-    print(f"Task {containers[ind].name} started, queue length {queue.qsize()} ...", flush=True)
     containers[ind].collect_features_from_reads(backbones[ind], in_args.max_num_reads)
     queue.put(containers[ind])
-    print(f"After put, queue length {queue.qsize()} ...", flush=True)
-    print(f"Task {containers[ind].name} terminated with {len(containers[ind].read_bases_features)} features", flush=True)
 
 if __name__ == "__main__":
     test_container = Oligo_Data_Container('test', args.test_bam_file, args.test_fast5_dir)
