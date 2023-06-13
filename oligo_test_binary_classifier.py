@@ -17,6 +17,7 @@ def task(in_queue, ind, containers, backbones, in_args):
     print(f"Task {containers[ind].name} started ...", flush=True)
     containers[ind].collect_features_from_reads(backbones[ind], in_args.max_num_reads)
     in_queue.put(containers[ind])
+    print(f'Task empty queue: {in_queue.empty()}')
     print(f"Task {containers[ind].name} terminated with {len(containers[ind].read_bases_features)} features", flush=True)
 
 if __name__ == "__main__":
