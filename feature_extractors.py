@@ -77,8 +77,7 @@ class Backbone_Network:
 
     def _get_base_probs_and_activations(self, in_chunks):
         print('A1')
-        # event = torch.unsqueeze(torch.FloatTensor(in_chunks), 1).to(self.device, non_blocking=True)
-        event = torch.unsqueeze(torch.FloatTensor(in_chunks), 1).to(self.device, non_blocking=False)
+        event = torch.unsqueeze(torch.FloatTensor(in_chunks), 1).to(self.device, non_blocking=True)
         event_size = event.shape[0]
         if event_size <= self.batchsize:
             print('A2')
