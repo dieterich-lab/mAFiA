@@ -145,6 +145,7 @@ class Oligo_Data_Container(Data_Container):
         super().__init__(name, bam_path)
         if fast5_dir:
             self._index_fast5_files(fast5_dir, index_bam_queries_only=True)
+        self.read_bases_features = {}
 
     def collect_features_from_reads(self, extractor, max_num_reads):
         print('Now extracting features from {}'.format(self.name))
@@ -153,11 +154,11 @@ class Oligo_Data_Container(Data_Container):
                               sample(list(self.indexed_read_ids.keys()), min(len(self.indexed_read_ids.keys()), max_num_reads))}
         else:
             sample_read_ids = self.indexed_read_ids
-        self.read_bases_features = {}
         for query_name in tqdm(sample_read_ids.keys()):
             this_read_signal = self._get_norm_signal_from_read_id(query_name, sample_read_ids)
             this_read_features, this_read_bases = extractor.get_features_from_signal(this_read_signal)
             self.read_bases_features[query_name] = (this_read_bases, this_read_features)
+            print('{}: {}'.format(query_name, self.read_bases_features[query_name][0]))
 
     def collect_motif_nucleotides(self, reference_motif, reference_generator, enforce_ref_5mer=False):
         print('Collecting nucleotides for motif {}'.format(reference_motif))
