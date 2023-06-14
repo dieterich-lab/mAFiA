@@ -12,13 +12,13 @@ do
   esac
 done
 
-PRJ_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/oligo
+PRJ_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 ARCH=${HOME}/git/renata/rnaarch
 MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 FILTER_SCORE=70
 REF=${PRJ_DIR}/reference/${ORIG}_oligo_ref_${RUN}.fasta
 DATASET=${ORIG}_${RUN}_${MOD}
-WORKSPACE=${PRJ_DIR}/${DATASET}
+WORKSPACE=${PRJ_DIR}/oligo/${DATASET}
 FAST5_DIR=${WORKSPACE}/fast5
 FASTA=${WORKSPACE}/renata.fasta
 SAM=${WORKSPACE}/spomelette.sam
