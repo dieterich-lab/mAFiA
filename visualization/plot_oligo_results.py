@@ -2,13 +2,31 @@ import os
 HOME = os.path.expanduser('~')
 import pandas as pd
 import numpy as np
-import matplotlib
-matplotlib.use('TkAgg')
+import matplotlib as mpl
+# matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import random
 random.seed(0)
 from random import sample
 import re
+
+cm = 1/2.54  # centimeters in inches
+gr = 1.618
+# mpl.rcParams['figure.dpi'] = 600
+# mpl.rcParams['savefig.dpi'] = 600
+mpl.rcParams['font.size'] = 7
+mpl.rcParams['legend.fontsize'] = 6
+mpl.rcParams['xtick.labelsize'] = 5
+mpl.rcParams['ytick.labelsize'] = 5
+mpl.rcParams['xtick.major.size'] = 2
+mpl.rcParams['ytick.major.size'] = 2
+mpl.rcParams['font.family'] = 'Arial'
+FMT = 'pdf'
+fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
+
+xtick_spacing = 0.5
+ytick_spacing = 0.1
 
 def get_norm_counts(in_df, sel_motif):
     df_motif = in_df[
@@ -39,10 +57,12 @@ def get_auc(rec, prec):
 
 results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
 # training_dataset = 'ISA'
-training_dataset = 'WUE'
+# training_dataset = 'WUE'
+training_dataset = 'ISA-WUE'
 
-testing_datasets = ['ISA_A', 'ISA_m6A']
-# testing_datasets = ['WUE_A', 'WUE_m6A']
+# testing_datasets = ['ISA_A', 'ISA_m6A']
+testing_datasets = ['WUE_A', 'WUE_m6A']
+# testing_datasets = ['ISA-WUE_A', 'ISA-WUE_m6A']
 
 ds_colors = {ds : c for ds, c in zip(testing_datasets, ['b', 'r'])}
 
@@ -63,8 +83,11 @@ motifs = ['GGACT', 'GGACA', 'GAACT', 'AGACT', 'GGACC', 'TGACT']
 ### plots ###
 num_rows = 2
 num_cols = 3
-fig_width = 16
-fig_height = 12
+fig_width = 8*cm
+fig_height = fig_width / gr
+
+x_max = 1.0
+xticks = np.round(np.linspace(0, x_max, 3), 3)
 
 ### histogram of prob. distribution ###
 fig_hist = plt.figure(figsize=(fig_width, fig_height))
@@ -82,19 +105,33 @@ for subplot_ind, this_motif in enumerate(motifs):
         this_motif_bin_A_m6A_counts['{}_counts'.format(A_m6A)] = ds_real_counts
 
         y_max = max(y_max, (ds_norm_counts.max() // 0.05 + 1) * 0.05)
-        axes_hist[subplot_ind].step(ds_bin_centers, ds_norm_counts, color=ds_colors[ds], label='{}, {} NTs'.format(ds.split('_')[-1], len(ds_motif)))
+        # y_max = 0.2
+        # axes_hist[subplot_ind].step(ds_bin_centers, ds_norm_counts, color=ds_colors[ds], label='{}, {} NTs'.format(ds.split('_')[-1], len(ds_motif)))
+        axes_hist[subplot_ind].step(ds_bin_centers, ds_norm_counts, color=ds_colors[ds], label='{}'.format(ds.split('_')[-1]))
     if subplot_ind>=(num_rows-1)*num_cols:
-        axes_hist[subplot_ind].set_xlabel('Mod. Prob.', fontsize=15)
-    if subplot_ind%num_cols==0:
-        axes_hist[subplot_ind].set_ylabel('Norm. frequency', fontsize=15)
-    axes_hist[subplot_ind].set_title('{}'.format(this_motif), fontsize=20)
-    axes_hist[subplot_ind].set_xlim([-0.05, 1.05])
-    axes_hist[subplot_ind].set_ylim([0, y_max])
-    axes_hist[subplot_ind].legend(loc='upper left', fontsize=12)
+        # axes_hist[subplot_ind].set_xlabel('Mod. Prob.')
+        axes_hist[subplot_ind].set_xticks(xticks)
+    else:
+        axes_hist[subplot_ind].set_xticks([])
+
+    # if subplot_ind%num_cols==0:
+    #     axes_hist[subplot_ind].set_ylabel('Norm. frequency')
+
+    yticks = np.round(np.linspace(0, y_max, 3), 3)
+    axes_hist[subplot_ind].set_yticks(yticks)
+
+    axes_hist[subplot_ind].set_title('{}'.format(this_motif), pad=-10)
+
+
+    axes_hist[subplot_ind].set_xlim([-0.01, 1.01])
+    axes_hist[subplot_ind].set_ylim([-0.001, y_max])
+    if subplot_ind==0:
+        axes_hist[subplot_ind].legend(loc='upper left')
     motif_bin_A_m6A_counts[this_motif] = this_motif_bin_A_m6A_counts
-fig_hist.tight_layout(rect=[0, 0.03, 1, 0.9])
-fig_hist.suptitle('Trained on {}, tested on {}'.format(training_dataset, '_'.join(testing_datasets[0].split('_')[:-1])), fontsize=25)
-fig_hist.savefig(os.path.join(img_out, 'hist_oligo_modProbs.png'), bbox_inches='tight')
+# fig_hist.tight_layout(rect=[0, 0.03, 1, 0.9])
+# fig_hist.suptitle('Trained on {}, tested on {}'.format(training_dataset, '_'.join(testing_datasets[0].split('_')[:-1])), fontsize=25)
+fig_hist.tight_layout(pad=0.5)
+fig_hist.savefig(os.path.join(img_out, f'hist_oligo_modProbs.{FMT}'), **fig_kwargs)
 
 ### precision-recall curve ###
 all_aucs = {}
@@ -105,19 +142,40 @@ for subplot_ind, this_motif in enumerate(motifs):
     this_motif_auc = get_auc(this_motif_recall, this_motif_precision)
     all_aucs[this_motif] = this_motif_auc
     axes_prc[subplot_ind].plot(this_motif_recall, this_motif_precision, label='AUC {:.2f}'.format(this_motif_auc))
-    if subplot_ind >= (num_rows - 1) * num_cols:
-        axes_prc[subplot_ind].set_xlabel('Recall', fontsize=15)
-    if subplot_ind % num_cols == 0:
-        axes_prc[subplot_ind].set_ylabel('precision', fontsize=15)
-    axes_prc[subplot_ind].set_title('{}'.format(this_motif), fontsize=20)
-    axes_prc[subplot_ind].set_xlim([-0.05, 1.05])
-    axes_prc[subplot_ind].set_ylim([-0.05, 1.05])
-    axes_prc[subplot_ind].legend(loc='lower left', fontsize=20)
-fig_prc.tight_layout(rect=[0, 0.03, 1, 0.9])
-fig_prc.suptitle('Trained on {}, tested on {}\nMean AUC {:.2f}'.format(training_dataset, '_'.join(testing_datasets[0].split('_')[:-1]), np.mean(list(all_aucs.values()))), fontsize=25)
-fig_prc.savefig(os.path.join(img_out, 'prc_oligo_modProbs.png'), bbox_inches='tight')
+    # if subplot_ind >= (num_rows - 1) * num_cols:
+    #     axes_prc[subplot_ind].set_xlabel('Recall')
+    # if subplot_ind % num_cols == 0:
+    #     axes_prc[subplot_ind].set_ylabel('precision')
+    axes_prc[subplot_ind].set_title('{}'.format(this_motif), pad=-10)
+    axes_prc[subplot_ind].set_xlim([-0.01, 1.01])
+    axes_prc[subplot_ind].set_ylim([-0.01, 1.01])
+    axes_prc[subplot_ind].legend(loc='lower left')
+
+    x_max = 1.0
+    y_max = 1.0
+    xticks = np.round(np.linspace(0, x_max, 3), 3)
+    yticks = np.round(np.linspace(0, y_max, 3), 3)
+    if subplot_ind>=(num_rows-1)*num_cols:
+        axes_prc[subplot_ind].set_xticks(xticks)
+    else:
+        axes_prc[subplot_ind].set_xticks([])
+    # if subplot_ind % num_cols == 0:
+    #     axes_prc[subplot_ind].set_yticks(yticks)
+    # else:
+    #     axes_prc[subplot_ind].set_yticks([])
+    axes_prc[subplot_ind].set_yticks(yticks)
+
+# fig_prc.tight_layout(rect=[0, 0.03, 1, 0.9])
+# fig_prc.suptitle('Trained on {}, tested on {}\nMean AUC {:.2f}'.format(training_dataset, '_'.join(testing_datasets[0].split('_')[:-1]), np.mean(list(all_aucs.values()))), fontsize=25)
+fig_prc.tight_layout(pad=0.5)
+fig_prc.savefig(os.path.join(img_out, f'prc_oligo_modProbs.{FMT}'), **fig_kwargs)
 
 # plt.close('all')
+
+### output mean AUC ###
+mean_auc = np.mean(list(all_aucs.values()))
+with open(os.path.join(img_out, 'mean_auc.txt'), 'w') as out_file:
+    out_file.write('{:.3f}'.format(mean_auc))
 
 ### visualize single-read ###
 # num_samples = 50
@@ -166,4 +224,6 @@ fig_prc.savefig(os.path.join(img_out, 'prc_oligo_modProbs.png'), bbox_inches='ti
 # plt.ylabel('P(m6A)', fontsize=20, rotation=-90, labelpad=30)
 # plt.yticks(cax_yticks, cax_yticks)
 #
-# fig_single_read.savefig(os.path.join(img_out, 'single_read_oligo_modProbs.png'))
+# fig_single_read.savefig(os.path.join(img_out, 'single_read_oligo_modProbs.eps'))
+
+plt.close('all')
