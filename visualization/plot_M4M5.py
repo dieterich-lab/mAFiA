@@ -9,35 +9,37 @@ import random
 random.seed(0)
 from random import sample
 import matplotlib
-matplotlib.use('TkAgg')
+# matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
 results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
-train_dataset = 'WUE_batches1+2'
+train_dataset = 'ISA-WUE'
 test_datasets = [
-    'M4_M5',
-    'M4_M5star',
-    'M4star_M5',
-    'M4star_M5star',
+    'ISA_run4_M4M5',
+    'ISA_run4_M4M5star',
+    'ISA_run4_M4starM5',
+    'ISA_run4_M4starM5star',
 ]
 ds_names = {
-    'M4_M5' : '$M_{4}M_{5}$',
-    'M4_M5star' : '$M_{4}M_{5}^{*}$',
-    'M4star_M5' : '$M_{4}^{*}M_{5}$',
-    'M4star_M5star' : '$M_{4}^{*}M_{5}^{*}$'
+    'ISA_run4_M4M5' : '$M_{4}M_{5}$',
+    'ISA_run4_M4M5star' : '$M_{4}M_{5}^{*}$',
+    'ISA_run4_M4starM5' : '$M_{4}^{*}M_{5}$',
+    'ISA_run4_M4starM5star' : '$M_{4}^{*}M_{5}^{*}$'
 }
 contig_patterns = [
-    '44',
-    '45',
-    '54',
-    '55'
+    'M4S0-M4S0',
+    'M4S0-M5S0',
+    'M5S0-M4S0',
+    'M5S0-M5S0'
 ]
 
 thresh_q = 70
+block_size = 21
+block_center = 10
 
-out_pickle = os.path.join(results_dir, 'M4_M5_modProbs_q{}.pkl'.format(thresh_q))
+out_pickle = os.path.join(results_dir, 'ISA_run4_M4M5_modProbs_q{}.pkl'.format(thresh_q))
 
-img_out = os.path.join(HOME, 'img_out/MAFIA', 'M4_M5_single_read_{}'.format(train_dataset))
+img_out = os.path.join(HOME, 'img_out/MAFIA', 'res_train_{}_test_ISA_run4_M4M5'.format(train_dataset))
 if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
 
@@ -50,12 +52,10 @@ if os.path.exists(out_pickle):
 else:
     dfs = {}
     for test_dataset in test_datasets:
-        path = os.path.join(results_dir, 'res_train_{}_test_RL_{}_q{}.tsv'.format(train_dataset, test_dataset, thresh_q))
+        path = os.path.join(results_dir, 'res_train_{}_test_{}_q{}.tsv'.format(train_dataset, test_dataset, thresh_q))
         dfs[test_dataset] = pd.read_csv(path, sep='\t').rename(columns={'Unnamed: 0': 'index'})
 
     ### collect mod probs based on contig pattern ###
-    block_size = 21
-    block_center = 10
     ds_pattern_modProbs = {}
     for test_ds in test_datasets:
         print('\nDataset {}'.format(test_ds))
@@ -67,15 +67,21 @@ else:
             print('\nCollecting pattern {}...'.format(c_pattern))
             for this_read in tqdm(unique_reads):
                 sub_df = df[df['read_id']==this_read]
-                contig_pattern = sub_df['contig'].values[0].split('_')[1]
+
+                # contig_pattern = sub_df['contig'].values[0].split('_')[1]
+                # pattern_start_blocks = [iter.span()[0] for iter in re.finditer(c_pattern, contig_pattern)]
+
+                ### TODO ###
+                contig_pattern = sub_df['contig'].values[0].lstrip('ISA-')
                 pattern_start_blocks = [iter.span()[0] for iter in re.finditer(c_pattern, contig_pattern)]
+
                 for this_start_block in pattern_start_blocks:
                     ref_pos_first = this_start_block * block_size + block_center
                     ref_pos_second = ref_pos_first + block_size
-                    if np.isin([ref_pos_first, ref_pos_second], sub_df['q_pos'].values).all():
+                    if np.isin([ref_pos_first, ref_pos_second], sub_df['ref_pos'].values).all():
                         mod_prob_pairs.append((
-                            sub_df[sub_df['q_pos']==ref_pos_first]['mod_prob'].values[0],
-                            sub_df[sub_df['q_pos']==ref_pos_second]['mod_prob'].values[0],
+                            sub_df[sub_df['ref_pos']==ref_pos_first]['mod_prob'].values[0],
+                            sub_df[sub_df['ref_pos']==ref_pos_second]['mod_prob'].values[0],
                         ))
             print('Mean pair mod. probs:', np.mean(np.vstack(mod_prob_pairs), axis=0))
             ds_pattern_modProbs[test_ds][c_pattern] = mod_prob_pairs
@@ -87,7 +93,7 @@ else:
 ########################################################################################################################
 ### visualize single-reads #############################################################################################
 ########################################################################################################################
-sel_test_ds = ['M4_M5star', 'M4star_M5']
+sel_test_ds = ['ISA_run4_M4M5star', 'ISA_run4_M4starM5']
 sel_patterns = ['45', '54']
 
 num_samples = 40
