@@ -102,7 +102,8 @@ for subplot_ind, this_motif in enumerate(motifs):
         ds_real_counts, ds_norm_counts, ds_bin_centers, ds_motif = get_norm_counts(df, this_motif)
         this_motif_bin_A_m6A_counts['bin_centers'] = ds_bin_centers
         A_m6A = ds.split('_')[-1]
-        this_motif_bin_A_m6A_counts['{}_counts'.format(A_m6A)] = ds_real_counts
+        # this_motif_bin_A_m6A_counts['{}_counts'.format(A_m6A)] = ds_real_counts
+        this_motif_bin_A_m6A_counts['{}_counts'.format(A_m6A)] = ds_norm_counts
 
         y_max = max(y_max, (ds_norm_counts.max() // 0.05 + 1) * 0.05)
         # y_max = 0.2
