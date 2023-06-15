@@ -13,7 +13,7 @@ set -e -u
 
 source ${HOME}/git/renata/virtualenv/bin/activate
 
-printf -v PART '%02d' "${SLURM_ARRAY_TASK_ID}"
+printf -v PART '%03d' "${SLURM_ARRAY_TASK_ID}"
 LIST_FILENAMES=${WORKSPACE}/${FILENAME_PREFIX}${PART}
 OUTPUT=${WORKSPACE}/part${PART}.fasta
 echo "Running basecaller on ${LIST_FILENAMES}"

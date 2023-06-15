@@ -3,27 +3,28 @@ ARCH=${HOME}/git/renata/rnaarch
 MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 
 ### new HEK293 ######################################################################################################################
-#DATASET=100_WT_0_IVT
 #DATASET=0_WT_100_IVT
-DATASET=25_WT_75_IVT
-#FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230419_HEK293_WT_IVT_Mix/${DATASET}_RTA/*/fast5_*
-
+#DATASET=25_WT_75_IVT
 #DATASET=50_WT_50_IVT
 #DATASET=75_WT_25_IVT
-#FAST5_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20230426_HEK293_WT_IVT/${DATASET}_RTA/*/fast5_*
+#DATASET=100_WT_0_IVT
 
+DATASET=P2_WT
 #####################################################################################################################################
 
-WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/${DATASET}
+WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/HEK293/${DATASET}
 mkdir -p ${WORKSPACE}
 cd ${WORKSPACE}
 
-if test -f basecall_merged.fasta
-then
-  cp basecall_merged.fasta basecall_merged.fasta.backup
-  mkdir _old
-  mv basecall_merged.fasta.backup filtered_q50.bam filtered_q50.bam.bai mapped.sam _old
-fi
+FAST5_DIR=${WORKSPACE}/fast5
+mkdir -p ${FAST5_DIR}
+
+#if test -f basecall_merged.fasta
+#then
+#  cp basecall_merged.fasta basecall_merged.fasta.backup
+#  mkdir _old
+#  mv basecall_merged.fasta.backup filtered_q50.bam filtered_q50.bam.bai mapped.sam _old
+#fi
 
 SAM=${WORKSPACE}/mapped.sam
 BAM=${WORKSPACE}/filtered_q50.bam
@@ -33,12 +34,12 @@ source ${HOME}/git/renata/virtualenv/bin/activate
 ### basecall large number of reads ###
 FILENAME_PREFIX=fast5_paths_part
 ls -1 ${FAST5_DIR}/*.fast5 > ${WORKSPACE}/fast5_paths_all
-split -l10 -d ${WORKSPACE}/fast5_paths_all ${WORKSPACE}/${FILENAME_PREFIX}
+split -a3 -l10 -d ${WORKSPACE}/fast5_paths_all ${WORKSPACE}/${FILENAME_PREFIX}
 
 NUM_ARRAYS=""
 for f in ${WORKSPACE}/fast5_paths_part*; do ff=${f##*part}; NUM_ARRAYS+="${ff},"; done
 NUM_ARRAYS=${NUM_ARRAYS%,*}
-sbatch --array=${NUM_ARRAYS} --export=ALL,WORKSPACE=${WORKSPACE},FILENAME_PREFIX=${FILENAME_PREFIX},ARCH=${ARCH},MODEL=${MODEL} ${HOME}/git/MAFIA/array_basecaller.sh
+sbatch --array=${NUM_ARRAYS} --export=ALL,WORKSPACE=${WORKSPACE},FILENAME_PREFIX=${FILENAME_PREFIX},ARCH=${ARCH},MODEL=${MODEL} ${HOME}/git/MAFIA/workflows/array_basecaller.sh
 
 #for f in ${WORKSPACE}/part*.fasta; do echo $f; grep '>' $f | wc -l; done
 
