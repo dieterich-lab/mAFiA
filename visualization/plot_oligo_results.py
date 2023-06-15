@@ -5,12 +5,12 @@ import numpy as np
 import matplotlib as mpl
 # matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
 import random
 random.seed(0)
 from random import sample
 import re
 
+#######################################################################
 cm = 1/2.54  # centimeters in inches
 gr = 1.618
 # mpl.rcParams['figure.dpi'] = 600
@@ -24,6 +24,7 @@ mpl.rcParams['ytick.major.size'] = 2
 mpl.rcParams['font.family'] = 'Arial'
 FMT = 'pdf'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
+#######################################################################
 
 xtick_spacing = 0.5
 ytick_spacing = 0.1
