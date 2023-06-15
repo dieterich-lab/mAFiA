@@ -4,10 +4,25 @@ from glob import glob
 import argparse
 import pandas as pd
 import numpy as np
-import matplotlib
-matplotlib.use('TkAgg')
+import matplotlib as mpl
+# matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
+#######################################################################
+cm = 1/2.54  # centimeters in inches
+gr = 1.618
+# mpl.rcParams['figure.dpi'] = 600
+# mpl.rcParams['savefig.dpi'] = 600
+mpl.rcParams['font.size'] = 7
+mpl.rcParams['legend.fontsize'] = 6
+mpl.rcParams['xtick.labelsize'] = 5
+mpl.rcParams['ytick.labelsize'] = 5
+mpl.rcParams['xtick.major.size'] = 2
+mpl.rcParams['ytick.major.size'] = 2
+mpl.rcParams['font.family'] = 'Arial'
+FMT = 'pdf'
+fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
+#######################################################################
 
 def get_norm_counts(in_df, sel_motif):
     df_motif = in_df[
@@ -47,23 +62,32 @@ def calc_mod_ratio_with_margin(in_df_motif, prob_margin, thresh_cov=50):
 
 results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
 # train_dataset = 'WUE_batches1-2'
-train_dataset = 'ISA_runs1-3'
+# train_dataset = 'ISA_runs1-3'
+train_dataset = 'ISA-WUE'
 test_datasets = [
-    # '0_WT_100_IVT',
-    # '25_WT_75_IVT',
-    # '50_WT_50_IVT',
-    # '75_WT_25_IVT',
+    '0_WT_100_IVT',
+    '25_WT_75_IVT',
+    '50_WT_50_IVT',
+    '75_WT_25_IVT',
     '100_WT_0_IVT'
 ]
 ds_colors = {
-    # '0_WT_100_IVT' : 'b',
-    # '25_WT_75_IVT' : 'g',
-    # '50_WT_50_IVT' : 'm',
-    # '75_WT_25_IVT' : 'c',
+    '0_WT_100_IVT' : 'b',
+    '25_WT_75_IVT' : 'g',
+    '50_WT_50_IVT' : 'm',
+    '75_WT_25_IVT' : 'c',
     '100_WT_0_IVT' : 'r'
 }
 
-img_out = os.path.join(HOME, 'img_out/MAFIA', os.path.basename('HEK293_mixing_{}'.format(train_dataset)))
+ds_names = {
+    '0_WT_100_IVT' : '0% WT',
+    '25_WT_75_IVT' : '25% WT',
+    '50_WT_50_IVT' : '50% WT',
+    '75_WT_25_IVT' : '75% WT',
+    '100_WT_0_IVT' : '100% WT'
+}
+
+img_out = os.path.join(HOME, 'img_out/MAFIA', os.path.basename('mRNA_train_{}_test_HEK293'.format(train_dataset)))
 if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
 
@@ -83,7 +107,7 @@ for ds in test_datasets:
         dfs[ds] = df
 
 # motifs = list(set.intersection(*[set(df['ref_motif'].unique()) for df in dfs.values()]))
-motifs = ['AGACT', 'GGACA', 'GGACC', 'GAACT', 'GGACT', 'TGACT']
+motifs = ['GGACT', 'GGACA', 'GAACT', 'AGACT', 'GGACC', 'TGACT']
 
 ### aggregate mod. ratio per site ###
 # def calc_mod_ratio(in_df_motif, thresh_mod=0.5, thresh_cov=50):
@@ -108,10 +132,14 @@ motifs = ['AGACT', 'GGACA', 'GGACC', 'GAACT', 'GGACT', 'TGACT']
 ### plots ###
 num_rows = 2
 num_cols = 3
-fig_width = num_cols*5
-fig_height = num_rows*5
-fig_hist = plt.figure(figsize=(fig_width, fig_height))
-axes_hist = fig_hist.subplots(num_rows, num_cols).flatten()
+# fig_width = num_cols*5
+# fig_height = num_rows*5
+fig_width = 9*cm
+fig_height = 7*cm
+xticks = [0, 0.5, 1]
+yticks = xticks
+# fig_hist = plt.figure(figsize=(fig_width, fig_height))
+# axes_hist = fig_hist.subplots(num_rows, num_cols).flatten()
 fig_mod_ratio = plt.figure(figsize=(fig_width, fig_height))
 axes_mod_ratio = fig_mod_ratio.subplots(num_rows, num_cols).flatten()
 dict_ds_motif_avg = {}
@@ -121,17 +149,17 @@ for ds, df in dfs.items():
         if this_motif not in df['ref_motif'].unique():
             continue
         ds_norm_counts, ds_bin_centers, ds_motif = get_norm_counts(df, this_motif)
-        axes_hist[subplot_ind].step(ds_bin_centers, ds_norm_counts, color=ds_colors[ds], label='{}'.format(ds))
-
-        axes_hist[subplot_ind].axvspan(xmin=PROB_MARGIN, xmax=1 - PROB_MARGIN, color='gray', alpha=0.5)
-        if subplot_ind>=num_cols*(num_rows-1):
-            axes_hist[subplot_ind].set_xlabel('Mod. Prob.', fontsize=15)
-        if subplot_ind%num_cols==0:
-            axes_hist[subplot_ind].set_ylabel('Norm. frequency', fontsize=15)
-        axes_hist[subplot_ind].set_title('{}'.format(this_motif), fontsize=20)
-        axes_hist[subplot_ind].set_xlim([-0.05, 1.05])
-        axes_hist[subplot_ind].set_ylim([0, 0.3])
-        axes_hist[subplot_ind].legend(loc='upper left', fontsize=12)
+        # axes_hist[subplot_ind].step(ds_bin_centers, ds_norm_counts, color=ds_colors[ds], label='{}'.format(ds))
+        #
+        # axes_hist[subplot_ind].axvspan(xmin=PROB_MARGIN, xmax=1 - PROB_MARGIN, color='gray', alpha=0.5)
+        # if subplot_ind>=num_cols*(num_rows-1):
+        #     axes_hist[subplot_ind].set_xlabel('Mod. Prob.')
+        # if subplot_ind%num_cols==0:
+        #     axes_hist[subplot_ind].set_ylabel('Norm. frequency')
+        # axes_hist[subplot_ind].set_title('{}'.format(this_motif))
+        # axes_hist[subplot_ind].set_xlim([-0.05, 1.05])
+        # axes_hist[subplot_ind].set_ylim([0, 0.3])
+        # axes_hist[subplot_ind].legend(loc='upper left')
 
         df_motif_avg = calc_mod_ratio_with_margin(ds_motif, prob_margin=PROB_MARGIN, thresh_cov=COV_THRESH)
         dict_ds_motif_avg[ds][this_motif] = df_motif_avg
@@ -141,7 +169,8 @@ for ds, df in dfs.items():
         corr = np.corrcoef(glori_ratio, mod_ratio)[0, 1]
 
         if ds=='100_WT_0_IVT':
-            axes_mod_ratio[subplot_ind].scatter(glori_ratio, mod_ratio, color=ds_colors[ds], marker='.', label='{} sites, corr. {:.2f}'.format(len(glori_ratio), corr))
+            axes_mod_ratio[subplot_ind].scatter(glori_ratio, mod_ratio, color=ds_colors[ds], marker='.', s=1, label=f'corr. {corr:.2f}')
+            # axes_mod_ratio[subplot_ind].scatter(glori_ratio, mod_ratio, color=ds_colors[ds], marker='.', label='{} sites, corr. {:.2f}'.format(len(glori_ratio), corr))
             # axes_mod_ratio[subplot_ind].plot(glori_ratio_ivt, mod_ratio_ivt, 'b.', label='IVT, {} sites, corr. {:.2f}'.format(len(glori_ratio_ivt), corr_ivt))
             # axes_mod_ratio[subplot_ind].plot(glori_ratio_wt, mod_ratio_wt, 'r.', label='WT, {} sites, corr. {:.2f}'.format(len(glori_ratio_wt), corr_wt))
 
@@ -149,23 +178,29 @@ for ds, df in dfs.items():
             axes_mod_ratio[subplot_ind].set_xlim([-0.05, 1.05])
             axes_mod_ratio[subplot_ind].set_ylim([-0.05, 1.05])
             if subplot_ind >= num_cols * (num_rows - 1):
-                axes_mod_ratio[subplot_ind].set_xlabel('GLORI mod. ratio', fontsize=15)
+                # axes_mod_ratio[subplot_ind].set_xlabel('GLORI mod. ratio')
+                axes_mod_ratio[subplot_ind].set_xticks(xticks)
+            else:
+                axes_mod_ratio[subplot_ind].set_xticks([])
             if subplot_ind%num_cols==0:
-                axes_mod_ratio[subplot_ind].set_ylabel('ONT mod. ratio', fontsize=15)
-            axes_mod_ratio[subplot_ind].set_title('{}'.format(this_motif), fontsize=20)
-            axes_mod_ratio[subplot_ind].legend(loc='upper left', fontsize=12)
+                # axes_mod_ratio[subplot_ind].set_ylabel('ONT mod. ratio')
+                axes_mod_ratio[subplot_ind].set_yticks(yticks)
+            else:
+                axes_mod_ratio[subplot_ind].set_yticks([])
+            axes_mod_ratio[subplot_ind].set_title(f'{this_motif}', pad=-10)
+            axes_mod_ratio[subplot_ind].legend(loc='upper left')
 
-fig_hist.tight_layout()
-# fig_mod_ratio.tight_layout()
-fig_mod_ratio.suptitle('Train: {}\nTest: {}'.format(train_dataset, 'HEK293 WT'), fontsize=25)
+# fig_hist.tight_layout()
+# fig_hist.savefig(os.path.join(img_out, f'hist_modProbs_pValThresh{P_VAL_THRESH}_marginProb{PROB_MARGIN}.{FMT}'), **fig_kwargs)
 
-fig_hist.savefig(os.path.join(img_out, 'hist_modProbs_pValThresh{:.2E}_marginProb{:.2f}.png'.format(P_VAL_THRESH, PROB_MARGIN)), bbox_inches='tight')
-fig_mod_ratio.savefig(os.path.join(img_out, 'corr_glori_modRatio_pValThresh{:.2E}_covThresh{}_marginProb{:.2f}.png'.format(P_VAL_THRESH, COV_THRESH, PROB_MARGIN)), bbox_inches='tight')
+fig_mod_ratio.tight_layout()
+# fig_mod_ratio.suptitle('Train: {}\nTest: {}'.format(train_dataset, 'HEK293 WT'))
+fig_mod_ratio.savefig(os.path.join(img_out, f'corr_glori_modRatio_pValThresh{P_VAL_THRESH}_covThresh{COV_THRESH}_marginProb{PROB_MARGIN}.{FMT}'), **fig_kwargs)
 
 ### 2D density plots ###
 num_bins = 20
 interval = 100 / num_bins
-fig = plt.figure(figsize=(len(test_datasets)*5, 5))
+fig = plt.figure(figsize=(20*cm, 5*cm))
 for subplot_ind, ds in enumerate(dict_ds_motif_avg.keys()):
     ax = plt.subplot(1, len(test_datasets), subplot_ind+1)
     ds_agg_avg = pd.concat(dict_ds_motif_avg[ds].values())
@@ -174,17 +209,22 @@ for subplot_ind, ds in enumerate(dict_ds_motif_avg.keys()):
     hist, x_bins, y_bins = np.histogram2d(glori_ratio, ont_ratio, bins=num_bins, range=[[0, 1], [0, 1]], density=True)
     im = ax.imshow(hist.T, origin='lower', vmin=1, vmax=6, cmap='plasma')
     ax.set_xticks(np.arange(0, num_bins+1, 5)-0.5, np.int32(np.arange(0, num_bins+1, 5)*interval))
-    ax.set_yticks(np.arange(0, num_bins+1, 5)-0.5, np.int32(np.arange(0, num_bins+1, 5)*interval))
     for tick in ax.yaxis.get_majorticklabels():
         tick.set_verticalalignment('bottom')
-    ax.set_xlabel('GLORI', fontsize=15)
+    # ax.set_xlabel('GLORI')
     if subplot_ind==0:
-        ax.set_ylabel('ONT mod. ratio', fontsize=15)
-    ax.set_title('{}\n{} sites'.format(ds, len(ds_agg_avg)), fontsize=15)
+        # ax.set_ylabel('ONT mod. ratio')
+        ax.set_yticks(np.arange(0, num_bins + 1, 5) - 0.5, np.int32(np.arange(0, num_bins + 1, 5) * interval))
+    else:
+        ax.set_yticks([])
+
+    # ax.set_title('{}\n{} sites'.format(ds, len(ds_agg_avg)))
+    ax.set_title(ds_names[ds])
+
 # fig.tight_layout()
-cb_ax = fig.add_axes([0.92, 0.16, 0.02, 0.68])
+cb_ax = fig.add_axes([0.92, 0.3, 0.02, 0.4])
 cbar = fig.colorbar(im, cax=cb_ax)
-cb_ax.set_ylabel('Norm. site count', fontsize=15, rotation=-90, labelpad=20)
-fig.savefig(os.path.join(img_out, 'hist2d_glori_modRatio_pValThresh{:.2E}_covThresh{}_marginProb{:.2f}.png'.format(P_VAL_THRESH, COV_THRESH, PROB_MARGIN)), bbox_inches='tight')
+# cb_ax.set_ylabel('Norm. site count', rotation=-90, labelpad=20)
+fig.savefig(os.path.join(img_out, f'hist2d_glori_modRatio_pValThresh{P_VAL_THRESH}_covThresh{COV_THRESH}_marginProb{PROB_MARGIN}.{FMT}'), **fig_kwargs)
 
 # plt.close('all')
