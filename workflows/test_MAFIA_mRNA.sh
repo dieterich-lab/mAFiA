@@ -10,16 +10,19 @@ TRAIN_DATASET=ISA-WUE
 ### Test data ##########################################################################################################
 ########################################################################################################################
 # new HEK293
-TEST_DATASET=100_WT_0_IVT
+#TEST_DATASET=100_WT_0_IVT
 #TEST_DATASET=75_WT_25_IVT
 #TEST_DATASET=50_WT_50_IVT
 #TEST_DATASET=25_WT_75_IVT
 #TEST_DATASET=0_WT_100_IVT
+
+# P2
+TEST_DATASET=P2_WT
 ########################################################################################################################
 PRJ_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 TEST_DIR=${PRJ_DIR}/HEK293/${TEST_DATASET}
 FAST5_DIR=${TEST_DIR}/fast5
-BAM=${TEST_DIR}/filtered_q50.bam
+BAM=${TEST_DIR}/genome_filtered_q50.bam
 OUTDIR=${PRJ_DIR}/results/train_${TRAIN_DATASET}_test_${TEST_DATASET}
 OUTFILE=${OUTDIR}/res_train_${TRAIN_DATASET}_test_${TEST_DATASET}.tsv
 

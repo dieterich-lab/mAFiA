@@ -1,4 +1,3 @@
-REF=${HOME}/Data/genomes/GRCh38_96.fa
 ARCH=${HOME}/git/renata/rnaarch
 MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 
@@ -26,9 +25,6 @@ mkdir -p ${FAST5_DIR}
 #  mv basecall_merged.fasta.backup filtered_q50.bam filtered_q50.bam.bai mapped.sam _old
 #fi
 
-SAM=${WORKSPACE}/mapped.sam
-BAM=${WORKSPACE}/filtered_q50.bam
-
 source ${HOME}/git/renata/virtualenv/bin/activate
 
 ### basecall large number of reads ###
@@ -51,17 +47,21 @@ else
 fi
 
 #### align to genome ###
+REF_GENOME=${HOME}/Data/genomes/GRCh38_96.fa
+SAM_GENOME=${WORKSPACE}/genome_mapped.sam
+BAM_GENOME=${WORKSPACE}/genome_filtered_q50.bam
+
 module purge
 module load minimap2
-minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF} ${WORKSPACE}/basecall_merged.fasta > ${SAM}
+minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF} ${WORKSPACE}/basecall_merged.fasta > ${SAM_GENOME}
 
 ### check stats and accuracy ###
-samtools flagstats ${SAM}
-${HOME}/git/renata/accuracy.py ${SAM} ${REF}
+samtools flagstats ${SAM_GENOME} > qc.txt
+${HOME}/git/renata/accuracy.py ${SAM_GENOME} ${REF} >> qc.txt
 
 #### Convert to BAM and index ###
-samtools view -bST ${REF} -q50 ${SAM} | samtools sort - > ${BAM}
-samtools index ${BAM}
+samtools view -bST ${REF} -q50 ${SAM_GENOME} | samtools sort - > ${BAM_GENOME}
+samtools index ${BAM_GENOME}
 
 ### clean up ###
 rm ${WORKSPACE}/part*.fasta
