@@ -1,14 +1,13 @@
 import os
 HOME = os.path.expanduser('~')
 from glob import glob
-import argparse
 import pandas as pd
 import numpy as np
-import matplotlib as mpl
-# matplotlib.use('TkAgg')
-import matplotlib.pyplot as plt
 
 #######################################################################
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+
 cm = 1/2.54  # centimeters in inches
 gr = 1.618
 # mpl.rcParams['figure.dpi'] = 600
@@ -87,7 +86,7 @@ ds_names = {
     '100_WT_0_IVT' : '100% WT'
 }
 
-img_out = os.path.join(HOME, 'img_out/MAFIA', os.path.basename('mRNA_train_{}_test_HEK293'.format(train_dataset)))
+img_out = os.path.join(HOME, 'img_out/MAFIA', os.path.basename('mRNA_train_{}_test_HEK293_GLORI'.format(train_dataset)))
 if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
 
@@ -130,12 +129,12 @@ motifs = ['GGACT', 'GGACA', 'GAACT', 'AGACT', 'GGACC', 'TGACT']
 
 
 ### plots ###
-num_rows = 2
-num_cols = 3
+num_rows = 3
+num_cols = 2
 # fig_width = num_cols*5
 # fig_height = num_rows*5
-fig_width = 9*cm
-fig_height = 7*cm
+fig_width = 6*cm
+fig_height = 10*cm
 xticks = [0, 0.5, 1]
 yticks = xticks
 # fig_hist = plt.figure(figsize=(fig_width, fig_height))
