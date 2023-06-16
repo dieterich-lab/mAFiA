@@ -28,3 +28,11 @@ print(metadata(se)$readToTranscriptMaps[[1]])
 
 ### write output ###
 writeBambuOutput(se, path = outpath)
+
+df <- apply(as.data.frame(metadata(se)$readToTranscriptMaps[[1]]), 2, as.character)
+write.table(
+  df, 
+  file = file.path(outpath, "readToTransciptMaps.tsv"),
+  sep = "\t",
+  row.names = FALSE
+  )
