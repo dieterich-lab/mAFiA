@@ -76,7 +76,4 @@ for _, row in tqdm(df_res.iterrows()):
         else:
             df_out.to_csv(out_tsv_path, sep='\t', index=False, mode='w')
         df_out = pd.DataFrame()
-
-num_annotated = (df_out['annotation']!='unknown').sum()
-percent_annotated = num_annotated / len(df_out) * 100
-print(f'{num_annotated}/{len(df_out)} ({percent_annotated:.1f}%) annotated')
+df_out.to_csv(out_tsv_path, sep='\t', index=False, mode='a')

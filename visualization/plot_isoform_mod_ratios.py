@@ -13,6 +13,10 @@ os.makedirs(img_out, exist_ok=True)
 
 df_annotated = pd.read_csv(annotated_res, sep='\t')
 
+num_annotated = (df_annotated['annotation']!='unknown').sum()
+percent_annotated = num_annotated / len(df_annotated) * 100
+print(f'{num_annotated}/{len(df_annotated)} ({percent_annotated:.1f}%) annotated')
+
 min_coverage = 10
 
 isoform_mod_ratios = {}
