@@ -11,10 +11,10 @@ test_dataset = 'P2_WT'
 # transcriptome_bam_file = f'/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/HEK293/{test_dataset}/transcriptome_mapped.bam'
 # out_tsv_path = f'/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_train_ISA-WUE_test_{test_dataset}.tsv.merged.annotated'
 
-results_file = f'/prj/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_train_ISA-WUE_test_{test_dataset}/res_train_ISA-WUE_test_{test_dataset}.tsv.merged'
+results_file = f'/prj/TRR319_RMaP/Project_BaseCalling/Adrian/results/train_ISA-WUE_test_{test_dataset}/res_train_ISA-WUE_test_{test_dataset}.tsv.merged'
 transcriptome_ref_file = '/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38.cdna.all.fa'
 transcriptome_bam_file = f'/prj/TRR319_RMaP/Project_BaseCalling/Adrian/HEK293/{test_dataset}/transcriptome_mapped.bam'
-out_tsv_path = f'/prj/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_train_ISA-WUE_test_{test_dataset}.tsv.merged.annotated'
+out_tsv_path = f'/prj/TRR319_RMaP/Project_BaseCalling/Adrian/results/train_ISA-WUE_test_{test_dataset}/res_train_ISA-WUE_test_{test_dataset}.tsv.merged.annotated'
 
 df_res = pd.read_csv(results_file, sep='\t')
 
