@@ -64,18 +64,20 @@ results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
 # train_dataset = 'ISA_runs1-3'
 train_dataset = 'ISA-WUE'
 test_datasets = [
-    '0_WT_100_IVT',
-    '25_WT_75_IVT',
-    '50_WT_50_IVT',
-    '75_WT_25_IVT',
-    '100_WT_0_IVT'
+#     '0_WT_100_IVT',
+#     '25_WT_75_IVT',
+#     '50_WT_50_IVT',
+#     '75_WT_25_IVT',
+#     '100_WT_0_IVT'
+    'P2_WT'
 ]
 ds_colors = {
     '0_WT_100_IVT' : 'b',
     '25_WT_75_IVT' : 'g',
     '50_WT_50_IVT' : 'm',
     '75_WT_25_IVT' : 'c',
-    '100_WT_0_IVT' : 'r'
+    '100_WT_0_IVT' : 'r',
+    'P2_WT': 'r'
 }
 
 ds_names = {
@@ -83,10 +85,11 @@ ds_names = {
     '25_WT_75_IVT' : '25% WT',
     '50_WT_50_IVT' : '50% WT',
     '75_WT_25_IVT' : '75% WT',
-    '100_WT_0_IVT' : '100% WT'
+    '100_WT_0_IVT' : '100% WT',
+    'P2_WT' : '100% WT P2'
 }
 
-img_out = os.path.join(HOME, 'img_out/MAFIA', os.path.basename('mRNA_train_{}_test_HEK293_GLORI'.format(train_dataset)))
+img_out = os.path.join(HOME, 'img_out/MAFIA', os.path.basename('mRNA_train_{}_test_P2_WT_GLORI'.format(train_dataset)))
 if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
 
@@ -167,7 +170,7 @@ for ds, df in dfs.items():
         mod_ratio = np.float64(df_motif_avg['mod_ratio'])
         corr = np.corrcoef(glori_ratio, mod_ratio)[0, 1]
 
-        if ds=='100_WT_0_IVT':
+        if ds in ['100_WT_0_IVT', 'P2_WT']:
             axes_mod_ratio[subplot_ind].scatter(glori_ratio, mod_ratio, color=ds_colors[ds], marker='.', s=1, label=f'corr. {corr:.2f}')
             # axes_mod_ratio[subplot_ind].scatter(glori_ratio, mod_ratio, color=ds_colors[ds], marker='.', label='{} sites, corr. {:.2f}'.format(len(glori_ratio), corr))
             # axes_mod_ratio[subplot_ind].plot(glori_ratio_ivt, mod_ratio_ivt, 'b.', label='IVT, {} sites, corr. {:.2f}'.format(len(glori_ratio_ivt), corr_ivt))
@@ -188,6 +191,8 @@ for ds, df in dfs.items():
                 axes_mod_ratio[subplot_ind].set_yticks([])
             axes_mod_ratio[subplot_ind].set_title(f'{this_motif}', pad=-10)
             axes_mod_ratio[subplot_ind].legend(loc='upper left')
+
+            print(this_motif, len(glori_ratio))
 
 # fig_hist.tight_layout()
 # fig_hist.savefig(os.path.join(img_out, f'hist_modProbs_pValThresh{P_VAL_THRESH}_marginProb{PROB_MARGIN}.{FMT}'), **fig_kwargs)

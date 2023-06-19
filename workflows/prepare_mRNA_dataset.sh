@@ -1,15 +1,15 @@
 ARCH=${HOME}/git/renata/rnaarch
 MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 
-### new HEK293 ######################################################################################################################
+### new HEK293 #########################################################################################################
 #DATASET=0_WT_100_IVT
 #DATASET=25_WT_75_IVT
 #DATASET=50_WT_50_IVT
 #DATASET=75_WT_25_IVT
-#DATASET=100_WT_0_IVT
+DATASET=100_WT_0_IVT
 
-DATASET=P2_WT
-#####################################################################################################################################
+#DATASET=P2_WT
+########################################################################################################################
 
 WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/HEK293/${DATASET}
 mkdir -p ${WORKSPACE}
@@ -27,7 +27,9 @@ mkdir -p ${FAST5_DIR}
 
 source ${HOME}/git/renata/virtualenv/bin/activate
 
-### basecall large number of reads ###
+########################################################################################################################
+### basecall large number of reads #####################################################################################
+########################################################################################################################
 FILENAME_PREFIX=fast5_paths_part
 ls -1 ${FAST5_DIR}/*.fast5 > ${WORKSPACE}/fast5_paths_all
 split -a3 -l10 -d ${WORKSPACE}/fast5_paths_all ${WORKSPACE}/${FILENAME_PREFIX}
@@ -46,23 +48,46 @@ else
   cat ${WORKSPACE}/part*.fasta > ${WORKSPACE}/basecall_merged.fasta
 fi
 
-#### align to genome ###
+########################################################################################################################
+#### align to genome ###################################################################################################
+########################################################################################################################
 REF_GENOME=${HOME}/Data/genomes/GRCh38_96.fa
 SAM_GENOME=${WORKSPACE}/genome_mapped.sam
 BAM_GENOME=${WORKSPACE}/genome_filtered_q50.bam
 
 module purge
 module load minimap2
-minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF} ${WORKSPACE}/basecall_merged.fasta > ${SAM_GENOME}
+minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF_GENOME} ${WORKSPACE}/basecall_merged.fasta > ${SAM_GENOME}
 
 ### check stats and accuracy ###
-samtools flagstats ${SAM_GENOME} > qc.txt
-${HOME}/git/renata/accuracy.py ${SAM_GENOME} ${REF} >> qc.txt
+samtools flagstats ${SAM_GENOME} > genome_qc.txt
+${HOME}/git/renata/accuracy.py ${SAM_GENOME} ${REF_GENOME} >> genome_qc.txt
 
 #### Convert to BAM and index ###
-samtools view -bST ${REF} -q50 ${SAM_GENOME} | samtools sort - > ${BAM_GENOME}
+samtools view -bST ${REF_GENOME} -q50 ${SAM_GENOME} | samtools sort - > ${BAM_GENOME}
 samtools index ${BAM_GENOME}
 
-### clean up ###
+########################################################################################################################
+#### align to transcriptome ############################################################################################
+########################################################################################################################
+REF_TRANSCRIPTOME=/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38.cdna.all.fa
+SAM_TRANSCRIPTOME=${WORKSPACE}/transcriptome_mapped.sam
+BAM_TRANSCRIPTOME=${WORKSPACE}/transcriptome_mapped.bam
+
+module purge
+module load minimap2
+minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF_TRANSCRIPTOME} ${WORKSPACE}/basecall_merged.fasta > ${SAM_TRANSCRIPTOME}
+
+### check stats and accuracy ###
+samtools flagstats ${SAM_TRANSCRIPTOME} > transcriptome_qc.txt
+${HOME}/git/renata/accuracy.py ${SAM_TRANSCRIPTOME} ${REF_TRANSCRIPTOME} >> transcriptome_qc.txt
+
+#### Convert to BAM and index ###
+samtools view -bST ${REF_TRANSCRIPTOME} ${SAM_TRANSCRIPTOME} | samtools sort - > ${BAM_TRANSCRIPTOME}
+samtools index ${BAM_TRANSCRIPTOME}
+
+########################################################################################################################
+### clean up ###########################################################################################################
+########################################################################################################################
 rm ${WORKSPACE}/part*.fasta
 rm ${WORKSPACE}/fast5_paths_all
