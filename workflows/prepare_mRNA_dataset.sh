@@ -6,9 +6,8 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 #DATASET=25_WT_75_IVT
 #DATASET=50_WT_50_IVT
 #DATASET=75_WT_25_IVT
-DATASET=100_WT_0_IVT
-
-#DATASET=P2_WT
+#DATASET=100_WT_0_IVT
+DATASET=P2_WT
 ########################################################################################################################
 
 WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/HEK293/${DATASET}
@@ -80,7 +79,7 @@ minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF_TRANSCRIPTOME} ${WO
 
 ### check stats and accuracy ###
 samtools flagstats ${SAM_TRANSCRIPTOME} > transcriptome_qc.txt
-${HOME}/git/renata/accuracy.py ${SAM_TRANSCRIPTOME} ${REF_TRANSCRIPTOME} >> transcriptome_qc.txt
+#${HOME}/git/renata/accuracy.py ${SAM_TRANSCRIPTOME} ${REF_TRANSCRIPTOME} >> transcriptome_qc.txt
 
 #### Convert to BAM and index ###
 samtools view -bST ${REF_TRANSCRIPTOME} ${SAM_TRANSCRIPTOME} | samtools sort - > ${BAM_TRANSCRIPTOME}
