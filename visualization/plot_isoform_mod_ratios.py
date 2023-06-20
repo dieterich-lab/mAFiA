@@ -18,14 +18,15 @@ mpl.rcParams['ytick.labelsize'] = 5
 mpl.rcParams['xtick.major.size'] = 2
 mpl.rcParams['ytick.major.size'] = 2
 mpl.rcParams['font.family'] = 'Arial'
-# FMT = 'pdf'
-FMT = 'png'
+FMT = 'pdf'
+# FMT = 'png'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
-dataset = 'P2_WT'
+# dataset = 'P2_WT'
+dataset = '100_WT_0_IVT'
 annotated_res = f'/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_train_ISA-WUE_test_{dataset}.tsv.merged.annotated'
-img_out = f'/home/adrian/img_out/MAFIA/{dataset}_isoforms'
+img_out = f'/home/adrian/img_out/MAFIA/{dataset}_isoforms_{FMT}'
 os.makedirs(img_out, exist_ok=True)
 
 df_annotated = pd.read_csv(annotated_res, sep='\t')
@@ -36,7 +37,7 @@ print(f'{num_annotated}/{len(df_annotated)} ({percent_annotated:.1f}%) annotated
 
 thresh_p_val = 1E-99
 min_coverage_site = 50
-min_coverage_isoform = 20
+min_coverage_isoform = 10
 gap_ratio = 0.1
 
 isoform_mod_ratios = {}
@@ -89,6 +90,7 @@ for this_index in tqdm(df_annotated['index'].unique()):
         default_x_spacing = (xrange[1] - xrange[0]) / row_max
         y_delta = 0.005
         y_round_up = 0.1
+        dot_size = 0.5
 
         cmap = plt.cm.get_cmap('rainbow', len(isoform_mod_ratios[this_index]))
 
@@ -111,7 +113,7 @@ for this_index in tqdm(df_annotated['index'].unique()):
                     row_y += y_delta
                 xs = np.concatenate(xs)
                 ys = np.concatenate(ys)
-            ax1.scatter(xs, ys, color=cmap(iso_ind), s=1)
+            ax1.scatter(xs, ys, color=cmap(iso_ind), s=dot_size)
 
         mafia_weighted = np.sum([tup[1] * tup[2] for tup in isoform_mod_ratios[this_index]]) / np.sum(
             [tup[2] for tup in isoform_mod_ratios[this_index]])
@@ -133,3 +135,29 @@ for this_index in tqdm(df_annotated['index'].unique()):
 
         plt.savefig(os.path.join(img_out, f"dot_site{sub_df['index'].values[0]}.{FMT}"), **fig_kwargs)
         plt.close('all')
+
+### histogram of splitting amount ###
+splitting_amount = []
+for k, v in isoform_mod_ratios.items():
+    if len(v)>1:
+        mod_ratios = [tup[1] for tup in v]
+        splitting_amount.append(np.max(mod_ratios) - np.min(mod_ratios))
+
+plt.figure(figsize=(5*cm, 5*cm))
+plt.hist(splitting_amount, range=[0, 1], bins=50)
+plt.xlabel('Max. difference between isoform mod. ratios')
+plt.ylabel('Site counts')
+plt.xticks([0, 0.5, 1.0])
+plt.yticks([0, 100, 200])
+plt.savefig(os.path.join(img_out, f"hist_max_diff_isoform_mod_ratios.{FMT}"), **fig_kwargs)
+plt.close()
+
+### dominant isoform to GLORI ###
+# mod_ratio_pairs = []
+# for k, v in isoform_mod_ratios.items():
+#     glori_ratio = float(df_annotated[df_annotated['index']==k]['Ratio'].values[0])
+#     dominant_mod_ratio = v[np.argmax([tup[2] for tup in v])][1]
+#     mod_ratio_pairs.append((glori_ratio, dominant_mod_ratio))
+#
+# plt.figure(figsize=(5*cm, 5*cm))
+# plt.scatter([pair[0] for pair in mod_ratio_pairs], [pair[1] for pair in mod_ratio_pairs])
