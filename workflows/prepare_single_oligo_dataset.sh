@@ -25,13 +25,13 @@ SAM=${WORKSPACE}/spomelette.sam
 LIGATION_REF=${WORKSPACE}/ligation_ref.fasta
 
 ### softlink fast5 files ###
-mkdir -p ${FAST5_DIR} && cd "$_"
-echo "Creating softlinks from ${LOC}"
-for f in ${LOC}/**/*.fast5
-do
-  ln -s $f
-done
-cd ${WORKSPACE}
+#mkdir -p ${FAST5_DIR} && cd "$_"
+#echo "Creating softlinks from ${LOC}"
+#for f in ${LOC}/**/*.fast5
+#do
+#  ln -s $f
+#done
+#cd ${WORKSPACE}
 
 ### check links ###
 #for my_link in ${FAST5_DIR}/*.fast5
@@ -55,15 +55,15 @@ cd ${WORKSPACE}
 #### basecall with Rodan IVT ###
 source ${HOME}/git/renata/virtualenv/bin/activate
 
-echo "Basecalling ${FAST5_DIR}"
-srun --partition=gpu --gres=gpu:turing:1 --cpus-per-task=8 --mem-per-cpu=8GB \
-python3 -u ${HOME}/git/renata/basecall_viterbi.py \
---fast5dir ${FAST5_DIR} \
---arch ${ARCH} \
---model ${MODEL} \
---batchsize 2048 \
---decoder viterbi \
-> ${FASTA}
+#echo "Basecalling ${FAST5_DIR}"
+#srun --partition=gpu --gres=gpu:turing:1 --cpus-per-task=8 --mem-per-cpu=8GB \
+#python3 -u ${HOME}/git/renata/basecall_viterbi.py \
+#--fast5dir ${FAST5_DIR} \
+#--arch ${ARCH} \
+#--model ${MODEL} \
+#--batchsize 2048 \
+#--decoder viterbi \
+#> ${FASTA}
 
 ### align with spomelette ###
 echo "Basecalling finished. Now aligning ${FASTA} to ${REF}"
