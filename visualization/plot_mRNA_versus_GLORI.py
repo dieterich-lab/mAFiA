@@ -68,8 +68,8 @@ test_datasets = [
 #     '25_WT_75_IVT',
 #     '50_WT_50_IVT',
 #     '75_WT_25_IVT',
-#     '100_WT_0_IVT'
-    'P2_WT'
+    '100_WT_0_IVT'
+    # 'P2_WT'
 ]
 ds_colors = {
     '0_WT_100_IVT' : 'b',

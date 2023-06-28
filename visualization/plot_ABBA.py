@@ -30,181 +30,199 @@ fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
 train_dataset = 'ISA-WUE'
 test_datasets = [
-    'ISA_run4_M4M5',
-    'ISA_run4_M4M5star',
-    'ISA_run4_M4starM5',
-    'ISA_run4_M4starM5star',
+    'WUE_batch3_AB',
+    'WUE_batch3_BA',
+    'WUE_batch3_ABBA',
 ]
 ds_names = {
-    'ISA_run4_M4M5' : 'GGACC + TGACT',
-    'ISA_run4_M4M5star' : 'GGACC + TGm6ACT',
-    'ISA_run4_M4starM5' : 'GGm6ACC + TGACT',
-    'ISA_run4_M4starM5star' : 'GGm6ACC + TGm6ACT'
+    'WUE_batch3_AB' : 'AB',
+    'WUE_batch3_BA': 'BA',
+    'WUE_batch3_ABBA' : 'ABBA',
 }
-contig_patterns = [
-    'M4S0-M4S0',
-    'M4S0-M5S0',
-    'M5S0-M4S0',
-    'M5S0-M5S0'
-]
-
-# sequences = {
-#     'M4S0' : 'CCCCAGCTGGACCGACTCAGA',
-#     'M5S0' : 'GGGACCTCTGACTGCTCTGGG'
-# }
-
-contig_motifs = {
-    'M4S0' : '...GGACC...',
-    'M5S0' : '...TGACT...'
-}
+target_pattern = 'M0S1'
 
 thresh_q = 70
-block_size = 21
-block_center = 10
+block_size = 13
+block_center = 6
 
-out_pickle = os.path.join(results_dir, 'ISA_run4_M4M5_modProbs_q{}.pkl'.format(thresh_q))
+# out_pickle = os.path.join(results_dir, 'ISA_run4_M4M5_modProbs_q{}.pkl'.format(thresh_q))
 
-img_out = os.path.join(HOME, 'img_out/MAFIA', 'res_train_{}_test_ISA_run4_M4M5'.format(train_dataset))
+img_out = os.path.join(HOME, 'img_out/MAFIA', 'res_train_{}_test_WUE_batch3_ABBA'.format(train_dataset))
 if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
 
 ########################################################################################################################
 ### load mod. probs. or collect from scratch ###########################################################################
 ########################################################################################################################
-if os.path.exists(out_pickle):
-    with open(out_pickle, 'rb') as handle:
-        ds_pattern_modProbs = pickle.load(handle)
-else:
-    dfs = {}
-    for test_dataset in test_datasets:
-        path = os.path.join(results_dir, 'res_train_{}_test_{}_q{}.tsv'.format(train_dataset, test_dataset, thresh_q))
-        this_df = pd.read_csv(path, sep='\t').rename(columns={'Unnamed: 0': 'index'})
-        dfs[test_dataset] = this_df
-        # dfs[test_dataset] = this_df[this_df['ref_motif']==this_df['pred_motif']]
+dfs = {}
+for test_dataset in test_datasets:
+    path = os.path.join(results_dir, 'res_train_{}_test_{}_q{}.tsv'.format(train_dataset, test_dataset, thresh_q))
+    this_df = pd.read_csv(path, sep='\t').rename(columns={'Unnamed: 0': 'index'})
+    dfs[test_dataset] = this_df
+    # dfs[test_dataset] = this_df[this_df['ref_motif']==this_df['pred_motif']]
 
-    ### collect mod probs based on contig pattern ###
-    ds_pattern_modProbs = {}
-    for test_ds in test_datasets:
-        print('\nDataset {}'.format(test_ds))
-        df = dfs[test_ds]
-        unique_reads = df['read_id'].unique()
-        ds_pattern_modProbs[test_ds] = {}
-        for this_read in tqdm(unique_reads):
-            sub_df = df[df['read_id']==this_read]
-            # contig_pattern = sub_df['contig'].values[0].split('_')[1]
-            contig_pattern = sub_df['contig'].values[0].lstrip('ISA-')
+### collect mod probs ###
+ds_refPos_modProbs = {}
+for test_ds in test_datasets:
+    print('\nDataset {}'.format(test_ds))
+    df = dfs[test_ds]
+    unique_reads = df['read_id'].unique()
+    ds_refPos_modProbs[test_ds] = {}
+    for this_read in tqdm(unique_reads):
+        sub_df = df[df['read_id']==this_read]
+        if len(sub_df)<2:
+            continue
 
-            for c_pattern in contig_patterns:
-                # print('\nCollecting pattern {}...'.format(c_pattern))
-                if c_pattern not in ds_pattern_modProbs[test_ds].keys():
-                    ds_pattern_modProbs[test_ds][c_pattern] = []
+        readPos = np.int64(sub_df['read_pos'].values)
+        refPos = np.int64(sub_df['ref_pos'].values)
+        modProb = sub_df['mod_prob'].values
 
-                # pattern_start_blocks = [it.span()[0] for it in re.finditer(c_pattern, contig_pattern)]
-                pattern_start_blocks = [it.span()[0] for it in re.finditer(c_pattern, contig_pattern)]
+        diff_readPos = np.diff(readPos)
+        diff_refPos = np.diff(refPos)
+        if np.any(np.abs(diff_readPos-block_size)>1) or np.any(np.abs(diff_refPos-block_size)>1):
+            continue
+        sel_indices = np.where(np.abs(diff_readPos - diff_refPos)<=(block_size//2))[0]
+        if (len(sel_indices)==0) or (not np.all(np.diff(sel_indices)==1)):
+            continue
+        sel_indices = np.concatenate([sel_indices, [sel_indices[-1]+1]])
+        # filtered_indices = np.concatenate([sel_indices, (sel_indices + 1)])
+        sel_refPos = refPos[sel_indices]
+        sel_modProb = modProb[sel_indices]
 
-                mod_prob_pairs = []
-                for this_start_block in pattern_start_blocks:
-                    ref_pos_first = this_start_block * block_size + block_center
-                    ref_pos_second = ref_pos_first + block_size
-                    if np.isin([ref_pos_first, ref_pos_second], sub_df['ref_pos'].values).all():
-                        mod_prob_pairs.append((
-                            sub_df[sub_df['ref_pos']==ref_pos_first]['mod_prob'].values[0],
-                            sub_df[sub_df['ref_pos']==ref_pos_second]['mod_prob'].values[0],
-                        ))
-                ds_pattern_modProbs[test_ds][c_pattern].extend(mod_prob_pairs)
-
-    ### dump to pickle ###
-    with open(out_pickle, 'wb') as handle:
-        pickle.dump(ds_pattern_modProbs, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        ds_refPos_modProbs[test_ds][this_read] = list(zip(sel_refPos, sel_modProb))
 
 ########################################################################################################################
-### visualize single-reads #############################################################################################
+### construct probality mat ############################################################################################
 ########################################################################################################################
-sel_test_ds = ['ISA_run4_M4M5star', 'ISA_run4_M4starM5']
-sel_patterns = ['M4S0-M5S0', 'M5S0-M4S0']
-
-fig_width = (5 + 1)*cm
-fig_height = 5*cm
-
-num_samples = 40
-ytick_pos = [0, 19, 39]
-yticks = [f'read {i+1}' for i in ytick_pos]
-min_pos = 10
-extent = 2 * block_size
+min_pos = 6
+extent = 80
 vmin = 0.8
-cax_yticks = np.linspace(vmin, 1, 3)
-num_rows = len(sel_test_ds)
-num_cols = len(sel_patterns)
+min_cycles = 3
+
+ds_mat_modProb = {}
+for test_ds in test_datasets:
+    refPos_modProbs = ds_refPos_modProbs[test_ds]
+    # mod_probs = [pair for pair in ds_pattern_modProbs[test_ds][c_pattern] if np.max(pair)>=vmin]
+    # print(test_ds, c_pattern, len(mod_probs), np.mean(np.vstack(mod_probs), axis=0))
+
+    sample_refPos_modProbs = list(refPos_modProbs.values())
+    mat_mod_prob = np.zeros([len(refPos_modProbs), extent])
+    i = 0
+    for pos_probs in sample_refPos_modProbs:
+        refPos = np.array([tup[0] for tup in pos_probs])
+        modProbs = np.array([tup[1] for tup in pos_probs])
+        if np.sum(modProbs>vmin)<min_cycles:
+            continue
+
+        first_high_ind = np.where(modProbs>vmin)[0][0]
+        # if first_high_ind==0:
+        #     filtered_refPos = refPos
+        #     filtered_modProbs = modProbs
+        #     shifted_refPos = filtered_refPos - np.min(filtered_refPos) + min_pos + block_size
+        # else:
+        filtered_refPos = refPos[first_high_ind:]
+        filtered_modProbs = modProbs[first_high_ind:]
+        shifted_refPos = filtered_refPos - np.min(filtered_refPos) + min_pos
+
+        extent_mask = shifted_refPos<extent
+        shifted_refPos = shifted_refPos[extent_mask]
+        filtered_modProbs = filtered_modProbs[extent_mask]
+
+        # if np.max(shifted_pos)>=extent:
+        #     continue
+        # mat_mod_prob[i, filtered_pos] = filtered_probs
+        mat_mod_prob[i, shifted_refPos] = filtered_modProbs
+        i+=1
+
+    mat_mod_prob = mat_mod_prob[~np.all(mat_mod_prob==0, axis=1)]
+    ds_mat_modProb[test_ds] = mat_mod_prob
+    print(f"{test_ds}: {len(mat_mod_prob)} samples")
+
+########################################################################################################################
+### visualize ##########################################################################################################
+########################################################################################################################
+num_samples = 15
+
+fig_width = 4*cm
+fig_height = 6*cm
+
+num_rows = 3
+num_cols = 1
+
+# cax_yticks = np.linspace(vmin, 1, 3)
+
+ytick_pos = [0, 9]
+yticks = [f'read {i+1}' for i in ytick_pos]
+
+xticks = np.arange(min_pos, extent, 2*block_size)
 
 fig_single_read = plt.figure(figsize=(fig_width, fig_height))
-for row_ind, test_ds in enumerate(sel_test_ds):
-    for col_ind, c_pattern in enumerate(sel_patterns):
-        mod_probs = ds_pattern_modProbs[test_ds][c_pattern]
-        # mod_probs = [pair for pair in ds_pattern_modProbs[test_ds][c_pattern] if np.max(pair)>=vmin]
-        # print(test_ds, c_pattern, len(mod_probs), np.mean(np.vstack(mod_probs), axis=0))
-        xtick_pos = [min_pos, min_pos+block_size]
-        # xticks = ['P{}'.format(p) for p in c_pattern]
-        # xticks = ''.join([sequences[contig] for contig in c_pattern.split('-')])
-        xticks = [contig_motifs[contig] for contig in c_pattern.split('-')]
-        if num_samples>=len(mod_probs):
-            sample_mod_probs = mod_probs
-        else:
-            sample_mod_probs = sample(mod_probs, num_samples)
-        mat_mod_prob = np.zeros([num_samples, extent])
-        for i, prob_pair in enumerate(sample_mod_probs):
-            mat_mod_prob[i, min_pos] = prob_pair[0]
-            mat_mod_prob[i, min_pos+block_size] = prob_pair[1]
+for row_ind, test_ds in enumerate(test_datasets):
+    display_mat = ds_mat_modProb[test_ds]
+    display_mat = display_mat[np.sum(display_mat>vmin, axis=1)>=3][:num_samples]
+    ax = fig_single_read.add_subplot(num_rows, num_cols, row_ind+1)
+    im = ax.imshow(display_mat, vmin=vmin, vmax=1, cmap='plasma')
+    # ax.set_xticks(xticks)
+    if row_ind==(num_rows-1):
+        ax.set_xticks(xticks)
+        ax.set_xlabel('Aligned position')
+    else:
+        ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_yticks(ytick_pos, yticks)
+    ax.set_title(ds_names[test_ds])
 
-        ax = fig_single_read.add_subplot(num_rows, num_cols, row_ind * num_cols + col_ind + 1)
-        im = ax.imshow(mat_mod_prob, vmin=vmin, vmax=1, cmap='plasma')
-        if row_ind==(num_rows-1):
-            ax.set_xticks(xtick_pos, xticks)
-            # ax.set_xlabel('Aligned pattern', fontsize=15)
-        else:
-            ax.set_xticks([])
-        if col_ind==0:
-            ax.set_yticks(ytick_pos, yticks)
-            ax.set_ylabel(ds_names[test_ds])
-        else:
-            ax.set_yticks([])
-# fig_single_read.tight_layout(rect=[0.1, 0.1, 0.8, 0.9])
+fig_single_read.tight_layout(rect=[0.1, 0.1, 0.8, 0.9])
 fig_single_read.subplots_adjust(left=0.1, bottom=0.1, right=0.8, top=0.9)
 cax = fig_single_read.add_axes([0.85, 0.3, 0.03, 0.4])
 plt.colorbar(im, cax=cax)
-# plt.ylabel('P(m6A)', fontsize=15, rotation=-90, labelpad=30)
-plt.yticks(cax_yticks, cax_yticks)
+plt.ylabel('P(m6A)', rotation=-90, labelpad=10)
 
-fig_single_read.savefig(os.path.join(img_out, f'single_read_grid_q{thresh_q}.{FMT}'), **fig_kwargs)
+fig_single_read.savefig(os.path.join(img_out, f'single_read_q{thresh_q}.{FMT}'), **fig_kwargs)
 
 ########################################################################################################################
-### box plots ##########################################################################################################
+### bar plots ##########################################################################################################
 ########################################################################################################################
-xtick_pos = [1, 2]
-fig_boxplot, axs = plt.subplots(nrows=num_rows, ncols=num_cols, figsize=(5*cm, 5*cm))
-for row_ind, test_ds in enumerate(sel_test_ds):
-    for col_ind, c_pattern in enumerate(sel_patterns):
-        mod_probs = np.vstack(ds_pattern_modProbs[test_ds][c_pattern])
-        ax = axs[row_ind, col_ind]
-        # ax.violinplot(mod_probs, xtick_pos, points=50, widths=0.8)
-        ax.boxplot(mod_probs, showfliers=False, whis=0.5)
-        # ax.axhline(y=0.5, c='r', alpha=0.5)
-        # xticks = ['P{}'.format(p) for p in c_pattern]
-        xticks = [contig_motifs[contig] for contig in c_pattern.split('-')]
+thresh_modProb = 0.8
+fig_barplot = plt.figure(figsize=(fig_width, fig_height))
+for row_ind, test_ds in enumerate(test_datasets):
+    x_pos = np.arange(min_pos, extent, block_size)
+    barplot_mat = ds_mat_modProb[test_ds]
+    ax = fig_barplot.add_subplot(num_rows, num_cols, row_ind+1)
+    ax.bar(x_pos, np.mean(barplot_mat[:, x_pos]>=thresh_modProb, axis=0), width=5, label=ds_names[test_ds])
+    ax.axhline(y=0.5, c='r', linestyle='--', alpha=0.5)
+    if row_ind==(num_rows-1):
+        ax.set_xticks(xticks)
+        ax.set_xlabel('Aligned position')
+    else:
+        ax.set_xticks([])
+    ax.set_ylim([0.0, 1.05])
+    if row_ind==1:
+        ax.set_ylabel(f'% NTs with P(m6A)>={thresh_modProb:.1f}')
+        # ax.set_ylabel('Mean P(m6A)')
+    ax.legend(loc='upper right')
+    # ax.set_yticks([])
+    # ax.set_yticks(ytick_pos, yticks)
+    # ax.set_title(ds_names[test_ds])
+fig_barplot.savefig(os.path.join(img_out, f'barplot_q{thresh_q}.{FMT}'), **fig_kwargs)
 
-        if row_ind==(num_rows-1):
-            ax.set_xticks(xtick_pos, xticks)
-            # ax.set_xlabel('Aligned pattern')
-        else:
-            ax.set_xticks([])
-        if col_ind==0:
-            ax.set_yticks(np.arange(0, 1.01, 0.5))
-            ax.set_ylabel(ds_names[test_ds])
-        else:
-            ax.set_yticks([])
-        ax.set_xlim([0.5, 2.5])
-        ax.set_ylim([-0.05, 1.05])
-
-        # axs[row_ind, col_ind].set_title('Custom violinplot 1', fontsize=fs)
-fig_boxplot.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.9)
-# fig_boxplot.suptitle('P(m6A)')
-fig_boxplot.savefig(os.path.join(img_out, f'boxplot_q{thresh_q}.{FMT}'), **fig_kwargs)
+########################################################################################################################
+### violin plots #######################################################################################################
+########################################################################################################################
+# x_pos = np.arange(min_pos, extent, block_size)
+#
+# fig_vlnplot = plt.figure(figsize=(fig_width, fig_height))
+# for row_ind, test_ds in enumerate(test_datasets):
+#     vlnplot_mat = ds_mat_modProb[test_ds]
+#     ax = fig_vlnplot.add_subplot(num_rows, num_cols, row_ind+1)
+#     im = ax.violinplot(vlnplot_mat[:, x_pos])
+#     if row_ind==(num_rows-1):
+#         ax.set_xticks(xticks)
+#         # ax.set_xlabel('Aligned pattern', fontsize=15)
+#     else:
+#         ax.set_xticks([])
+#     # ax.set_ylim([0.0, 1.0])
+#     # ax.set_yticks([])
+#     # ax.set_yticks(ytick_pos, yticks)
+#     ax.set_title(ds_names[test_ds])
+# fig_vlnplot.savefig(os.path.join(img_out, f'vlnplot_q{thresh_q}.{FMT}'), **fig_kwargs)
