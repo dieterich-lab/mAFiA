@@ -36,7 +36,7 @@ class Oligo_Reference_Generator:
         else:
             print('Error - multiple origins for oligos')
             raise
-        oligo_suffixes = ['-'.join(id.split('-')[1:]) for id in oligo_ids]
+        oligo_suffixes = [id.split('-')[1] for id in oligo_ids]
         return '{}-{}'.format(oligo_origin, '-'.join(oligo_suffixes))
 
     def get_ligation_reference(self, segments):
@@ -90,6 +90,7 @@ class Oligo_Reference_Generator:
                             intra_block_shift = self.flat_oligo_dims['{}-{}'.format(lig_ref_origin, this_lig_ref_suffix)][1]
                             site_positions.append(inter_block_shifts+intra_block_shift)
                     relevant_ligation_ref_ids_positions[ref_id] = site_positions
+
         return relevant_ligation_ref_ids_positions
 
 class Query_Container:
