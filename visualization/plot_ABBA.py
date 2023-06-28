@@ -10,6 +10,7 @@ random.seed(10)
 from random import sample
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from collections import Counter
 
 #######################################################################
 cm = 1/2.54  # centimeters in inches
@@ -31,12 +32,12 @@ results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
 train_dataset = 'ISA-WUE'
 test_datasets = [
     'WUE_batch3_AB',
-    'WUE_batch3_BA',
+    # 'WUE_batch3_BA',
     'WUE_batch3_ABBA',
 ]
 ds_names = {
     'WUE_batch3_AB' : 'AB',
-    'WUE_batch3_BA': 'BA',
+    # 'WUE_batch3_BA': 'BA',
     'WUE_batch3_ABBA' : 'ABBA',
 }
 target_pattern = 'M0S1'
@@ -141,12 +142,12 @@ for test_ds in test_datasets:
 ########################################################################################################################
 ### visualize ##########################################################################################################
 ########################################################################################################################
-num_samples = 15
+num_samples = 40
 
-fig_width = 4*cm
-fig_height = 6*cm
+fig_width = 5*cm
+fig_height = 5*cm
 
-num_rows = 3
+num_rows = 2
 num_cols = 1
 
 # cax_yticks = np.linspace(vmin, 1, 3)
@@ -157,13 +158,13 @@ yticks = [f'read {i+1}' for i in ytick_pos]
 xticks = np.arange(min_pos, extent, 2*block_size)
 
 fig_single_read = plt.figure(figsize=(fig_width, fig_height))
-for row_ind, test_ds in enumerate(test_datasets):
+for subplot_ind, test_ds in enumerate(test_datasets):
     display_mat = ds_mat_modProb[test_ds]
     display_mat = display_mat[np.sum(display_mat>vmin, axis=1)>=3][:num_samples]
-    ax = fig_single_read.add_subplot(num_rows, num_cols, row_ind+1)
+    ax = fig_single_read.add_subplot(num_rows, num_cols, subplot_ind+1)
     im = ax.imshow(display_mat, vmin=vmin, vmax=1, cmap='plasma')
     # ax.set_xticks(xticks)
-    if row_ind==(num_rows-1):
+    if subplot_ind==(num_rows-1):
         ax.set_xticks(xticks)
         ax.set_xlabel('Aligned position')
     else:
@@ -185,19 +186,19 @@ fig_single_read.savefig(os.path.join(img_out, f'single_read_q{thresh_q}.{FMT}'),
 ########################################################################################################################
 thresh_modProb = 0.8
 fig_barplot = plt.figure(figsize=(fig_width, fig_height))
-for row_ind, test_ds in enumerate(test_datasets):
+for subplot_ind, test_ds in enumerate(test_datasets):
     x_pos = np.arange(min_pos, extent, block_size)
     barplot_mat = ds_mat_modProb[test_ds]
-    ax = fig_barplot.add_subplot(num_rows, num_cols, row_ind+1)
+    ax = fig_barplot.add_subplot(num_rows, num_cols, subplot_ind+1)
     ax.bar(x_pos, np.mean(barplot_mat[:, x_pos]>=thresh_modProb, axis=0), width=5, label=ds_names[test_ds])
     ax.axhline(y=0.5, c='r', linestyle='--', alpha=0.5)
-    if row_ind==(num_rows-1):
+    if subplot_ind==(num_rows-1):
         ax.set_xticks(xticks)
         ax.set_xlabel('Aligned position')
     else:
         ax.set_xticks([])
     ax.set_ylim([0.0, 1.05])
-    if row_ind==1:
+    if subplot_ind==1:
         ax.set_ylabel(f'% NTs with P(m6A)>={thresh_modProb:.1f}')
         # ax.set_ylabel('Mean P(m6A)')
     ax.legend(loc='upper right')
@@ -226,3 +227,36 @@ fig_barplot.savefig(os.path.join(img_out, f'barplot_q{thresh_q}.{FMT}'), **fig_k
 #     # ax.set_yticks(ytick_pos, yticks)
 #     ax.set_title(ds_names[test_ds])
 # fig_vlnplot.savefig(os.path.join(img_out, f'vlnplot_q{thresh_q}.{FMT}'), **fig_kwargs)
+
+########################################################################################################################
+### block distances ####################################################################################################
+########################################################################################################################
+fig_dist_freq = plt.figure(figsize=(fig_width, fig_height))
+for subplot_ind, test_ds in enumerate(test_datasets):
+    mat_thresh = (ds_mat_modProb[test_ds]>=thresh_modProb)
+    i_ind, j_ind = np.where(mat_thresh)
+    dists = []
+    for i in np.unique(i_ind):
+        js = j_ind[i_ind == i]
+        dists.extend(list(np.diff(js)))
+    dist_counts = Counter(dists).most_common()
+    block_dists = [int(tup[0]/block_size) for tup in dist_counts]
+    counts = [tup[1] for tup in dist_counts]
+    sorted_counts = np.array(counts)[np.argsort(block_dists)]
+    freq = sorted_counts / np.sum(sorted_counts)
+    block_dists = np.array(block_dists)[np.argsort(block_dists)]
+
+    ax = fig_dist_freq.add_subplot(num_rows, num_cols, subplot_ind+1)
+    ax.bar(block_dists, freq, width=0.8, label=ds_names[test_ds])
+    if subplot_ind==(num_rows-1):
+        ax.set_xticks(block_dists)
+        ax.set_xlabel('Block Distance')
+    else:
+        ax.set_xticks([])
+    ax.set_ylabel('Norm. Freq.')
+    ax.set_yticks([0, 0.5, 1.0])
+    ax.set_ylim([0.0, 0.75])
+    ax.legend(loc='upper right')
+    # ax.set_title(ds_names[test_ds])
+
+fig_dist_freq.savefig(os.path.join(img_out, f'distFreq_q{thresh_q}.{FMT}'), **fig_kwargs)

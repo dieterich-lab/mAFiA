@@ -6,7 +6,7 @@ import numpy as np
 from tqdm import tqdm
 import pickle
 import random
-random.seed(10)
+random.seed(0)
 from random import sample
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -30,22 +30,22 @@ fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
 train_dataset = 'ISA-WUE'
 test_datasets = [
-    'ISA_run4_M4M5',
+    # 'ISA_run4_M4M5',
     'ISA_run4_M4M5star',
     'ISA_run4_M4starM5',
-    'ISA_run4_M4starM5star',
+    # 'ISA_run4_M4starM5star',
 ]
 ds_names = {
-    'ISA_run4_M4M5' : 'GGACC + TGACT',
+    # 'ISA_run4_M4M5' : 'GGACC + TGACT',
     'ISA_run4_M4M5star' : 'GGACC + TGm6ACT',
     'ISA_run4_M4starM5' : 'GGm6ACC + TGACT',
-    'ISA_run4_M4starM5star' : 'GGm6ACC + TGm6ACT'
+    # 'ISA_run4_M4starM5star' : 'GGm6ACC + TGm6ACT'
 }
 contig_patterns = [
-    'M4S0-M4S0',
+    # 'M4S0-M4S0',
     'M4S0-M5S0',
     'M5S0-M4S0',
-    'M5S0-M5S0'
+    # 'M5S0-M5S0'
 ]
 
 # sequences = {
@@ -54,8 +54,8 @@ contig_patterns = [
 # }
 
 contig_motifs = {
-    'M4S0' : '...GGACC...',
-    'M5S0' : '...TGACT...'
+    'M4S0' : 'GGACC',
+    'M5S0' : 'TGACT'
 }
 
 thresh_q = 70
@@ -106,7 +106,8 @@ else:
                 for this_start_block in pattern_start_blocks:
                     ref_pos_first = this_start_block * block_size + block_center
                     ref_pos_second = ref_pos_first + block_size
-                    if np.isin([ref_pos_first, ref_pos_second], sub_df['ref_pos'].values).all():
+                    if (np.isin([ref_pos_first, ref_pos_second], sub_df['ref_pos'].values).all())\
+                            and (np.abs((sub_df[sub_df['ref_pos']==ref_pos_second]['read_pos'].values-sub_df[sub_df['ref_pos']==ref_pos_first]['read_pos'].values)[0]-block_size)<=1):
                         mod_prob_pairs.append((
                             sub_df[sub_df['ref_pos']==ref_pos_first]['mod_prob'].values[0],
                             sub_df[sub_df['ref_pos']==ref_pos_second]['mod_prob'].values[0],
@@ -139,8 +140,10 @@ num_cols = len(sel_patterns)
 fig_single_read = plt.figure(figsize=(fig_width, fig_height))
 for row_ind, test_ds in enumerate(sel_test_ds):
     for col_ind, c_pattern in enumerate(sel_patterns):
-        mod_probs = ds_pattern_modProbs[test_ds][c_pattern]
+        # mod_probs = ds_pattern_modProbs[test_ds][c_pattern]
         # mod_probs = [pair for pair in ds_pattern_modProbs[test_ds][c_pattern] if np.max(pair)>=vmin]
+        mod_probs = [pair for pair in ds_pattern_modProbs[test_ds][c_pattern] if ((np.max(pair)-np.min(pair))>=0.6)]
+
         # print(test_ds, c_pattern, len(mod_probs), np.mean(np.vstack(mod_probs), axis=0))
         xtick_pos = [min_pos, min_pos+block_size]
         # xticks = ['P{}'.format(p) for p in c_pattern]
