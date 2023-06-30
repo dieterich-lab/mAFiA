@@ -35,7 +35,7 @@ test_datasets = [
 ]
 ds_names = {
     'WUE_batch3_AB_BA' : 'AB | BA',
-    'WUE_batch3_ABBA' : 'ABBA',
+    'WUE_batch3_ABBA' : 'AB - BA',
 }
 target_pattern = 'M0S1'
 
@@ -157,7 +157,7 @@ for test_ds in test_datasets:
 ########################################################################################################################
 ### visualize ##########################################################################################################
 ########################################################################################################################
-num_samples = 40
+num_samples = 30
 
 fig_width = 5*cm
 fig_height = 5*cm
@@ -167,27 +167,28 @@ num_cols = 1
 
 # cax_yticks = np.linspace(vmin, 1, 3)
 
-ytick_pos = [0, 19, 39]
+ytick_pos = [0, 14, 29]
 yticks = [f'read {i+1}' for i in ytick_pos]
 
-xticks = np.arange(min_pos, extent, 2*block_size)
+xticks = np.arange(min_pos, extent, block_size)
 
 fig_single_read = plt.figure(figsize=(fig_width, fig_height))
 for subplot_ind, test_ds in enumerate(test_datasets):
-    display_mat = ds_mat_modProb[test_ds][:num_samples]
-    # display_mat = ds_mat_modProb[test_ds][sample(range(ds_mat_modProb[test_ds].shape[0]), num_samples)]
-    # display_mat = display_mat[np.sum(display_mat>vmin, axis=1)>=3][:num_samples]
+    full_mat = ds_mat_modProb[test_ds]
+    sel_rows = np.argpartition(np.max(np.abs(np.diff(full_mat[:, [6, 19, 32, 45]], axis=1)), axis=1), -num_samples)[-num_samples:]
+    display_mat = full_mat[sel_rows]
     ax = fig_single_read.add_subplot(num_rows, num_cols, subplot_ind+1)
     im = ax.imshow(display_mat, vmin=vmin, vmax=1, cmap='plasma')
     # ax.set_xticks(xticks)
     if subplot_ind==(num_rows-1):
         ax.set_xticks(xticks)
-        ax.set_xlabel('Aligned position')
+        ax.set_xlabel('Aligned Position')
     else:
         ax.set_xticks([])
     ax.set_yticks([])
     ax.set_yticks(ytick_pos, yticks)
-    ax.set_title(ds_names[test_ds])
+    ax.set_xlim([-0.5, 51.5])
+    # ax.set_title(ds_names[test_ds])
 
 fig_single_read.tight_layout(rect=[0.1, 0.1, 0.8, 0.9])
 fig_single_read.subplots_adjust(left=0.1, bottom=0.1, right=0.8, top=0.9)
@@ -213,7 +214,7 @@ for subplot_ind, test_ds in enumerate(test_datasets):
     ax.axhline(y=0.5, c='r', linestyle='--', alpha=0.5)
     if subplot_ind==(num_rows-1):
         ax.set_xticks(xticks)
-        ax.set_xlabel('Aligned position')
+        ax.set_xlabel('Aligned Position')
     else:
         ax.set_xticks([])
     ax.set_ylim([0.0, 1.05])
