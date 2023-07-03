@@ -8,10 +8,10 @@
 #SBATCH --job-name=m6Anet_CHEUI
 #SBATCH --output=/home/achan/slurm/m6Anet_CHEUI_%A.out
 
-DATASET=100_WT_0_IVT
+#DATASET=100_WT_0_IVT
 #DATASET=75_WT_25_IVT
 #DATASET=50_WT_50_IVT
-#DATASET=25_WT_75_IVT
+DATASET=25_WT_75_IVT
 #DATASET=0_WT_100_IVT
 
 echo ${DATASET}
@@ -56,6 +56,7 @@ module load minimap2
 module load vbz_compression nanopolish
 
 ### index reads ###
+echo "Indexing reads"
 nanopolish index -s sequencing_summary.txt -d ${FAST5} all.fastq.gz
 
 ### align with minimap ###
@@ -63,6 +64,7 @@ minimap2 -ax map-ont --secondary=no -t 8 ${REF} all.fastq.gz | samtools view -F 
 samtools index ${BAM}
 
 ### eventalign ###
+echo "Event align"
 nanopolish eventalign \
 --reads all.fastq.gz \
 --bam ${BAM} \
@@ -83,6 +85,7 @@ mkdir -p ${m6ANET_OUTDIR}
 cd ${m6ANET_OUTDIR}
 
 rev ${NANOPOLISH}/eventalign.txt | cut -f2- | rev > eventalign.txt
+echo "m6Anet"
 m6anet dataprep --eventalign eventalign.txt --out_dir ${m6ANET_OUTDIR} --n_processes 4
 m6anet inference --input_dir ${m6ANET_OUTDIR} --out_dir ${m6ANET_OUTDIR} --n_processes 4 --num_iterations 1000
 
@@ -94,6 +97,7 @@ conda activate CHEUI
 mkdir -p ${CHEUI_OUTDIR}
 cd ${CHEUI_OUTDIR}
 
+echo "CHEUI"
 python3 ${GIT_CHEUI}/scripts/CHEUI_preprocess_m6A.py \
 -i ${NANOPOLISH}/eventalign.txt \
 -m ${GIT_CHEUI}/kmer_models/model_kmer.csv \
