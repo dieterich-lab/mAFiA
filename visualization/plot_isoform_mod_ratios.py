@@ -94,47 +94,47 @@ for this_index in tqdm(df_annotated['index'].unique()):
 
         cmap = plt.cm.get_cmap('rainbow', len(isoform_mod_ratios[this_index]))
 
-        fig = plt.figure(figsize=(4*cm, 6*cm))
-        ax1 = fig.add_subplot()
-        for iso_ind, (this_anno, this_mod_ratio, this_num_read) in enumerate(isoform_mod_ratios[this_index]):
-            if this_num_read<=row_max:
-                xs = set_row_xs(this_num_read, default_x_spacing)
-                ys = [this_mod_ratio] * this_num_read
-            else:
-                xs = []
-                ys = []
-                row_dots = row_max
-                row_y = this_mod_ratio
-                while this_num_read>0:
-                    xs.append(set_row_xs(row_dots, default_x_spacing))
-                    ys.append([row_y] * row_dots)
-                    this_num_read -= row_dots
-                    row_dots = min(row_dots-1, this_num_read)
-                    row_y += y_delta
-                xs = np.concatenate(xs)
-                ys = np.concatenate(ys)
-            ax1.scatter(xs, ys, color=cmap(iso_ind), s=dot_size)
-
-        mafia_weighted = np.sum([tup[1] * tup[2] for tup in isoform_mod_ratios[this_index]]) / np.sum(
-            [tup[2] for tup in isoform_mod_ratios[this_index]])
-
-        ytick_pos = [tup[1] for tup in isoform_mod_ratios[this_index]] + [glori_ratio]
-        yticks = [tup[0] for tup in isoform_mod_ratios[this_index]] + ['GLORI']
-        ylim = [(min(ytick_pos)//y_round_up)*y_round_up - 0.05, (max(ytick_pos)//y_round_up+1)*y_round_up + 0.05]
-        ax1.set_xticks([])
-        ax1.set_yticks(ytick_pos, yticks)
-
-        ax1.axhline(glori_ratio, color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
-
-        ax1.set_title(f"{chr}: pos {pos}\ngene {gene}")
-        ax1.set_ylim(ylim)
-        ax2 = ax1.twinx()
-        ax2.set_yticks(ytick_pos, [f"{ytick:.2f}" for ytick in ytick_pos])
-        ax2.set_ylim(ylim)
-        ax2.set_ylabel('Mod. Ratio', rotation=-90, labelpad=10)
-
-        plt.savefig(os.path.join(img_out, f"dot_site{sub_df['index'].values[0]}.{FMT}"), **fig_kwargs)
-        plt.close('all')
+        # fig = plt.figure(figsize=(4*cm, 6*cm))
+        # ax1 = fig.add_subplot()
+        # for iso_ind, (this_anno, this_mod_ratio, this_num_read) in enumerate(isoform_mod_ratios[this_index]):
+        #     if this_num_read<=row_max:
+        #         xs = set_row_xs(this_num_read, default_x_spacing)
+        #         ys = [this_mod_ratio] * this_num_read
+        #     else:
+        #         xs = []
+        #         ys = []
+        #         row_dots = row_max
+        #         row_y = this_mod_ratio
+        #         while this_num_read>0:
+        #             xs.append(set_row_xs(row_dots, default_x_spacing))
+        #             ys.append([row_y] * row_dots)
+        #             this_num_read -= row_dots
+        #             row_dots = min(row_dots-1, this_num_read)
+        #             row_y += y_delta
+        #         xs = np.concatenate(xs)
+        #         ys = np.concatenate(ys)
+        #     ax1.scatter(xs, ys, color=cmap(iso_ind), s=dot_size)
+        #
+        # mafia_weighted = np.sum([tup[1] * tup[2] for tup in isoform_mod_ratios[this_index]]) / np.sum(
+        #     [tup[2] for tup in isoform_mod_ratios[this_index]])
+        #
+        # ytick_pos = [tup[1] for tup in isoform_mod_ratios[this_index]] + [glori_ratio]
+        # yticks = [tup[0] for tup in isoform_mod_ratios[this_index]] + ['GLORI']
+        # ylim = [(min(ytick_pos)//y_round_up)*y_round_up - 0.05, (max(ytick_pos)//y_round_up+1)*y_round_up + 0.05]
+        # ax1.set_xticks([])
+        # ax1.set_yticks(ytick_pos, yticks)
+        #
+        # ax1.axhline(glori_ratio, color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
+        #
+        # ax1.set_title(f"{chr}: pos {pos}\ngene {gene}")
+        # ax1.set_ylim(ylim)
+        # ax2 = ax1.twinx()
+        # ax2.set_yticks(ytick_pos, [f"{ytick:.2f}" for ytick in ytick_pos])
+        # ax2.set_ylim(ylim)
+        # ax2.set_ylabel('Mod. Ratio', rotation=-90, labelpad=10)
+        #
+        # plt.savefig(os.path.join(img_out, f"dot_site{sub_df['index'].values[0]}.{FMT}"), **fig_kwargs)
+        # plt.close('all')
 
 ### histogram of splitting amount ###
 splitting_amount = []
@@ -161,3 +161,26 @@ plt.close()
 #
 # plt.figure(figsize=(5*cm, 5*cm))
 # plt.scatter([pair[0] for pair in mod_ratio_pairs], [pair[1] for pair in mod_ratio_pairs])
+
+### output dataframe ###
+df_out = pd.DataFrame()
+for k, v in isoform_mod_ratios.items():
+    num_isoforms = len(v)
+
+    sub_df = df_annotated[df_annotated['index'] == k]
+    chr = sub_df['Chr'].unique()[0]
+    pos = sub_df['Sites'].unique()[0]
+    gene = sub_df['Gene'].unique()[0]
+
+    new_df = pd.DataFrame.from_dict({
+        'Chr' : [chr] * num_isoforms,
+        'Pos' : [pos] * num_isoforms,
+        'Gene' : [gene] * num_isoforms,
+        'Transcript ID' : [l[0] for l in v],
+        'Mod. Ratio' : [l[1] for l in v],
+        'Num. Reads': [l[2] for l in v],
+    })
+
+    df_out = pd.concat([df_out, new_df])
+
+df_out.to_csv(os.path.join(img_out, f'isoforms_{dataset}.tsv'), index=False, sep='\t')

@@ -62,9 +62,10 @@ thresh_q = 70
 block_size = 21
 block_center = 10
 
-out_pickle = os.path.join(results_dir, 'ISA_run4_M4M5_modProbs_q{}.pkl'.format(thresh_q))
+# out_pickle = os.path.join(results_dir, 'ISA_run4_M4M5_modProbs_q{}.pkl'.format(thresh_q))
+out_pickle = os.path.join(results_dir, 'ISA_run4_M4M5_modProbs_minimap.pkl')
 
-img_out = os.path.join(HOME, 'img_out/MAFIA', 'res_train_{}_test_ISA_run4_M4M5'.format(train_dataset))
+img_out = os.path.join(HOME, 'img_out/MAFIA', 'res_train_{}_test_ISA_run4_M4M5_minimap'.format(train_dataset))
 if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
 
@@ -77,7 +78,8 @@ if os.path.exists(out_pickle):
 else:
     dfs = {}
     for test_dataset in test_datasets:
-        path = os.path.join(results_dir, 'res_train_{}_test_{}_q{}.tsv'.format(train_dataset, test_dataset, thresh_q))
+        # path = os.path.join(results_dir, 'res_train_{}_test_{}_q{}.tsv'.format(train_dataset, test_dataset, thresh_q))
+        path = os.path.join(results_dir, 'res_train_{}_test_{}_minimap.tsv'.format(train_dataset, test_dataset))
         this_df = pd.read_csv(path, sep='\t').rename(columns={'Unnamed: 0': 'index'})
         dfs[test_dataset] = this_df
         # dfs[test_dataset] = this_df[this_df['ref_motif']==this_df['pred_motif']]
