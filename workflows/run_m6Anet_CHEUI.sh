@@ -1,18 +1,15 @@
 #!/usr/bin/env bash
 
-sterm -N gpu-g3-1 -c 4 -m 64G
-
 module load minimap2
 module load vbz_compression nanopolish
-module load cuda m6anet
 
-DATASET=WUE_batch3_AB_BA
-#DATASET=WUE_batch3_ABBA
+#DATASET=WUE_batch3_AB_BA
+DATASET=WUE_batch3_ABBA
 
 PRJ=/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 NANOPOLISH=${PRJ}/nanopolish/${DATASET}
 FAST5=${PRJ}/oligo/${DATASET}/fast5
-BASECALL=${PRJ}/oligo/${DATASET}/renata.fasta
+FASTQ=${PRJ}/nanopolish/${DATASET}/fastq
 LIGATION_REF=${PRJ}/oligo/${DATASET}/ligation_ref.fasta
 BAM=${NANOPOLISH}/minimap.bam
 m6ANET_OUTDIR=${PRJ}/m6Anet/${DATASET}
@@ -25,20 +22,20 @@ GIT_CHEUI=/home/achan/git/CHEUI
 mkdir -p ${NANOPOLISH}
 cd ${NANOPOLISH}
 
-### filter basecall ###
-sed '$!N;/>.*\n$/d;P;D' ${BASECALL} > basecall.fasta
-nanopolish index -s sequencing_summary.txt -d ${FAST5} basecall.fasta
+### index reads ###
+cat ${FASTQ}/*.fastq.gz > all.fastq.gz
+nanopolish index -s sequencing_summary.txt -d ${FAST5} all.fastq.gz
 
 ### copy reference ###
 sed -e '1,2d' ${LIGATION_REF} > ref.fasta
 
-### align ###
-minimap2 -ax map-ont --secondary=no -t 8 ref.fasta basecall.fasta | samtools sort -o ${BAM}
+### align with minimap ###
+minimap2 -ax map-ont --secondary=no -t 8 ref.fasta all.fastq.gz | samtools view -F 2324 -b - | samtools sort -o ${BAM}
 samtools index ${BAM}
 
 ### eventalign ###
 nanopolish eventalign \
---reads basecall.fasta \
+--reads all.fastq.gz \
 --bam ${BAM} \
 --genome ref.fasta \
 --scale-events \
@@ -51,12 +48,16 @@ nanopolish eventalign \
 ######################################################################################
 ### m6Anet ###########################################################################
 ######################################################################################
+module load cuda m6anet
+
 mkdir -p ${m6ANET_OUTDIR}
 cd ${m6ANET_OUTDIR}
 
 rev ${NANOPOLISH}/eventalign.txt | cut -f2- | rev > eventalign.txt
 
 m6anet dataprep --eventalign eventalign.txt --out_dir ${m6ANET_OUTDIR} --n_processes 4
+
+srun --partition=gpu --gres=gpu:turing:1 --cpus-per-task=8 --mem-per-cpu=8GB \
 m6anet inference --input_dir ${m6ANET_OUTDIR} --out_dir ${m6ANET_OUTDIR} --n_processes 4 --num_iterations 1000
 
 ######################################################################################
@@ -73,6 +74,7 @@ python3 ${GIT_CHEUI}/scripts/CHEUI_preprocess_m6A.py \
 -o ${CHEUI_OUTDIR}/out_A_signals+IDs.p \
 -n 15
 
+srun --partition=gpu --gres=gpu:turing:1 --cpus-per-task=8 --mem-per-cpu=8GB \
 python3 ${GIT_CHEUI}/scripts/CHEUI_predict_model1.py \
 -i ${CHEUI_OUTDIR}/out_A_signals+IDs.p/eventalign_signals+IDS.p \
 -m ${GIT_CHEUI}/CHEUI_trained_models/CHEUI_m6A_model1.h5 \

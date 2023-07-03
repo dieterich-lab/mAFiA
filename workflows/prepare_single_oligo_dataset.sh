@@ -92,4 +92,9 @@ echo "Converting to ${BAM}"
 samtools view -bST ${LIGATION_REF} ${FILTERED_SAM} | samtools sort - > ${BAM}
 samtools index ${BAM}
 
+### align with minimap ###
+echo "Aligning with minimap"
+minimap2 -ax map-ont --secondary=no -t 8 ${LIGATION_REF} ${FASTA} | samtools view -F 2324 -b - | samtools sort -o renata.minimap.bam
+samtools index renata.minimap.bam
+
 echo "${DATASET} finished"
