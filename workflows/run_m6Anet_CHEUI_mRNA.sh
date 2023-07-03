@@ -1,6 +1,20 @@
 #!/usr/bin/env bash
+#SBATCH --partition=gpu
+#SBATCH --exclude=gpu-g4-1
+#SBATCH --gres=gpu:turing:1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=80GB
+#SBATCH --verbose
+#SBATCH --job-name=m6Anet_CHEUI
+#SBATCH --output=/home/achan/slurm/m6Anet_CHEUI_%A.out
 
 DATASET=100_WT_0_IVT
+#DATASET=75_WT_25_IVT
+#DATASET=50_WT_50_IVT
+#DATASET=25_WT_75_IVT
+#DATASET=0_WT_100_IVT
+
+echo ${DATASET}
 
 PRJ=/prj/TRR319_RMaP/Project_BaseCalling/Adrian
 NANOPOLISH=${PRJ}/nanopolish/${DATASET}
