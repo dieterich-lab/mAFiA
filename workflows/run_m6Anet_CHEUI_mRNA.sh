@@ -83,10 +83,7 @@ mkdir -p ${m6ANET_OUTDIR}
 cd ${m6ANET_OUTDIR}
 
 rev ${NANOPOLISH}/eventalign.txt | cut -f2- | rev > eventalign.txt
-
 m6anet dataprep --eventalign eventalign.txt --out_dir ${m6ANET_OUTDIR} --n_processes 4
-
-srun --partition=gpu --gres=gpu:turing:1 --cpus-per-task=8 --mem-per-cpu=8GB \
 m6anet inference --input_dir ${m6ANET_OUTDIR} --out_dir ${m6ANET_OUTDIR} --n_processes 4 --num_iterations 1000
 
 ######################################################################################
@@ -103,7 +100,6 @@ python3 ${GIT_CHEUI}/scripts/CHEUI_preprocess_m6A.py \
 -o ${CHEUI_OUTDIR}/out_A_signals+IDs.p \
 -n 15
 
-srun --partition=gpu --gres=gpu:turing:1 --cpus-per-task=8 --mem-per-cpu=8GB \
 python3 ${GIT_CHEUI}/scripts/CHEUI_predict_model1.py \
 -i ${CHEUI_OUTDIR}/out_A_signals+IDs.p/eventalign_signals+IDS.p \
 -m ${GIT_CHEUI}/CHEUI_trained_models/CHEUI_m6A_model1.h5 \
