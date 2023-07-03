@@ -26,12 +26,13 @@ conda activate MAFIA
 ########################################################################################################################
 
 PRJ_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian
-BAM=${PRJ_DIR}/oligo/${TEST_DATASET}/spomelette_q70.bam
+#BAM=${PRJ_DIR}/oligo/${TEST_DATASET}/spomelette_q70.bam
+BAM=${PRJ_DIR}/oligo/${TEST_DATASET}/renata.minimap.bam
 FAST5_DIR=${PRJ_DIR}/oligo/${TEST_DATASET}/fast5
 LIG_REF=${PRJ_DIR}/oligo/${TEST_DATASET}/ligation_ref.fasta
 BACKBONE_MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 CLASSIFIER_MODEL_DIR=${PRJ_DIR}/MAFIA_classifiers/${TRAIN_DATASET}
-OUTFILE=${PRJ_DIR}/results/res_train_${TRAIN_DATASET}_test_${TEST_DATASET}_q70.tsv
+OUTFILE=${PRJ_DIR}/results/res_train_${TRAIN_DATASET}_test_${TEST_DATASET}_minimap.tsv
 ########################################################################################################################
 
 set -e -f
