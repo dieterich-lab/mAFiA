@@ -84,9 +84,10 @@ GIT_CHEUI=/home/achan/git/CHEUI
 #mkdir -p ${m6ANET_OUTDIR}
 #cd ${m6ANET_OUTDIR}
 #
-#rev ${NANOPOLISH}/eventalign.txt | cut -f2- | rev > eventalign.txt
-#echo "m6Anet..."
+#cut -d "    " -f 1-15 ${NANOPOLISH}/eventalign.txt > eventalign.txt
+#echo "m6Anet dataprep...":
 #m6anet dataprep --eventalign eventalign.txt --out_dir ${m6ANET_OUTDIR} --n_processes 4
+#echo "m6Anet inference...":
 #m6anet inference --input_dir ${m6ANET_OUTDIR} --out_dir ${m6ANET_OUTDIR} --n_processes 4 --num_iterations 1000
 
 ######################################################################################
