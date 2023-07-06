@@ -23,8 +23,8 @@ FMT = 'pdf'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
-# dataset = 'P2_WT'
-dataset = '100_WT_0_IVT'
+dataset = 'P2_WT'
+# dataset = '100_WT_0_IVT'
 annotated_res = f'/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_train_ISA-WUE_test_{dataset}.tsv.merged.annotated'
 img_out = f'/home/adrian/img_out/MAFIA/{dataset}_isoforms_{FMT}'
 os.makedirs(img_out, exist_ok=True)
@@ -85,14 +85,14 @@ for this_index in tqdm(df_annotated['index'].unique()):
                 half_width = (num_dots // 2) * x_spacing
             return np.linspace(-half_width, half_width, num_dots)
 
-        xrange = [-1, 1]
-        row_max = 50
-        default_x_spacing = (xrange[1] - xrange[0]) / row_max
-        y_delta = 0.005
-        y_round_up = 0.1
-        dot_size = 0.5
+        # xrange = [-1, 1]
+        # row_max = 50
+        # default_x_spacing = (xrange[1] - xrange[0]) / row_max
+        # y_delta = 0.005
+        # y_round_up = 0.1
+        # dot_size = 0.5
 
-        cmap = plt.cm.get_cmap('rainbow', len(isoform_mod_ratios[this_index]))
+        # cmap = plt.cm.get_cmap('rainbow', len(isoform_mod_ratios[this_index]))
 
         # fig = plt.figure(figsize=(4*cm, 6*cm))
         # ax1 = fig.add_subplot()
@@ -143,14 +143,14 @@ for k, v in isoform_mod_ratios.items():
         mod_ratios = [tup[1] for tup in v]
         splitting_amount.append(np.max(mod_ratios) - np.min(mod_ratios))
 
-plt.figure(figsize=(5*cm, 5*cm))
-plt.hist(splitting_amount, range=[0, 1], bins=50)
-plt.xlabel('Max. difference between isoform mod. ratios')
-plt.ylabel('Site counts')
-plt.xticks([0, 0.5, 1.0])
-plt.yticks([0, 100, 200])
-plt.savefig(os.path.join(img_out, f"hist_max_diff_isoform_mod_ratios.{FMT}"), **fig_kwargs)
-plt.close()
+# plt.figure(figsize=(5*cm, 5*cm))
+# plt.hist(splitting_amount, range=[0, 1], bins=50)
+# plt.xlabel('Max. difference between isoform mod. ratios')
+# plt.ylabel('Site counts')
+# plt.xticks([0, 0.5, 1.0])
+# plt.yticks([0, 100, 200])
+# plt.savefig(os.path.join(img_out, f"hist_max_diff_isoform_mod_ratios.{FMT}"), **fig_kwargs)
+# plt.close()
 
 ### dominant isoform to GLORI ###
 # mod_ratio_pairs = []
@@ -183,4 +183,4 @@ for k, v in isoform_mod_ratios.items():
 
     df_out = pd.concat([df_out, new_df])
 
-df_out.to_csv(os.path.join(img_out, f'isoforms_{dataset}.tsv'), index=False, sep='\t')
+df_out.to_csv(os.path.join(f'/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/isoform_modRatio_{dataset}.tsv'), index=False, sep='\t')

@@ -17,8 +17,8 @@ mpl.rcParams['ytick.labelsize'] = 5
 mpl.rcParams['xtick.major.size'] = 1
 mpl.rcParams['ytick.major.size'] = 1
 mpl.rcParams['font.family'] = 'Arial'
-FMT = 'pdf'
-# FMT = 'png'
+# FMT = 'pdf'
+FMT = 'png'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
@@ -308,6 +308,7 @@ for vmin in np.arange(0.1, 1, 0.1):
     ########################################################################################################################
     ### block distances ####################################################################################################
     ########################################################################################################################
+    ds_diff = {}
     fig_dist_freq = plt.figure(figsize=(fig_width, fig_height))
     for subplot_ind, test_ds in enumerate(test_datasets):
         mat_thresh = (ds_mat_modProb[test_ds]>=thresh_modProb)
@@ -325,6 +326,8 @@ for vmin in np.arange(0.1, 1, 0.1):
         # block_dists = np.array(block_dists)[np.argsort(block_dists)]
         nt_dists = np.array(nt_dists)[np.argsort(nt_dists)]
 
+        ds_diff[test_ds] = np.sum((freq[np.isin(nt_dists, [26, 52])] - freq[np.isin(nt_dists, [13, 39])]))
+
         ax = fig_dist_freq.add_subplot(num_rows, num_cols, subplot_ind+1)
         ax.bar(np.arange(len(nt_dists)), freq, width=0.5, label=ds_names[test_ds])
         if subplot_ind==(num_rows-1):
@@ -339,5 +342,9 @@ for vmin in np.arange(0.1, 1, 0.1):
         ax.legend(loc='upper right')
         # ax.set_title(ds_names[test_ds])
 
-    fig_dist_freq.savefig(os.path.join(img_out, f'distFreq_vmin{vmin:.1f}.{FMT}'), **fig_kwargs)
+    inter_ds_diff = ds_diff['WUE_batch3_AB_BA'] - ds_diff['WUE_batch3_ABBA']
+    # high = ds_diff['WUE_batch3_AB_BA']
+    # low = ds_diff['WUE_batch3_ABBA']
+
+    fig_dist_freq.savefig(os.path.join(img_out, f'distFreq_vmin{vmin:.1f}_diff{inter_ds_diff:.2f}.{FMT}'), **fig_kwargs)
     plt.close('all')
