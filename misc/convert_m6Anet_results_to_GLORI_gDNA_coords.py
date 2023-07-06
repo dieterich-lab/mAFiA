@@ -6,8 +6,8 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 
-PRJ = os.path.join(HOME, 'Data')
-# PRJ = '/prj'
+# PRJ = os.path.join(HOME, 'Data')
+PRJ = '/prj'
 
 def get_genomic_coord_from_cDNA(id, pos):
     server = "http://rest.ensembl.org"
@@ -52,10 +52,13 @@ def get_cDNA_coords(in_tid, in_tpos, tx):
     return out_chr, out_gpos
 
 test_dataset = '75_WT_25_IVT'
-m6Anet_file = os.path.join(PRJ, 'TRR319_RMaP/Project_BaseCalling/Christoph/m6anet/workflow_tx/inference/{}/data.site_proba.csv'.format(test_dataset))
+
+result_dir = os.path.join(PRJ, 'TRR319_RMaP/Project_BaseCalling/Adrian/m6Anet')
+m6Anet_file = os.path.join(result_dir, f'{test_dataset}/data.site_proba.csv')
 tx_file = os.path.join(HOME, 'Data/transcriptomes/GRCh38_102.bed')
 glori_file = os.path.join(HOME, 'Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv')
-out_dir = os.path.join(HOME, 'img_out/m6Anet')
+# out_dir = os.path.join(HOME, 'img_out/m6Anet')
+out_dir = result_dir
 os.makedirs(out_dir, exist_ok=True)
 
 df_m6Anet = pd.read_csv(m6Anet_file)
@@ -71,6 +74,8 @@ dict_chr = {
     str(i) : 'chr{}'.format(i) for i in range(1, 23)
 }
 dict_chr['MT'] = 'chrM'
+dict_chr['X'] = 'chrX'
+dict_chr['Y'] = 'chrY'
 
 collected_sites = []
 for ind, row in tqdm(df_m6Anet_filtered.iterrows()):
@@ -97,7 +102,7 @@ print('{} GLORI sites collected'.format(len(collected_sites)))
 df_m6Anet_glori = df_m6Anet.loc[[site[0] for site in collected_sites]]
 df_m6Anet_glori['Chr'] = [site[1] for site in collected_sites]
 df_m6Anet_glori['Sites'] = [site[2] for site in collected_sites]
-df_m6Anet_glori['GLORI'] = [site[3] for site in collected_sites]
+df_m6Anet_glori['Ratio'] = [site[3] for site in collected_sites]
 df_m6Anet_glori['Pvalue'] = [site[5] for site in collected_sites]
 df_m6Anet_glori.to_csv(m6Anet_file.replace('.csv', '_glori.csv'))
 
@@ -124,4 +129,4 @@ for ind, row in tqdm(df_m6Anet_glori.iterrows()):
 print('{} bad cDNA->gDNA conversions out of {}'.format(len(bad_indices), len(df_m6Anet_glori)))
 
 df_m6Anet_glori_filtered = df_m6Anet_glori.drop(bad_indices)
-df_m6Anet_glori_filtered.to_csv(m6Anet_file.replace('.csv', '_glori_filtered.csv'))
+df_m6Anet_glori_filtered.to_csv(m6Anet_file.replace('.csv', '.glori_filtered.csv'))
