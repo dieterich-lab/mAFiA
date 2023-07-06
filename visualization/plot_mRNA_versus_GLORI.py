@@ -3,7 +3,7 @@ HOME = os.path.expanduser('~')
 from glob import glob
 import pandas as pd
 import numpy as np
-
+from scipy.stats import linregress
 #######################################################################
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -23,21 +23,22 @@ FMT = 'pdf'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
-def get_norm_counts(in_df, sel_motif):
-    df_motif = in_df[
+def filter_df(in_df, sel_motif):
+    df_filtered = in_df[
         (np.float32(in_df['P_adjust']) <= P_VAL_THRESH)
         & (in_df['ref_motif']==sel_motif)
         # & (df['pred_motif']==sel_motif)
     ]
+    return df_filtered
 
-    ### histogram of mod prob per read ###
+def get_norm_counts(in_df):
     num_bins = 100
     bin_edges = np.linspace(0, 1, num_bins + 1)
     bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
-    bin_counts, _ = np.histogram(df_motif['mod_prob'], bins=bin_edges)
+    bin_counts, _ = np.histogram(in_df['mod_prob'], bins=bin_edges)
     norm_counts = bin_counts / np.sum(bin_counts)
 
-    return norm_counts, bin_centers, df_motif
+    return norm_counts, bin_centers
 
 def calc_mod_ratio_with_margin(in_df_motif, prob_margin, thresh_cov=50):
     df_motif_avg = pd.DataFrame()
@@ -58,16 +59,17 @@ def calc_mod_ratio_with_margin(in_df_motif, prob_margin, thresh_cov=50):
     df_motif_avg.reset_index(drop=True)
     return df_motif_avg
 
+# train_dataset = 'ISA-WUE'
+# results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
 
-results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
-# train_dataset = 'WUE_batches1-2'
-# train_dataset = 'ISA_runs1-3'
-train_dataset = 'ISA-WUE'
+train_dataset = 'm6Anet'
+results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6Anet'
+
 test_datasets = [
-#     '0_WT_100_IVT',
-#     '25_WT_75_IVT',
-#     '50_WT_50_IVT',
-#     '75_WT_25_IVT',
+    '0_WT_100_IVT',
+    '25_WT_75_IVT',
+    '50_WT_50_IVT',
+    '75_WT_25_IVT',
     '100_WT_0_IVT'
     # 'P2_WT'
 ]
@@ -89,7 +91,7 @@ ds_names = {
     'P2_WT' : '100% WT P2'
 }
 
-img_out = os.path.join(HOME, 'img_out/MAFIA', os.path.basename('mRNA_train_{}_test_P2_WT_GLORI'.format(train_dataset)))
+img_out = os.path.join(HOME, 'img_out/MAFIA', os.path.basename('mRNA_train_{}_test_HEK293_GLORI'.format(train_dataset)))
 if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
 
@@ -98,15 +100,29 @@ COV_THRESH = 50
 PROB_MARGIN = 0.5
 COMMON_SITES_ONLY = False
 
-dfs = {}
-for ds in test_datasets:
-    paths = glob(os.path.join(results_dir, 'res_train_{}_test_{}.tsv.merged'.format(train_dataset, ds)))
-    if len(paths)==1:
-        df = pd.read_csv(paths[0], sep='\t').rename(columns={'Unnamed: 0': 'index'})
+def import_MAFIA_res(res_dir):
+    dfs = {}
+    for ds in test_datasets:
+        paths = glob(os.path.join(res_dir, 'res_train_{}_test_{}.tsv.merged'.format(train_dataset, ds)))
+        if len(paths)==1:
+            df = pd.read_csv(paths[0], sep='\t').rename(columns={'Unnamed: 0': 'index'})
+            dfs[ds] = df
+        elif len(paths)>=2:
+            df = pd.concat([pd.read_csv(path, sep='\t').rename(columns={'Unnamed: 0': 'index'}) for path in paths])
+            dfs[ds] = df
+    return dfs
+
+def import_m6Anet_res(res_dir):
+    dfs = {}
+    for ds in test_datasets:
+        path = os.path.join(res_dir, ds, 'data.site_proba.glori_filtered.csv')
+        if not os.path.exists(path):
+            continue
+        df = pd.read_csv(path)
+        df = df.rename(columns={"kmer": "ref_motif", "Pvalue": "P_adjust"})
         dfs[ds] = df
-    elif len(paths)>=2:
-        df = pd.concat([pd.read_csv(path, sep='\t').rename(columns={'Unnamed: 0': 'index'}) for path in paths])
-        dfs[ds] = df
+    return dfs
+
 
 # motifs = list(set.intersection(*[set(df['ref_motif'].unique()) for df in dfs.values()]))
 motifs = ['GGACT', 'GGACA', 'GAACT', 'AGACT', 'GGACC', 'TGACT']
@@ -130,6 +146,8 @@ motifs = ['GGACT', 'GGACA', 'GAACT', 'AGACT', 'GGACC', 'TGACT']
 # df_motif_avg_ivt = calc_mod_ratio(df_motif_ivt, thresh_mod=crit_thresh, thresh_cov=COV_THRESH)
 # df_motif_avg_wt = calc_mod_ratio(df_motif_wt, thresh_mod=crit_thresh, thresh_cov=COV_THRESH)
 
+# dfs = import_MAFIA_res(results_dir)
+dfs = import_m6Anet_res(results_dir)
 
 ### plots ###
 num_rows = 3
@@ -150,7 +168,7 @@ for ds, df in dfs.items():
     for subplot_ind, this_motif in enumerate(motifs):
         if this_motif not in df['ref_motif'].unique():
             continue
-        ds_norm_counts, ds_bin_centers, ds_motif = get_norm_counts(df, this_motif)
+        ds_motif = filter_df(df, this_motif)
         # axes_hist[subplot_ind].step(ds_bin_centers, ds_norm_counts, color=ds_colors[ds], label='{}'.format(ds))
         #
         # axes_hist[subplot_ind].axvspan(xmin=PROB_MARGIN, xmax=1 - PROB_MARGIN, color='gray', alpha=0.5)
@@ -163,7 +181,11 @@ for ds, df in dfs.items():
         # axes_hist[subplot_ind].set_ylim([0, 0.3])
         # axes_hist[subplot_ind].legend(loc='upper left')
 
-        df_motif_avg = calc_mod_ratio_with_margin(ds_motif, prob_margin=PROB_MARGIN, thresh_cov=COV_THRESH)
+        if train_dataset not in ['m6Anet', 'CHEUI']:
+            ds_norm_counts, ds_bin_centers = get_norm_counts(df)
+            df_motif_avg = calc_mod_ratio_with_margin(ds_motif, prob_margin=PROB_MARGIN, thresh_cov=COV_THRESH)
+        else:
+            df_motif_avg = ds_motif
         dict_ds_motif_avg[ds][this_motif] = df_motif_avg
 
         glori_ratio = np.float64(df_motif_avg['Ratio'])
@@ -201,7 +223,15 @@ fig_mod_ratio.tight_layout()
 # fig_mod_ratio.suptitle('Train: {}\nTest: {}'.format(train_dataset, 'HEK293 WT'))
 fig_mod_ratio.savefig(os.path.join(img_out, f'corr_glori_modRatio_pValThresh{P_VAL_THRESH}_covThresh{COV_THRESH}_marginProb{PROB_MARGIN}.{FMT}'), **fig_kwargs)
 
+### 100 WT overall ###
+df_wt = pd.concat(dict_ds_motif_avg['100_WT_0_IVT'].values())
+corr = np.corrcoef(df_wt['Ratio'], df_wt['mod_ratio'])[0, 1]
+num_sites = len(df_wt)
+with open(os.path.join(img_out, 'stats.txt'), 'w') as out_f:
+    out_f.write(f'{num_sites} sites, corr {corr:.3f}')
+
 ### 2D density plots ###
+ds_slope_err = {}
 num_bins = 20
 interval = 100 / num_bins
 fig = plt.figure(figsize=(20*cm, 5*cm))
@@ -225,10 +255,29 @@ for subplot_ind, ds in enumerate(dict_ds_motif_avg.keys()):
     # ax.set_title('{}\n{} sites'.format(ds, len(ds_agg_avg)))
     ax.set_title(ds_names[ds])
 
+    lin_fit = linregress(0.5 * (x_bins[1:] + x_bins[:-1]), x_bins[np.argmax(hist, axis=1)])
+    ds_slope_err[ds] = (lin_fit.slope, lin_fit.stderr)
 # fig.tight_layout()
 cb_ax = fig.add_axes([0.92, 0.3, 0.02, 0.4])
 cbar = fig.colorbar(im, cax=cb_ax)
 # cb_ax.set_ylabel('Norm. site count', rotation=-90, labelpad=20)
 fig.savefig(os.path.join(img_out, f'hist2d_glori_modRatio_pValThresh{P_VAL_THRESH}_covThresh{COV_THRESH}_marginProb{PROB_MARGIN}.{FMT}'), **fig_kwargs)
+
+### slope vs mixing ratio ###
+# ticks = np.arange(0, 1.01, 0.25)
+ticks = [0, 0.5, 0.75, 1]
+plt.figure(figsize=(5*cm, 5*cm))
+plt.errorbar(x=ticks,
+             y=[v[0] for v in ds_slope_err.values()],
+             yerr=[v[1] for v in ds_slope_err.values()],
+             marker='.',
+             linestyle='None',
+             capsize=2.0
+             )
+plt.xticks(ticks)
+plt.yticks(ticks)
+# plt.xlabel('WT Ratio')
+# plt.ylabel('Ridge Inclination')
+plt.savefig(os.path.join(img_out, f'ridge_inclination_pValThresh{P_VAL_THRESH}_covThresh{COV_THRESH}_marginProb{PROB_MARGIN}.{FMT}'), **fig_kwargs)
 
 # plt.close('all')
