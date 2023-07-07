@@ -264,8 +264,7 @@ cbar = fig.colorbar(im, cax=cb_ax)
 fig.savefig(os.path.join(img_out, f'hist2d_glori_modRatio_pValThresh{P_VAL_THRESH}_covThresh{COV_THRESH}_marginProb{PROB_MARGIN}.{FMT}'), **fig_kwargs)
 
 ### slope vs mixing ratio ###
-# ticks = np.arange(0, 1.01, 0.25)
-ticks = [0, 0.5, 0.75, 1]
+ticks = np.arange(0, 1.01, 0.25)
 plt.figure(figsize=(5*cm, 5*cm))
 plt.errorbar(x=ticks,
              y=[v[0] for v in ds_slope_err.values()],
