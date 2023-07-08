@@ -2,11 +2,11 @@
 #SBATCH --partition=gpu
 #SBATCH --exclude=gpu-g4-1
 #SBATCH --gres=gpu:turing:1
-#SBATCH --cpus-per-task=8
-#SBATCH --mem=80GB
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=128GB
 #SBATCH --verbose
-#SBATCH --job-name=m6Anet_CHEUI
-#SBATCH --output=/home/achan/slurm/m6Anet_CHEUI_%A.out
+#SBATCH --job-name=CHEUI_cpp
+#SBATCH --output=/home/achan/slurm/CHEUI_cpp_%A.out
 
 DATASET=100_WT_0_IVT
 #DATASET=75_WT_25_IVT
@@ -23,7 +23,7 @@ FASTQ=${PRJ}/nanopolish/${DATASET}/fastq
 REF=/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38.cdna.all.fa
 BAM=${NANOPOLISH}/minimap.bam
 m6ANET_OUTDIR=${PRJ}/m6Anet/${DATASET}
-CHEUI_OUTDIR=${PRJ}/CHEUI/${DATASET}
+CHEUI_OUTDIR=${PRJ}/CHEUI/${DATASET}_cpp
 GIT_CHEUI=/home/achan/git/CHEUI
 
 ######################################################################################
@@ -99,12 +99,20 @@ conda activate CHEUI
 mkdir -p ${CHEUI_OUTDIR}
 cd ${CHEUI_OUTDIR}
 
-echo "CHEUI preprocessing..."
-python3 ${GIT_CHEUI}/scripts/CHEUI_preprocess_m6A.py \
+#echo "CHEUI preprocessing..."
+#python3 ${GIT_CHEUI}/scripts/CHEUI_preprocess_m6A.py \
+#-i ${NANOPOLISH}/eventalign.txt \
+#-m ${GIT_CHEUI}/kmer_models/model_kmer.csv \
+#-o ${CHEUI_OUTDIR}/out_A_signals+IDs.p \
+#-n 15
+
+${GIT_CHEUI}/scripts/preprocessing_CPP/CHEUI \
 -i ${NANOPOLISH}/eventalign.txt \
 -m ${GIT_CHEUI}/kmer_models/model_kmer.csv \
 -o ${CHEUI_OUTDIR}/out_A_signals+IDs.p \
--n 15
+-n 16 \
+--m6A
+
 
 echo "CHEUI predict..."
 python3 ${GIT_CHEUI}/scripts/CHEUI_predict_model1.py \
