@@ -97,7 +97,7 @@ eval "$(conda shell.bash hook)"
 conda activate CHEUI
 
 mkdir -p ${CHEUI_OUTDIR}
-cd ${CHEUI_OUTDIR}
+#cd ${CHEUI_OUTDIR}
 
 #echo "CHEUI preprocessing..."
 #python3 ${GIT_CHEUI}/scripts/CHEUI_preprocess_m6A.py \
@@ -106,13 +106,14 @@ cd ${CHEUI_OUTDIR}
 #-o ${CHEUI_OUTDIR}/out_A_signals+IDs.p \
 #-n 15
 
-${GIT_CHEUI}/scripts/preprocessing_CPP/CHEUI \
+cd ${GIT_CHEUI}/scripts/preprocessing_CPP
+
+./CHEUI \
 -i ${NANOPOLISH}/eventalign.txt \
 -m ${GIT_CHEUI}/kmer_models/model_kmer.csv \
 -o ${CHEUI_OUTDIR}/out_A_signals+IDs.p \
 -n 16 \
 --m6A
-
 
 echo "CHEUI predict..."
 python3 ${GIT_CHEUI}/scripts/CHEUI_predict_model1.py \
