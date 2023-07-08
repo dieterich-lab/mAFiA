@@ -17,13 +17,14 @@ DATASET=100_WT_0_IVT
 echo ${DATASET}
 
 PRJ=/prj/TRR319_RMaP/Project_BaseCalling/Adrian
-NANOPOLISH=${PRJ}/nanopolish/${DATASET}
+SCRATCH=/scratch/achan
+NANOPOLISH=${SCRATCH}/nanopolish/${DATASET}
 FAST5=${PRJ}/HEK293/${DATASET}/fast5
-FASTQ=${PRJ}/nanopolish/${DATASET}/fastq
+FASTQ=${SCRATCH}/nanopolish/${DATASET}/fastq
 REF=/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38.cdna.all.fa
 BAM=${NANOPOLISH}/minimap.bam
-m6ANET_OUTDIR=${PRJ}/m6Anet/${DATASET}
-CHEUI_OUTDIR=${PRJ}/CHEUI/${DATASET}_cpp
+m6ANET_OUTDIR=${SCRATCH}/m6Anet/${DATASET}
+CHEUI_OUTDIR=${SCRATCH}/CHEUI/${DATASET}
 GIT_CHEUI=/home/achan/git/CHEUI
 
 ######################################################################################
@@ -108,6 +109,7 @@ mkdir -p ${CHEUI_OUTDIR}
 
 cd ${GIT_CHEUI}/scripts/preprocessing_CPP
 
+echo "CHEUI preprocessing..."
 ./CHEUI \
 -i ${NANOPOLISH}/eventalign.txt \
 -m ${GIT_CHEUI}/kmer_models/model_kmer.csv \
