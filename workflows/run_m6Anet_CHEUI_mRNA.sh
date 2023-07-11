@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
-#SBATCH --cpus-per-task=8
-#SBATCH --mem=64GB
+#SBATCH --begin=02:00
+#SBATCH --nodelist=gpu-g4-1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=128GB
 #SBATCH --verbose
-#SBATCH --job-name=CHEUI_cpp
-#SBATCH --output=/home/achan/slurm/CHEUI_cpp_%A.out
+#SBATCH --job-name=CHEUI_predict
+#SBATCH --output=/home/achan/slurm/CHEUI_predict_%A.out
 
 DATASET=100_WT_0_IVT
 #DATASET=75_WT_25_IVT
@@ -94,32 +96,31 @@ GIT_CHEUI=/home/achan/git/CHEUI
 eval "$(conda shell.bash hook)"
 conda activate CHEUI
 
-mkdir -p ${CHEUI_OUTDIR}
+#mkdir -p ${CHEUI_OUTDIR}
 #cd ${CHEUI_OUTDIR}
 
 #python3 /home/achan/git/MAFIA/workflows/split_large_nanopolish_File.py
 
-cd ${GIT_CHEUI}/scripts/preprocessing_CPP
-#for evtaln in ${CHEUI_OUTDIR}/eventalign_*
-for i in {0..15}
-do
-  PART=$(printf %02d $i)
-  echo "CHEUI preprocessing part${PART}..."
-  srun --partition=gpu --cpus-per-task=16 \
-  ./CHEUI \
-  -i ${CHEUI_OUTDIR}/eventalign_part${PART}.txt \
-  -m ${GIT_CHEUI}/kmer_models/model_kmer.csv \
-  -o ${CHEUI_OUTDIR}/prep_m6A_part${PART} \
-  -n 16 \
-  --m6A \
-  &
-done
+#cd ${GIT_CHEUI}/scripts/preprocessing_CPP
+#for i in {0..15}
+#do
+#  PART=$(printf %02d $i)
+#  echo "CHEUI preprocessing part${PART}..."
+#  srun --partition=gpu --cpus-per-task=16 \
+#  ./CHEUI \
+#  -i ${CHEUI_OUTDIR}/eventalign_part${PART}.txt \
+#  -m ${GIT_CHEUI}/kmer_models/model_kmer.csv \
+#  -o ${CHEUI_OUTDIR}/prep_m6A_part${PART} \
+#  -n 16 \
+#  --m6A \
+#  &
+#done
 
-python3 ${GIT_CHEUI}/scripts/combine_binary_file.py -i ${CHEUI_OUTDIR}/prep_m6A_* -o ${CHEUI_OUTDIR}/out_A_signals+IDs.p
+#python3 ${GIT_CHEUI}/scripts/combine_binary_file.py -i ${CHEUI_OUTDIR}/prep_m6A -o ${CHEUI_OUTDIR}/prep_m6A/combined.p
 
 echo "CHEUI predict model 1..."
 python3 ${GIT_CHEUI}/scripts/CHEUI_predict_model1.py \
--i ${CHEUI_OUTDIR}/prep_m6A/eventalign_signals+IDS.p \
+-i ${CHEUI_OUTDIR}/prep_m6A/combined.p \
 -m ${GIT_CHEUI}/CHEUI_trained_models/CHEUI_m6A_model1.h5 \
 -o ${CHEUI_OUTDIR}/read_level_m6A_predictions.txt \
 -l ${DATASET}
@@ -128,7 +129,6 @@ echo "Sort reads..."
 sort -k1  --parallel=16 ${CHEUI_OUTDIR}/read_level_m6A_predictions.txt > ${CHEUI_OUTDIR}/read_level_m6A_predictions_sorted.txt
 
 echo "CHEUI predict model 2..."
-srun --partition=gpu \
 python3 ${GIT_CHEUI}/scripts/CHEUI_predict_model2.py \
 -m  ${GIT_CHEUI}/CHEUI_trained_models/CHEUI_m6A_model2.h5 \
 -i ${CHEUI_OUTDIR}/read_level_m6A_predictions_sorted.txt \
