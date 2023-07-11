@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
-#SBATCH --partition=gpu
-#SBATCH --exclude=gpu-g4-1
-#SBATCH --gres=gpu:turing:1
-#SBATCH --cpus-per-task=16
-#SBATCH --mem=128GB
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=64GB
 #SBATCH --verbose
 #SBATCH --job-name=CHEUI_cpp
 #SBATCH --output=/home/achan/slurm/CHEUI_cpp_%A.out
@@ -100,26 +97,41 @@ conda activate CHEUI
 mkdir -p ${CHEUI_OUTDIR}
 #cd ${CHEUI_OUTDIR}
 
-#echo "CHEUI preprocessing..."
-#python3 ${GIT_CHEUI}/scripts/CHEUI_preprocess_m6A.py \
-#-i ${NANOPOLISH}/eventalign.txt \
-#-m ${GIT_CHEUI}/kmer_models/model_kmer.csv \
-#-o ${CHEUI_OUTDIR}/out_A_signals+IDs.p \
-#-n 15
+#python3 /home/achan/git/MAFIA/workflows/split_large_nanopolish_File.py
 
 cd ${GIT_CHEUI}/scripts/preprocessing_CPP
+#for evtaln in ${CHEUI_OUTDIR}/eventalign_*
+for i in {0..15}
+do
+  PART=$(printf %02d $i)
+  echo "CHEUI preprocessing part${PART}..."
+  srun --partition=gpu --cpus-per-task=16 \
+  ./CHEUI \
+  -i ${CHEUI_OUTDIR}/eventalign_part${PART}.txt \
+  -m ${GIT_CHEUI}/kmer_models/model_kmer.csv \
+  -o ${CHEUI_OUTDIR}/prep_m6A_part${PART} \
+  -n 16 \
+  --m6A \
+  &
+done
 
-echo "CHEUI preprocessing..."
-./CHEUI \
--i ${NANOPOLISH}/eventalign.txt \
--m ${GIT_CHEUI}/kmer_models/model_kmer.csv \
--o ${CHEUI_OUTDIR}/out_A_signals+IDs.p \
--n 16 \
---m6A
+python3 ${GIT_CHEUI}/scripts/combine_binary_file.py -i ${CHEUI_OUTDIR}/prep_m6A_* -o ${CHEUI_OUTDIR}/out_A_signals+IDs.p
 
-echo "CHEUI predict..."
+echo "CHEUI predict model 1..."
 python3 ${GIT_CHEUI}/scripts/CHEUI_predict_model1.py \
--i ${CHEUI_OUTDIR}/out_A_signals+IDs.p/eventalign_signals+IDS.p \
+-i ${CHEUI_OUTDIR}/prep_m6A/eventalign_signals+IDS.p \
 -m ${GIT_CHEUI}/CHEUI_trained_models/CHEUI_m6A_model1.h5 \
 -o ${CHEUI_OUTDIR}/read_level_m6A_predictions.txt \
 -l ${DATASET}
+
+echo "Sort reads..."
+sort -k1  --parallel=16 ${CHEUI_OUTDIR}/read_level_m6A_predictions.txt > ${CHEUI_OUTDIR}/read_level_m6A_predictions_sorted.txt
+
+echo "CHEUI predict model 2..."
+srun --partition=gpu \
+python3 ${GIT_CHEUI}/scripts/CHEUI_predict_model2.py \
+-m  ${GIT_CHEUI}/CHEUI_trained_models/CHEUI_m6A_model2.h5 \
+-i ${CHEUI_OUTDIR}/read_level_m6A_predictions_sorted.txt \
+-o ${CHEUI_OUTDIR}/site_level_m6A_predictions.txt
+
+#rm ${NANOPOLISH}/eventalign.txt
