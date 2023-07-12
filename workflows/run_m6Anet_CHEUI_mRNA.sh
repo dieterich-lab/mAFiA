@@ -5,9 +5,9 @@
 #SBATCH --job-name=CHEUI
 #SBATCH --output=/home/achan/slurm/CHEUI_%A.out
 
-DATASET=100_WT_0_IVT
+#DATASET=100_WT_0_IVT
 #DATASET=75_WT_25_IVT
-#DATASET=50_WT_50_IVT
+DATASET=50_WT_50_IVT
 #DATASET=25_WT_75_IVT
 #DATASET=0_WT_100_IVT
 
@@ -94,9 +94,10 @@ GIT_CHEUI=/home/achan/git/CHEUI
 eval "$(conda shell.bash hook)"
 conda activate CHEUI
 
-#mkdir -p ${CHEUI_OUTDIR}
-#cd ${CHEUI_OUTDIR}
+mkdir -p ${CHEUI_OUTDIR}
+cd ${CHEUI_OUTDIR}
 
+echo "Splitting nanopolish file..."
 python3 /home/achan/git/MAFIA/workflows/split_large_nanopolish_File.py \
 --infile ${NANOPOLISH}/eventalign.txt \
 --outfile_prefix ${CHEUI_OUTDIR}/eventalign_part
@@ -106,7 +107,7 @@ for i in {0..15}
 do
   PART=$(printf %02d $i)
   echo "CHEUI preprocessing part${PART}..."
-  srun --partition=gpu --cpus-per-task=16 \
+  sbatch --cpus-per-task=16 --wait \
   ./CHEUI \
   -i ${CHEUI_OUTDIR}/eventalign_part${PART}.txt \
   -m ${GIT_CHEUI}/kmer_models/model_kmer.csv \
@@ -116,17 +117,21 @@ do
   &
 done
 
+wait
+
 for i in {0..15}
 do
   PART=$(printf %02d $i)
   echo "CHEUI predict model 1 on part${PART}..."
-  srun --partition=gpu --cpus-per-task=8 \
+  sbatch --partition=gpu --cpus-per-task=8 --wait \
   python3 ${GIT_CHEUI}/scripts/CHEUI_predict_model1.py \
   -m ${GIT_CHEUI}/CHEUI_trained_models/CHEUI_m6A_model1.h5 \
   -i ${CHEUI_OUTDIR}/prep_m6A/eventalign_part${PART}_signals+IDS.p \
   -o ${CHEUI_OUTDIR}/read_level_m6A_predictions_part${PART}.txt \
-  -l ${DATASET} &
+  -l ${DATASET}
 done
+
+wait
 
 cat ${CHEUI_OUTDIR}/read_level_m6A_predictions_part00.txt > ${CHEUI_OUTDIR}/read_level_m6A_predictions_combined.txt
 for i in {1..15}
@@ -139,6 +144,7 @@ echo "Sort reads..."
 sort -k1  --parallel=16 ${CHEUI_OUTDIR}/read_level_m6A_predictions_combined.txt > ${CHEUI_OUTDIR}/read_level_m6A_predictions_sorted.txt
 
 echo "CHEUI predict model 2..."
+sbatch --partition=gpu --cpus-per-task=16 \
 python3 ${GIT_CHEUI}/scripts/CHEUI_predict_model2.py \
 -m  ${GIT_CHEUI}/CHEUI_trained_models/CHEUI_m6A_model2.h5 \
 -i ${CHEUI_OUTDIR}/read_level_m6A_predictions_sorted.txt \
