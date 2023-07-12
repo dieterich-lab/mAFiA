@@ -113,8 +113,7 @@ do
   -m ${GIT_CHEUI}/kmer_models/model_kmer.csv \
   -o ${CHEUI_OUTDIR}/prep_m6A_part${PART} \
   -n 16 \
-  --m6A \
-  &
+  --m6A
 done
 
 wait
