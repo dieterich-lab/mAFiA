@@ -1,9 +1,18 @@
+import argparse
 import pandas as pd
 
-num_reads_per_file = 100000
+parser = argparse.ArgumentParser
+parser.add_argument('--infile')
+parser.add_argument('--outfile_prefix')
+parser.add_argument('--num_reads_per_file', type=int, default=400000)
+args = parser.parse_args()
+infile = args.infile
+outfile_prefix = args.outfile_prefix
+num_reads_per_file = args.num_reads_per_file
 
-infile = '/scratch/achan/nanopolish/100_WT_0_IVT/eventalign.txt'
-outfile_prefix = '/scratch/achan/CHEUI/100_WT_0_IVT/eventalign_part'
+# infile = '/scratch/achan/nanopolish/100_WT_0_IVT/eventalign.txt'
+# outfile_prefix = '/scratch/achan/CHEUI/100_WT_0_IVT/eventalign_part'
+# num_reads_per_file = 400000
 
 df_iterator = pd.read_csv(
     infile,
