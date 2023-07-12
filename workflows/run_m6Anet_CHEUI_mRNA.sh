@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-#SBATCH --begin=02:00
 #SBATCH --nodelist=gpu-g4-1
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=128GB
@@ -7,10 +6,10 @@
 #SBATCH --job-name=CHEUI_predict
 #SBATCH --output=/home/achan/slurm/CHEUI_predict_%A.out
 
-DATASET=100_WT_0_IVT
+#DATASET=100_WT_0_IVT
 #DATASET=75_WT_25_IVT
 #DATASET=50_WT_50_IVT
-#DATASET=25_WT_75_IVT
+DATASET=25_WT_75_IVT
 #DATASET=0_WT_100_IVT
 
 echo ${DATASET}
@@ -118,12 +117,12 @@ conda activate CHEUI
 
 #python3 ${GIT_CHEUI}/scripts/combine_binary_file.py -i ${CHEUI_OUTDIR}/prep_m6A -o ${CHEUI_OUTDIR}/prep_m6A/combined.p
 
-echo "CHEUI predict model 1..."
-python3 ${GIT_CHEUI}/scripts/CHEUI_predict_model1.py \
--i ${CHEUI_OUTDIR}/prep_m6A/combined.p \
--m ${GIT_CHEUI}/CHEUI_trained_models/CHEUI_m6A_model1.h5 \
--o ${CHEUI_OUTDIR}/read_level_m6A_predictions.txt \
--l ${DATASET}
+#echo "CHEUI predict model 1..."
+#python3 ${GIT_CHEUI}/scripts/CHEUI_predict_model1.py \
+#-i ${CHEUI_OUTDIR}/prep_m6A/combined.p \
+#-m ${GIT_CHEUI}/CHEUI_trained_models/CHEUI_m6A_model1.h5 \
+#-o ${CHEUI_OUTDIR}/read_level_m6A_predictions.txt \
+#-l ${DATASET}
 
 echo "Sort reads..."
 sort -k1  --parallel=16 ${CHEUI_OUTDIR}/read_level_m6A_predictions.txt > ${CHEUI_OUTDIR}/read_level_m6A_predictions_sorted.txt
