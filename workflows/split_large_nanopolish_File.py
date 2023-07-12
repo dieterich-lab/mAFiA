@@ -1,7 +1,7 @@
 import argparse
 import pandas as pd
 
-parser = argparse.ArgumentParser
+parser = argparse.ArgumentParser()
 parser.add_argument('--infile')
 parser.add_argument('--outfile_prefix')
 parser.add_argument('--num_reads_per_file', type=int, default=400000)
