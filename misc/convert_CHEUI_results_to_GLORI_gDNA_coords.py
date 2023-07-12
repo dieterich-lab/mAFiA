@@ -6,8 +6,8 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 
-# PRJ = os.path.join(HOME, 'Data')
-PRJ = '/prj'
+PRJ = os.path.join(HOME, 'Data')
+# PRJ = '/prj'
 
 def get_genomic_coord_from_cDNA(id, pos):
     server = "http://rest.ensembl.org"
@@ -51,23 +51,22 @@ def get_cDNA_coords(in_tid, in_tpos, tx):
 
     return out_chr, out_gpos
 
-test_dataset = '75_WT_25_IVT'
+test_dataset = '0_WT_100_IVT'
 
-result_dir = os.path.join(PRJ, 'TRR319_RMaP/Project_BaseCalling/Adrian/m6Anet')
-m6Anet_file = os.path.join(result_dir, f'{test_dataset}/data.site_proba.csv')
+result_dir = os.path.join(PRJ, 'TRR319_RMaP/Project_BaseCalling/Adrian/CHEUI')
+cheui_file = os.path.join(result_dir, f'{test_dataset}/site_level_m6A_predictions.txt')
 tx_file = os.path.join(HOME, 'Data/transcriptomes/GRCh38_102.bed')
 glori_file = os.path.join(HOME, 'Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv')
 out_dir = result_dir
 os.makedirs(out_dir, exist_ok=True)
 
-df_m6Anet = pd.read_csv(m6Anet_file)
+df_cheui = pd.read_csv(cheui_file, sep='\t')
 df_tx = pd.read_csv(tx_file, sep='\t', usecols=list(range(4))+[5]+list(range(9, 12)),
                     names=['chr', 'start', 'stop', 'transcript_id', 'strand', 'num_blocks', 'block_sizes', 'block_starts'],
                     dtype={'chr': str})
 df_glori = pd.read_csv(glori_file)
 
-df_m6Anet_filtered = df_m6Anet
-# df_m6Anet_filtered = df_m6Anet[df_m6Anet['probability_modified']>0.9]
+df_cheui_filtered = df_cheui
 
 dict_chr = {
     str(i) : 'chr{}'.format(i) for i in range(1, 23)
@@ -77,11 +76,11 @@ dict_chr['X'] = 'chrX'
 dict_chr['Y'] = 'chrY'
 
 collected_sites = []
-for ind, row in tqdm(df_m6Anet_filtered.iterrows()):
+for ind, row in tqdm(df_cheui_filtered.iterrows()):
     # print(ind)
-    tid = row['transcript_id'].split('.')[0]
-    tpos = row['transcript_position']
-    mod_ratio = row['mod_ratio']
+    tid = row['contig'].split('.')[0]
+    tpos = row['position']
+    mod_ratio = row['stoichiometry']
 
     ### parsing bed file ###
     contig, gpos = get_cDNA_coords(tid, tpos, df_tx)
@@ -98,19 +97,19 @@ for ind, row in tqdm(df_m6Anet_filtered.iterrows()):
 print('{} GLORI sites collected'.format(len(collected_sites)))
 
 ### slice df and check against ensembl API ###
-df_m6Anet_glori = df_m6Anet.loc[[site[0] for site in collected_sites]]
-df_m6Anet_glori['Chr'] = [site[1] for site in collected_sites]
-df_m6Anet_glori['Sites'] = [site[2] for site in collected_sites]
-df_m6Anet_glori['Ratio'] = [site[3] for site in collected_sites]
-df_m6Anet_glori['Pvalue'] = [site[5] for site in collected_sites]
-df_m6Anet_glori.to_csv(m6Anet_file.replace('.csv', '_glori.csv'))
+df_cheui_glori = df_cheui.loc[[site[0] for site in collected_sites]]
+df_cheui_glori['Chr'] = [site[1] for site in collected_sites]
+df_cheui_glori['Sites'] = [site[2] for site in collected_sites]
+df_cheui_glori['Ratio'] = [site[3] for site in collected_sites]
+df_cheui_glori['Pvalue'] = [site[5] for site in collected_sites]
+df_cheui_glori.to_csv(cheui_file.replace('.txt', '_glori.txt'), sep='\t')
 
 bad_indices = []
-for ind, row in tqdm(df_m6Anet_glori.iterrows()):
+for ind, row in tqdm(df_cheui_glori.iterrows()):
     # print(ind)
     ### ensembl API ###
-    tid = row['transcript_id'].split('.')[0]
-    tpos = row['transcript_position']
+    tid = row['contig'].split('.')[0]
+    tpos = row['position']
     mapping = get_genomic_coord_from_cDNA(tid, tpos)
     if mapping is None:
         bad_indices.append(ind)
@@ -125,7 +124,7 @@ for ind, row in tqdm(df_m6Anet_glori.iterrows()):
         # print('{}: ensembl gpos {} != my gpos {}\n'.format(ind, ens_start, row['Sites']))
     # else:
     #     print('Okay\n')
-print('{} bad cDNA->gDNA conversions out of {}'.format(len(bad_indices), len(df_m6Anet_glori)))
+print('{} bad cDNA->gDNA conversions out of {}'.format(len(bad_indices), len(df_cheui_glori)))
 
-df_m6Anet_glori_filtered = df_m6Anet_glori.drop(bad_indices)
-df_m6Anet_glori_filtered.to_csv(m6Anet_file.replace('.csv', '.glori_filtered.csv'))
+df_cheui_glori_filtered = df_cheui_glori.drop(bad_indices)
+df_cheui_glori_filtered.to_csv(cheui_file.replace('.txt', '.glori_filtered.txt'), sep='\t')
