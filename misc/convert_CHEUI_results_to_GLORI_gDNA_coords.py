@@ -6,10 +6,12 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 
-test_dataset = '100_WT_0_IVT'
+# test_dataset = '100_WT_0_IVT'
 
 # PRJ = os.path.join(HOME, 'Data')
 # PRJ = '/prj'
+
+cheui_file = sys.argv[1]
 
 def get_genomic_coord_from_cDNA(id, pos):
     server = "http://rest.ensembl.org"
@@ -53,12 +55,12 @@ def get_cDNA_coords(in_tid, in_tpos, tx):
 
     return out_chr, out_gpos
 
-result_dir = os.path.join('/scratch/achan/CHEUI')
-cheui_file = os.path.join(result_dir, f'{test_dataset}/site_level_m6A_predictions.txt')
+# result_dir = os.path.join('/scratch/achan/CHEUI')
+# cheui_file = os.path.join(result_dir, f'{test_dataset}/site_level_m6A_predictions.txt')
 tx_file = os.path.join(HOME, 'Data/transcriptomes/GRCh38_102.bed')
 glori_file = os.path.join(HOME, 'Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv')
-out_dir = result_dir
-os.makedirs(out_dir, exist_ok=True)
+# out_dir = result_dir
+# os.makedirs(out_dir, exist_ok=True)
 
 df_cheui = pd.read_csv(cheui_file, sep='\t')
 df_tx = pd.read_csv(tx_file, sep='\t', usecols=list(range(4))+[5]+list(range(9, 12)),
@@ -102,7 +104,7 @@ df_cheui_glori['Chr'] = [site[1] for site in collected_sites]
 df_cheui_glori['Sites'] = [site[2] for site in collected_sites]
 df_cheui_glori['Ratio'] = [site[3] for site in collected_sites]
 df_cheui_glori['Pvalue'] = [site[5] for site in collected_sites]
-df_cheui_glori.to_csv(cheui_file.replace('.txt', '_glori.txt'), sep='\t')
+df_cheui_glori.to_csv(cheui_file+'.glori', sep='\t')
 
 bad_indices = []
 for ind, row in tqdm(df_cheui_glori.iterrows()):
@@ -127,4 +129,4 @@ for ind, row in tqdm(df_cheui_glori.iterrows()):
 print('{} bad cDNA->gDNA conversions out of {}'.format(len(bad_indices), len(df_cheui_glori)))
 
 df_cheui_glori_filtered = df_cheui_glori.drop(bad_indices)
-df_cheui_glori_filtered.to_csv(cheui_file.replace('.txt', '.glori_filtered.txt'), sep='\t')
+df_cheui_glori_filtered.to_csv(cheui_file+'.glori.filtered', sep='\t')

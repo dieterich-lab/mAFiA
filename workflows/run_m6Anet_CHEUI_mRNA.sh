@@ -5,9 +5,9 @@
 #SBATCH --job-name=GODOT
 #SBATCH --output=/home/achan/slurm/CHEUI_%A.out
 
-#DATASET=100_WT_0_IVT
+DATASET=100_WT_0_IVT
 #DATASET=75_WT_25_IVT
-DATASET=50_WT_50_IVT
+#DATASET=50_WT_50_IVT
 #DATASET=25_WT_75_IVT
 #DATASET=0_WT_100_IVT
 
@@ -150,4 +150,11 @@ done
 #-i ${CHEUI_OUTDIR}/read_level_m6A_predictions_sorted.txt \
 #-o ${CHEUI_OUTDIR}/site_level_m6A_predictions.txt
 
-#rm ${NANOPOLISH}/eventalign.txt
+tail -n +2 ${CHEUI_OUTDIR}/site_level_m6A_predictions.txt | split -a 3 -d -l 100000 - ${CHEUI_OUTDIR}/site_level_m6A_predictions.txt.part
+for file in ${CHEUI_OUTDIR}/site_level_m6A_predictions.txt.part*
+do
+    head -n 1 ${CHEUI_OUTDIR}/site_level_m6A_predictions.txt > with_header_tmp
+    cat "$file" >> with_header_tmp
+    mv -f with_header_tmp "$file"
+done
+
