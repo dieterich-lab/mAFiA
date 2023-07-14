@@ -1,9 +1,4 @@
 #!/usr/bin/env bash
-#SBATCH --cpus-per-task=16
-#SBATCH --mem=128GB
-#SBATCH --verbose
-#SBATCH --job-name=GODOT
-#SBATCH --output=/home/achan/slurm/CHEUI_%A.out
 
 DATASET=100_WT_0_IVT
 #DATASET=75_WT_25_IVT
@@ -96,25 +91,25 @@ conda activate CHEUI
 
 #mkdir -p ${CHEUI_OUTDIR}
 #cd ${CHEUI_OUTDIR}
-#echo "Splitting nanopolish file..."
-#python3 /home/achan/git/MAFIA/workflows/split_large_nanopolish_File.py \
-#--infile ${NANOPOLISH}/eventalign.txt \
-#--outfile_prefix ${CHEUI_OUTDIR}/eventalign_part
+echo "Splitting nanopolish file..."
+python3 /home/achan/git/MAFIA/workflows/split_large_nanopolish_File.py \
+--infile ${NANOPOLISH}/eventalign.txt \
+--outfile_prefix ${CHEUI_OUTDIR}/eventalign_part
 
 num_parts=$(ls ${CHEUI_OUTDIR}/eventalign_part*.txt | wc -l)
 
 cd ${GIT_CHEUI}/scripts/preprocessing_CPP
-for i in {0..$((num_parts-1))}
+for i in {0..4}
 do
   PART=$(printf %02d $i)
   echo "CHEUI preprocessing part${PART}..."
-  sbatch --cpus-per-task=16 --wait \
+  srun -p general -c 2 --mem 32GB \
   ./CHEUI \
   -i ${CHEUI_OUTDIR}/eventalign_part${PART}.txt \
   -m ${GIT_CHEUI}/kmer_models/model_kmer.csv \
   -o ${CHEUI_OUTDIR}/prep_m6A_part${PART} \
   -n 16 \
-  --m6A
+  --m6A &
 done
 
 #wait
