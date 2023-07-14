@@ -104,7 +104,7 @@ df_cheui_glori['Chr'] = [site[1] for site in collected_sites]
 df_cheui_glori['Sites'] = [site[2] for site in collected_sites]
 df_cheui_glori['Ratio'] = [site[3] for site in collected_sites]
 df_cheui_glori['Pvalue'] = [site[5] for site in collected_sites]
-df_cheui_glori.to_csv(cheui_file+'.glori', sep='\t')
+df_cheui_glori.to_csv(cheui_file+'.glori', sep='\t', index=False)
 
 bad_indices = []
 for ind, row in tqdm(df_cheui_glori.iterrows()):
@@ -129,4 +129,4 @@ for ind, row in tqdm(df_cheui_glori.iterrows()):
 print('{} bad cDNA->gDNA conversions out of {}'.format(len(bad_indices), len(df_cheui_glori)))
 
 df_cheui_glori_filtered = df_cheui_glori.drop(bad_indices)
-df_cheui_glori_filtered.to_csv(cheui_file+'.glori.filtered', sep='\t')
+df_cheui_glori_filtered.to_csv(cheui_file+'.glori.filtered', sep='\t', index=False)
