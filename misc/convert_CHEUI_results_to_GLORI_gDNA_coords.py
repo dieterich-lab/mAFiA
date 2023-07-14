@@ -11,8 +11,8 @@ from tqdm import tqdm
 # PRJ = os.path.join(HOME, 'Data')
 # PRJ = '/prj'
 
-# cheui_file = sys.argv[1]
-cheui_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/CHEUI/100_WT_0_IVT/site_level_m6A_predictions.txt.part019'
+cheui_file = sys.argv[1]
+# cheui_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/CHEUI/100_WT_0_IVT/site_level_m6A_predictions.txt.part019'
 
 def get_genomic_coord_from_cDNA(id, pos):
     server = "http://rest.ensembl.org"
