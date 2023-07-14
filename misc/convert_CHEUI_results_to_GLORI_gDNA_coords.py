@@ -6,8 +6,10 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 
-PRJ = os.path.join(HOME, 'Data')
-# PRJ = '/prj'
+test_dataset = '100_WT_0_IVT'
+
+# PRJ = os.path.join(HOME, 'Data')
+PRJ = '/prj'
 
 def get_genomic_coord_from_cDNA(id, pos):
     server = "http://rest.ensembl.org"
@@ -50,8 +52,6 @@ def get_cDNA_coords(in_tid, in_tpos, tx):
     out_gpos = sub_tx['start'].values[0] + local_gpos
 
     return out_chr, out_gpos
-
-test_dataset = '0_WT_100_IVT'
 
 result_dir = os.path.join(PRJ, 'TRR319_RMaP/Project_BaseCalling/Adrian/CHEUI')
 cheui_file = os.path.join(result_dir, f'{test_dataset}/site_level_m6A_predictions.txt')
