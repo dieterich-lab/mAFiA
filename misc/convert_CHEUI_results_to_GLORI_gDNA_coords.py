@@ -9,7 +9,7 @@ from tqdm import tqdm
 test_dataset = '100_WT_0_IVT'
 
 # PRJ = os.path.join(HOME, 'Data')
-PRJ = '/prj'
+# PRJ = '/prj'
 
 def get_genomic_coord_from_cDNA(id, pos):
     server = "http://rest.ensembl.org"
@@ -53,7 +53,7 @@ def get_cDNA_coords(in_tid, in_tpos, tx):
 
     return out_chr, out_gpos
 
-result_dir = os.path.join(PRJ, 'TRR319_RMaP/Project_BaseCalling/Adrian/CHEUI')
+result_dir = os.path.join('/scratch/achan/CHEUI')
 cheui_file = os.path.join(result_dir, f'{test_dataset}/site_level_m6A_predictions.txt')
 tx_file = os.path.join(HOME, 'Data/transcriptomes/GRCh38_102.bed')
 glori_file = os.path.join(HOME, 'Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv')
