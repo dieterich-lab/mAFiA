@@ -11,7 +11,8 @@ from tqdm import tqdm
 # PRJ = os.path.join(HOME, 'Data')
 # PRJ = '/prj'
 
-cheui_file = sys.argv[1]
+# cheui_file = sys.argv[1]
+cheui_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/CHEUI/100_WT_0_IVT/site_level_m6A_predictions.txt.part019'
 
 def get_genomic_coord_from_cDNA(id, pos):
     server = "http://rest.ensembl.org"
@@ -70,6 +71,8 @@ df_glori = pd.read_csv(glori_file)
 
 df_cheui_filtered = df_cheui
 
+# df_cheui_filtered['position'] = df_cheui_filtered['position'] + 4
+
 dict_chr = {
     str(i) : 'chr{}'.format(i) for i in range(1, 23)
 }
@@ -81,7 +84,7 @@ collected_sites = []
 for ind, row in tqdm(df_cheui_filtered.iterrows()):
     # print(ind)
     tid = row['contig'].split('.')[0]
-    tpos = row['position']
+    tpos = row['position'] + 4
     mod_ratio = row['stoichiometry']
 
     ### parsing bed file ###
@@ -95,7 +98,7 @@ for ind, row in tqdm(df_cheui_filtered.iterrows()):
     sel_row = df_glori[(df_glori['Chr']==dict_chr[contig]) * (df_glori['Sites']==gpos)]
     if len(sel_row)>0:
         # print(sel_row)
-        collected_sites.append((ind, dict_chr[contig], gpos, sel_row['Ratio'].values[0], mod_ratio, sel_row['Pvalue'].values[0]))
+        collected_sites.append((ind, dict_chr[contig], gpos, sel_row['Ratio'].values[0], mod_ratio, sel_row['Pvalue'].values[0], sel_row['strand']))
 print('{} GLORI sites collected'.format(len(collected_sites)))
 
 ### slice df and check against ensembl API ###
@@ -104,6 +107,7 @@ df_cheui_glori['Chr'] = [site[1] for site in collected_sites]
 df_cheui_glori['Sites'] = [site[2] for site in collected_sites]
 df_cheui_glori['Ratio'] = [site[3] for site in collected_sites]
 df_cheui_glori['Pvalue'] = [site[5] for site in collected_sites]
+df_cheui_glori['Strand'] = [site[6] for site in collected_sites]
 df_cheui_glori.to_csv(cheui_file+'.glori', sep='\t', index=False)
 
 bad_indices = []
@@ -111,7 +115,7 @@ for ind, row in tqdm(df_cheui_glori.iterrows()):
     # print(ind)
     ### ensembl API ###
     tid = row['contig'].split('.')[0]
-    tpos = row['position']
+    tpos = row['position'] + 4
     mapping = get_genomic_coord_from_cDNA(tid, tpos)
     if mapping is None:
         bad_indices.append(ind)
