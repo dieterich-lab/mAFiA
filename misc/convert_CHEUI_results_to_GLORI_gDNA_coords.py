@@ -98,7 +98,7 @@ for ind, row in tqdm(df_cheui_filtered.iterrows()):
     sel_row = df_glori[(df_glori['Chr']==dict_chr[contig]) * (df_glori['Sites']==gpos)]
     if len(sel_row)>0:
         # print(sel_row)
-        collected_sites.append((ind, dict_chr[contig], gpos, sel_row['Ratio'].values[0], mod_ratio, sel_row['Pvalue'].values[0], sel_row['strand']))
+        collected_sites.append((ind, dict_chr[contig], gpos, sel_row['Ratio'].values[0], mod_ratio, sel_row['Pvalue'].values[0], sel_row['Strand']))
 print('{} GLORI sites collected'.format(len(collected_sites)))
 
 ### slice df and check against ensembl API ###
