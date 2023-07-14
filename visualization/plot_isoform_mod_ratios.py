@@ -23,8 +23,8 @@ FMT = 'pdf'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
-dataset = 'P2_WT'
-# dataset = '100_WT_0_IVT'
+# dataset = 'P2_WT'
+dataset = '100_WT_0_IVT'
 annotated_res = f'/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_train_ISA-WUE_test_{dataset}.tsv.merged.annotated'
 img_out = f'/home/adrian/img_out/MAFIA/{dataset}_isoforms_{FMT}'
 os.makedirs(img_out, exist_ok=True)
@@ -163,7 +163,30 @@ for k, v in isoform_mod_ratios.items():
 # plt.scatter([pair[0] for pair in mod_ratio_pairs], [pair[1] for pair in mod_ratio_pairs])
 
 ### output dataframe ###
-df_out = pd.DataFrame()
+# df_out = pd.DataFrame()
+# for k, v in isoform_mod_ratios.items():
+#     num_isoforms = len(v)
+#
+#     sub_df = df_annotated[df_annotated['index'] == k]
+#     chr = sub_df['Chr'].unique()[0]
+#     pos = sub_df['Sites'].unique()[0]
+#     gene = sub_df['Gene'].unique()[0]
+#
+#     new_df = pd.DataFrame.from_dict({
+#         'Chr' : [chr] * num_isoforms,
+#         'Pos' : [pos] * num_isoforms,
+#         'Gene' : [gene] * num_isoforms,
+#         'Transcript ID' : [l[0] for l in v],
+#         'Mod. Ratio' : [l[1] for l in v],
+#         'Num. Reads': [l[2] for l in v],
+#     })
+#
+#     df_out = pd.concat([df_out, new_df])
+# df_out.to_csv(os.path.join(f'/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/isoform_modRatio_{dataset}.tsv'), index=False, sep='\t')
+
+thresh_splitting = 0.3
+
+df_split = pd.DataFrame()
 for k, v in isoform_mod_ratios.items():
     num_isoforms = len(v)
 
@@ -172,15 +195,39 @@ for k, v in isoform_mod_ratios.items():
     pos = sub_df['Sites'].unique()[0]
     gene = sub_df['Gene'].unique()[0]
 
-    new_df = pd.DataFrame.from_dict({
-        'Chr' : [chr] * num_isoforms,
-        'Pos' : [pos] * num_isoforms,
-        'Gene' : [gene] * num_isoforms,
-        'Transcript ID' : [l[0] for l in v],
-        'Mod. Ratio' : [l[1] for l in v],
-        'Num. Reads': [l[2] for l in v],
-    })
+    transcript_ids = np.array([l[0] for l in v])
+    mod_ratios = np.array([l[1] for l in v])
+    num_reads = np.array([l[2] for l in v])
 
-    df_out = pd.concat([df_out, new_df])
+    max_splitting = np.max(mod_ratios) - np.min(mod_ratios)
+    if max_splitting>=thresh_splitting:
+        ind_0 = np.argmin(mod_ratios)
+        ind_1 = np.argmax(mod_ratios)
+        new_df = pd.DataFrame.from_dict({
+            'Chr' : [chr],
+            'Pos' : [pos],
+            'Gene' : [gene],
+            'Splitting' : [max_splitting],
+            'Transcript_0' : [transcript_ids[ind_0]],
+            'Mod_Ratio_0' : [mod_ratios[ind_0]],
+            'Num_Reads_0' : [num_reads[ind_0]],
+            'Transcript_1': [transcript_ids[ind_1]],
+            'Mod_Ratio_1': [mod_ratios[ind_1]],
+            'Num_Reads_1': [num_reads[ind_1]]
+        })
+        df_split = pd.concat([df_split, new_df])
+df_split.to_csv(os.path.join(f'/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/isoform_{dataset}_spltting{thresh_splitting:.2f}.tsv'), index=False, sep='\t')
 
-df_out.to_csv(os.path.join(f'/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/isoform_modRatio_{dataset}.tsv'), index=False, sep='\t')
+### compare with JACUSA ###
+jacusa_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/merged_wt_vs_mut.out'
+df_jacusa = pd.read_csv(jacusa_file, sep='\t')
+
+for _, row in df_split.iterrows():
+    contig = row['Chr'].lstrip('chr')
+    pos = row['Pos']
+    sub_df = df_jacusa[(df_jacusa['#contig']==contig) * (df_jacusa['start']==pos)]
+
+    if len(sub_df)>1:
+        print('\n############################################')
+        print('mAFiA:\n', row.values)
+        print('JACUSA:\n', sub_df.values)

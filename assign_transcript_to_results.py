@@ -30,9 +30,6 @@ empty_out = 10000
 
 df_out = pd.DataFrame()
 for _, row in tqdm(df_res.iterrows()):
-    if row['index']<213538:
-        continue
-
     read_id = row['read_id']
     read_pos = row['read_pos']
     ref_motif = row['ref_motif']
