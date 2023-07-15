@@ -12,7 +12,6 @@ from tqdm import tqdm
 # PRJ = '/prj'
 
 cheui_file = sys.argv[1]
-# cheui_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/CHEUI/100_WT_0_IVT/site_level_m6A_predictions.txt.part019'
 
 def get_genomic_coord_from_cDNA(id, pos):
     server = "http://rest.ensembl.org"
@@ -95,7 +94,7 @@ for ind, row in tqdm(df_cheui_filtered.iterrows()):
     ### check ###
     # print('contig {}, pos {}'.format(contig==mapping['seq_region_name'], gpos==mapping['start']))
 
-    sel_row = df_glori[(df_glori['Chr']==dict_chr[contig]) * (df_glori['Sites']==gpos)]
+    sel_row = df_glori[(df_glori['Chr']==dict_chr[contig]) & (df_glori['Sites']==gpos)]
     if len(sel_row)>0:
         # print(sel_row)
         collected_sites.append((ind, dict_chr[contig], gpos, sel_row['Ratio'].values[0], mod_ratio, sel_row['Pvalue'].values[0], sel_row['Strand'].values[0]))
