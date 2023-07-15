@@ -106,7 +106,7 @@ df_cheui_glori['Chr'] = [site[1] for site in collected_sites]
 df_cheui_glori['Sites'] = [site[2] for site in collected_sites]
 df_cheui_glori['Ratio'] = [site[3] for site in collected_sites]
 df_cheui_glori['Pvalue'] = [site[5] for site in collected_sites]
-df_cheui_glori['Strand'] = [site[6] for site in collected_sites]
+df_cheui_glori['Strand'] = [str(site[6]) for site in collected_sites]
 df_cheui_glori.to_csv(cheui_file+'.glori', sep='\t', index=False)
 
 bad_indices = []
