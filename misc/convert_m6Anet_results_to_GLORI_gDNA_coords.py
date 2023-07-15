@@ -9,6 +9,8 @@ from tqdm import tqdm
 # PRJ = os.path.join(HOME, 'Data')
 PRJ = '/prj'
 
+m6Anet_file = sys.argv[1]
+
 def get_genomic_coord_from_cDNA(id, pos):
     server = "http://rest.ensembl.org"
     ext = "/map/cdna/{}/{}..{}?".format(id, pos, pos+1)
@@ -51,14 +53,14 @@ def get_cDNA_coords(in_tid, in_tpos, tx):
 
     return out_chr, out_gpos
 
-test_dataset = '75_WT_25_IVT'
+# test_dataset = '75_WT_25_IVT'
 
-result_dir = os.path.join(PRJ, 'TRR319_RMaP/Project_BaseCalling/Adrian/m6Anet')
-m6Anet_file = os.path.join(result_dir, f'{test_dataset}/data.site_proba.csv')
+# result_dir = os.path.join(PRJ, 'TRR319_RMaP/Project_BaseCalling/Adrian/m6Anet')
+# m6Anet_file = os.path.join(result_dir, f'{test_dataset}/data.site_proba.csv')
 tx_file = os.path.join(HOME, 'Data/transcriptomes/GRCh38_102.bed')
 glori_file = os.path.join(HOME, 'Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv')
-out_dir = result_dir
-os.makedirs(out_dir, exist_ok=True)
+# out_dir = result_dir
+# os.makedirs(out_dir, exist_ok=True)
 
 df_m6Anet = pd.read_csv(m6Anet_file)
 df_tx = pd.read_csv(tx_file, sep='\t', usecols=list(range(4))+[5]+list(range(9, 12)),
@@ -94,7 +96,7 @@ for ind, row in tqdm(df_m6Anet_filtered.iterrows()):
     sel_row = df_glori[(df_glori['Chr']==dict_chr[contig]) * (df_glori['Sites']==gpos)]
     if len(sel_row)>0:
         # print(sel_row)
-        collected_sites.append((ind, dict_chr[contig], gpos, sel_row['Ratio'].values[0], mod_ratio, sel_row['Pvalue'].values[0]))
+        collected_sites.append((ind, dict_chr[contig], gpos, sel_row['Ratio'].values[0], mod_ratio, sel_row['P_adjust'].values[0]))
 print('{} GLORI sites collected'.format(len(collected_sites)))
 
 ### slice df and check against ensembl API ###
@@ -102,8 +104,8 @@ df_m6Anet_glori = df_m6Anet.loc[[site[0] for site in collected_sites]]
 df_m6Anet_glori['Chr'] = [site[1] for site in collected_sites]
 df_m6Anet_glori['Sites'] = [site[2] for site in collected_sites]
 df_m6Anet_glori['Ratio'] = [site[3] for site in collected_sites]
-df_m6Anet_glori['Pvalue'] = [site[5] for site in collected_sites]
-df_m6Anet_glori.to_csv(m6Anet_file.replace('.csv', '_glori.csv'))
+df_m6Anet_glori['P_adjust'] = [site[5] for site in collected_sites]
+df_m6Anet_glori.to_csv(m6Anet_file+'.glori')
 
 bad_indices = []
 for ind, row in tqdm(df_m6Anet_glori.iterrows()):
@@ -128,4 +130,4 @@ for ind, row in tqdm(df_m6Anet_glori.iterrows()):
 print('{} bad cDNA->gDNA conversions out of {}'.format(len(bad_indices), len(df_m6Anet_glori)))
 
 df_m6Anet_glori_filtered = df_m6Anet_glori.drop(bad_indices)
-df_m6Anet_glori_filtered.to_csv(m6Anet_file.replace('.csv', '.glori_filtered.csv'))
+df_m6Anet_glori_filtered.to_csv(m6Anet_file+'.glori.filtered')

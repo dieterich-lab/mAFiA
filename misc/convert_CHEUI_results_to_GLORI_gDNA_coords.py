@@ -97,7 +97,7 @@ for ind, row in tqdm(df_cheui_filtered.iterrows()):
     sel_row = df_glori[(df_glori['Chr']==dict_chr[contig]) & (df_glori['Sites']==gpos)]
     if len(sel_row)>0:
         # print(sel_row)
-        collected_sites.append((ind, dict_chr[contig], gpos, sel_row['Ratio'].values[0], mod_ratio, sel_row['Pvalue'].values[0], sel_row['Strand'].values[0]))
+        collected_sites.append((ind, dict_chr[contig], gpos, sel_row['Ratio'].values[0], mod_ratio, sel_row['P_adjust'].values[0], sel_row['Strand'].values[0]))
 print('{} GLORI sites collected'.format(len(collected_sites)))
 
 ### slice df and check against ensembl API ###
@@ -105,7 +105,7 @@ df_cheui_glori = df_cheui.loc[[site[0] for site in collected_sites]]
 df_cheui_glori['Chr'] = [site[1] for site in collected_sites]
 df_cheui_glori['Sites'] = [site[2] for site in collected_sites]
 df_cheui_glori['Ratio'] = [site[3] for site in collected_sites]
-df_cheui_glori['Pvalue'] = [site[5] for site in collected_sites]
+df_cheui_glori['P_adjust'] = [site[5] for site in collected_sites]
 df_cheui_glori['Strand'] = [str(site[6]) for site in collected_sites]
 df_cheui_glori.to_csv(cheui_file+'.glori', sep='\t', index=False)
 
