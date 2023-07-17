@@ -19,14 +19,54 @@ mpl.rcParams['ytick.labelsize'] = 5
 mpl.rcParams['xtick.major.size'] = 2
 mpl.rcParams['ytick.major.size'] = 2
 mpl.rcParams['font.family'] = 'Arial'
-FMT = 'pdf'
+# FMT = 'pdf'
+FMT = 'png'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
-def filter_df(in_df, sel_motif):
+def collapse_isoforms_m6anet(in_df):
+    genomic_sites = list(set([(row[0], row[1]) for row in in_df[['Chr', 'Sites']].values]))
+
+    out_df = pd.DataFrame()
+    for chr, pos in genomic_sites:
+        sub_df = in_df[(in_df['Chr']==chr) & (in_df['Sites']==pos)]
+        if len(sub_df)>1:
+            all_mod_ratio = sub_df['mod_ratio'].values
+            all_n_reads = sub_df['n_reads'].values
+            total_n_reads = np.sum(all_n_reads)
+            weighted_mod_ratio = np.sum(all_mod_ratio * all_n_reads) / total_n_reads
+            new_row = sub_df.drop(columns=['transcript_id', 'transcript_position', 'probability_modified']).iloc[0, :]
+            new_row['n_reads'] = total_n_reads
+            new_row['mod_ratio'] = weighted_mod_ratio
+            out_df = pd.concat([out_df, pd.DataFrame([new_row])])
+        else:
+            out_df = pd.concat([out_df, sub_df.drop(columns=['transcript_id', 'transcript_position', 'probability_modified'])])
+    return out_df
+
+def collapse_isoforms_cheui(in_df):
+    genomic_sites = list(set([(row[0], row[1]) for row in in_df[['Chr', 'Sites']].values]))
+
+    out_df = pd.DataFrame()
+    for chr, pos in genomic_sites:
+        sub_df = in_df[(in_df['Chr']==chr) & (in_df['Sites']==pos)]
+        if len(sub_df)>1:
+            all_mod_ratio = sub_df['stoichiometry'].values
+            all_n_reads = sub_df['coverage'].values
+            total_n_reads = np.sum(all_n_reads)
+            weighted_mod_ratio = np.sum(all_mod_ratio * all_n_reads) / total_n_reads
+            new_row = sub_df.drop(columns=['contig', 'position', 'probability', 'Strand']).iloc[0, :]
+            new_row['coverage'] = total_n_reads
+            new_row['stoichiometry'] = weighted_mod_ratio
+            out_df = pd.concat([out_df, pd.DataFrame([new_row])])
+        else:
+            out_df = pd.concat([out_df, sub_df.drop(columns=['contig', 'position', 'probability', 'Strand'])])
+    return out_df
+
+def filter_df(in_df):
     df_filtered = in_df[
         (np.float32(in_df['P_adjust']) <= P_VAL_THRESH)
-        & (in_df['ref_motif']==sel_motif)
+        # & (in_df['ref_motif']==sel_motif)
+        & (in_df['num_features']>=COV_THRESH)
         # & (df['pred_motif']==sel_motif)
     ]
     return df_filtered
@@ -59,11 +99,49 @@ def calc_mod_ratio_with_margin(in_df_motif, prob_margin, thresh_cov=50):
     df_motif_avg.reset_index(drop=True)
     return df_motif_avg
 
+def import_MAFIA_res(res_dir):
+    dfs = {}
+    for ds in test_datasets:
+        paths = glob(os.path.join(res_dir, 'res_train_{}_test_{}.tsv.merged'.format(train_dataset, ds)))
+        if len(paths)==1:
+            df = pd.read_csv(paths[0], sep='\t').rename(columns={'Unnamed: 0': 'index'})
+            dfs[ds] = df
+        elif len(paths)>=2:
+            df = pd.concat([pd.read_csv(path, sep='\t').rename(columns={'Unnamed: 0': 'index'}) for path in paths])
+            dfs[ds] = df
+    return dfs
+
+def import_m6Anet_res(res_dir):
+    dfs = {}
+    for ds in test_datasets:
+        path = os.path.join(res_dir, ds, 'data.site_proba.csv.glori')
+        if not os.path.exists(path):
+            continue
+        df = collapse_isoforms_m6anet(pd.read_csv(path))
+        df = df.rename(columns={"kmer": "ref_motif", "n_reads": "num_features"})
+        dfs[ds] = df
+    return dfs
+
+def import_CHEUI_res(res_dir):
+    dfs = {}
+    for ds in test_datasets:
+        path = os.path.join(res_dir, ds, 'site_level_m6A_predictions.txt.glori')
+        if not os.path.exists(path):
+            continue
+        df = collapse_isoforms_cheui(pd.read_csv(path, sep='\t'))
+        df = df.rename(columns={"stoichiometry" : "mod_ratio", "coverage": "num_features"})
+        df['ref_motif'] = [this_site[2:7] for this_site in df['site']]
+        dfs[ds] = df
+    return dfs
+
 # train_dataset = 'ISA-WUE'
 # results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
 
-train_dataset = 'm6Anet'
-results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6Anet'
+# train_dataset = 'm6Anet'
+# results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6Anet'
+
+train_dataset = 'CHEUI'
+results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/CHEUI'
 
 test_datasets = [
     '0_WT_100_IVT',
@@ -95,33 +173,10 @@ img_out = os.path.join(HOME, 'img_out/MAFIA', os.path.basename('mRNA_train_{}_te
 if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
 
-P_VAL_THRESH = 1.0E-99
+P_VAL_THRESH = 1.0E-3
 COV_THRESH = 50
 PROB_MARGIN = 0.5
 COMMON_SITES_ONLY = False
-
-def import_MAFIA_res(res_dir):
-    dfs = {}
-    for ds in test_datasets:
-        paths = glob(os.path.join(res_dir, 'res_train_{}_test_{}.tsv.merged'.format(train_dataset, ds)))
-        if len(paths)==1:
-            df = pd.read_csv(paths[0], sep='\t').rename(columns={'Unnamed: 0': 'index'})
-            dfs[ds] = df
-        elif len(paths)>=2:
-            df = pd.concat([pd.read_csv(path, sep='\t').rename(columns={'Unnamed: 0': 'index'}) for path in paths])
-            dfs[ds] = df
-    return dfs
-
-def import_m6Anet_res(res_dir):
-    dfs = {}
-    for ds in test_datasets:
-        path = os.path.join(res_dir, ds, 'data.site_proba.glori_filtered.csv')
-        if not os.path.exists(path):
-            continue
-        df = pd.read_csv(path)
-        df = df.rename(columns={"kmer": "ref_motif", "Pvalue": "P_adjust"})
-        dfs[ds] = df
-    return dfs
 
 
 # motifs = list(set.intersection(*[set(df['ref_motif'].unique()) for df in dfs.values()]))
@@ -146,8 +201,12 @@ motifs = ['GGACT', 'GGACA', 'GAACT', 'AGACT', 'GGACC', 'TGACT']
 # df_motif_avg_ivt = calc_mod_ratio(df_motif_ivt, thresh_mod=crit_thresh, thresh_cov=COV_THRESH)
 # df_motif_avg_wt = calc_mod_ratio(df_motif_wt, thresh_mod=crit_thresh, thresh_cov=COV_THRESH)
 
-# dfs = import_MAFIA_res(results_dir)
-dfs = import_m6Anet_res(results_dir)
+if train_dataset=='ISA-WUE':
+    dfs = import_MAFIA_res(results_dir)
+elif train_dataset=='m6Anet':
+    dfs = import_m6Anet_res(results_dir)
+elif train_dataset=='CHEUI':
+    dfs = import_CHEUI_res(results_dir)
 
 ### plots ###
 num_rows = 3
@@ -155,7 +214,7 @@ num_cols = 2
 # fig_width = num_cols*5
 # fig_height = num_rows*5
 fig_width = 6*cm
-fig_height = 10*cm
+fig_height = 9*cm
 xticks = [0, 0.5, 1]
 yticks = xticks
 # fig_hist = plt.figure(figsize=(fig_width, fig_height))
@@ -168,7 +227,7 @@ for ds, df in dfs.items():
     for subplot_ind, this_motif in enumerate(motifs):
         if this_motif not in df['ref_motif'].unique():
             continue
-        ds_motif = filter_df(df, this_motif)
+        ds_motif = df[df['ref_motif']==this_motif]
         # axes_hist[subplot_ind].step(ds_bin_centers, ds_norm_counts, color=ds_colors[ds], label='{}'.format(ds))
         #
         # axes_hist[subplot_ind].axvspan(xmin=PROB_MARGIN, xmax=1 - PROB_MARGIN, color='gray', alpha=0.5)
@@ -183,9 +242,9 @@ for ds, df in dfs.items():
 
         if train_dataset not in ['m6Anet', 'CHEUI']:
             ds_norm_counts, ds_bin_centers = get_norm_counts(df)
-            df_motif_avg = calc_mod_ratio_with_margin(ds_motif, prob_margin=PROB_MARGIN, thresh_cov=COV_THRESH)
+            df_motif_avg = filter_df(calc_mod_ratio_with_margin(ds_motif, prob_margin=PROB_MARGIN, thresh_cov=COV_THRESH))
         else:
-            df_motif_avg = ds_motif
+            df_motif_avg = filter_df(ds_motif)
         dict_ds_motif_avg[ds][this_motif] = df_motif_avg
 
         glori_ratio = np.float64(df_motif_avg['Ratio'])
@@ -211,7 +270,8 @@ for ds, df in dfs.items():
                 axes_mod_ratio[subplot_ind].set_yticks(yticks)
             else:
                 axes_mod_ratio[subplot_ind].set_yticks([])
-            axes_mod_ratio[subplot_ind].set_title(f'{this_motif}', pad=-10)
+            display_motif = this_motif.replace('T', 'U')
+            axes_mod_ratio[subplot_ind].set_title(f'{display_motif}', pad=-10)
             axes_mod_ratio[subplot_ind].legend(loc='upper left')
 
             print(this_motif, len(glori_ratio))
@@ -225,9 +285,9 @@ fig_mod_ratio.savefig(os.path.join(img_out, f'corr_glori_modRatio_pValThresh{P_V
 
 ### 100 WT overall ###
 df_wt = pd.concat(dict_ds_motif_avg['100_WT_0_IVT'].values())
-corr = np.corrcoef(df_wt['Ratio'], df_wt['mod_ratio'])[0, 1]
+corr = np.corrcoef(np.float64(df_wt['Ratio']), np.float64(df_wt['mod_ratio']))[0, 1]
 num_sites = len(df_wt)
-with open(os.path.join(img_out, 'stats.txt'), 'w') as out_f:
+with open(os.path.join(img_out, f'stats_pValThresh{P_VAL_THRESH}_covThresh{COV_THRESH}.txt'), 'w') as out_f:
     out_f.write(f'{num_sites} sites, corr {corr:.3f}')
 
 ### 2D density plots ###
@@ -241,7 +301,7 @@ for subplot_ind, ds in enumerate(dict_ds_motif_avg.keys()):
     glori_ratio = np.float32(ds_agg_avg['Ratio'].values)
     ont_ratio = np.float32(ds_agg_avg['mod_ratio'].values)
     hist, x_bins, y_bins = np.histogram2d(glori_ratio, ont_ratio, bins=num_bins, range=[[0, 1], [0, 1]], density=True)
-    im = ax.imshow(hist.T, origin='lower', vmin=1, vmax=6, cmap='plasma')
+    im = ax.imshow(hist.T, origin='lower', vmin=0, vmax=6, cmap='plasma')
     ax.set_xticks(np.arange(0, num_bins+1, 5)-0.5, np.int32(np.arange(0, num_bins+1, 5)*interval))
     for tick in ax.yaxis.get_majorticklabels():
         tick.set_verticalalignment('bottom')
@@ -264,19 +324,20 @@ cbar = fig.colorbar(im, cax=cb_ax)
 fig.savefig(os.path.join(img_out, f'hist2d_glori_modRatio_pValThresh{P_VAL_THRESH}_covThresh{COV_THRESH}_marginProb{PROB_MARGIN}.{FMT}'), **fig_kwargs)
 
 ### slope vs mixing ratio ###
-ticks = np.arange(0, 1.01, 0.25)
-plt.figure(figsize=(5*cm, 5*cm))
-plt.errorbar(x=ticks,
-             y=[v[0] for v in ds_slope_err.values()],
-             yerr=[v[1] for v in ds_slope_err.values()],
-             marker='.',
-             linestyle='None',
-             capsize=2.0
-             )
-plt.xticks(ticks)
-plt.yticks(ticks)
-# plt.xlabel('WT Ratio')
-# plt.ylabel('Ridge Inclination')
-plt.savefig(os.path.join(img_out, f'ridge_inclination_pValThresh{P_VAL_THRESH}_covThresh{COV_THRESH}_marginProb{PROB_MARGIN}.{FMT}'), **fig_kwargs)
+if len(ds_slope_err)==5:
+    ticks = np.arange(0, 1.01, 0.25)
+    plt.figure(figsize=(5*cm, 5*cm))
+    plt.errorbar(x=ticks,
+                 y=[v[0] for v in ds_slope_err.values()],
+                 yerr=[v[1] for v in ds_slope_err.values()],
+                 marker='.',
+                 linestyle='None',
+                 capsize=2.0
+                 )
+    plt.xticks(ticks)
+    plt.yticks(ticks)
+    # plt.xlabel('WT Ratio')
+    # plt.ylabel('Ridge Inclination')
+    plt.savefig(os.path.join(img_out, f'ridge_inclination_pValThresh{P_VAL_THRESH}_covThresh{COV_THRESH}_marginProb{PROB_MARGIN}.{FMT}'), **fig_kwargs)
 
-# plt.close('all')
+plt.close('all')

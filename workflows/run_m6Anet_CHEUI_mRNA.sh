@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-DATASET=100_WT_0_IVT
-#DATASET=75_WT_25_IVT
+#DATASET=100_WT_0_IVT
+DATASET=75_WT_25_IVT
 #DATASET=50_WT_50_IVT
 #DATASET=25_WT_75_IVT
 #DATASET=0_WT_100_IVT
@@ -92,18 +92,19 @@ conda activate CHEUI
 #mkdir -p ${CHEUI_OUTDIR}
 #cd ${CHEUI_OUTDIR}
 echo "Splitting nanopolish file..."
+srun -p general \
 python3 /home/achan/git/MAFIA/workflows/split_large_nanopolish_File.py \
 --infile ${NANOPOLISH}/eventalign.txt \
---outfile_prefix ${CHEUI_OUTDIR}/eventalign_part
+--outfile_prefix ${CHEUI_OUTDIR}/eventalign_part &
 
 num_parts=$(ls ${CHEUI_OUTDIR}/eventalign_part*.txt | wc -l)
 
 cd ${GIT_CHEUI}/scripts/preprocessing_CPP
-for i in {0..4}
+for i in {0..3}
 do
   PART=$(printf %02d $i)
   echo "CHEUI preprocessing part${PART}..."
-  srun -p general -c 2 --mem 32GB \
+  srun -p general -c 4 --mem 128GB \
   ./CHEUI \
   -i ${CHEUI_OUTDIR}/eventalign_part${PART}.txt \
   -m ${GIT_CHEUI}/kmer_models/model_kmer.csv \
@@ -114,42 +115,60 @@ done
 
 #wait
 
-#for i in {0..$((num_parts-1))}
-#do
-#  PART=$(printf %02d $i)
-#  echo "CHEUI predict model 1 on part${PART}..."
-#  sbatch --partition=gpu --cpus-per-task=8 --wait \
-#  python3 ${GIT_CHEUI}/scripts/CHEUI_predict_model1.py \
-#  -m ${GIT_CHEUI}/CHEUI_trained_models/CHEUI_m6A_model1.h5 \
-#  -i ${CHEUI_OUTDIR}/prep_m6A/eventalign_part${PART}_signals+IDS.p \
-#  -o ${CHEUI_OUTDIR}/read_level_m6A_predictions_part${PART}.txt \
-#  -l ${DATASET}
-#done
-#
-#wait
-#
-#cat ${CHEUI_OUTDIR}/read_level_m6A_predictions_part00.txt > ${CHEUI_OUTDIR}/read_level_m6A_predictions_combined.txt
-#for i in {1..15}
-#do
-#  PART=$(printf %02d $i)
-#  cat ${CHEUI_OUTDIR}/read_level_m6A_predictions_part${PART}.txt >> ${CHEUI_OUTDIR}/read_level_m6A_predictions_combined.txt
-#done
-#
-#echo "Sort reads..."
-#sort -k1  --parallel=16 ${CHEUI_OUTDIR}/read_level_m6A_predictions_combined.txt > ${CHEUI_OUTDIR}/read_level_m6A_predictions_sorted.txt
-#
-#echo "CHEUI predict model 2..."
-#sbatch --partition=gpu --cpus-per-task=16 \
-#python3 ${GIT_CHEUI}/scripts/CHEUI_predict_model2.py \
-#-m  ${GIT_CHEUI}/CHEUI_trained_models/CHEUI_m6A_model2.h5 \
-#-i ${CHEUI_OUTDIR}/read_level_m6A_predictions_sorted.txt \
-#-o ${CHEUI_OUTDIR}/site_level_m6A_predictions.txt
+for i in {0..$((num_parts-1))}
+do
+  PART=$(printf %02d $i)
+  echo "CHEUI predict model 1 on part${PART}..."
+  srun --partition=gpu --cpus-per-task=8 \
+  python3 ${GIT_CHEUI}/scripts/CHEUI_predict_model1.py \
+  -m ${GIT_CHEUI}/CHEUI_trained_models/CHEUI_m6A_model1.h5 \
+  -i ${CHEUI_OUTDIR}/prep_m6A/eventalign_part${PART}_signals+IDS.p \
+  -o ${CHEUI_OUTDIR}/read_level_m6A_predictions_part${PART}.txt \
+  -l ${DATASET} &
+done
 
-tail -n +2 ${CHEUI_OUTDIR}/site_level_m6A_predictions.txt | split -a 3 -d -l 100000 - ${CHEUI_OUTDIR}/site_level_m6A_predictions.txt.part
+cat ${CHEUI_OUTDIR}/read_level_m6A_predictions_part00.txt > ${CHEUI_OUTDIR}/read_level_m6A_predictions_combined.txt
+for i in {1..4}
+do
+  PART=$(printf %02d $i)
+  cat ${CHEUI_OUTDIR}/read_level_m6A_predictions_part${PART}.txt >> ${CHEUI_OUTDIR}/read_level_m6A_predictions_combined.txt
+done
+
+echo "Sort reads..."
+srun -p general -c 8 --mem 64GB \
+sort -k1  --parallel=16 ${CHEUI_OUTDIR}/read_level_m6A_predictions_combined.txt > ${CHEUI_OUTDIR}/read_level_m6A_predictions_sorted.txt
+
+echo "CHEUI predict model 2..."
+srun --partition=gpu --cpus-per-task=16 \
+python3 ${GIT_CHEUI}/scripts/CHEUI_predict_model2.py \
+-m  ${GIT_CHEUI}/CHEUI_trained_models/CHEUI_m6A_model2.h5 \
+-i ${CHEUI_OUTDIR}/read_level_m6A_predictions_sorted.txt \
+-o ${CHEUI_OUTDIR}/site_level_m6A_predictions.txt &
+
+tail -n +2 ${CHEUI_OUTDIR}/site_level_m6A_predictions.txt | split -a 2 -d -l 100000 - ${CHEUI_OUTDIR}/site_level_m6A_predictions.txt.part
 for file in ${CHEUI_OUTDIR}/site_level_m6A_predictions.txt.part*
 do
     head -n 1 ${CHEUI_OUTDIR}/site_level_m6A_predictions.txt > with_header_tmp
     cat "$file" >> with_header_tmp
     mv -f with_header_tmp "$file"
+done
+
+for file in ${CHEUI_OUTDIR}/site_level_m6A_predictions.txt.part*
+do
+  srun python3 ${HOME}/git/MAFIA/misc/convert_CHEUI_results_to_GLORI_gDNA_coords.py ${file} &
+done
+
+cat site_level_m6A_predictions.txt.part00.glori > site_level_m6A_predictions.txt.glori
+for i in {1..13}
+do
+  part=$(printf %02d $i)
+  tail -n+2 site_level_m6A_predictions.txt.part${part}.glori >> site_level_m6A_predictions.txt.glori
+done
+
+cat site_level_m6A_predictions.txt.part00.glori.filtered > site_level_m6A_predictions.txt.glori.filtered
+for i in {1..13}
+do
+  part=$(printf %02d $i)
+  tail -n+2 site_level_m6A_predictions.txt.part${part}.glori.filtered >> site_level_m6A_predictions.txt.glori.filtered
 done
 
