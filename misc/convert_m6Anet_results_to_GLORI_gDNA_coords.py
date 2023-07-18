@@ -107,27 +107,27 @@ df_m6Anet_glori['Ratio'] = [site[3] for site in collected_sites]
 df_m6Anet_glori['P_adjust'] = [site[5] for site in collected_sites]
 df_m6Anet_glori.to_csv(m6Anet_file+'.glori')
 
-bad_indices = []
-for ind, row in tqdm(df_m6Anet_glori.iterrows()):
-    # print(ind)
-    ### ensembl API ###
-    tid = row['transcript_id'].split('.')[0]
-    tpos = row['transcript_position']
-    mapping = get_genomic_coord_from_cDNA(tid, tpos)
-    if mapping is None:
-        bad_indices.append(ind)
-        continue
-
-    if mapping['seq_region_name'] not in dict_chr.keys():
-        continue
-    ens_chr = dict_chr[mapping['seq_region_name']]
-    ens_start = mapping['start']
-    if ens_start!=row['Sites']:
-        bad_indices.append(ind)
-        # print('{}: ensembl gpos {} != my gpos {}\n'.format(ind, ens_start, row['Sites']))
-    # else:
-    #     print('Okay\n')
-print('{} bad cDNA->gDNA conversions out of {}'.format(len(bad_indices), len(df_m6Anet_glori)))
-
-df_m6Anet_glori_filtered = df_m6Anet_glori.drop(bad_indices)
-df_m6Anet_glori_filtered.to_csv(m6Anet_file+'.glori.filtered')
+# bad_indices = []
+# for ind, row in tqdm(df_m6Anet_glori.iterrows()):
+#     # print(ind)
+#     ### ensembl API ###
+#     tid = row['transcript_id'].split('.')[0]
+#     tpos = row['transcript_position']
+#     mapping = get_genomic_coord_from_cDNA(tid, tpos)
+#     if mapping is None:
+#         bad_indices.append(ind)
+#         continue
+#
+#     if mapping['seq_region_name'] not in dict_chr.keys():
+#         continue
+#     ens_chr = dict_chr[mapping['seq_region_name']]
+#     ens_start = mapping['start']
+#     if ens_start!=row['Sites']:
+#         bad_indices.append(ind)
+#         # print('{}: ensembl gpos {} != my gpos {}\n'.format(ind, ens_start, row['Sites']))
+#     # else:
+#     #     print('Okay\n')
+# print('{} bad cDNA->gDNA conversions out of {}'.format(len(bad_indices), len(df_m6Anet_glori)))
+#
+# df_m6Anet_glori_filtered = df_m6Anet_glori.drop(bad_indices)
+# df_m6Anet_glori_filtered.to_csv(m6Anet_file+'.glori.filtered')

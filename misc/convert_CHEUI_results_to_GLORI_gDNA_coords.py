@@ -109,27 +109,27 @@ df_cheui_glori['P_adjust'] = [site[5] for site in collected_sites]
 df_cheui_glori['Strand'] = [str(site[6]) for site in collected_sites]
 df_cheui_glori.to_csv(cheui_file+'.glori', sep='\t', index=False)
 
-bad_indices = []
-for ind, row in tqdm(df_cheui_glori.iterrows()):
-    # print(ind)
-    ### ensembl API ###
-    tid = row['contig'].split('.')[0]
-    tpos = row['position'] + 4
-    mapping = get_genomic_coord_from_cDNA(tid, tpos)
-    if mapping is None:
-        bad_indices.append(ind)
-        continue
-
-    if mapping['seq_region_name'] not in dict_chr.keys():
-        continue
-    ens_chr = dict_chr[mapping['seq_region_name']]
-    ens_start = mapping['start']
-    if ens_start!=row['Sites']:
-        bad_indices.append(ind)
-        # print('{}: ensembl gpos {} != my gpos {}\n'.format(ind, ens_start, row['Sites']))
-    # else:
-    #     print('Okay\n')
-print('{} bad cDNA->gDNA conversions out of {}'.format(len(bad_indices), len(df_cheui_glori)))
-
-df_cheui_glori_filtered = df_cheui_glori.drop(bad_indices)
-df_cheui_glori_filtered.to_csv(cheui_file+'.glori.filtered', sep='\t', index=False)
+# bad_indices = []
+# for ind, row in tqdm(df_cheui_glori.iterrows()):
+#     # print(ind)
+#     ### ensembl API ###
+#     tid = row['contig'].split('.')[0]
+#     tpos = row['position'] + 4
+#     mapping = get_genomic_coord_from_cDNA(tid, tpos)
+#     if mapping is None:
+#         bad_indices.append(ind)
+#         continue
+#
+#     if mapping['seq_region_name'] not in dict_chr.keys():
+#         continue
+#     ens_chr = dict_chr[mapping['seq_region_name']]
+#     ens_start = mapping['start']
+#     if ens_start!=row['Sites']:
+#         bad_indices.append(ind)
+#         # print('{}: ensembl gpos {} != my gpos {}\n'.format(ind, ens_start, row['Sites']))
+#     # else:
+#     #     print('Okay\n')
+# print('{} bad cDNA->gDNA conversions out of {}'.format(len(bad_indices), len(df_cheui_glori)))
+#
+# df_cheui_glori_filtered = df_cheui_glori.drop(bad_indices)
+# df_cheui_glori_filtered.to_csv(cheui_file+'.glori.filtered', sep='\t', index=False)
