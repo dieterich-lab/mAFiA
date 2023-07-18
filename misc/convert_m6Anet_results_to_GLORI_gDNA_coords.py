@@ -93,7 +93,7 @@ for ind, row in tqdm(df_m6Anet_filtered.iterrows()):
     ### check ###
     # print('contig {}, pos {}'.format(contig==mapping['seq_region_name'], gpos==mapping['start']))
 
-    sel_row = df_glori[(df_glori['Chr']==dict_chr[contig]) * (df_glori['Sites']==gpos)]
+    sel_row = df_glori[(df_glori['Chr']==dict_chr[contig]) & (df_glori['Sites']==gpos)]
     if len(sel_row)>0:
         # print(sel_row)
         collected_sites.append((ind, dict_chr[contig], gpos, sel_row['Ratio'].values[0], mod_ratio, sel_row['P_adjust'].values[0]))
