@@ -42,7 +42,7 @@ class mRNA_Output_Writer(Output_Writer):
 
     def update_site_df(self, in_row, cov, ratio, ref_5mer):
         in_row['coverage'] = cov
-        in_row['frequency'] = int(ratio*100)
+        in_row['frequency'] = round(ratio*100.0)
         in_row['ref5mer'] = ref_5mer
         self.site_counts += 1
         self.df_out = pd.concat([self.df_out, pd.DataFrame(in_row).T])
