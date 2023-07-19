@@ -134,14 +134,14 @@ def import_CHEUI_res(res_dir):
         dfs[ds] = df
     return dfs
 
-# train_dataset = 'ISA-WUE'
-# results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
+train_dataset = 'ISA-WUE'
+results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
 
 # train_dataset = 'm6Anet'
 # results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6Anet'
 
-train_dataset = 'CHEUI'
-results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/CHEUI'
+# train_dataset = 'CHEUI'
+# results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/CHEUI'
 
 test_datasets = [
     '0_WT_100_IVT',

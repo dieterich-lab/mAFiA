@@ -2,6 +2,7 @@ import os, sys
 HOME = os.path.expanduser('~')
 sys.path.append(os.path.join(HOME, 'git/MAFIA'))
 import pandas as pd
+from tqdm import tqdm
 from Bio import SeqIO
 from arg_parsers import mRNA_Test_Args_Parser
 from data_containers import mRNA_Site, mRNA_Data_Container
@@ -32,7 +33,7 @@ def main(args):
     writer = mRNA_Output_Writer(out_path=args.outfile, output_mod_probs=args.output_mod_probs)
 
     df_mod = pd.read_csv(args.mod_file, sep='\t')
-    for _, row in df_mod.iterrows():
+    for _, row in tqdm(list(df_mod.iterrows())):
         this_mRNA_site = mRNA_Site(row, reference)
         if this_mRNA_site.ref_motif not in motif_classifiers.keys():
             continue
@@ -52,7 +53,7 @@ def main(args):
             print('=========================================================\n')
             df_nts = test_container.flush_nts_to_dataframe()
             # writer.update_df_out(row, df_nts, mod_ratio)
-            writer.update_site_df(row, this_site_coverage, this_site_mod_ratio)
+            writer.update_site_df(row, this_site_coverage, this_site_mod_ratio, this_mRNA_site.ref_5mer)
             writer.write_df()
         else:
             test_container.nucleotides.clear()
