@@ -39,13 +39,31 @@ class Aligned_Read:
             feature = in_feature,
         )
 
+# class mRNA_Site:
+#     def __init__(self, row, ref):
+#         self.ind = row['index']
+#         self.chr = row['Chr'].lstrip('chr')
+#         self.start = row['Sites'] - 1  # 0-based
+#         self.strand = row['Strand']
+#         self.glori_ratio = row['Ratio']
+#
+#         ref_5mer = ref[self.chr][self.start-2:self.start+3]
+#         if self.strand == '-':
+#             self.ref_motif = str(Seq(ref_5mer).reverse_complement())
+#         else:
+#             self.ref_motif = ref_5mer
+#
+#     def print(self):
+#         print('site{}, chr{}, start{}, strand{}'.format(self.ind, self.chr, self.start, self.strand))
+#         print('Reference motif {}'.format(self.ref_motif))
+#         print('GLORI ratio {}'.format(self.glori_ratio))
+
 class mRNA_Site:
     def __init__(self, row, ref):
-        self.ind = row['index']
-        self.chr = row['Chr'].lstrip('chr')
-        self.start = row['Sites'] - 1  # 0-based
-        self.strand = row['Strand']
-        self.glori_ratio = row['Ratio']
+        self.chr = row['chrom']
+        self.start = row['chromStart']  # 0-based
+        self.strand = row['strand']
+        self.ind = f'{self.chr}.{self.start}'
 
         ref_5mer = ref[self.chr][self.start-2:self.start+3]
         if self.strand == '-':
@@ -54,9 +72,8 @@ class mRNA_Site:
             self.ref_motif = ref_5mer
 
     def print(self):
-        print('site{}, chr{}, start{}, strand{}'.format(self.ind, self.chr, self.start, self.strand))
+        print('chr{}, start{}, strand{}'.format(self.chr, self.start, self.strand))
         print('Reference motif {}'.format(self.ref_motif))
-        print('GLORI ratio {}'.format(self.glori_ratio))
 
 class Data_Container:
     def __init__(self, name, bam_path, fast5_dir):

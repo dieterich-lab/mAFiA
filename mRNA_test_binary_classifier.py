@@ -3,10 +3,11 @@ HOME = os.path.expanduser('~')
 sys.path.append(os.path.join(HOME, 'git/MAFIA'))
 import pandas as pd
 from Bio import SeqIO
-from arg_parsers import mRNA_Test_Args_Parser, mRNA_Output_Writer
+from arg_parsers import mRNA_Test_Args_Parser
 from data_containers import mRNA_Site, mRNA_Data_Container
 from feature_extractors import Backbone_Network
 from feature_classifiers import load_motif_classifiers
+from mod_file_reader_writer import mRNA_Output_Writer
 
 parser = mRNA_Test_Args_Parser()
 parser.parse_and_print()
@@ -30,10 +31,9 @@ def main(args):
     motif_classifiers = load_motif_classifiers(args.classifier_model_dir)
     writer = mRNA_Output_Writer(out_path=args.outfile, output_mod_probs=args.output_mod_probs)
 
-    df_mod = pd.read_csv(args.mod_file)
-    df_mod = df_mod.rename(columns={'Unnamed: 0': 'index'})
-    for _, glori_row in df_mod[df_mod['index']>writer.last_ind].iterrows():
-        this_mRNA_site = mRNA_Site(glori_row, reference)
+    df_mod = pd.read_csv(args.mod_file, sep='\t')
+    for _, row in df_mod.iterrows():
+        this_mRNA_site = mRNA_Site(row, reference)
         if this_mRNA_site.ref_motif not in motif_classifiers.keys():
             continue
 
@@ -44,13 +44,15 @@ def main(args):
             enforce_ref_5mer=args.enforce_ref_5mer
         )
 
-        if len(test_container.nucleotides.get(this_mRNA_site.ind, [])) > args.min_coverage:
+        this_site_coverage = len(test_container.nucleotides.get(this_mRNA_site.ind, []))
+        if this_site_coverage > args.min_coverage:
             print('=========================================================')
             this_mRNA_site.print()
-            mod_ratio = motif_classifiers[this_mRNA_site.ref_motif].test(test_container.nucleotides[this_mRNA_site.ind])
+            this_site_mod_ratio = motif_classifiers[this_mRNA_site.ref_motif].test(test_container.nucleotides[this_mRNA_site.ind])
             print('=========================================================\n')
             df_nts = test_container.flush_nts_to_dataframe()
-            writer.update_df_out(glori_row, df_nts, mod_ratio)
+            # writer.update_df_out(row, df_nts, mod_ratio)
+            writer.update_site_df(row, this_site_coverage, this_site_mod_ratio)
             writer.write_df()
         else:
             test_container.nucleotides.clear()

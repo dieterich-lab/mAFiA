@@ -128,7 +128,7 @@ do
 done
 
 cat ${CHEUI_OUTDIR}/read_level_m6A_predictions_part00.txt > ${CHEUI_OUTDIR}/read_level_m6A_predictions_combined.txt
-for i in {1..4}
+for i in {1..3}
 do
   PART=$(printf %02d $i)
   cat ${CHEUI_OUTDIR}/read_level_m6A_predictions_part${PART}.txt >> ${CHEUI_OUTDIR}/read_level_m6A_predictions_combined.txt
@@ -159,16 +159,16 @@ do
 done
 
 cat site_level_m6A_predictions.txt.part00.glori > site_level_m6A_predictions.txt.glori
-for i in {1..13}
+for i in {1..19}
 do
   part=$(printf %02d $i)
   tail -n+2 site_level_m6A_predictions.txt.part${part}.glori >> site_level_m6A_predictions.txt.glori
 done
 
-cat site_level_m6A_predictions.txt.part00.glori.filtered > site_level_m6A_predictions.txt.glori.filtered
-for i in {1..13}
-do
-  part=$(printf %02d $i)
-  tail -n+2 site_level_m6A_predictions.txt.part${part}.glori.filtered >> site_level_m6A_predictions.txt.glori.filtered
-done
+#cat site_level_m6A_predictions.txt.part00.glori.filtered > site_level_m6A_predictions.txt.glori.filtered
+#for i in {1..13}
+#do
+#  part=$(printf %02d $i)
+#  tail -n+2 site_level_m6A_predictions.txt.part${part}.glori.filtered >> site_level_m6A_predictions.txt.glori.filtered
+#done
 
