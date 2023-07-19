@@ -67,13 +67,13 @@ class mRNA_Site:
 
         ref_5mer = ref[self.chr][self.start-2:self.start+3]
         if self.strand == '-':
-            self.ref_motif = str(Seq(ref_5mer).reverse_complement())
+            self.ref_5mer = str(Seq(ref_5mer).reverse_complement())
         else:
-            self.ref_motif = ref_5mer
+            self.ref_5mer = ref_5mer
 
     def print(self):
         print('chr{}, start{}, strand{}'.format(self.chr, self.start, self.strand))
-        print('Reference motif {}'.format(self.ref_motif))
+        print('Reference motif {}'.format(self.ref_5mer))
 
 class Data_Container:
     def __init__(self, name, bam_path, fast5_dir):
