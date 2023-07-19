@@ -35,7 +35,7 @@ def main(args):
     df_mod = pd.read_csv(args.mod_file, sep='\t')
     for _, row in tqdm(list(df_mod.iterrows())):
         this_mRNA_site = mRNA_Site(row, reference)
-        if this_mRNA_site.ref_motif not in motif_classifiers.keys():
+        if this_mRNA_site.ref_5mer not in motif_classifiers.keys():
             continue
 
         test_container.collect_nucleotides_aligned_to_mRNA_site(
@@ -49,7 +49,7 @@ def main(args):
         if this_site_coverage > args.min_coverage:
             print('=========================================================')
             this_mRNA_site.print()
-            this_site_mod_ratio = motif_classifiers[this_mRNA_site.ref_motif].test(test_container.nucleotides[this_mRNA_site.ind])
+            this_site_mod_ratio = motif_classifiers[this_mRNA_site.ref_5mer].test(test_container.nucleotides[this_mRNA_site.ind])
             print('=========================================================\n')
             df_nts = test_container.flush_nts_to_dataframe()
             # writer.update_df_out(row, df_nts, mod_ratio)

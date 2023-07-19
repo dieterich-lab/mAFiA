@@ -239,7 +239,7 @@ class mRNA_Data_Container(Data_Container):
                             query_position = pileupread.alignment.query_length - query_position - 1
                         query_sequence = pileupread.alignment.get_forward_sequence()
                         query_5mer = query_sequence[(query_position - 2):(query_position + 3)]
-                        if enforce_ref_5mer and (query_5mer != site.ref_motif):
+                        if enforce_ref_5mer and (query_5mer != site.ref_5mer):
                             continue
                         if (query_name in self.indexed_read_ids.keys()):
                             valid_counts += 1
@@ -256,6 +256,6 @@ class mRNA_Data_Container(Data_Container):
                             break
         site_nts = extractor.get_nucleotides_from_multiple_reads(all_aligned_reads)
         for nt in site_nts:
-            nt.ref_5mer = site.ref_motif
+            nt.ref_5mer = site.ref_5mer
         if len(site_nts)>0:
             self.nucleotides[site.ind] = site_nts
