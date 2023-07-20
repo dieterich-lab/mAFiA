@@ -11,17 +11,18 @@ from random import sample
 from tqdm import tqdm
 
 class Nucleotide:
-    def __init__(self, read_id='', read_pos=-1, ref_pos=-1, pred_5mer='NNNNN', ref_5mer='NNNNN', feature=[], mod_prob=-1):
+    def __init__(self, read_id='', read_pos=-1, ref_pos=-1, pred_5mer='NNNNN', ref_5mer='NNNNN', feature=[], strand='.', mod_prob=-1):
         self.read_id = str(read_id)
         self.read_pos = int(read_pos)
         self.ref_pos = int(ref_pos)
         self.pred_5mer = str(pred_5mer)
         self.ref_5mer = str(ref_5mer)
         self.feature = np.array(feature)
+        self.strand = str(strand)
         self.mod_prob = float(mod_prob)
 
 class Aligned_Read:
-    def __init__(self, read_id='', read_pos=-1, ref_pos=-1, query_5mer='NNNNN', pred_5mer='NNNNN', norm_signal=[], flag=-1):
+    def __init__(self, read_id='', read_pos=-1, ref_pos=-1, query_5mer='NNNNN', pred_5mer='NNNNN', norm_signal=[], flag=-1, strand='.'):
         self.read_id = str(read_id)
         self.read_pos = int(read_pos)
         self.ref_pos = int(ref_pos)
@@ -29,6 +30,7 @@ class Aligned_Read:
         self.pred_5mer = str(pred_5mer)
         self.norm_signal = np.array(norm_signal)
         self.flag = int(flag)
+        self.strand = str(strand)
 
     def create_nucleotide(self, in_pred_5mer, in_feature):
         return Nucleotide(
@@ -37,6 +39,7 @@ class Aligned_Read:
             ref_pos = self.ref_pos,
             pred_5mer = in_pred_5mer,
             feature = in_feature,
+            strand = self.strand
         )
 
 # class mRNA_Site:
@@ -250,7 +253,8 @@ class mRNA_Data_Container(Data_Container):
                                 query_5mer=query_5mer,
                                 ref_pos=pileupcolumn.reference_pos,
                                 norm_signal=this_read_signal,
-                                flag=flag
+                                flag=flag,
+                                strand=site.strand
                             ))
                         if (max_num_reads > 0) and (len(all_aligned_reads) >= max_num_reads):
                             break

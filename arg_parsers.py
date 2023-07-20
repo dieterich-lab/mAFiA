@@ -1,5 +1,4 @@
-import os, argparse
-import pandas as pd
+import argparse
 
 class Args_Parser(argparse.ArgumentParser):
     def __init__(self):
@@ -26,7 +25,7 @@ class Test_Args_Parser(Args_Parser):
         super().__init__()
         self.add_argument('--test_bam_file')
         self.add_argument('--test_fast5_dir')
-        self.add_argument('--outfile')
+        self.add_argument('--out_dir')
 
 class Train_Args_Parser(Args_Parser):
     def __init__(self):
