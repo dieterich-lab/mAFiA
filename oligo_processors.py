@@ -16,7 +16,11 @@ class Oligo_Reference_Generator:
                 ligation_ref.name = ''
                 ligation_ref.description = ''
                 self.ligation_ref[ligation_ref.id] = ligation_ref
-            self.oligo_ref = [self.ligation_ref[k] for k, v in self.ligation_ref.items() if len(re.findall(self.oligo_fmt, v.id))==1]
+            self.oligo_ref = [
+                self.ligation_ref[k]
+                for k, v in self.ligation_ref.items()
+                if len(re.findall(self.oligo_fmt, v.id))==1
+            ]
         else:
             self.oligo_ref = list(SeqIO.parse(oligo_ref_file, 'fasta'))
             self.ligation_ref = {}
@@ -34,8 +38,7 @@ class Oligo_Reference_Generator:
         if len(set(oligo_origins))==1:
             oligo_origin = oligo_origins[0]
         else:
-            print('Error - multiple origins for oligos')
-            raise
+            raise Exception('Error - multiple origins for oligos')
         oligo_suffixes = [id.split('-')[1] for id in oligo_ids]
         return '{}-{}'.format(oligo_origin, '-'.join(oligo_suffixes))
 
@@ -129,14 +132,6 @@ class Local_Aligner(PairwiseAligner):
         target_end = chosen_alignment.coordinates[0][-1]
         query_start = chosen_alignment.coordinates[1][0]
         query_end = chosen_alignment.coordinates[1][-1]
-
-        ### debug ###
-        # if args.debug:
-        #     chosen_seq = chosen_alignment.query.seq
-        #     chosen_motif = chosen_seq[len(chosen_seq)//2-2:len(chosen_seq)//2+3]
-        #     print('Match scores: {}'.format(', '.join([str(score) for score in ref_scores])))
-        #     print('Chosen reference {} - {}'.format(chosen_ref_ind, chosen_motif))
-        #     print(chosen_alignment)
 
         return chosen_ref_ind, chosen_score, target_start, target_end, chosen_alignment
 
