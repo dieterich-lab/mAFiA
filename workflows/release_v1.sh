@@ -47,6 +47,6 @@ python3 ${HOME}/git/MAFIA/test_mAFiA.py \
 --min_coverage 50 \
 --max_num_reads 1000 \
 --backbone_model_path ${backbone} \
---classifier_model_dir ${mafia}
+--classifier_model_dir ${mafia} \
 --mod_prob_thresh 0.5 \
 --out_dir "${workspace}/output"

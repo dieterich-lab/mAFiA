@@ -25,7 +25,7 @@ def convert_statedict(state_dict):
 
 
 class Backbone_Network:
-    def __init__(self, model_path, extraction_layer, feature_width, batchsize=1024):
+    def __init__(self, model_path, extraction_layer, feature_width, batchsize=2048):
         print('Finding my backbone...')
         torchdict = torch.load(model_path, map_location="cpu")
         self.config = Objectview(torchdict["config"])
