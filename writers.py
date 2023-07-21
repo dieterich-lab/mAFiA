@@ -52,7 +52,7 @@ class BAM_Writer:
         self.in_bam_path = in_bam_path
         self.out_bam_path = out_bam_path
         self.dict_read_mod = {}
-        self.mod_read_counts = 0
+        self.read_counts = 0
 
     def build_dict_read_mod(self, site_nts):
         all_nts = [nt for k, v in site_nts.items() for nt in v]
@@ -88,5 +88,5 @@ class BAM_Writer:
                         mm, ml = self.generate_mm_ml_tags(this_read_mods)
                         this_read.set_tag('MM', mm)
                         this_read.set_tag('ML', ml)
-                        self.mod_read_counts += 1
                     fo.write(this_read)
+                    self.read_counts += 1
