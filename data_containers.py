@@ -95,18 +95,17 @@ class Data_Container:
             bam_query_names = []
         for f5_filepath in tqdm(f5_paths):
             try:
-                f5 = get_fast5_file(f5_filepath, mode="r")
+                with get_fast5_file(f5_filepath, mode="r") as f5:
+                    read_ids = f5.get_read_ids()
+                    if len(bam_query_names) > 0:
+                        for read_id in read_ids:
+                            if read_id in bam_query_names:
+                                self.indexed_read_ids[read_id] = f5_filepath
+                    else:
+                        for read_id in read_ids:
+                            self.indexed_read_ids[read_id] = f5_filepath
             except:
                 print(f'Error reading {f5_filepath}!')
-            else:
-                read_ids = f5.get_read_ids()
-                if len(bam_query_names) > 0:
-                    for read_id in read_ids:
-                        if read_id in bam_query_names:
-                            self.indexed_read_ids[read_id] = f5_filepath
-                else:
-                    for read_id in read_ids:
-                        self.indexed_read_ids[read_id] = f5_filepath
 
         print(f'{len(self.indexed_read_ids)} reads indexed')
 
@@ -117,12 +116,12 @@ class Data_Container:
 
     def _get_norm_signal_from_read_id(self, id, index_paths):
         filepath = index_paths[id]
-        f5 = get_fast5_file(filepath, mode="r")
-        read = f5.get_read(id)
-        signal = read.get_raw_data(scale=True)
-        signal_start = 0
-        signal_end = len(signal)
-        med, mad = self._med_mad(signal[signal_start:signal_end])
+        with get_fast5_file(filepath, mode="r") as f5:
+            read = f5.get_read(id)
+            signal = read.get_raw_data(scale=True)
+            signal_start = 0
+            signal_end = len(signal)
+            med, mad = self._med_mad(signal[signal_start:signal_end])
         return (signal[signal_start:signal_end] - med) / mad
 
     def build_dict_read_ref(self):
