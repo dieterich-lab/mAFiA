@@ -11,24 +11,30 @@ from random import sample
 from tqdm import tqdm
 
 class Nucleotide:
-    def __init__(self, read_id='', read_pos=-1, ref_pos=-1, pred_5mer='NNNNN', ref_5mer='NNNNN', feature=[], strand='.', mod_prob=-1):
+    def __init__(self, read_id='', read_pos=-1, ref_pos=-1, pred_5mer='NNNNN', ref_5mer='NNNNN', feature=None, strand='.', mod_prob=-1):
         self.read_id = str(read_id)
         self.read_pos = int(read_pos)
         self.ref_pos = int(ref_pos)
         self.pred_5mer = str(pred_5mer)
         self.ref_5mer = str(ref_5mer)
-        self.feature = np.array(feature)
+        if feature is None:
+            self.feature = np.array([])
+        else:
+            self.feature = np.array(feature)
         self.strand = str(strand)
         self.mod_prob = float(mod_prob)
 
 class Aligned_Read:
-    def __init__(self, read_id='', read_pos=-1, ref_pos=-1, query_5mer='NNNNN', pred_5mer='NNNNN', norm_signal=[], flag=-1, strand='.'):
+    def __init__(self, read_id='', read_pos=-1, ref_pos=-1, query_5mer='NNNNN', pred_5mer='NNNNN', norm_signal=None, flag=-1, strand='.'):
         self.read_id = str(read_id)
         self.read_pos = int(read_pos)
         self.ref_pos = int(ref_pos)
         self.query_5mer = str(query_5mer)
         self.pred_5mer = str(pred_5mer)
-        self.norm_signal = np.array(norm_signal)
+        if norm_signal is None:
+            self.norm_signal = np.array([])
+        else:
+            self.norm_signal = np.array(norm_signal)
         self.flag = int(flag)
         self.strand = str(strand)
 
@@ -41,25 +47,6 @@ class Aligned_Read:
             feature = in_feature,
             strand = self.strand
         )
-
-# class mRNA_Site:
-#     def __init__(self, row, ref):
-#         self.ind = row['index']
-#         self.chr = row['Chr'].lstrip('chr')
-#         self.start = row['Sites'] - 1  # 0-based
-#         self.strand = row['Strand']
-#         self.glori_ratio = row['Ratio']
-#
-#         ref_5mer = ref[self.chr][self.start-2:self.start+3]
-#         if self.strand == '-':
-#             self.ref_motif = str(Seq(ref_5mer).reverse_complement())
-#         else:
-#             self.ref_motif = ref_5mer
-#
-#     def print(self):
-#         print(f'site{self.ind}, chr{self.chr}, start{self.start}, strand{self.strand}')
-#         print(f'Reference motif {self.ref_motif}')
-#         print(f'GLORI ratio {self.glori_ratio}')
 
 class mRNA_Site:
     def __init__(self, row, ref):
