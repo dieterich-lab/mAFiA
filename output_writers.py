@@ -27,7 +27,7 @@ class Site_Writer(Dataframe_Writer):
         #     self.site_counts = len(self.df_out['index'].unique())
         #     if self.site_counts > 0:
         #         self.last_ind = self.df_out.tail(1)['index'].values[0]
-        #         print('Restarting from {}, index {}, {} sites'.format(out_path, self.last_ind, self.site_counts))
+        #         print(f'Restarting from {out_path}, index {self.last_ind}, {self.site_counts} sites')
         #         return
         self.df_out = pd.DataFrame()
         self.site_counts = 0

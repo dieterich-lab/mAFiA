@@ -17,7 +17,7 @@ class Args_Parser(argparse.ArgumentParser):
         self.args = self.parse_args()
         print('=========================================================')
         for k, v in vars(self.args).items():
-            print('{} : {}'.format(k, v))
+            print(f'{k} : {v}')
         print('=========================================================')
 
 class Test_Args_Parser(Args_Parser):

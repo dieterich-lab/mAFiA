@@ -8,13 +8,13 @@ from arg_parsers import mRNA_Test_Args_Parser
 from data_containers import mRNA_Site, mRNA_Data_Container
 from feature_extractors import Backbone_Network
 from feature_classifiers import load_motif_classifiers
-from writers import Site_Writer, BAM_Writer
+from output_writers import Site_Writer, BAM_Writer
 
 parser = mRNA_Test_Args_Parser()
 parser.parse_and_print()
 
 def load_genome_reference(ref_file):
-    print('Parsing genome reference {}...'.format(os.path.basename(ref_file)))
+    print(f'Parsing genome reference {os.path.basename(ref_file)}...')
     ref = {}
     for record in SeqIO.parse(ref_file, 'fasta'):
         if (record.id.isnumeric()) or (record.id in ['X', 'Y']):
@@ -56,14 +56,15 @@ def main(args):
             this_site_mod_ratio = motif_classifiers[this_mRNA_site.ref_5mer].test(test_container.nucleotides[this_mRNA_site.ind])
             print('=========================================================\n')
             # df_nts = test_container.flush_nts_to_dataframe()
+            # df_nts = test_container.flush_nts_to_dataframe()
             site_writer.update_site_df(row, this_site_coverage, this_site_mod_ratio, this_mRNA_site.ref_5mer)
             site_writer.write_df()
         # else:
             # test_container.nucleotides.clear()
-    print('Total {} mod. sites written to {}'.format(site_writer.site_counts, site_writer.out_path))
+    print(f'Total {site_writer.site_counts} mod. sites written to {site_writer.out_path}')
 
     bam_writer.write_bam_with_mm_ml_tags(test_container)
-    print('Total {} mod. reads written to {}'.format(bam_writer.read_counts, bam_writer.out_bam_path))
+    print(f'Total {bam_writer.read_counts} mod. reads written to {bam_writer.out_bam_path}')
 
 if __name__ == "__main__":
     main(parser.args)

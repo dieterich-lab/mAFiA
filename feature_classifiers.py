@@ -52,17 +52,17 @@ class Motif_Classifier:
         self.precision, self.recall, self.thresholds = precision_recall_curve(y_test, y_score)
         self.auc = auc(self.recall, self.precision)
 
-        print('AUC {:.2f}'.format(self.auc))
+        print(f'AUC {self.auc:.2f}')
 
     def test(self, test_nts, mod_thresh=0.5):
-        print('Testing {} NTs...'.format(len(test_nts)))
+        print(f'Testing {len(test_nts)} NTs...')
         test_features = [nt.feature for nt in test_nts]
         mod_probs = self.binary_model.predict_proba(test_features)[:, 1]
         for this_nt, this_mod_prob in zip(test_nts, mod_probs):
             this_nt.mod_prob = this_mod_prob
         predictions = np.int32(mod_probs > mod_thresh)
         avg_mod_ratio = np.mean(predictions)
-        print('Predicted mod. ratio {:.2f}'.format(avg_mod_ratio))
+        print(f'Predicted mod. ratio {avg_mod_ratio:.2f}')
         return avg_mod_ratio
 
     def save(self, out_model_path, draw_prc=False):
@@ -76,12 +76,7 @@ class Motif_Classifier:
             plt.xlabel('Recall')
             plt.ylabel('Precision')
             plt.ylim([0, 1.05])
-            plt.title('{}\n{} train NTs, {} test NTs\n AUC = {:.2f}'.format(
-                self.motif,
-                len(self.train_nts),
-                len(self.test_nts),
-                self.auc
-            ))
+            plt.title(f'{self.motif}\n{len(self.train_nts)} train NTs, {len(self.test_nts)} test NTs\n AUC = {self.auc:.2f}')
             plt.savefig(out_img_path, bbox_inches='tight')
             plt.close('all')
 
@@ -95,6 +90,6 @@ def load_motif_classifiers(classifier_dir):
             this_motif_classifier = pickle.load(h_in)
         motif_classifiers[this_motif_classifier.motif] = this_motif_classifier
     classifier_motifs = list(motif_classifiers.keys())
-    print('Target motifs: {}'.format(', '.join(classifier_motifs)))
+    print('Target motifs: ', ', '.join(classifier_motifs))
 
     return motif_classifiers

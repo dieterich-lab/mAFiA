@@ -28,7 +28,7 @@ def get_freer_device():
         os.system('nvidia-smi -q -d Memory |grep -A5 GPU|grep Free >tmp')
         memory_available = [int(x.split()[2]) for x in open('tmp', 'r').readlines()]
         device_num = np.argmax(memory_available)
-        freer_device = torch.device("cuda:{}".format(device_num))
+        freer_device = torch.device(f"cuda:{device_num}")
         free_mem = memory_available[device_num]
     else:
         freer_device = torch.device("cpu")
@@ -45,7 +45,7 @@ class Backbone_Network:
         self.batchsize = batchsize
         self.activation = {}
         self._load_model(model_path)
-        print('Using device {}, model {} at extraction layer {}'.format(self.device, os.path.basename(model_path), extraction_layer))
+        print(f'Using device {self.device}, model {os.path.basename(model_path)} at extraction layer {extraction_layer}')
 
     def _segment(self, seg, s):
         seg = np.concatenate((seg, np.zeros((-len(seg) % s))))
@@ -166,8 +166,7 @@ class Backbone_Network:
 
             pred_motif = this_chunk_basecalls[aligned_read.read_pos-2 : aligned_read.read_pos+3]
             if pred_motif != aligned_read.query_5mer:
-                print(
-                    '\n!!! Error: Predicted motif {} =/= aligned {} !!!\n'.format(pred_motif, aligned_read.query_5mer))
+                print(f'\n!!! Error: Predicted motif {pred_motif} =/= aligned {aligned_read.query_5mer} !!!\n')
                 continue
 
             nt_feature = this_chunk_features[aligned_read.read_pos]
