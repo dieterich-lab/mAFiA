@@ -91,7 +91,8 @@ class Data_Container:
                     else:
                         for read_id in read_ids:
                             self.indexed_read_ids[read_id] = f5_filepath
-            except:
+            except Exception as e:
+                print(e)
                 print(f'Error reading {f5_filepath}!')
 
         print(f'{len(self.indexed_read_ids)} reads indexed')

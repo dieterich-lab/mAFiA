@@ -23,17 +23,6 @@ def convert_statedict(state_dict):
         new_checkpoint[name] = v
     return new_checkpoint
 
-def get_freer_device():
-    if torch.cuda.is_available():
-        os.system('nvidia-smi -q -d Memory |grep -A5 GPU|grep Free >tmp')
-        memory_available = [int(x.split()[2]) for x in open('tmp', 'r').readlines()]
-        device_num = np.argmax(memory_available)
-        freer_device = torch.device(f"cuda:{device_num}")
-        free_mem = memory_available[device_num]
-    else:
-        freer_device = torch.device("cpu")
-        free_mem = -1
-    return freer_device, free_mem
 
 class Backbone_Network:
     def __init__(self, model_path, extraction_layer, feature_width, batchsize=1024):
