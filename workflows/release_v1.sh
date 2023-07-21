@@ -2,10 +2,9 @@ conda activate MAFIA
 
 workspace="/prj/TRR319_RMaP/Project_BaseCalling/Adrian/release_v1"
 backbone="${workspace}/models/backbone.torch"
-mafia="${workspace}/models/mAFiA"
+classifier="${workspace}/models/mAFiA"
 fast5dir="${workspace}/data/fast5_chrX"
 basecall="${workspace}/output/basecall.fasta"
-
 mkdir -p "${workspace}/output"
 
 ########################################################################################################################
@@ -37,7 +36,7 @@ samtools index ${bam}
 ########################################################################################################################
 #### mAFiA #############################################################################################################
 ########################################################################################################################
-mod="${release}/data/GLORI_chrX.bed"
+mod="${workspace}/data/GLORI_chrX.bed"
 
 python3 ${HOME}/git/MAFIA/test_mAFiA.py \
 --test_bam_file ${bam} \
@@ -47,6 +46,6 @@ python3 ${HOME}/git/MAFIA/test_mAFiA.py \
 --min_coverage 50 \
 --max_num_reads 1000 \
 --backbone_model_path ${backbone} \
---classifier_model_dir ${mafia} \
+--classifier_model_dir ${classifier} \
 --mod_prob_thresh 0.5 \
---out_dir "${workspace}/output"
+--out_dir "${workspace}/output" &
