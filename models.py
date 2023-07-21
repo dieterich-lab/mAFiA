@@ -59,14 +59,21 @@ class Squeeze_Excite(torch.nn.Module):
 
 class Convblock(torch.nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=False,
-                 seperable=True, expansion=True, batchnorm=True, dropout=0.1, activation=torch.nn.GELU, sqex=True,
-                 squeeze=32, sqex_activation=torch.nn.GELU, residual=True):
+                 seperable=True, expansion=True, batchnorm=True, dropout=0.1, activation=None, sqex=True,
+                 squeeze=32, sqex_activation=None, residual=True):
         # no bias?
         super(Convblock, self).__init__()
         self.seperable = seperable
         self.batchnorm = batchnorm
         self.dropout = dropout
-        self.activation = activation
+        if activation is not None:
+            self.activation = activation
+        else:
+            self.activation = torch.nn.GELU
+        if sqex_activation is not None:
+            self.sqex_activation = sqex_activation
+        else:
+            self.sqex_activation = torch.nn.GELU
         self.squeeze = squeeze
         self.stride = stride
         self.in_channels = in_channels
@@ -90,7 +97,7 @@ class Convblock(torch.nn.Module):
                 self.bn1 = torch.nn.BatchNorm1d(out_channels)
             self.act1 = self.activation()
             if self.squeeze:
-                self.sqex = Squeeze_Excite(in_channels=out_channels, reduction=self.squeeze, activation=sqex_activation)
+                self.sqex = Squeeze_Excite(in_channels=out_channels, reduction=self.squeeze, activation=self.sqex_activation)
             self.pointwise = torch.nn.Conv1d(out_channels, out_channels, kernel_size=1, dilation=dilation, bias=bias,
                                              padding=0)
             if self.batchnorm:
@@ -105,7 +112,7 @@ class Convblock(torch.nn.Module):
                 self.bn1 = torch.nn.BatchNorm1d(out_channels)
             self.act1 = self.activation()
             if self.squeeze:
-                self.sqex = Squeeze_Excite(in_channels=out_channels, reduction=self.squeeze, activation=sqex_activation)
+                self.sqex = Squeeze_Excite(in_channels=out_channels, reduction=self.squeeze, activation=self.sqex_activation)
             if self.dropout:
                 self.drop = torch.nn.Dropout(self.dropout)
         if self.residual and self.stride == 1:
@@ -163,16 +170,7 @@ class Rodan(nn.Module):
         self.seqlen = config.seqlen
         self.vocab = config.vocab
         self.bn = nn.BatchNorm1d
-
-        # [P, Channels, Separable, kernel_size, stride, sqex, dropout]
-        # P = -1 kernel_size//2, 0 none, >0 used as padding
-        # Channels
-        # seperable = 0 False, 1 True
-        # kernel_size
-        # stride
-        # sqex = 0 False, 1 True
-        # dropout = 0 False, 1 True
-        if arch == None: arch = rna_default
+        arch = rna_default if arch is None else arch
 
         activation = Activation_Function(config.activation.lower())
         sqex_activation = Activation_Function(config.sqex_activation.lower())
@@ -182,13 +180,8 @@ class Rodan(nn.Module):
         convsize = self.seqlen
 
         for i, layer in enumerate(arch):
-            paddingarg = layer[0]
-            out_channels = layer[1]
-            seperable = layer[2]
-            kernel = layer[3]
-            stride = layer[4]
-            sqex = layer[5]
-            dodropout = layer[6]
+            paddingarg, out_channels, seperable, kernel, stride, sqex, dodropout = layer
+
             expansion = True
 
             if dodropout:
@@ -223,99 +216,9 @@ class Rodan(nn.Module):
         if debug: print("Finished init network")
 
     def forward(self, x):
-        # x = self.embedding(x)
         x = self.convlayers(x)
         x = x.permute(0, 2, 1)
         x = self.final(x)
-
-        ### debug ###
-        # plt.figure()
-        # plt.plot(x[0, :, 1], c='b')
-        # plt.plot(x[0, :, 5], c='r')
-        # plt.show()
 
         x = torch.nn.functional.log_softmax(x, 2)
         return x.permute(1, 0, 2)
-
-class Renata(nn.Module):
-    def __init__(self, config=None, arch=None, seqlen=1024, num_lstm_layers=4, debug=False):
-        super().__init__()
-        if debug: print("Initializing network")
-
-        self.seqlen = seqlen
-        self.vocab = config.vocab
-        self.bn = nn.BatchNorm1d
-
-        if arch == None: arch = rna_default
-
-        activation = Activation_Function(config.activation.lower())
-        sqex_activation = Activation_Function(config.sqex_activation.lower())
-
-        self.convlayers = nn.Sequential()
-        in_channels = 1
-        convsize = self.seqlen
-
-        for i, layer in enumerate(arch):
-            paddingarg = layer[0]
-            out_channels = layer[1]
-            seperable = layer[2]
-            kernel = layer[3]
-            stride = layer[4]
-            sqex = layer[5]
-            dodropout = layer[6]
-            expansion = True
-
-            if dodropout:
-                dropout = config.dropout
-            else:
-                dropout = 0
-            if sqex:
-                squeeze = config.sqex_reduction
-            else:
-                squeeze = 0
-
-            if paddingarg == -1:
-                padding = kernel // 2
-            else:
-                padding = paddingarg
-            if i == 0: expansion = False
-
-            convsize = (convsize + (padding * 2) - (kernel - stride)) // stride
-            if debug:
-                print("padding:", padding, "seperable:", seperable, "ch", out_channels, "k:", kernel, "s:", stride,
-                      "sqex:", sqex, "drop:", dropout, "expansion:", expansion)
-                print("convsize:", convsize)
-            self.convlayers.add_module("conv" + str(i),
-                                       Convblock(in_channels, out_channels, kernel, stride=stride, padding=padding,
-                                                 seperable=seperable, activation=activation, expansion=expansion,
-                                                 dropout=dropout, squeeze=squeeze, sqex_activation=sqex_activation,
-                                                 residual=True))
-            in_channels = out_channels
-            self.conv_out_size = out_channels
-
-        self.final_size = self.conv_out_size
-
-        self.num_lstm_layers = num_lstm_layers
-
-        self.lstm = nn.LSTM(
-            input_size=self.conv_out_size,
-            hidden_size=self.final_size,
-            batch_first=True,
-            num_layers=self.num_lstm_layers)
-
-        self.final = nn.Linear(self.final_size, len(self.vocab))
-        if debug: print("Finished init network")
-
-    def init_hidden(self, batch_size):
-        h0 = torch.randn(self.num_lstm_layers, batch_size, self.final_size)
-        c0 = torch.randn(self.num_lstm_layers, batch_size, self.final_size)
-        return (h0, c0)
-
-    def forward(self, x, h_in):
-        x = self.convlayers(x)
-        x = x.permute(0, 2, 1)
-        x, h_out = self.lstm(x, h_in)
-        x = self.final(x)
-
-        x = torch.nn.functional.log_softmax(x, 2)
-        return x.permute(1, 0, 2), h_out

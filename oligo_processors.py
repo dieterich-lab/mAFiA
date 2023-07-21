@@ -16,7 +16,11 @@ class Oligo_Reference_Generator:
                 ligation_ref.name = ''
                 ligation_ref.description = ''
                 self.ligation_ref[ligation_ref.id] = ligation_ref
-            self.oligo_ref = [self.ligation_ref[k] for k, v in self.ligation_ref.items() if len(re.findall(self.oligo_fmt, v.id))==1]
+            self.oligo_ref = [
+                self.ligation_ref[k]
+                for k, v in self.ligation_ref.items()
+                if len(re.findall(self.oligo_fmt, v.id))==1
+            ]
         else:
             self.oligo_ref = list(SeqIO.parse(oligo_ref_file, 'fasta'))
             self.ligation_ref = {}
@@ -34,8 +38,7 @@ class Oligo_Reference_Generator:
         if len(set(oligo_origins))==1:
             oligo_origin = oligo_origins[0]
         else:
-            print('Error - multiple origins for oligos')
-            raise
+            raise Exception('Error - multiple origins for oligos')
         oligo_suffixes = [id.split('-')[1] for id in oligo_ids]
         return '{}-{}'.format(oligo_origin, '-'.join(oligo_suffixes))
 
@@ -129,14 +132,6 @@ class Local_Aligner(PairwiseAligner):
         target_end = chosen_alignment.coordinates[0][-1]
         query_start = chosen_alignment.coordinates[1][0]
         query_end = chosen_alignment.coordinates[1][-1]
-
-        ### debug ###
-        # if args.debug:
-        #     chosen_seq = chosen_alignment.query.seq
-        #     chosen_motif = chosen_seq[len(chosen_seq)//2-2:len(chosen_seq)//2+3]
-        #     print('Match scores: {}'.format(', '.join([str(score) for score in ref_scores])))
-        #     print('Chosen reference {} - {}'.format(chosen_ref_ind, chosen_motif))
-        #     print(chosen_alignment)
 
         return chosen_ref_ind, chosen_score, target_start, target_end, chosen_alignment
 
@@ -307,25 +302,18 @@ class Writer:
     def get_correct_sam_line(self, in_alignment, sam_writer, write_md=False, write_cs=True):
         sam_fields = sam_writer.format_alignment(in_alignment, md=write_md).rstrip('\n').split('\t')
 
-        ### cigar string: change I on both ends to S ###
         cigar_string = sam_fields[5]
         match_in_del_sclip = re.findall(r"([0-9]+)M|([0-9]+)I|([0-9]+)D|([0-9]+)S", cigar_string)
-        # beginning I #
         if len(match_in_del_sclip[0][1]) > 0:
             match_in_del_sclip[0] = ('', '', '', match_in_del_sclip[0][1])
-            ### remove 'D' after starting 'S' ###
             if len(match_in_del_sclip[1][2]) > 0:
                 match_in_del_sclip = [match_in_del_sclip[0]] + match_in_del_sclip[2:]
-        # ending I #
         if len(match_in_del_sclip[-1][1]) > 0:
             match_in_del_sclip[-1] = ('', '', '', match_in_del_sclip[-1][1])
-            ### remove 'D' before ending 'S' ###
             if len(match_in_del_sclip[-2][2]) > 0:
                 match_in_del_sclip = match_in_del_sclip[:-2] + [match_in_del_sclip[-1]]
-        # beginning D #
         if len(match_in_del_sclip[0][2]) > 0:
             match_in_del_sclip = match_in_del_sclip[1:]
-        # ending D #
         if len(match_in_del_sclip[-1][2]) > 0:
             match_in_del_sclip = match_in_del_sclip[:-1]
 
@@ -333,33 +321,10 @@ class Writer:
             [n + suffix for cs in match_in_del_sclip for n, suffix in zip(cs, ['M', 'I', 'D', 'S']) if len(n) > 0])
         sam_fields[5] = correct_cigar_string
 
-        ### start pos ###
         str_match_stick = in_alignment._format_unicode().split('\n')[1]
         correct_pos = in_alignment.indices[0, str_match_stick.find('|')] + 1  # 1-based
         sam_fields[3] = str(correct_pos)
 
-        # if args.debug:
-        #     correct_MIDS = re.findall(r"([0-9]+)M|([0-9]+)I|([0-9]+)D|([0-9]+)S", correct_cigar_string)
-        #     ### check SM...MS ###
-        #     if (len(correct_MIDS[0][3]) > 0) or (len(correct_MIDS[-1][3]) > 0) \
-        #             or (len(correct_MIDS[0][2]) > 0) or (len(correct_MIDS[-1][2]) > 0):
-        #         print(in_alignment)
-        #         print('Start pos:', correct_pos)
-        #         print('Before:', cigar_string)
-        #         print('After:', correct_cigar_string)
-        #
-        #         tlen = 0
-        #         qlen = 0
-        #         for x in correct_MIDS:
-        #             m, i, d, s = [int(xx) if len(xx) else 0 for xx in x]
-        #             tlen += m + d
-        #             qlen += m + i + s
-        #         print('Target len:', len(in_alignment.target) == tlen)
-        #         print('Query len:', len(in_alignment.query) == qlen)
-        #
-        #         print('\n')
-
-        ### generate CS flag ###
         if write_cs:
             len_clips = trim.get_softclip_lengths(correct_cigar_string)
             query_trimmed = trim.softclips(sam_fields[9], len_clips)
