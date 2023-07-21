@@ -56,7 +56,6 @@ def main(args):
             this_site_mod_ratio = motif_classifiers[this_mRNA_site.ref_5mer].test(test_container.nucleotides[this_mRNA_site.ind])
             print('=========================================================\n')
             # df_nts = test_container.flush_nts_to_dataframe()
-            # df_nts = test_container.flush_nts_to_dataframe()
             site_writer.update_site_df(row, this_site_coverage, this_site_mod_ratio, this_mRNA_site.ref_5mer)
             site_writer.write_df()
         # else:
