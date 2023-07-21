@@ -13,18 +13,18 @@ Preliminary:
   - GRCh38_96.X: genome reference
   - GLORI_chrX.bed: GLORI mod-sites on chr X, bed format
 4. Assume that data and model are unzipped to ${workspace}
-  backbone="${workspace}/models/backbone.torch"
-  classifier="${workspace}/models/mAFiA"
-  fast5dir="${workspace}/data/fast5_chrX"
-  ref="${workspace}/data/GRCh38_96.X.fa"
-  mod="${workspace}/data/GLORI_chrX.bed"
+- backbone="${workspace}/models/backbone.torch"
+- classifier="${workspace}/models/mAFiA"
+- fast5dir="${workspace}/data/fast5_chrX"
+- ref="${workspace}/data/GRCh38_96.X.fa"
+- mod="${workspace}/data/GLORI_chrX.bed"
 
-  mkdir -p "${workspace}/output"
-  basecall="${workspace}/output/basecall.fasta"
-  bam="${workspace}/output/aligned_filtered_q50.bam"
+- mkdir -p "${workspace}/output"
+- basecall="${workspace}/output/basecall.fasta"
+- bam="${workspace}/output/aligned_filtered_q50.bam"
 
 5. Activate virtual environment
-   conda activate MAFIA
+- conda activate MAFIA
 
 Basecalling:
 python3 ${HOME}/git/MAFIA/rodan_viterbi.py \
