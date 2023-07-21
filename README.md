@@ -3,7 +3,7 @@
 Brief demo on chr X:
 
 Preliminary:
-1. Download models and data from https://data.dieterichlab.org/index.php/apps/files?dir=/Dieterich%20lab%20group%20folder/mAFiA_releave_v1
+1. Download models and data from https://data.dieterichlab.org/s/dKb6KtmKX99Q5Ld
 2. The folder "models" contains:
 - backbone.torch: RODAN-based neural network for basecalling and feature extraction
 - backbone.config: cfg file for backbone
