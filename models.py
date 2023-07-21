@@ -59,14 +59,21 @@ class Squeeze_Excite(torch.nn.Module):
 
 class Convblock(torch.nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=False,
-                 seperable=True, expansion=True, batchnorm=True, dropout=0.1, activation=torch.nn.GELU, sqex=True,
-                 squeeze=32, sqex_activation=torch.nn.GELU, residual=True):
+                 seperable=True, expansion=True, batchnorm=True, dropout=0.1, activation=None, sqex=True,
+                 squeeze=32, sqex_activation=None, residual=True):
         # no bias?
         super(Convblock, self).__init__()
         self.seperable = seperable
         self.batchnorm = batchnorm
         self.dropout = dropout
-        self.activation = activation
+        if activation is not None:
+            self.activation = activation
+        else:
+            self.activation = torch.nn.GELU
+        if sqex_activation is not None:
+            self.sqex_activation = sqex_activation
+        else:
+            self.sqex_activation = torch.nn.GELU
         self.squeeze = squeeze
         self.stride = stride
         self.in_channels = in_channels
@@ -90,7 +97,7 @@ class Convblock(torch.nn.Module):
                 self.bn1 = torch.nn.BatchNorm1d(out_channels)
             self.act1 = self.activation()
             if self.squeeze:
-                self.sqex = Squeeze_Excite(in_channels=out_channels, reduction=self.squeeze, activation=sqex_activation)
+                self.sqex = Squeeze_Excite(in_channels=out_channels, reduction=self.squeeze, activation=self.sqex_activation)
             self.pointwise = torch.nn.Conv1d(out_channels, out_channels, kernel_size=1, dilation=dilation, bias=bias,
                                              padding=0)
             if self.batchnorm:
@@ -105,7 +112,7 @@ class Convblock(torch.nn.Module):
                 self.bn1 = torch.nn.BatchNorm1d(out_channels)
             self.act1 = self.activation()
             if self.squeeze:
-                self.sqex = Squeeze_Excite(in_channels=out_channels, reduction=self.squeeze, activation=sqex_activation)
+                self.sqex = Squeeze_Excite(in_channels=out_channels, reduction=self.squeeze, activation=self.sqex_activation)
             if self.dropout:
                 self.drop = torch.nn.Dropout(self.dropout)
         if self.residual and self.stride == 1:
@@ -172,7 +179,7 @@ class Rodan(nn.Module):
         # stride
         # sqex = 0 False, 1 True
         # dropout = 0 False, 1 True
-        if arch == None: arch = rna_default
+        arch = rna_default if arch is None else arch
 
         activation = Activation_Function(config.activation.lower())
         sqex_activation = Activation_Function(config.sqex_activation.lower())
@@ -182,13 +189,8 @@ class Rodan(nn.Module):
         convsize = self.seqlen
 
         for i, layer in enumerate(arch):
-            paddingarg = layer[0]
-            out_channels = layer[1]
-            seperable = layer[2]
-            kernel = layer[3]
-            stride = layer[4]
-            sqex = layer[5]
-            dodropout = layer[6]
+            paddingarg, out_channels, seperable, kernel, stride, sqex, dodropout = layer
+            
             expansion = True
 
             if dodropout:
