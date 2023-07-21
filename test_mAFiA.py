@@ -33,8 +33,8 @@ def main(args):
     ivt_backbone = Backbone_Network(args.backbone_model_path, args.extraction_layer, args.feature_width)
     reference = load_genome_reference(args.ref_file)
     motif_classifiers = load_motif_classifiers(args.classifier_model_dir)
-    site_writer = Site_Writer(out_path=os.path.join(args.out_dir, 'site_mods.bed'))
-    bam_writer = BAM_Writer(in_bam_path=args.test_bam_file, out_bam_path=os.path.join(args.out_dir, 'read_mods.bam'))
+    site_writer = Site_Writer(out_path=os.path.join(args.out_dir, 'mAFiA.sites.bed'))
+    bam_writer = BAM_Writer(in_bam_path=args.test_bam_file, out_bam_path=os.path.join(args.out_dir, 'mAFiA.reads.bam'))
 
     df_mod = pd.read_csv(args.mod_file, sep='\t')
     for _, row in tqdm(list(df_mod.iterrows())):
