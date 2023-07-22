@@ -1,6 +1,6 @@
 # mAFiA - (Another) m<sup>6</sup>A Finding Algorithm
 
-Here we provide a brief walkthrough to measure m<sup>6</sup>A stoichiometry on chromosome X:
+Here we provide a brief walkthrough to run mAFiA, using the example of chromosome X. Complete dataset can be downloaded from [spam](url).
 
 ## 0. Preliminary
 1. Download models and data from [phish_link](https://data.dieterichlab.org/s/dKb6KtmKX99Q5Ld)
