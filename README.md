@@ -1,18 +1,18 @@
 # mAFiA - (Another) m<sup>6</sup>A Finding Algorithm
 
-Here we provide a brief walkthrough to run mAFiA, using the example of chromosome X. Complete dataset can be downloaded from [spam](url).
+Here we provide a brief walkthrough to run mAFiA, using the example of chromosome X. Complete dataset can be downloaded from [???](url).
 
 ## 0. Preliminary
-1. Download models and data from [phish_link](https://data.dieterichlab.org/s/dKb6KtmKX99Q5Ld)
-2. The folder "models" contains:
+- Download models and data from [phish_link](https://data.dieterichlab.org/s/dKb6KtmKX99Q5Ld)
+- The folder "models" contains:
     - backbone.torch: [RODAN](https://github.com/biodlab/RODAN)-based neural network for basecalling and feature extraction
     - backbone.config: training configuration for backbone
     - mAFiA: pickled classifiers for mAFiA
-3. The folder "data" contains a subset of input data on chr X:
+- The folder "data" contains a subset of input data on chr X:
     - fast5_chrX: dRNA-Seq raw data from HEK293 WT mRNA
     - GRCh38_96.X: genome reference
     - GLORI_chrX.bed: [GLORI](https://www.nature.com/articles/s41587-022-01487-9) mod-sites in bed format
-4. Assume that data and model are unzipped to ${data} and ${model} respectively. Your output directory is ${output}
+- Assume that data and model are unzipped to ${data} and ${model} respectively. Your output directory is ${output}
 ```
 backbone="${models}/backbone.torch"
 classifier="${models}/mAFiA"
