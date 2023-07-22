@@ -33,7 +33,7 @@ conda activate MAFIA
 ${mafia} is your code directory.
 
 ## 1. Basecalling
-The basecalling script is adapted from the [RODAN](https://github.com/biodlab/RODAN) architecture.
+The basecalling script is adapted from the [RODAN](https://github.com/biodlab/RODAN) repository.
 ```
 python3 ${mafia}/rodan_viterbi.py \
 --fast5dir ${fast5dir} \
