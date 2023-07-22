@@ -24,9 +24,10 @@ mkdir -p "${output}"
 basecall="${output}/rodan.fasta"
 bam="${output}/minimap.q50.bam"
 ```
-5. Get code and activate virtual environment (WIP)
+- Get code and activate virtual environment (WIP)
 ```
 git clone git@github.com:dieterich-lab/m6AFiA.git
+...
 conda activate MAFIA
 ```
 ${mafia} is your code directory.
