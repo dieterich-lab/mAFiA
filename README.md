@@ -58,7 +58,7 @@ samtools index ${bam}
 ## 3. mAFiA
 After the standard procedures, we can now look at the m<sup>6</sup>A sites as listed in ${mod}.
 ```
-python3 ${HOME}/git/MAFIA/test_mAFiA.py \
+python3 ${mafia}/test_mAFiA.py \
 --test_bam_file ${bam} \
 --test_fast5_dir ${fast5dir} \
 --ref_file ${ref} \
