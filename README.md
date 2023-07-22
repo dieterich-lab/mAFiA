@@ -8,10 +8,10 @@ Here we provide a brief walkthrough to measure m<sup>6</sup>A stoichiometry on c
     - backbone.torch: [RODAN](https://github.com/biodlab/RODAN)-based neural network for basecalling and feature extraction
     - backbone.config: training configuration for backbone
     - mAFiA: pickled classifiers for mAFiA
-3. The folder "data" contains:
-    - fast5_chrX: dRNA-Seq raw data from HEK293 WT mRNA, chr X only
+3. The folder "data" contains a subset of input data on chr X:
+    - fast5_chrX: dRNA-Seq raw data from HEK293 WT mRNA
     - GRCh38_96.X: genome reference
-    - GLORI_chrX.bed: [GLORI](https://www.nature.com/articles/s41587-022-01487-9) mod-sites on chr X, bed format
+    - GLORI_chrX.bed: [GLORI](https://www.nature.com/articles/s41587-022-01487-9) mod-sites in bed format
 4. Assume that data and model are unzipped to ${data} and ${model} respectively. Your output directory is ${output}
 ```
 backbone="${models}/backbone.torch"
