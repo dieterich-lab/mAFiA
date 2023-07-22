@@ -11,7 +11,7 @@ Here we provide a brief walkthrough to measure m<sup>6</sup>A stoichiometry on c
 3. The folder "data" contains:
     - fast5_chrX: dRNA-Seq raw data from HEK293 WT mRNA, chr X only
     - GRCh38_96.X: genome reference
-    - GLORI_chrX.bed: GLORI mod-sites on chr X, bed format
+    - GLORI_chrX.bed: [GLORI](https://www.nature.com/articles/s41587-022-01487-9) mod-sites on chr X, bed format
 4. Assume that data and model are unzipped to ${data} and ${model} respectively. Your output directory is ${output}
 ```
 backbone="${models}/backbone.torch"
