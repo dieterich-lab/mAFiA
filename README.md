@@ -1,3 +1,4 @@
+![logo](mAFiA_with_base.png)
 # mAFiA - (Another) m<sup>6</sup>A Finding Algorithm
 
 Here we provide a brief walkthrough to run mAFiA, using the example of chromosome X. Complete dataset can be downloaded from [???](url).
