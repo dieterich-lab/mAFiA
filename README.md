@@ -1,50 +1,62 @@
-# m6AFiA - (Another) m6A Finding Algorithm
+# mAFiA - (Another) m<sup>6</sup>A Finding Algorithm
 
-Brief demo on chr X:
+Here we provide a brief walkthrough to measure m<sup>6</sup>A stoichiometry on chromosome X:
 
-Preliminary:
-1. Download models and data from https://data.dieterichlab.org/s/dKb6KtmKX99Q5Ld
+## 0. Preliminary
+1. Download models and data from [phish_link](https://data.dieterichlab.org/s/dKb6KtmKX99Q5Ld)
 2. The folder "models" contains:
-- backbone.torch: RODAN-based neural network for basecalling and feature extraction
-- backbone.config: cfg file for backbone
-- mAFiA: pickled models for mAFiA
+    - backbone.torch: [RODAN](https://github.com/biodlab/RODAN)-based neural network for basecalling and feature extraction
+    - backbone.config: training configuration for backbone
+    - mAFiA: pickled classifiers for mAFiA
 3. The folder "data" contains:
-  - fast5_chrX: dRNA-Seq raw data from HEK293 WT mRNA, chr X only
-  - GRCh38_96.X: genome reference
-  - GLORI_chrX.bed: GLORI mod-sites on chr X, bed format
-4. Assume that data and model are unzipped to ${workspace}
-- backbone="${workspace}/models/backbone.torch"
-- classifier="${workspace}/models/mAFiA"
-- fast5dir="${workspace}/data/fast5_chrX"
-- ref="${workspace}/data/GRCh38_96.X.fa"
-- mod="${workspace}/data/GLORI_chrX.bed"
+    - fast5_chrX: dRNA-Seq raw data from HEK293 WT mRNA, chr X only
+    - GRCh38_96.X: genome reference
+    - GLORI_chrX.bed: GLORI mod-sites on chr X, bed format
+4. Assume that data and model are unzipped to ${data} and ${model} respectively. Your output directory is ${output}
+```
+backbone="${models}/backbone.torch"
+classifier="${models}/mAFiA"
+fast5dir="${data}/fast5_chrX"
+ref="${data}/GRCh38_96.X.fa"
+mod="${data}/GLORI_chrX.bed"
 
-- mkdir -p "${workspace}/output"
-- basecall="${workspace}/output/basecall.fasta"
-- bam="${workspace}/output/aligned_filtered_q50.bam"
+mkdir -p "${output}"
+basecall="${output}/rodan.fasta"
+bam="${output}/minimap.q50.bam"
+```
+5. Get code and activate virtual environment (WIP)
+```
+git clone git@github.com:dieterich-lab/m6AFiA.git
+conda activate MAFIA
+```
+${mafia} is your code directory.
 
-5. Activate virtual environment
-- conda activate MAFIA
-
-Basecalling:
-python3 ${HOME}/git/MAFIA/rodan_viterbi.py \
+## 1. Basecalling
+The basecalling script is adapted from the [RODAN](https://github.com/biodlab/RODAN) architecture.
+```
+python3 ${mafia}/rodan_viterbi.py \
 --fast5dir ${fast5dir} \
 --model ${backbone} \
 --batchsize 2048 \
 --decoder viterbi \
---arch ${HOME}/git/MAFIA/rnaarch \
+--arch ${mafia}/rnaarch \
 > ${basecall} &
+```
+This should take about 20 mins on a GPU computer.
 
-Should take about 20 mins on a GPU computer
-
-Alignment:
+## 2. Alignment
+Align basecalling results to reference genome. Filter, sort, and index BAM file.
+```
 minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${ref} ${basecall} \
 | samtools view -bST ${ref} -q50 - \
 | samtools sort - > ${bam}
 
 samtools index ${bam}
+```
 
-m6A Detection:
+## 3. mAFiA
+After the standard procedures, we can now look at the m<sup>6</sup>A sites as listed in ${mod}.
+```
 python3 ${HOME}/git/MAFIA/test_mAFiA.py \
 --test_bam_file ${bam} \
 --test_fast5_dir ${fast5dir} \
@@ -55,6 +67,10 @@ python3 ${HOME}/git/MAFIA/test_mAFiA.py \
 --backbone_model_path ${backbone} \
 --classifier_model_dir ${classifier} \
 --mod_prob_thresh 0.5 \
---out_dir "${workspace}/output" &
+--out_dir ${output} &
+```
+This last step should take less than 1 hour on a GPU machine. We are currently working on integrating the feature extraction step directly into basecalling. The run-time should then be significantly reduced.
 
-Should take less than 1 hour. We are currently working on combined the feature extraction step with basecalling. The run-time should then be significantly compressed.
+In your ${output} directory, you should now see two files:
+  -"mAFiA.sites.bed": List of sites with coverage above minimum threshold (default 50). The column "modRatio" lists the site's stoichiometry.
+  -"mAFiA.reads.bam": Aligned reads identical to those in the input BAM file ${bam}, but with additional MM and ML tags that mark the location and modification probability in each individual read. The results can be visualized with, eg, [IGV](https://software.broadinstitute.org/software/igv/).
