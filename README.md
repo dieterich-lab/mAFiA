@@ -5,7 +5,7 @@
 Here we provide a brief walkthrough to run mAFiA, using the example of chromosome X. Complete dataset can be downloaded from [???](url).
 
 ## 0. Preliminary
-- Get code and activate virtual environment. We use conda, but you can also create your own virtual environment with packages listed in requirements.txt.
+- Get code and activate virtual environment. Install dependencies listed in requirements.txt.
 ```
 git clone git@github.com:dieterich-lab/mAFiA.git
 cd mAFiA
