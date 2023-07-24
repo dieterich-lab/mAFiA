@@ -14,14 +14,14 @@ source mafia-venv/bin/activate
 pip install -r requirements.txt
 ```
 - Download models and data from [phish_link](https://data.dieterichlab.org/s/dKb6KtmKX99Q5Ld)
-- The folder "models" contains:
-    - backbone.torch: [RODAN](https://github.com/biodlab/RODAN)-based neural network for basecalling and feature extraction
-    - backbone.config: training configuration for backbone
-    - mAFiA: pickled logistic regression models
-- The folder "data" contains a subset of input data on chr X:
-    - fast5_chrX: dRNA-Seq raw data from HEK293 WT mRNA
-    - GRCh38_96.X: genome reference
-    - GLORI_chrX.bed: query modification sites in bed format. This file specifically corresponds to those listed in [GLORI](https://www.nature.com/articles/s41587-022-01487-9).
+    - The folder "models" contains:
+        - backbone.torch: [RODAN](https://github.com/biodlab/RODAN)-based neural network for basecalling and feature extraction
+        - backbone.config: training configuration for backbone
+        - mAFiA: pickled logistic regression models
+    - The folder "data" contains a subset of input data on chr X:
+        - fast5_chrX: dRNA-Seq raw data from HEK293 WT mRNA
+        - GRCh38_96.X: genome reference
+        - GLORI_chrX.bed: query modification sites in bed format. This file specifically corresponds to those listed in [GLORI](https://www.nature.com/articles/s41587-022-01487-9).
 - Assume that data and model are unzipped to ${data} and ${model} respectively. Your output directory is ${output}
 ```
 backbone="${models}/backbone.torch"
