@@ -46,7 +46,7 @@ python3 ${mafia}/rodan_viterbi.py \
 --arch ${mafia}/rnaarch \
 > ${basecall} &
 ```
-Without the --debug option, the script will not output any progress. However, you should see the file ${basecall} growing. This step should take about 20 mins on a GPU machine.
+You should see the file ${basecall} growing. This step should take about 20 mins on a GPU machine.
 
 ## 2. Alignment
 Align basecalling results to reference genome. Filter, sort, and index BAM file.
