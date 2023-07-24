@@ -5,22 +5,22 @@
 Here we provide a brief walkthrough to run mAFiA, using the example of chromosome X. Complete dataset can be downloaded from [???](url).
 
 ## 0. Preliminary
-- Get code and activate virtual environment. We use conda environment, but you can also create your own virtual environment with packages listed in requirements.txt.
+- Get code and activate virtual environment. We use conda, but you can also create your own virtual environment with packages listed in requirements.txt.
 ```
 git clone git@github.com:dieterich-lab/mAFiA.git
-conda create --name MAFIA --file requirements.txt
-conda activate MAFIA
+cd mAFiA
+conda create --name mAFiA --file requirements.txt
+conda activate mAFiA
 ```
-${mafia} is your code directory.
 - Download models and data from [phish_link](https://data.dieterichlab.org/s/dKb6KtmKX99Q5Ld)
 - The folder "models" contains:
     - backbone.torch: [RODAN](https://github.com/biodlab/RODAN)-based neural network for basecalling and feature extraction
     - backbone.config: training configuration for backbone
-    - mAFiA: pickled classifiers for mAFiA
+    - mAFiA: pickled logistic regression models
 - The folder "data" contains a subset of input data on chr X:
     - fast5_chrX: dRNA-Seq raw data from HEK293 WT mRNA
     - GRCh38_96.X: genome reference
-    - GLORI_chrX.bed: [GLORI](https://www.nature.com/articles/s41587-022-01487-9) mod-sites in bed format
+    - GLORI_chrX.bed: query modification sites in bed format. This file specifically corresponds to those listed in [GLORI](https://www.nature.com/articles/s41587-022-01487-9).
 - Assume that data and model are unzipped to ${data} and ${model} respectively. Your output directory is ${output}
 ```
 backbone="${models}/backbone.torch"
@@ -35,7 +35,7 @@ bam="${output}/minimap.q50.bam"
 ```
 
 ## 1. Basecalling
-The basecalling script is adapted from the [RODAN](https://github.com/biodlab/RODAN) repository.
+The basecalling script is adapted from the [RODAN](https://github.com/biodlab/RODAN) repository. Assume that ${mafia} is your code directory.
 ```
 python3 ${mafia}/rodan_viterbi.py \
 --fast5dir ${fast5dir} \
