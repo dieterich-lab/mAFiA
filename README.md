@@ -5,6 +5,13 @@
 Here we provide a brief walkthrough to run mAFiA, using the example of chromosome X. Complete dataset can be downloaded from [???](url).
 
 ## 0. Preliminary
+- Get code and activate virtual environment. We use conda environment, but you can also create your own virtual environment with packages listed in requirements.txt.
+```
+git clone git@github.com:dieterich-lab/mAFiA.git
+conda create --name MAFIA --file requirements.txt
+conda activate MAFIA
+```
+${mafia} is your code directory.
 - Download models and data from [phish_link](https://data.dieterichlab.org/s/dKb6KtmKX99Q5Ld)
 - The folder "models" contains:
     - backbone.torch: [RODAN](https://github.com/biodlab/RODAN)-based neural network for basecalling and feature extraction
@@ -26,13 +33,6 @@ mkdir -p "${output}"
 basecall="${output}/rodan.fasta"
 bam="${output}/minimap.q50.bam"
 ```
-- Get code and activate virtual environment. We use conda environment, but you can also create your own virtual environment with packages listed in requirements.txt.
-```
-git clone git@github.com:dieterich-lab/mAFiA.git
-conda create --name MAFIA --file requirements.txt
-conda activate MAFIA
-```
-${mafia} is your code directory.
 
 ## 1. Basecalling
 The basecalling script is adapted from the [RODAN](https://github.com/biodlab/RODAN) repository.
