@@ -1,9 +1,7 @@
 import os
-HOME = os.path.expanduser('~')
 from glob import glob
 import numpy as np
 import random
-random.seed(0)
 from random import sample
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
@@ -13,8 +11,10 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import precision_recall_curve, auc
 # import matplotlib.pyplot as plt
 import pickle
+random.seed(0)
 
-class Motif_Classifier:
+
+class MotifClassifier:
     def __init__(self, motif, classifier_type, scaler):
         self.motif = motif
         self.classifier_type = classifier_type
@@ -38,17 +38,19 @@ class Motif_Classifier:
         sample_unm_nts = sample(unm_nts, max_num_features)
         sample_mod_nts = sample(mod_nts, max_num_features)
 
-        labels = np.array([0 for ii in range(len(sample_unm_nts))] + [1 for ii in range(len(sample_mod_nts))])
+        labels = np.array([0 for _ in range(len(sample_unm_nts))] + [1 for _ in range(len(sample_mod_nts))])
         unm_features = [nt.feature for nt in sample_unm_nts]
         mod_features = [nt.feature for nt in sample_mod_nts]
         all_features = np.array(unm_features + mod_features)
 
-        X_train, X_test, y_train, y_test, train_nts, test_nts = train_test_split(all_features, labels, sample_unm_nts+sample_mod_nts, test_size=frac_test_split)
+        x_train, x_test, y_train, y_test, train_nts, test_nts = train_test_split(
+            all_features, labels, sample_unm_nts+sample_mod_nts, test_size=frac_test_split
+        )
         self.train_nts = train_nts
         self.test_nts = test_nts
 
-        self.binary_model = self.binary_model.fit(X_train, y_train)
-        y_score = self.binary_model.decision_function(X_test)
+        self.binary_model = self.binary_model.fit(x_train, y_train)
+        y_score = self.binary_model.decision_function(x_test)
         self.precision, self.recall, self.thresholds = precision_recall_curve(y_test, y_score)
         self.auc = auc(self.recall, self.precision)
 

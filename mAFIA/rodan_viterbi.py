@@ -5,29 +5,37 @@
 # (c) 2020,2021,2022 Don Neumann
 #
 
-import torch
+import argparse
+import glob
+import os
+import sys
+import time
+
 import numpy as np
-import os, sys, argparse, time, glob
+import torch
 from fast_ctc_decode import beam_search, viterbi_search
 from ont_fast5_api.fast5_interface import get_fast5_file
 from torch.multiprocessing import Queue, Process
 
-from models import Objectview, Rodan
 import ont
+from models import Objectview, Rodan
+
 
 def segment(seg, s):
-    seg = np.concatenate((seg, np.zeros((-len(seg)%s))))
-    nrows=((seg.size-s)//s)+1
-    n=seg.strides[0]
-    return np.lib.stride_tricks.as_strided(seg, shape=(nrows,s), strides=(s*n, n))
+    seg = np.concatenate((seg, np.zeros((-len(seg) % s))))
+    nrows = ((seg.size - s) // s) + 1
+    n = seg.strides[0]
+    return np.lib.stride_tricks.as_strided(seg, shape=(nrows, s), strides=(s * n, n))
+
 
 def convert_statedict(state_dict):
     from collections import OrderedDict
     new_checkpoint = OrderedDict()
     for k, v in state_dict.items():
-        name = k[7:] # remove module.
+        name = k[7:]  # remove module.
         new_checkpoint[name] = v
     return new_checkpoint
+
 
 def get_freer_device():
     if torch.cuda.is_available():
@@ -41,17 +49,21 @@ def get_freer_device():
         free_mem = -1
     return freer_device, free_mem
 
-def load_model(modelfile, config = None, args = None):
-    if modelfile == None:
+
+def load_model(modelfile, config=None, args=None):
+    if modelfile is None:
         sys.stderr.write("No model file specified!")
         sys.exit(1)
-    if args.choose_freer_device==True:
+    if args.choose_freer_device:
         device, mem = get_freer_device()
-        if args.debug: print("Using device {} with free memory {}MB".format(device, mem), flush=True)
+        if args.debug:
+            print("Using device {} with free memory {}MB".format(device, mem), flush=True)
     else:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        if args.debug: print("Using device {}".format(device), flush=True)
-    if args.debug: print("Using device:", device)
+        if args.debug:
+            print("Using device {}".format(device), flush=True)
+    if args.debug:
+        print("Using device:", device)
     if args.arch is not None:
         model = Rodan(config=config, arch=args.arch).to(device)
     else:
@@ -66,13 +78,14 @@ def load_model(modelfile, config = None, args = None):
 
     model.eval()
     torch.set_grad_enabled(False)
-    optimizer = torch.optim.Adam(model.parameters(), lr = config.lr)
+    optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
     return model, device
+
 
 def mp_files(queue, config, args):
     dir = args.fast5dir
     if args.list_filenames is None:
-        list_files = list(glob.iglob(dir+"/**/*.fast5", recursive=True))
+        list_files = list(glob.iglob(dir + "/**/*.fast5", recursive=True))
     else:
         filenames = []
         with open(args.list_filenames, 'r') as f_in:
@@ -92,7 +105,7 @@ def mp_files(queue, config, args):
         for read in f5.get_reads():
             while queue.qsize() >= 100:
                 time.sleep(1)
-            #outfile = os.path.splitext(os.path.basename(file))[0]
+            # outfile = os.path.splitext(os.path.basename(file))[0]
             try:
                 signal = read.get_raw_data(scale=True)
                 if args.debug: print("mp_files:", file)
@@ -110,14 +123,14 @@ def mp_files(queue, config, args):
                 chunks = newchunks
                 queuechunks = [read.read_id] * newchunks.shape[0]
             if chunks.shape[0] >= args.batchsize:
-                for i in range(0, chunks.shape[0]//args.batchsize, args.batchsize):
+                for i in range(0, chunks.shape[0] // args.batchsize, args.batchsize):
                     queue.put((queuechunks[:args.batchsize], chunks[:args.batchsize]))
                     chunks = chunks[args.batchsize:]
                     queuechunks = queuechunks[args.batchsize:]
         f5.close()
     if len(queuechunks) > 0:
         if args.debug: print("queuechunks:", len(queuechunks), chunks.shape[0])
-        for i in range(0, int(np.ceil(chunks.shape[0]/args.batchsize)), args.batchsize):
+        for i in range(0, int(np.ceil(chunks.shape[0] / args.batchsize)), args.batchsize):
             start = i * args.batchsize
             end = start + args.batchsize
             if end > chunks.shape[0]: end = chunks.shape[0]
@@ -125,10 +138,11 @@ def mp_files(queue, config, args):
             if args.debug: print("put last chunk", chunks[start:end].shape[0])
     queue.put(("end", None))
 
+
 def mp_gpu(inqueue, outqueue, config, args):
     model, device = load_model(args.model, config, args)
     shtensor = None
-    if device.type=='cpu':
+    if device.type == 'cpu':
         pin_memory = False
     else:
         pin_memory = True
@@ -136,12 +150,12 @@ def mp_gpu(inqueue, outqueue, config, args):
         time1 = time.perf_counter()
         read = inqueue.get()
         file = read[0]
-        if type(file) == str: 
+        if type(file) == str:
             outqueue.put(("end", None))
             break
         chunks = read[1]
         for i in range(0, chunks.shape[0], config.batchsize):
-            end = i+config.batchsize
+            end = i + config.batchsize
             if end > chunks.shape[0]: end = chunks.shape[0]
             event = torch.unsqueeze(torch.FloatTensor(chunks[i:end]), 1).to(device, non_blocking=True)
             out = model.forward(event)
@@ -155,6 +169,7 @@ def mp_gpu(inqueue, outqueue, config, args):
             outqueue.put((file, logitspre))
             del out
             del logitspre
+
 
 def mp_write(queue, config, args):
     files = None
@@ -177,11 +192,12 @@ def mp_write(queue, config, args):
                     files = newchunk[0]
             while files.count(files[0]) < len(files) or finish:
                 totlen = files.count(files[0])
-                callchunk = chunks[:,:totlen,:]
+                callchunk = chunks[:, :totlen, :]
                 logits = np.transpose(np.argmax(callchunk, -1), (1, 0))
                 label_blank = np.zeros((logits.shape[0], logits.shape[1] + 200))
                 try:
-                    out,outstr = ctcdecoder(logits, label_blank, pre=callchunk, decoder=args.decoder, beam_size=args.beamsize)
+                    out, outstr = ctcdecoder(logits, label_blank, pre=callchunk, decoder=args.decoder,
+                                             beam_size=args.beamsize)
                 except:
                     # failure in decoding
                     out = ""
@@ -194,31 +210,36 @@ def mp_write(queue, config, args):
                 for j in range(len(out)):
                     seq += outstr[j]
                 readid = os.path.splitext(os.path.basename(files[0]))[0]
-                print(">"+readid)
+                print(">" + readid)
                 if args.reverse:
                     print(seq[::-1])
                 else:
                     print(seq)
-                newchunks = chunks[:,totlen:,:]
+                newchunks = chunks[:, totlen:, :]
                 chunks = newchunks
                 files = files[totlen:]
-                totprocessed+=1
+                totprocessed += 1
                 if finish and not len(files): break
             if finish: break
-                
-vocab = { 1:"A", 2:"C", 3:"G", 4:"T" }
+
+
+vocab = {1: "A", 2: "C", 3: "G", 4: "T"}
 alphabet = "".join(["N"] + list(vocab.values()))
+
 
 def ctcdecoder(logits, label, blank=False, decoder='viterbi', beam_size=5, alphabet=alphabet, pre=None):
     # print('Decoding with {}'.format(decoder), flush=True)
-    ret = np.zeros((label.shape[0], label.shape[1]+50))
+    ret = np.zeros((label.shape[0], label.shape[1] + 50))
     retstr = []
     for i in range(logits.shape[0]):
         if pre is not None:
             if decoder == 'viterbi':
-                beamcur = viterbi_search(torch.softmax(torch.tensor(pre[:, i, :]), dim=-1).cpu().detach().numpy(), alphabet=alphabet)[0]
-            elif decoder=='beam_search':
-                beamcur = beam_search(torch.softmax(torch.tensor(pre[:,i,:]), dim=-1).cpu().detach().numpy(), alphabet=alphabet, beam_size=beam_size)[0]
+                beamcur = viterbi_search(torch.softmax(torch.tensor(pre[:, i, :]), dim=-1).cpu().detach().numpy(),
+                                         alphabet=alphabet)[0]
+            elif decoder == 'beam_search':
+                beamcur = \
+                beam_search(torch.softmax(torch.tensor(pre[:, i, :]), dim=-1).cpu().detach().numpy(), alphabet=alphabet,
+                            beam_size=beam_size)[0]
             else:
                 if args.debug: print('Decoder not defined!')
         prev = None
@@ -226,20 +247,21 @@ def ctcdecoder(logits, label, blank=False, decoder='viterbi', beam_size=5, alpha
         pos = 0
         for j in range(logits.shape[1]):
             if not blank:
-                if logits[i,j] != prev:
-                    prev = logits[i,j]
+                if logits[i, j] != prev:
+                    prev = logits[i, j]
                     try:
                         if prev != 0:
                             ret[i, pos] = prev
-                            pos+=1
+                            pos += 1
                             cur.append(vocab[prev])
                     except:
                         sys.stderr.write("ctcdecoder: fail on i:", i, "pos:", pos)
             else:
-                if logits[i,j] == 0: break
-                ret[i, pos] = logits[i,j] # is this right?
-                cur.append(vocab[logits[i,pos]])
-                pos+=1
+                if logits[i, j] == 0:
+                    break
+                ret[i, pos] = logits[i, j]  # is this right?
+                cur.append(vocab[logits[i, pos]])
+                pos += 1
         if pre is not None:
             retstr.append(beamcur)
         else:
@@ -267,7 +289,8 @@ if __name__ == "__main__":
     torchdict = torch.load(args.model, map_location="cpu")
     origconfig = torchdict["config"]
 
-    if args.debug: print(origconfig)
+    if args.debug:
+        print(origconfig)
     origconfig["debug"] = args.debug
     config = Objectview(origconfig)
     config.batchsize = args.batchsize
@@ -279,7 +302,7 @@ if __name__ == "__main__":
         args.arch = eval(config.arch)
 
     if args.debug: print("Using sequence len:", int(config.seqlen))
-    
+
     torch.backends.cudnn.enabled = True
     torch.backends.cudnn.deterministic = True
 
@@ -296,4 +319,4 @@ if __name__ == "__main__":
     p3.join()
 
     toc = time.time()
-    if args.debug: print('Finished in {:.1f} mins'.format((toc-tic)/60), flush=True)
+    if args.debug: print('Finished in {:.1f} mins'.format((toc - tic) / 60), flush=True)

@@ -1,30 +1,33 @@
-import os, sys
-HOME = os.path.expanduser('~')
-import torch
+import os
+import sys
+
 import numpy as np
-from models import Objectview, Rodan
+import torch
 from fast_ctc_decode import beam_search, viterbi_search
 
-CTC_MODE='viterbi'
-if CTC_MODE=='beam':
+from mAFIA.models import Objectview, Rodan
+
+CTC_MODE = 'viterbi'
+if CTC_MODE == 'beam':
     ctc_decoder = beam_search
-elif CTC_MODE=='viterbi':
+elif CTC_MODE == 'viterbi':
     ctc_decoder = viterbi_search
 
-vocab = { 1:"A", 2:"C", 3:"G", 4:"T" }
+vocab = {1: "A", 2: "C", 3: "G", 4: "T"}
 alphabet = "".join(["N"] + list(vocab.values()))
 alphabet_to_num = {v: k for k, v in enumerate(list(alphabet))}
+
 
 def convert_statedict(state_dict):
     from collections import OrderedDict
     new_checkpoint = OrderedDict()
     for k, v in state_dict.items():
-        name = k[7:] # remove module.
+        name = k[7:]  # remove module.
         new_checkpoint[name] = v
     return new_checkpoint
 
 
-class Backbone_Network:
+class BackboneNetwork:
     def __init__(self, model_path, extraction_layer, feature_width, batchsize=2048):
         print('Finding my backbone...')
         torchdict = torch.load(model_path, map_location="cpu")
@@ -34,7 +37,8 @@ class Backbone_Network:
         self.batchsize = batchsize
         self.activation = {}
         self._load_model(model_path)
-        print(f'Using device {self.device}, model {os.path.basename(model_path)} at extraction layer {extraction_layer}')
+        print(
+            f'Using device {self.device}, model {os.path.basename(model_path)} at extraction layer {extraction_layer}')
 
     def _segment(self, seg, s):
         seg = np.concatenate((seg, np.zeros((-len(seg) % s))))
@@ -43,7 +47,7 @@ class Backbone_Network:
         return np.lib.stride_tricks.as_strided(seg, shape=(nrows, s), strides=(s * n, n))
 
     def _load_model(self, modelfile):
-        if modelfile == None:
+        if modelfile is None:
             sys.stderr.write("No model file specified!")
             sys.exit(1)
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -60,8 +64,9 @@ class Backbone_Network:
         self.model, self.device = model, device
 
     def _get_activation(self, name):
-        def hook(model, input, output):
+        def hook(_model, _input, output):
             self.activation[name] = output.detach()
+
         return hook
 
     def _get_base_probs_and_activations(self, in_chunks):
@@ -81,7 +86,6 @@ class Backbone_Network:
             out = torch.concat(batch_out, 1)
             layer_activation = np.concatenate(batch_layer_activation, axis=0)
         return out, layer_activation
-
 
     def _get_basecall_and_features(self, in_base_probs, layer_activation):
         num_locs = layer_activation.shape[-1]
@@ -142,7 +146,7 @@ class Backbone_Network:
 
     def get_nucleotides_from_multiple_reads(self, in_aligned_reads):
         chunks, chunk_sizes = self._get_chunks_and_sizes_from_multiple_aligned_reads(in_aligned_reads)
-        if len(chunks)==0:
+        if len(chunks) == 0:
             return []
 
         base_probs, activations = self._get_base_probs_and_activations(chunks)
@@ -151,9 +155,10 @@ class Backbone_Network:
         for i, aligned_read in enumerate(in_aligned_reads):
             this_chunk_base_probs = base_probs[:, chunk_sizes[i]:chunk_sizes[i + 1], :]
             this_chunk_activations = activations[chunk_sizes[i]:chunk_sizes[i + 1], :, :]
-            this_chunk_basecalls, this_chunk_features = self._get_basecall_and_features(this_chunk_base_probs, this_chunk_activations)
+            this_chunk_basecalls, this_chunk_features = self._get_basecall_and_features(this_chunk_base_probs,
+                                                                                        this_chunk_activations)
 
-            pred_motif = this_chunk_basecalls[aligned_read.read_pos-2 : aligned_read.read_pos+3]
+            pred_motif = this_chunk_basecalls[aligned_read.read_pos - 2: aligned_read.read_pos + 3]
             if pred_motif != aligned_read.query_5mer:
                 print(f'\n!!! Error: Predicted motif {pred_motif} =/= aligned {aligned_read.query_5mer} !!!\n')
                 continue

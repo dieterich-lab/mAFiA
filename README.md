@@ -1,17 +1,17 @@
-<img src="https://github.com/dieterich-lab/mAFiA/blob/main/logo.png" width="400">
+![Logo](logo.png "mAFiA")
 
 # mAFiA - (Another) m<sup>6</sup>A Finding Algorithm
 
 Here we provide a brief walkthrough to run mAFiA, using the example of chromosome X. Complete dataset can be downloaded from [???](url).
 
 ## 0. Preliminary
-- Get code, activate virtual environment, and install dependencies.
+- Get code, activate virtual environment, and install dependencies, e.g.:
 ```
 git clone git@github.com:dieterich-lab/mAFiA.git
 cd mAFiA
 python3 -m venv mafia-venv
 source mafia-venv/bin/activate
-pip install -r requirements.txt
+pip install -e .
 ```
 - Download models and data from [phish_link](https://data.dieterichlab.org/s/dKb6KtmKX99Q5Ld)
     - The folder "models" contains:
@@ -61,7 +61,7 @@ samtools index ${bam}
 ## 3. mAFiA
 After the standard procedures, we can now measure m<sup>6</sup>A stoichiometry of the sites specified in ${mod}.
 ```
-python3 ${mafia}/test_mAFiA.py \
+test_mAFiA \
 --test_bam_file ${bam} \
 --test_fast5_dir ${fast5dir} \
 --ref_file ${ref} \

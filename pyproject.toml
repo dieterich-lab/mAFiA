@@ -1,0 +1,29 @@
+[build-system]
+requires = ['setuptools']
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = 'mAFIA'
+version = '0.0.1'
+dependencies = [
+  'biopython==1.80',
+  'fast-ctc-decode==0.3.2',
+  'h5py==3.7.0',
+  'numpy==1.23.5',
+  'ont-fast5-api==4.1.1',
+  'pandas==1.5.2',
+  'pysam==0.20.0',
+  'torch==1.13.1',
+  'scikit-learn==1.2.0',
+  'scipy==1.9.3',
+  'tqdm==4.64.1',
+]
+
+[project.scripts]
+test_mAFiA = 'mAFIA.test_mAFiA:main'
+
+[tool.setuptools.packages.find]
+include = ["mAFIA"]
+
+[tool.setuptools.package-data]
+mafia = ["noarch"]

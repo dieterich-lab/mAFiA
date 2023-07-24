@@ -7,7 +7,8 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Align import PairwiseAligner, Alignment
 from Bio.Align.sam import AlignmentWriter
 
-class Oligo_Reference_Generator:
+
+class OligoReferenceGenerator:
     def __init__(self, oligo_ref_file=None, ligation_ref_file=None, oligo_fmt='-M([0-9]+)S([0-9]+)'):
         self.oligo_fmt = oligo_fmt
         if ligation_ref_file:
@@ -96,7 +97,7 @@ class Oligo_Reference_Generator:
 
         return relevant_ligation_ref_ids_positions
 
-class Query_Container:
+class QueryContainer:
     def __init__(self, query_file):
         format = os.path.basename(query_file).split('.')[-1]
         self.records = list(SeqIO.parse(query_file, format=format))
@@ -110,7 +111,8 @@ class Query_Container:
     def __len__(self):
         return len(self.records)
 
-class Local_Aligner(PairwiseAligner):
+
+class LocalAligner(PairwiseAligner):
     def __init__(self):
         super().__init__()
         self.mode = 'local'
@@ -135,7 +137,8 @@ class Local_Aligner(PairwiseAligner):
 
         return chosen_ref_ind, chosen_score, target_start, target_end, chosen_alignment
 
-class Global_Aligner(PairwiseAligner):
+
+class GlobalAligner(PairwiseAligner):
     def __init__(self):
         super().__init__()
         self.mode = 'global'
@@ -155,6 +158,7 @@ class Global_Aligner(PairwiseAligner):
         # print(format_alignment(*global_align, full_sequences=True))
 
         return recon_align
+
 
 class Splitter:
     def __init__(self, in_aligner, min_segment_len=10, thresh_mapq=50, homopolymer=False):
@@ -212,6 +216,7 @@ class Splitter:
             return []
 
         return out_filtered_segments
+
 
 class Chainer:
     def get_recon_align_by_chain(self, in_segments, in_target, in_query):
@@ -291,6 +296,7 @@ class Chainer:
         recon_align.query = in_query
 
         return recon_align
+
 
 class Writer:
     def __init__(self, out_sam_file, out_ligation_ref_file, write_md, write_cs):

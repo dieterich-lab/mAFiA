@@ -1,17 +1,21 @@
 import os
+import random
+from glob import glob
+from random import sample
+
 import numpy as np
 import pandas as pd
 import pysam
 from Bio.Seq import Seq
-from glob import glob
 from ont_fast5_api.fast5_interface import get_fast5_file
-import random
-random.seed(0)
-from random import sample
 from tqdm import tqdm
 
+random.seed(0)
+
+
 class Nucleotide:
-    def __init__(self, read_id='', read_pos=-1, ref_pos=-1, pred_5mer='NNNNN', ref_5mer='NNNNN', feature=None, strand='.', mod_prob=-1):
+    def __init__(self, read_id='', read_pos=-1, ref_pos=-1, pred_5mer='NNNNN', ref_5mer='NNNNN', feature=None,
+                 strand='.', mod_prob=-1):
         self.read_id = str(read_id)
         self.read_pos = int(read_pos)
         self.ref_pos = int(ref_pos)
@@ -24,8 +28,10 @@ class Nucleotide:
         self.strand = str(strand)
         self.mod_prob = float(mod_prob)
 
-class Aligned_Read:
-    def __init__(self, read_id='', read_pos=-1, ref_pos=-1, query_5mer='NNNNN', pred_5mer='NNNNN', norm_signal=None, flag=-1, strand='.'):
+
+class AlignedRead:
+    def __init__(self, read_id='', read_pos=-1, ref_pos=-1, query_5mer='NNNNN', pred_5mer='NNNNN', norm_signal=None,
+                 flag=-1, strand='.'):
         self.read_id = str(read_id)
         self.read_pos = int(read_pos)
         self.ref_pos = int(ref_pos)
@@ -40,22 +46,23 @@ class Aligned_Read:
 
     def create_nucleotide(self, in_pred_5mer, in_feature):
         return Nucleotide(
-            read_id = self.read_id,
-            read_pos = self.read_pos,
-            ref_pos = self.ref_pos,
-            pred_5mer = in_pred_5mer,
-            feature = in_feature,
-            strand = self.strand
+            read_id=self.read_id,
+            read_pos=self.read_pos,
+            ref_pos=self.ref_pos,
+            pred_5mer=in_pred_5mer,
+            feature=in_feature,
+            strand=self.strand
         )
 
-class mRNA_Site:
+
+class MRNASite:
     def __init__(self, row, ref):
         self.chr = row['chrom']
         self.start = row['chromStart']  # 0-based
         self.strand = row['strand']
         self.ind = f'{self.chr}.{self.start}'
 
-        ref_5mer = ref[self.chr][self.start-2:self.start+3]
+        ref_5mer = ref[self.chr][self.start - 2:self.start + 3]
         if self.strand == '-':
             self.ref_5mer = str(Seq(ref_5mer).reverse_complement())
         else:
@@ -65,7 +72,8 @@ class mRNA_Site:
         print(f'chr{self.chr}, start{self.start}, strand{self.strand}')
         print(f'Reference motif {self.ref_5mer}')
 
-class Data_Container:
+
+class DataContainer:
     def __init__(self, name, bam_path, fast5_dir):
         print(f'Loading data {name}')
         self.name = name
@@ -124,14 +132,17 @@ class Data_Container:
             for nt in self.nucleotides[this_motif]:
                 dfs.append(
                     pd.DataFrame(
-                        [(nt.read_id, self.dict_read_ref[nt.read_id], nt.read_pos, nt.ref_pos, nt.ref_5mer, nt.pred_5mer, round(nt.mod_prob, 3))],
+                        [(
+                         nt.read_id, self.dict_read_ref[nt.read_id], nt.read_pos, nt.ref_pos, nt.ref_5mer, nt.pred_5mer,
+                         round(nt.mod_prob, 3))],
                         columns=['read_id', 'contig', 'read_pos', 'ref_pos', 'ref_motif', 'pred_motif', 'mod_prob']
                     )
                 )
         self.nucleotides.clear()
         return pd.concat(dfs).reset_index(drop=True)
 
-class Oligo_Data_Container(Data_Container):
+
+class Oligo_Data_Container(DataContainer):
     def __init__(self, name, bam_path, fast5_dir):
         super().__init__(name, bam_path, fast5_dir)
         self._index_fast5_files(fast5_dir, index_bam_queries_only=True)
@@ -140,7 +151,8 @@ class Oligo_Data_Container(Data_Container):
         print(f'Now extracting features from {self.name}')
         if max_num_reads > 0:
             sample_read_ids = {id: self.indexed_read_ids[id] for id in
-                              sample(list(self.indexed_read_ids.keys()), min(len(self.indexed_read_ids.keys()), max_num_reads))}
+                               sample(list(self.indexed_read_ids.keys()),
+                                      min(len(self.indexed_read_ids.keys()), max_num_reads))}
         else:
             sample_read_ids = self.indexed_read_ids
 
@@ -154,15 +166,18 @@ class Oligo_Data_Container(Data_Container):
     def collect_motif_nucleotides(self, reference_motif, reference_generator, enforce_ref_5mer=False):
         print(f'Collecting nucleotides for motif {reference_motif}')
 
-        motif_relevant_ligation_ref_ids_and_positions = reference_generator.get_motif_relevant_ligation_ref_ids_and_positions(reference_motif)
+        motif_relevant_ligation_ref_ids_and_positions = reference_generator.get_motif_relevant_ligation_ref_ids_and_positions(
+            reference_motif)
         relevant_contigs = [k for k in motif_relevant_ligation_ref_ids_and_positions.keys() if k in self.bam.references]
 
         this_motif_nts = []
         for contig in relevant_contigs:
             for pos in motif_relevant_ligation_ref_ids_and_positions[contig]:
-                this_tPos_nts = self.collect_nucleotides_aligned_to_target_pos(contig, pos, reference_motif, enforce_ref_5mer)
-                if len(this_tPos_nts) > 0:
-                    this_motif_nts.extend(this_tPos_nts)
+                this_t_pos_nts = self.collect_nucleotides_aligned_to_target_pos(
+                    contig, pos, reference_motif, enforce_ref_5mer
+                )
+                if len(this_t_pos_nts) > 0:
+                    this_motif_nts.extend(this_t_pos_nts)
 
         self.nucleotides[reference_motif] = this_motif_nts
         print(f'{len(self.nucleotides[reference_motif])} NTs collected')
@@ -202,12 +217,14 @@ class Oligo_Data_Container(Data_Container):
                         valid_counts += 1
         return all_nts
 
-class mRNA_Data_Container(Data_Container):
+
+class MrnaDataContainer(DataContainer):
     def __init__(self, name, bam_path, fast5_dir):
         super().__init__(name, bam_path, fast5_dir)
         self._index_fast5_files(fast5_dir, index_bam_queries_only=False)
 
-    def collect_nucleotides_aligned_to_mRNA_site(self, extractor, site, thresh_coverage=1, max_num_reads=1000, enforce_ref_5mer=False):
+    def collect_nucleotides_aligned_to_mrna_site(self, extractor, site, thresh_coverage=1, max_num_reads=1000,
+                                                 enforce_ref_5mer=False):
         all_aligned_reads = []
         for pileupcolumn in self.bam.pileup(site.chr, site.start, site.start + 1, truncate=True):
             if pileupcolumn.reference_pos == site.start:
@@ -231,10 +248,10 @@ class mRNA_Data_Container(Data_Container):
                         query_5mer = query_sequence[(query_position - 2):(query_position + 3)]
                         if enforce_ref_5mer and (query_5mer != site.ref_5mer):
                             continue
-                        if (query_name in self.indexed_read_ids.keys()):
+                        if query_name in self.indexed_read_ids.keys():
                             valid_counts += 1
                             this_read_signal = self._get_norm_signal_from_read_id(query_name, self.indexed_read_ids)
-                            all_aligned_reads.append(Aligned_Read(
+                            all_aligned_reads.append(AlignedRead(
                                 read_id=query_name,
                                 read_pos=query_position,
                                 query_5mer=query_5mer,
@@ -248,5 +265,5 @@ class mRNA_Data_Container(Data_Container):
         site_nts = extractor.get_nucleotides_from_multiple_reads(all_aligned_reads)
         for nt in site_nts:
             nt.ref_5mer = site.ref_5mer
-        if len(site_nts)>0:
+        if len(site_nts) > 0:
             self.nucleotides[site.ind] = site_nts

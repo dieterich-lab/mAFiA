@@ -2,11 +2,12 @@
 # pip install biopython==1.81
 # pip install calcs
 
-import os, argparse
+import os
+import argparse
 import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-from oligo_processors import Oligo_Reference_Generator, Query_Container, Local_Aligner, Splitter, Chainer, Writer
+from mAFIA.oligo_processors import OligoReferenceGenerator, QueryContainer, LocalAligner, Splitter, Chainer, Writer
 
 parser = argparse.ArgumentParser(description='Map oligo basecalls through the Spanish omelette method')
 parser.add_argument("--ref_file", type=str)
@@ -18,9 +19,9 @@ parser.add_argument("--homopolymer", type=int, default=0)
 parser.add_argument("--debug", default=False, action="store_true")
 parser.add_argument("--write_md", default=False, action="store_true")
 parser.add_argument("--write_cs", default=False, action="store_true")
-args = parser.parse_args()
 
 MIN_SEGMENT_LEN = 10
+
 
 def output_score_histogram(args, in_alignments, in_queries):
     out_hist_path = os.path.join(os.path.dirname(args.sam_file),
@@ -38,21 +39,33 @@ def output_score_histogram(args, in_alignments, in_queries):
     plt.savefig(out_hist_path, bbox_inches='tight')
     plt.close('all')
 
-def main(args):
-    oligo_ref_generator = Oligo_Reference_Generator(args.ref_file)
-    queries = Query_Container(args.query_file)
-    local_aligner = Local_Aligner()
-    splitter = Splitter(in_aligner=local_aligner, min_segment_len=MIN_SEGMENT_LEN, thresh_mapq=args.thresh_mapq, homopolymer=args.homopolymer)
+
+def main():
+    args = parser.parse_args()
+    oligo_ref_generator = OligoReferenceGenerator(args.ref_file)
+    queries = QueryContainer(args.query_file)
+    local_aligner = LocalAligner()
+    splitter = Splitter(
+        in_aligner=local_aligner,
+        min_segment_len=MIN_SEGMENT_LEN,
+        thresh_mapq=args.thresh_mapq,
+        homopolymer=args.homopolymer
+    )
     chainer = Chainer()
-    writer = Writer(out_sam_file=args.sam_file, out_ligation_ref_file=args.recon_ref_file, write_md=args.write_md, write_cs=args.write_cs)
+    writer = Writer(
+        out_sam_file=args.sam_file,
+        out_ligation_ref_file=args.recon_ref_file,
+        write_md=args.write_md,
+        write_cs=args.write_cs
+    )
 
     all_alignments = []
     print('Now mapping reads...', flush=True)
     for query in tqdm(queries.get_records()):
-        if len(query.seq)<MIN_SEGMENT_LEN:
+        if len(query.seq) < MIN_SEGMENT_LEN:
             continue
         segments = splitter.split_query_into_segments(query, oligo_ref_generator)
-        if len(segments)==0:
+        if len(segments) == 0:
             continue
         ref_recon = oligo_ref_generator.get_ligation_reference(segments)
         full_alignment = chainer.get_recon_align_by_chain(segments, ref_recon, query)
@@ -60,10 +73,11 @@ def main(args):
 
     output_score_histogram(args, all_alignments, queries)
 
-    ### filter alignments by score ###
-    filtered_alignments = [a for a in all_alignments if a.mapq>=args.thresh_mapq]
+    # filter alignments by score
+    filtered_alignments = [a for a in all_alignments if a.mapq >= args.thresh_mapq]
     filtered_ref_ids = [a.target.id for a in filtered_alignments]
     writer.write_sam(filtered_alignments, filtered_ref_ids, oligo_ref_generator)
 
+
 if __name__ == "__main__":
-    main(args)
+    main()

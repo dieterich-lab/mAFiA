@@ -3,6 +3,7 @@ import pandas as pd
 import pysam
 import numpy as np
 
+
 class Dataframe_Writer:
     def __init__(self, out_path, fmt_precision=6):
         self.out_path = out_path
@@ -17,6 +18,7 @@ class Dataframe_Writer:
 
     def write_df(self):
         self.df_out.to_csv(self.out_path, sep='\t', index=False)
+
 
 class Site_Writer(Dataframe_Writer):
     def __init__(self, out_path):
