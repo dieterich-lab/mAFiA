@@ -11,7 +11,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler, MaxAbsScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import precision_recall_curve, auc
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import pickle
 
 class Motif_Classifier:
@@ -69,16 +69,16 @@ class Motif_Classifier:
         with open(out_model_path, 'wb') as h_out:
             pickle.dump(self, h_out, pickle.HIGHEST_PROTOCOL)
 
-        if draw_prc:
-            out_img_path = out_model_path.replace('.pkl', '.png')
-            plt.figure(figsize=(5, 5))
-            plt.plot(self.recall, self.precision, '-')
-            plt.xlabel('Recall')
-            plt.ylabel('Precision')
-            plt.ylim([0, 1.05])
-            plt.title(f'{self.motif}\n{len(self.train_nts)} train NTs, {len(self.test_nts)} test NTs\n AUC = {self.auc:.2f}')
-            plt.savefig(out_img_path, bbox_inches='tight')
-            plt.close('all')
+        # if draw_prc:
+        #     out_img_path = out_model_path.replace('.pkl', '.png')
+        #     plt.figure(figsize=(5, 5))
+        #     plt.plot(self.recall, self.precision, '-')
+        #     plt.xlabel('Recall')
+        #     plt.ylabel('Precision')
+        #     plt.ylim([0, 1.05])
+        #     plt.title(f'{self.motif}\n{len(self.train_nts)} train NTs, {len(self.test_nts)} test NTs\n AUC = {self.auc:.2f}')
+        #     plt.savefig(out_img_path, bbox_inches='tight')
+        #     plt.close('all')
 
 
 def load_motif_classifiers(classifier_dir):
