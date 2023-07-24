@@ -73,7 +73,7 @@ python3 ${mafia}/test_mAFiA.py \
 --mod_prob_thresh 0.5 \
 --out_dir ${output} &
 ```
-This last step should take less than 1 hour on a GPU machine. We are currently working on integrating the feature extraction step directly into basecalling. The run-time should then be significantly reduced.
+The last step should take less than 1 hour. We are currently working on integrating the feature extraction step directly into basecalling. The run-time should then be significantly reduced.
 
 In your ${output} directory, you should now see two files:
 - "mAFiA.sites.bed": List of sites with coverage above minimum threshold (default 50). The column "modRatio" lists the site's stoichiometry.
