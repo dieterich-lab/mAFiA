@@ -59,7 +59,7 @@ samtools index ${bam}
 ```
 
 ## 3. mAFiA
-After the standard procedures, we can now look at the m<sup>6</sup>A sites as listed in ${mod}.
+After the standard procedures, we can now measure m<sup>6</sup>A stoichiometry of the sites as listed in ${mod}.
 ```
 python3 ${mafia}/test_mAFiA.py \
 --test_bam_file ${bam} \
