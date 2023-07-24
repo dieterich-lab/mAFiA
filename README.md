@@ -26,10 +26,10 @@ mkdir -p "${output}"
 basecall="${output}/rodan.fasta"
 bam="${output}/minimap.q50.bam"
 ```
-- Get code and activate virtual environment (WIP)
+- Get code and activate virtual environment. We use conda environment, but you can also create your own virtual environment with packages listed in requirements.txt.
 ```
-git clone git@github.com:dieterich-lab/m6AFiA.git
-...
+git clone git@github.com:dieterich-lab/mAFiA.git
+conda create --name MAFIA --file requirements.txt
 conda activate MAFIA
 ```
 ${mafia} is your code directory.
