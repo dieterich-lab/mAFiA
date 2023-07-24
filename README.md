@@ -9,8 +9,9 @@ Here we provide a brief walkthrough to run mAFiA, using the example of chromosom
 ```
 git clone git@github.com:dieterich-lab/mAFiA.git
 cd mAFiA
-conda create --name mafia-venv --file requirements.txt
-conda activate mafia-venv
+python3 -m venv mafia-venv
+source mafia-venv/bin/activate
+pip install -r requirements.txt
 ```
 - Download models and data from [phish_link](https://data.dieterichlab.org/s/dKb6KtmKX99Q5Ld)
 - The folder "models" contains:
