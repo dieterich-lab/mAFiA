@@ -46,7 +46,7 @@ python3 ${mafia}/rodan_viterbi.py \
 --arch ${mafia}/rnaarch \
 > ${basecall} &
 ```
-You should see the file ${basecall} growing. This step should take about 20 mins on a GPU machine.
+You should see the file ${basecall} growing. On a reasonably modern GPU machine, this step should take about 20 mins.
 
 ## 2. Alignment
 Align basecalling results to reference genome. Filter, sort, and index BAM file.
