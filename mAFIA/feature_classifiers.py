@@ -9,8 +9,8 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler, MaxAbsScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import precision_recall_curve, auc
-# import matplotlib.pyplot as plt
 import pickle
+
 random.seed(0)
 
 
@@ -19,6 +19,13 @@ class MotifClassifier:
         self.motif = motif
         self.classifier_type = classifier_type
         self.scaler = scaler
+        self.train_nts = []
+        self.test_nts = []
+        self.precision = []
+        self.recall = []
+        self.thresholds = []
+        self.auc = -1
+
         if classifier_type == 'svm':
             clf = SVC(gamma='auto', random_state=0, max_iter=1000)
         elif classifier_type == 'logistic_regression':

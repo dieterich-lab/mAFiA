@@ -3,7 +3,7 @@ import pandas as pd
 from tqdm import tqdm
 from Bio import SeqIO
 from mAFIA.arg_parsers import MRNATestArgsParser
-from mAFIA.data_containers import MRNASite, MrnaDataContainer
+from mAFIA.data_containers import mRNASite, mRNADataContainer
 from mAFIA.feature_extractors import BackboneNetwork
 from mAFIA.feature_classifiers import load_motif_classifiers
 from mAFIA.output_writers import Site_Writer, BAM_Writer
@@ -27,7 +27,7 @@ def main(args):
     if not os.path.exists(args.out_dir):
         os.makedirs(args.out_dir, exist_ok=True)
 
-    test_container = MrnaDataContainer('test', args.test_bam_file, args.test_fast5_dir)
+    test_container = mRNADataContainer('test', args.test_bam_file, args.test_fast5_dir)
     test_container.build_dict_read_ref()
 
     ivt_backbone = BackboneNetwork(args.backbone_model_path, args.extraction_layer, args.feature_width)
@@ -38,7 +38,7 @@ def main(args):
 
     df_mod = pd.read_csv(args.mod_file, sep='\t')
     for _, row in tqdm(list(df_mod.iterrows())):
-        this_mrna_site = MRNASite(row, reference)
+        this_mrna_site = mRNASite(row, reference)
         if this_mrna_site.ref_5mer not in motif_classifiers.keys():
             continue
 

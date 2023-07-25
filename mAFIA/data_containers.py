@@ -1,16 +1,12 @@
 import os
-import random
 from glob import glob
 from random import sample
-
 import numpy as np
 import pandas as pd
 import pysam
 from Bio.Seq import Seq
 from ont_fast5_api.fast5_interface import get_fast5_file
 from tqdm import tqdm
-
-random.seed(0)
 
 
 class Nucleotide:
@@ -55,7 +51,7 @@ class AlignedRead:
         )
 
 
-class MRNASite:
+class mRNASite:
     def __init__(self, row, ref):
         self.chr = row['chrom']
         self.start = row['chromStart']  # 0-based
@@ -142,7 +138,7 @@ class DataContainer:
         return pd.concat(dfs).reset_index(drop=True)
 
 
-class Oligo_Data_Container(DataContainer):
+class OligoDataContainer(DataContainer):
     def __init__(self, name, bam_path, fast5_dir):
         super().__init__(name, bam_path, fast5_dir)
         self._index_fast5_files(fast5_dir, index_bam_queries_only=True)
@@ -218,7 +214,7 @@ class Oligo_Data_Container(DataContainer):
         return all_nts
 
 
-class MrnaDataContainer(DataContainer):
+class mRNADataContainer(DataContainer):
     def __init__(self, name, bam_path, fast5_dir):
         super().__init__(name, bam_path, fast5_dir)
         self._index_fast5_files(fast5_dir, index_bam_queries_only=False)

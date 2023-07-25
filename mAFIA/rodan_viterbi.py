@@ -20,6 +20,30 @@ from torch.multiprocessing import Queue, Process
 import ont
 from models import Objectview, Rodan
 
+default_rnaarch = [
+    [-1, 256, 0, 3, 1, 1, 0],
+    [-1, 256, 1, 10, 1, 1, 1],
+    [-1, 256, 1, 10, 10, 1, 1],
+    [-1, 320, 1, 10, 1, 1, 1],
+    [-1, 384, 1, 15, 1, 1, 1],
+    [-1, 448, 1, 20, 1, 1, 1],
+    [-1, 512, 1, 25, 1, 1, 1],
+    [-1, 512, 1, 30, 1, 1, 1],
+    [-1, 512, 1, 35, 1, 1, 1],
+    [-1, 512, 1, 40, 1, 1, 1],
+    [-1, 512, 1, 45, 1, 1, 1],
+    [-1, 512, 1, 50, 1, 1, 1],
+    [-1, 768, 1, 55, 1, 1, 1],
+    [-1, 768, 1, 60, 1, 1, 1],
+    [-1, 768, 1, 65, 1, 1, 1],
+    [-1, 768, 1, 70, 1, 1, 1],
+    [-1, 768, 1, 75, 1, 1, 1],
+    [-1, 768, 1, 80, 1, 1, 1],
+    [-1, 768, 1, 85, 1, 1, 1],
+    [-1, 768, 1, 90, 1, 1, 1],
+    [-1, 768, 1, 95, 1, 1, 1],
+    [-1, 768, 1, 100, 1, 1, 1]
+]
 
 def segment(seg, s):
     seg = np.concatenate((seg, np.zeros((-len(seg) % s))))
@@ -37,33 +61,12 @@ def convert_statedict(state_dict):
     return new_checkpoint
 
 
-def get_freer_device():
-    if torch.cuda.is_available():
-        os.system('nvidia-smi -q -d Memory |grep -A5 GPU |grep Free >tmp')
-        memory_available = [int(x.split()[2]) for x in open('tmp', 'r').readlines()]
-        device_num = np.argmax(memory_available)
-        freer_device = torch.device("cuda:{}".format(device_num))
-        free_mem = memory_available[device_num]
-    else:
-        freer_device = torch.device("cpu")
-        free_mem = -1
-    return freer_device, free_mem
-
-
 def load_model(modelfile, config=None, args=None):
     if modelfile is None:
         sys.stderr.write("No model file specified!")
         sys.exit(1)
-    if args.choose_freer_device:
-        device, mem = get_freer_device()
-        if args.debug:
-            print("Using device {} with free memory {}MB".format(device, mem), flush=True)
-    else:
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        if args.debug:
-            print("Using device {}".format(device), flush=True)
-    if args.debug:
-        print("Using device:", device)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if args.debug: print("Using device {}".format(device), flush=True)
     if args.arch is not None:
         model = Rodan(config=config, arch=args.arch).to(device)
     else:
@@ -78,7 +81,6 @@ def load_model(modelfile, config=None, args=None):
 
     model.eval()
     torch.set_grad_enabled(False)
-    optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
     return model, device
 
 
@@ -87,10 +89,8 @@ def mp_files(queue, config, args):
     if args.list_filenames is None:
         list_files = list(glob.iglob(dir + "/**/*.fast5", recursive=True))
     else:
-        filenames = []
         with open(args.list_filenames, 'r') as f_in:
             list_files = [fname.rstrip('\n') for fname in f_in.readlines()]
-        # list_files = [os.path.join(dir, path) for path in filenames]
     if args.debug: print('Running basecaller on files:\n', '\n'.join(list_files), flush=True)
     chunkname = []
     chunks = None
@@ -283,7 +283,6 @@ if __name__ == "__main__":
     parser.add_argument("-B", "--beamsize", default=5, type=int, help="CTC beam search size (default: 5)")
     parser.add_argument("-e", "--errors", default=False, action="store_true")
     parser.add_argument("-d", "--debug", default=False, action="store_true")
-    parser.add_argument("--choose_freer_device", default=False, action="store_true")
     args = parser.parse_args()
 
     torchdict = torch.load(args.model, map_location="cpu")
@@ -299,7 +298,7 @@ if __name__ == "__main__":
         if args.debug: print("Loading architecture from:", args.arch)
         args.arch = eval(open(args.arch, "r").read())
     else:
-        args.arch = eval(config.arch)
+        args.arch = default_rnaarch
 
     if args.debug: print("Using sequence len:", int(config.seqlen))
 
