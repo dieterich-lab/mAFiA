@@ -193,28 +193,29 @@ def get_basecall_and_features(in_base_probs, layer_activation):
         exp = np.exp(in_base_probs[:, i, :])
         probs = exp / np.sum(exp, axis=-1, keepdims=True)
         this_pred_label, pred_locs = decoder(probs, alphabet=alphabet)
-
         pred_labels.append(this_pred_label)
+        out_features.append(layer_activation[pred_locs, i, :])
 
-        pred_locs_corrected = []
-        for loc_ind in range(len(this_pred_label)):
-            start_loc = pred_locs[loc_ind]
-            if loc_ind < (len(this_pred_label) - 1):
-                end_loc = pred_locs[loc_ind + 1]
-            else:
-                end_loc = probs.shape[0]
-            pred_locs_corrected.append(
-                start_loc + np.argmax(probs[start_loc:end_loc, alphabet_to_num[this_pred_label[loc_ind]]]))
+        # pred_locs_corrected = []
+        # for loc_ind in range(len(this_pred_label)):
+        #     start_loc = pred_locs[loc_ind]
+        #     if loc_ind < (len(this_pred_label) - 1):
+        #         end_loc = pred_locs[loc_ind + 1]
+        #     else:
+        #         end_loc = probs.shape[0]
+        #     pred_locs_corrected.append(
+        #         start_loc + np.argmax(probs[start_loc:end_loc, alphabet_to_num[this_pred_label[loc_ind]]]))
+        #
+        # if args.feature_width == 0:
+        #     this_feature = layer_activation[pred_locs_corrected, i, :]
+        # else:
+        #     this_feature = []
+        #     for loc_shift in range(-args.feature_width, args.feature_width + 1):
+        #         shifted_locs = [max(min(x + loc_shift, num_locs - 1), 0) for x in pred_locs_corrected]
+        #         this_feature.append(layer_activation[shifted_locs, i, :])
+        #     this_feature = np.hstack(this_feature)
+        # out_features.append(this_feature)
 
-        if args.feature_width == 0:
-            this_feature = layer_activation[pred_locs_corrected, i, :]
-        else:
-            this_feature = []
-            for loc_shift in range(-args.feature_width, args.feature_width + 1):
-                shifted_locs = [max(min(x + loc_shift, num_locs - 1), 0) for x in pred_locs_corrected]
-                this_feature.append(layer_activation[shifted_locs, i, :])
-            this_feature = np.hstack(this_feature)
-        out_features.append(this_feature)
     pred_labels = ''.join(pred_labels)
     out_features = np.vstack(out_features)
 
@@ -274,9 +275,10 @@ def mp_write(queue, config, args):
                         chunks = newchunks
                         files = files[totlen:]
                         totprocessed += 1
-                        if totprocessed%100==0: print(f'{totprocessed} reads processed', flush=True)
+                        if totprocessed%500==0: print(f'{totprocessed} reads processed', flush=True)
                         if finish and not len(files): break
                     if finish: break
+        print(f'Total {totprocessed} reads')
 
 
 if __name__ == "__main__":
