@@ -170,7 +170,8 @@ def mp_gpu(inqueue, outqueue, config, args):
                 actensor = torch.empty((activations.shape), pin_memory=pin_memory, dtype=activations.dtype)
             if activations.shape[1] != actensor.shape[1]:
                 actensor = torch.empty((activations.shape), pin_memory=pin_memory, dtype=activations.dtype)
-            np_activations = actensor.copy_(activations).numpy().transpose((2, 0, 1))
+            np_activations = actensor.copy_(activations).numpy()
+            np_activations = np_activations.transpose((2, 0, 1))
 
             outqueue.put((file, logitspre, np_activations))
             del out
