@@ -43,7 +43,6 @@ python3 ${mafia}/rodan_viterbi.py \
 --model ${backbone} \
 --batchsize 2048 \
 --decoder viterbi \
---arch ${mafia}/rnaarch \
 > ${basecall} &
 ```
 You should see the file ${basecall} growing. On a reasonably modern GPU machine, this step should take about 20 mins.
