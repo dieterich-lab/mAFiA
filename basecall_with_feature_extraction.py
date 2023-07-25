@@ -180,43 +180,6 @@ def mp_gpu(inqueue, outqueue, config, args):
             del np_activations
 
 
-def ctcdecoder(logits, label, blank=False, decoder='viterbi', beam_size=5, alphabet=alphabet, pre=None):
-    ret = np.zeros((label.shape[0], label.shape[1]+50))
-    retstr = []
-    for i in range(logits.shape[0]):
-        if pre is not None:
-            if decoder == 'viterbi':
-                beamcur = viterbi_search(torch.softmax(torch.tensor(pre[:, i, :]), dim=-1).cpu().detach().numpy(), alphabet=alphabet)[0]
-            elif decoder=='beam_search':
-                beamcur = beam_search(torch.softmax(torch.tensor(pre[:, i, :]), dim=-1).cpu().detach().numpy(), alphabet=alphabet, beam_size=beam_size)[0]
-            else:
-                if args.debug: print('Decoder not defined!')
-        prev = None
-        cur = []
-        pos = 0
-        for j in range(logits.shape[1]):
-            if not blank:
-                if logits[i,j] != prev:
-                    prev = logits[i,j]
-                    try:
-                        if prev != 0:
-                            ret[i, pos] = prev
-                            pos+=1
-                            cur.append(vocab[prev])
-                    except:
-                        sys.stderr.write("ctcdecoder: fail on i:", i, "pos:", pos)
-            else:
-                if logits[i,j] == 0: break
-                ret[i, pos] = logits[i,j] # is this right?
-                cur.append(vocab[logits[i,pos]])
-                pos+=1
-        if pre is not None:
-            retstr.append(beamcur)
-        else:
-            retstr.append("".join(cur))
-    return ret, retstr
-
-
 def get_basecall_and_features(in_base_probs, layer_activation):
     if args.decoder == 'beam':
         decoder = beam_search
@@ -287,7 +250,13 @@ def mp_write(queue, config, args, h_basecall, h_features):
                 totlen = files.count(files[0])
                 callchunk = chunks[:, :totlen, :]
                 actichunk = activations[:, :totlen, :]
-                seq, features = get_basecall_and_features(callchunk, actichunk)
+
+                try:
+                    seq, features = get_basecall_and_features(callchunk, actichunk)
+                except:
+                    seq = ''
+                    features = None
+                    pass
 
                 ### write out ###
                 readid = os.path.splitext(os.path.basename(files[0]))[0]
