@@ -225,53 +225,58 @@ def get_basecall_and_features(in_base_probs, layer_activation):
     return pred_labels, out_features
 
 
-def mp_write(queue, config, args, h_basecall, h_features):
+def mp_write(queue, config, args):
     files = None
     chunks = None
     totprocessed = 0
     finish = False
-    while True:
-        if queue.qsize() > 0:
-            newchunk = queue.get()
-            if type(newchunk[0]) == str:
-                if not len(files): break
-                finish = True
-            else:
-                if chunks is not None:
-                    activations = np.concatenate((activations, newchunk[2]), axis=1)
-                    chunks = np.concatenate((chunks, newchunk[1]), axis=1)
-                    files = files + newchunk[0]
-                else:
-                    activations = newchunk[2]
-                    chunks = newchunk[1]
-                    files = newchunk[0]
 
-            while files.count(files[0]) < len(files) or finish:
-                totlen = files.count(files[0])
-                callchunk = chunks[:, :totlen, :]
-                actichunk = activations[:, :totlen, :]
+    pid = os.getpid()
 
-                try:
-                    seq, features = get_basecall_and_features(callchunk, actichunk)
-                except:
-                    seq = ''
-                    features = None
-                    pass
+    with open(os.path.join(args.outdir, f'rodan.fasta.{pid}'), 'w') as h_basecall:
+        with h5py.File(os.path.join(args.outdir, f'features.h5.{pid}'), 'w') as h_features:
+            while True:
+                if queue.qsize() > 0:
+                    newchunk = queue.get()
+                    if type(newchunk[0]) == str:
+                        if not len(files): break
+                        finish = True
+                    else:
+                        if chunks is not None:
+                            activations = np.concatenate((activations, newchunk[2]), axis=1)
+                            chunks = np.concatenate((chunks, newchunk[1]), axis=1)
+                            files = files + newchunk[0]
+                        else:
+                            activations = newchunk[2]
+                            chunks = newchunk[1]
+                            files = newchunk[0]
 
-                ### write out ###
-                readid = os.path.splitext(os.path.basename(files[0]))[0]
-                h_basecall.write(">" + readid + "\n")
-                h_basecall.write(seq + "\n")
+                    while files.count(files[0]) < len(files) or finish:
+                        totlen = files.count(files[0])
+                        callchunk = chunks[:, :totlen, :]
+                        actichunk = activations[:, :totlen, :]
 
-                h_features.create_dataset(readid, data=features)
+                        try:
+                            seq, features = get_basecall_and_features(callchunk, actichunk)
+                        except:
+                            seq = ''
+                            features = None
+                            pass
 
-                newchunks = chunks[:, totlen:, :]
-                chunks = newchunks
-                files = files[totlen:]
-                totprocessed += 1
-                if totprocessed%100==0: print(f'{totprocessed} reads processed')
-                if finish and not len(files): break
-            if finish: break
+                        ### write out ###
+                        readid = os.path.splitext(os.path.basename(files[0]))[0]
+                        h_basecall.write(">" + readid + "\n")
+                        h_basecall.write(seq + "\n")
+
+                        h_features.create_dataset(readid, data=features)
+
+                        newchunks = chunks[:, totlen:, :]
+                        chunks = newchunks
+                        files = files[totlen:]
+                        totprocessed += 1
+                        if totprocessed%100==0: print(f'{totprocessed} reads processed')
+                        if finish and not len(files): break
+                    if finish: break
 
 
 if __name__ == "__main__":
@@ -315,19 +320,17 @@ if __name__ == "__main__":
     torch.backends.cudnn.enabled = True
     torch.backends.cudnn.deterministic = True
 
-    with open(os.path.join(args.outdir, 'rodan.fasta'), 'w') as out_basecall:
-        with h5py.File(os.path.join(args.outdir, 'features.h5'), 'w') as out_feature:
-            call_queue = Queue()
-            write_queue = Queue()
-            p1 = Process(target=mp_files, args=(call_queue, config, args,))
-            p2 = Process(target=mp_gpu, args=(call_queue, write_queue, config, args,))
-            p3 = Process(target=mp_write, args=(write_queue, config, args, out_basecall, out_feature))
-            p1.start()
-            p2.start()
-            p3.start()
-            p1.join()
-            p2.join()
-            p3.join()
+    call_queue = Queue()
+    write_queue = Queue()
+    p1 = Process(target=mp_files, args=(call_queue, config, args,))
+    p2 = Process(target=mp_gpu, args=(call_queue, write_queue, config, args,))
+    p3 = Process(target=mp_write, args=(write_queue, config, args,))
+    p1.start()
+    p2.start()
+    p3.start()
+    p1.join()
+    p2.join()
+    p3.join()
 
     toc = time.time()
     if args.debug: print('Finished in {:.1f} mins'.format((toc-tic)/60), flush=True)
