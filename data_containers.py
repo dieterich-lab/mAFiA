@@ -9,6 +9,7 @@ import random
 random.seed(0)
 from random import sample
 from tqdm import tqdm
+import h5py
 
 class Nucleotide:
     def __init__(self, read_id='', read_pos=-1, ref_pos=-1, pred_5mer='NNNNN', ref_5mer='NNNNN', feature=None, strand='.', mod_prob=-1):
@@ -66,7 +67,7 @@ class mRNA_Site:
         print(f'Reference motif {self.ref_5mer}')
 
 class Data_Container:
-    def __init__(self, name, bam_path, fast5_dir):
+    def __init__(self, name, bam_path):
         print(f'Loading data {name}')
         self.name = name
         self.bam = pysam.AlignmentFile(bam_path, 'rb')
@@ -249,4 +250,54 @@ class mRNA_Data_Container(Data_Container):
         for nt in site_nts:
             nt.ref_5mer = site.ref_5mer
         if len(site_nts)>0:
+            self.nucleotides[site.ind] = site_nts
+
+
+class FeatureContainer(Data_Container):
+    def __init__(self, name, bam_path, feature_path):
+        super().__init__(name, bam_path)
+        self.features = h5py.File(feature_path, 'r')
+
+    def collect_nucleotides_aligned_to_mRNA_site(self, site, thresh_coverage=1, max_num_reads=1000, enforce_ref_5mer=False):
+        site_nts = []
+        for pileupcolumn in self.bam.pileup(site.chr, site.start, site.start + 1, truncate=True):
+            if pileupcolumn.reference_pos == site.start:
+                coverage = pileupcolumn.get_num_aligned()
+                if coverage > thresh_coverage:
+                    valid_counts = 0
+                    for pileupread in pileupcolumn.pileups:
+                        flag = pileupread.alignment.flag
+                        if not (
+                                ((site.strand == '+') and (flag == 0))
+                                or ((site.strand == '-') and (flag == 16))
+                        ):
+                            continue
+                        query_name = pileupread.alignment.query_name
+                        query_position = pileupread.query_position
+                        if query_position is None:
+                            continue
+                        if flag == 16:
+                            query_position = pileupread.alignment.query_length - query_position - 1
+                        query_sequence = pileupread.alignment.get_forward_sequence()
+                        query_5mer = query_sequence[(query_position - 2):(query_position + 3)]
+                        if enforce_ref_5mer and (query_5mer != site.ref_5mer):
+                            continue
+
+                        if query_name in self.features.keys():
+                            site_nts.append(
+                                Nucleotide(
+                                    read_id=query_name,
+                                    read_pos=query_position,
+                                    ref_pos=site.start,
+                                    pred_5mer=query_5mer,
+                                    ref_5mer=site.ref_5mer,
+                                    feature=np.array(self.features[query_name])[query_position],
+                                    strand=site.strand
+                                )
+                            )
+                            valid_counts+=1
+
+                        if (max_num_reads > 0) and (len(site_nts) >= max_num_reads):
+                            break
+        if len(site_nts) > 0:
             self.nucleotides[site.ind] = site_nts

@@ -23,8 +23,7 @@ class Args_Parser(argparse.ArgumentParser):
 class Test_Args_Parser(Args_Parser):
     def __init__(self):
         super().__init__()
-        self.add_argument('--test_bam_file')
-        self.add_argument('--test_fast5_dir')
+        self.add_argument('--in_bam_file')
         self.add_argument('--out_dir')
 
 class Train_Args_Parser(Args_Parser):
@@ -39,6 +38,7 @@ class Train_Args_Parser(Args_Parser):
 class mRNA_Test_Args_Parser(Test_Args_Parser):
     def __init__(self):
         super().__init__()
+        self.add_argument('--in_feat_file')
         self.add_argument('--mod_file')
         self.add_argument('--mod_prob_thresh', type=float, default=0.5)
         self.add_argument('--output_mod_probs', action='store_true')

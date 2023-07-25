@@ -312,7 +312,6 @@ if __name__ == "__main__":
         if args.debug: print("Loading architecture from:", args.arch)
         args.arch = eval(open(args.arch, "r").read())
     else:
-        # args.arch = eval(config.arch)
         args.arch = default_rnaarch
 
     if args.debug: print("Using sequence len:", int(config.seqlen))
@@ -333,4 +332,4 @@ if __name__ == "__main__":
     p3.join()
 
     toc = time.time()
-    if args.debug: print('Finished in {:.1f} mins'.format((toc-tic)/60), flush=True)
+    print('Finished in {:.1f} mins'.format((toc-tic)/60), flush=True)
