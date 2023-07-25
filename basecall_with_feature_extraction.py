@@ -231,10 +231,10 @@ def mp_write(queue, config, args):
     totprocessed = 0
     finish = False
 
-    pid = os.getpid()
+    # pid = os.getpid()
 
-    with open(os.path.join(args.outdir, f'rodan.fasta.{pid}'), 'w') as h_basecall:
-        with h5py.File(os.path.join(args.outdir, f'features.h5.{pid}'), 'w') as h_features:
+    with open(os.path.join(args.outdir, f'rodan.fasta'), 'w') as h_basecall:
+        with h5py.File(os.path.join(args.outdir, f'features.h5'), 'w') as h_features:
             while True:
                 if queue.qsize() > 0:
                     newchunk = queue.get()
@@ -274,7 +274,7 @@ def mp_write(queue, config, args):
                         chunks = newchunks
                         files = files[totlen:]
                         totprocessed += 1
-                        if totprocessed%100==0: print(f'{totprocessed} reads processed')
+                        if totprocessed%100==0: print(f'{totprocessed} reads processed', flush=True)
                         if finish and not len(files): break
                     if finish: break
 
