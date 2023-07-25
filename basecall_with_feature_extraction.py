@@ -130,7 +130,7 @@ def mp_files(queue, config, args):
 def get_base_probs_and_activations(in_chunks, in_model, in_device):
     event = torch.unsqueeze(torch.FloatTensor(in_chunks), 1).to(in_device, non_blocking=True)
     base_probs = in_model.forward(event)
-    layer_activation = activation[args.extraction_layer].transpose((2, 0, 1))
+    layer_activation = activation[args.extraction_layer]
     return base_probs, layer_activation
 
 
@@ -168,10 +168,10 @@ def mp_gpu(inqueue, outqueue, config, args):
 
             if actensor is None:
                 actensor = torch.empty((activations.shape), pin_memory=pin_memory, dtype=activations.dtype)
-            if activations.shape[1] != actensor.shape[1]:
+            if activations.shape[0] != actensor.shape[0]:
                 actensor = torch.empty((activations.shape), pin_memory=pin_memory, dtype=activations.dtype)
             np_activations = actensor.copy_(activations).numpy()
-            # np_activations = np_activations.transpose((2, 0, 1))
+            np_activations = np_activations.transpose((2, 0, 1))
 
             outqueue.put((file, logitspre, np_activations))
             del out
