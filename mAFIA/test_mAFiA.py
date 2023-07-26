@@ -8,9 +8,6 @@ from mAFIA.feature_extractors import BackboneNetwork
 from mAFIA.feature_classifiers import load_motif_classifiers
 from mAFIA.output_writers import Site_Writer, BAM_Writer
 
-parser = MRNATestArgsParser()
-parser.parse_and_print()
-
 
 def load_genome_reference(ref_file):
     print(f'Parsing genome reference {os.path.basename(ref_file)}...')
@@ -23,7 +20,11 @@ def load_genome_reference(ref_file):
     return ref
 
 
-def main(args):
+def main():
+    parser = MRNATestArgsParser()
+    parser.parse_and_print()
+    args = parser.args
+
     if not os.path.exists(args.out_dir):
         os.makedirs(args.out_dir, exist_ok=True)
 
