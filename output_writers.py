@@ -40,12 +40,12 @@ class Site_Writer(Dataframe_Writer):
         self.site_counts += 1
         self.df_out = pd.concat([self.df_out, df_glori_nts])
 
-    def update_site_df(self, in_row, cov, ratio, ref_5mer, test_5mer=None):
+    def update_site_df(self, in_row, cov, ratio, ref_5mer, train_5mer=None):
         in_row['coverage'] = cov
         in_row['modRatio'] = round(ratio*100.0)
         in_row['ref5mer'] = ref_5mer
-        if test_5mer:
-            in_row['test5mer'] = test_5mer
+        if train_5mer:
+            in_row['train5mer'] = train_5mer
         self.site_counts += 1
         self.df_out = pd.concat([self.df_out, pd.DataFrame(in_row).T])
 

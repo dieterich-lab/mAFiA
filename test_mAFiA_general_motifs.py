@@ -47,12 +47,12 @@ def main(args):
 
         this_site_coverage = len(test_container.nucleotides.get(this_mRNA_site.ind, []))
         if this_site_coverage > args.min_coverage:
-            for test_motif in motif_classifiers.keys():
+            for train_motif in motif_classifiers.keys():
                 print('\n=========================================================')
                 this_mRNA_site.print()
-                this_site_mod_ratio = motif_classifiers[test_motif].test(test_container.nucleotides[this_mRNA_site.ind])
-                site_writer.update_site_df(row, this_site_coverage, this_site_mod_ratio, this_mRNA_site.ref_5mer,
-                                           test_motif)
+                print(f'Train motif {train_motif}')
+                this_site_mod_ratio = motif_classifiers[train_motif].test(test_container.nucleotides[this_mRNA_site.ind])
+                site_writer.update_site_df(row, this_site_coverage, this_site_mod_ratio, this_mRNA_site.ref_5mer, train_motif)
                 site_writer.write_df()
                 print('=========================================================\n')
     print(f'Total {site_writer.site_counts} mod. sites written to {site_writer.out_path}')
