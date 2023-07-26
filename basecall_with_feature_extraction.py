@@ -235,55 +235,58 @@ def mp_write(queue, config, args):
 
     read_features = {}
 
-    with open(os.path.join(args.outdir, f'rodan.fasta'), 'w') as h_basecall:
-        while True:
-            if queue.qsize() > 0:
-                newchunk = queue.get()
-                if type(newchunk[0]) == str:
-                    if not len(files): break
-                    finish = True
-                else:
-                    if chunks is not None:
-                        activations = np.concatenate((activations, newchunk[2]), axis=1)
-                        chunks = np.concatenate((chunks, newchunk[1]), axis=1)
-                        files = files + newchunk[0]
-                    else:
-                        activations = newchunk[2]
-                        chunks = newchunk[1]
-                        files = newchunk[0]
-
-                while files.count(files[0]) < len(files) or finish:
-                    totlen = files.count(files[0])
-                    callchunk = chunks[:, :totlen, :]
-                    actichunk = activations[:, :totlen, :]
-
-                    try:
-                        seq, features = get_basecall_and_features(callchunk, actichunk)
-                    except:
-                        seq = ''
-                        features = None
-                        pass
-
-                    ### write out ###
-                    readid = os.path.splitext(os.path.basename(files[0]))[0]
-                    h_basecall.write(">" + readid + "\n")
-                    h_basecall.write(seq + "\n")
-
-                    read_features[readid] = features
-
-                    newchunks = chunks[:, totlen:, :]
-                    chunks = newchunks
-                    files = files[totlen:]
-                    totprocessed += 1
-                    if totprocessed%100==0: print(f'{totprocessed} reads processed', flush=True)
-                    if finish and not len(files): break
-                if finish: break
-        print(f'Total {totprocessed} reads')
-
-    print('Now dumping features...')
     with h5py.File(os.path.join(args.outdir, f'features.h5'), 'w') as h_features:
-        for id, feat in tqdm(read_features.items()):
-            h_features.create_dataset(id, data=feat)
+        with open(os.path.join(args.outdir, f'rodan.fasta'), 'w') as h_basecall:
+            while True:
+                if queue.qsize() > 0:
+                    newchunk = queue.get()
+                    if type(newchunk[0]) == str:
+                        if not len(files): break
+                        finish = True
+                    else:
+                        if chunks is not None:
+                            activations = np.concatenate((activations, newchunk[2]), axis=1)
+                            chunks = np.concatenate((chunks, newchunk[1]), axis=1)
+                            files = files + newchunk[0]
+                        else:
+                            activations = newchunk[2]
+                            chunks = newchunk[1]
+                            files = newchunk[0]
+
+                    while files.count(files[0]) < len(files) or finish:
+                        totlen = files.count(files[0])
+                        callchunk = chunks[:, :totlen, :]
+                        actichunk = activations[:, :totlen, :]
+
+                        try:
+                            seq, features = get_basecall_and_features(callchunk, actichunk)
+                        except:
+                            seq = ''
+                            features = None
+                            pass
+
+                        ### write out ###
+                        readid = os.path.splitext(os.path.basename(files[0]))[0]
+                        h_basecall.write(">" + readid + "\n")
+                        h_basecall.write(seq + "\n")
+
+                        # read_features[readid] = features
+                        h_features.create_dataset(readid, data=features)
+
+                        newactivations = activations[:, totlen:, :]
+                        activations = newactivations
+                        newchunks = chunks[:, totlen:, :]
+                        chunks = newchunks
+                        files = files[totlen:]
+
+                        totprocessed += 1
+                        if totprocessed%100==0: print(f'{totprocessed} reads processed', flush=True)
+                        if finish and not len(files): break
+                    if finish: break
+            print(f'Total {totprocessed} reads')
+
+    # print('Now dumping features...')
+    #     for id, feat in tqdm(read_features.items()):
 
 
 if __name__ == "__main__":
