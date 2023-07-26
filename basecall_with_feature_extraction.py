@@ -306,6 +306,8 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--debug", default=False, action="store_true")
     args = parser.parse_args()
 
+    print('Running RODAN basecaller with feature dump', flush=True)
+
     os.makedirs(args.outdir, exist_ok=True)
 
     torchdict = torch.load(args.model, map_location="cpu")
