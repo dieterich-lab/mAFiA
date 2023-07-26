@@ -7,12 +7,6 @@ from mAFiA.data_containers import mRNASite, mRNADataContainer
 from mAFiA.feature_extractors import BackboneNetwork
 from mAFiA.feature_classifiers import load_motif_classifiers
 from mAFiA.output_writers import Site_Writer, BAM_Writer
-<<<<<<< HEAD
-=======
-
-parser = MRNATestArgsParser()
-parser.parse_and_print()
->>>>>>> 8368e86 (rename)
 
 
 def load_genome_reference(ref_file):
