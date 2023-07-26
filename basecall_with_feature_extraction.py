@@ -233,8 +233,6 @@ def mp_write(queue, config, args):
     totprocessed = 0
     finish = False
 
-    # pid = os.getpid()
-
     read_features = {}
 
     with open(os.path.join(args.outdir, f'rodan.fasta'), 'w') as h_basecall:
@@ -277,7 +275,7 @@ def mp_write(queue, config, args):
                     chunks = newchunks
                     files = files[totlen:]
                     totprocessed += 1
-                    if totprocessed%100==0: print(f'{totprocessed} reads called', flush=True)
+                    if totprocessed%100==0: print(f'{totprocessed} reads processed', flush=True)
                     if finish and not len(files): break
                 if finish: break
         print(f'Total {totprocessed} reads')
