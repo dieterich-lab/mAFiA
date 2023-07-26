@@ -24,7 +24,7 @@ pip install -e .
     - The folder "models" contains:
         - backbone.torch: [RODAN](https://github.com/biodlab/RODAN)-based neural network for basecalling and feature extraction
         - backbone.config: training configuration for backbone
-        - mAFiA: pickled logistic regression models
+        - classifiers: pickled logistic regression models
     - The folder "data" contains a subset of input data on chr X:
         - fast5_chrX: dRNA-Seq raw data from HEK293 WT mRNA
         - GRCh38_96.X: genome reference
