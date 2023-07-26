@@ -227,13 +227,15 @@ def get_basecall_and_features(in_base_probs, layer_activation):
     return pred_labels, out_features
 
 
-def mp_write(queue, config, args, dict_features):
+def mp_write(queue, config, args):
     files = None
     chunks = None
     totprocessed = 0
     finish = False
 
     # pid = os.getpid()
+
+    read_features = {}
 
     with open(os.path.join(args.outdir, f'rodan.fasta'), 'w') as h_basecall:
         while True:
@@ -269,16 +271,21 @@ def mp_write(queue, config, args, dict_features):
                     h_basecall.write(">" + readid + "\n")
                     h_basecall.write(seq + "\n")
 
-                    dict_features[readid] = features
+                    read_features[readid] = features
 
                     newchunks = chunks[:, totlen:, :]
                     chunks = newchunks
                     files = files[totlen:]
                     totprocessed += 1
-                    if totprocessed%500==0: print(f'{totprocessed} reads processed', flush=True)
+                    if totprocessed%100==0: print(f'{totprocessed} reads called', flush=True)
                     if finish and not len(files): break
                 if finish: break
         print(f'Total {totprocessed} reads')
+
+    print('Now dumping features...')
+    with h5py.File(os.path.join(args.outdir, f'features.h5'), 'w') as h_features:
+        for id, feat in tqdm(read_features.items()):
+            h_features.create_dataset(id, data=feat)
 
 
 if __name__ == "__main__":
@@ -321,24 +328,17 @@ if __name__ == "__main__":
     torch.backends.cudnn.enabled = True
     torch.backends.cudnn.deterministic = True
 
-    read_features = {}
-
     call_queue = Queue()
     write_queue = Queue()
     p1 = Process(target=mp_files, args=(call_queue, config, args,))
     p2 = Process(target=mp_gpu, args=(call_queue, write_queue, config, args,))
-    p3 = Process(target=mp_write, args=(write_queue, config, args, read_features))
+    p3 = Process(target=mp_write, args=(write_queue, config, args))
     p1.start()
     p2.start()
     p3.start()
     p1.join()
     p2.join()
     p3.join()
-
-    print('Now dumping features...')
-    with h5py.File(os.path.join(args.outdir, f'features.h5'), 'w') as h_features:
-        for id, feat in tqdm(read_features.items()):
-            h_features.create_dataset(id, data=feat)
 
     toc = time.time()
     print('Finished in {:.1f} mins'.format((toc-tic)/60), flush=True)
