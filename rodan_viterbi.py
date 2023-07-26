@@ -1,0 +1,321 @@
+#!/usr/bin/env python
+#
+# RODAN
+# v1.0
+# (c) 2020,2021,2022 Don Neumann
+#
+
+import argparse
+import glob
+import os
+import sys
+import time
+
+import numpy as np
+import torch
+from fast_ctc_decode import beam_search, viterbi_search
+from ont_fast5_api.fast5_interface import get_fast5_file
+from torch.multiprocessing import Queue, Process
+
+import ont
+from models import Objectview, Rodan
+
+default_rnaarch = [
+    [-1, 256, 0, 3, 1, 1, 0],
+    [-1, 256, 1, 10, 1, 1, 1],
+    [-1, 256, 1, 10, 10, 1, 1],
+    [-1, 320, 1, 10, 1, 1, 1],
+    [-1, 384, 1, 15, 1, 1, 1],
+    [-1, 448, 1, 20, 1, 1, 1],
+    [-1, 512, 1, 25, 1, 1, 1],
+    [-1, 512, 1, 30, 1, 1, 1],
+    [-1, 512, 1, 35, 1, 1, 1],
+    [-1, 512, 1, 40, 1, 1, 1],
+    [-1, 512, 1, 45, 1, 1, 1],
+    [-1, 512, 1, 50, 1, 1, 1],
+    [-1, 768, 1, 55, 1, 1, 1],
+    [-1, 768, 1, 60, 1, 1, 1],
+    [-1, 768, 1, 65, 1, 1, 1],
+    [-1, 768, 1, 70, 1, 1, 1],
+    [-1, 768, 1, 75, 1, 1, 1],
+    [-1, 768, 1, 80, 1, 1, 1],
+    [-1, 768, 1, 85, 1, 1, 1],
+    [-1, 768, 1, 90, 1, 1, 1],
+    [-1, 768, 1, 95, 1, 1, 1],
+    [-1, 768, 1, 100, 1, 1, 1]
+]
+
+def segment(seg, s):
+    seg = np.concatenate((seg, np.zeros((-len(seg) % s))))
+    nrows = ((seg.size - s) // s) + 1
+    n = seg.strides[0]
+    return np.lib.stride_tricks.as_strided(seg, shape=(nrows, s), strides=(s * n, n))
+
+
+def convert_statedict(state_dict):
+    from collections import OrderedDict
+    new_checkpoint = OrderedDict()
+    for k, v in state_dict.items():
+        name = k[7:]  # remove module.
+        new_checkpoint[name] = v
+    return new_checkpoint
+
+
+def load_model(modelfile, config=None, args=None):
+    if modelfile is None:
+        sys.stderr.write("No model file specified!")
+        sys.exit(1)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if args.debug: print("Using device {}".format(device), flush=True)
+    if args.arch is not None:
+        model = Rodan(config=config, arch=args.arch).to(device)
+    else:
+        model = Rodan(config=config).to(device)
+    if args.debug: print("Loading pretrained weights:", modelfile)
+    state_dict = torch.load(modelfile, map_location=device)["state_dict"]
+    if "state_dict" in state_dict:
+        model.load_state_dict(convert_statedict(state_dict["state_dict"]))
+    else:
+        model.load_state_dict(torch.load(modelfile, map_location=device)["state_dict"])
+    if args.debug: print(model)
+
+    model.eval()
+    torch.set_grad_enabled(False)
+    return model, device
+
+
+def mp_files(queue, config, args):
+    dir = args.fast5dir
+    if args.list_filenames is None:
+        list_files = list(glob.iglob(dir + "/**/*.fast5", recursive=True))
+    else:
+        with open(args.list_filenames, 'r') as f_in:
+            list_files = [fname.rstrip('\n') for fname in f_in.readlines()]
+    if args.debug: print('Running basecaller on files:\n', '\n'.join(list_files), flush=True)
+    chunkname = []
+    chunks = None
+    queuechunks = None
+    chunkremainder = None
+    for file in list_files:
+        try:
+            f5 = get_fast5_file(file, mode="r")
+        except:
+            if args.debug: print('Error opening {}. Skipping...'.format(file), flush=True)
+            continue
+        for read in f5.get_reads():
+            while queue.qsize() >= 100:
+                time.sleep(1)
+            # outfile = os.path.splitext(os.path.basename(file))[0]
+            try:
+                signal = read.get_raw_data(scale=True)
+                if args.debug: print("mp_files:", file)
+            except:
+                continue
+            signal_start = 0
+            signal_end = len(signal)
+            med, mad = ont.med_mad(signal[signal_start:signal_end])
+            signal = (signal[signal_start:signal_end] - med) / mad
+            newchunks = segment(signal, config.seqlen)
+            if chunks is not None:
+                chunks = np.concatenate((chunks, newchunks), axis=0)
+                queuechunks += [read.read_id] * newchunks.shape[0]
+            else:
+                chunks = newchunks
+                queuechunks = [read.read_id] * newchunks.shape[0]
+            if chunks.shape[0] >= args.batchsize:
+                for i in range(0, chunks.shape[0] // args.batchsize, args.batchsize):
+                    queue.put((queuechunks[:args.batchsize], chunks[:args.batchsize]))
+                    chunks = chunks[args.batchsize:]
+                    queuechunks = queuechunks[args.batchsize:]
+        f5.close()
+    if len(queuechunks) > 0:
+        if args.debug: print("queuechunks:", len(queuechunks), chunks.shape[0])
+        for i in range(0, int(np.ceil(chunks.shape[0] / args.batchsize)), args.batchsize):
+            start = i * args.batchsize
+            end = start + args.batchsize
+            if end > chunks.shape[0]: end = chunks.shape[0]
+            queue.put((queuechunks[start:end], chunks[start:end]))
+            if args.debug: print("put last chunk", chunks[start:end].shape[0])
+    queue.put(("end", None))
+
+
+def mp_gpu(inqueue, outqueue, config, args):
+    model, device = load_model(args.model, config, args)
+    shtensor = None
+    if device.type == 'cpu':
+        pin_memory = False
+    else:
+        pin_memory = True
+    while True:
+        time1 = time.perf_counter()
+        read = inqueue.get()
+        file = read[0]
+        if type(file) == str:
+            outqueue.put(("end", None))
+            break
+        chunks = read[1]
+        for i in range(0, chunks.shape[0], config.batchsize):
+            end = i + config.batchsize
+            if end > chunks.shape[0]: end = chunks.shape[0]
+            event = torch.unsqueeze(torch.FloatTensor(chunks[i:end]), 1).to(device, non_blocking=True)
+            out = model.forward(event)
+
+            if shtensor is None:
+                shtensor = torch.empty((out.shape), pin_memory=pin_memory, dtype=out.dtype)
+            if out.shape[1] != shtensor.shape[1]:
+                shtensor = torch.empty((out.shape), pin_memory=pin_memory, dtype=out.dtype)
+            logitspre = shtensor.copy_(out).numpy()
+            if args.debug: print("mp_gpu:", logitspre.shape)
+            outqueue.put((file, logitspre))
+            del out
+            del logitspre
+
+
+def mp_write(queue, config, args):
+    files = None
+    chunks = None
+    totprocessed = 0
+    finish = False
+    while True:
+        if queue.qsize() > 0:
+            newchunk = queue.get()
+            if type(newchunk[0]) == str:
+                if not len(files): break
+                finish = True
+            else:
+                if chunks is not None:
+                    chunks = np.concatenate((chunks, newchunk[1]), axis=1)
+                    files = files + newchunk[0]
+                else:
+                    chunks = newchunk[1]
+                    files = newchunk[0]
+                    files = newchunk[0]
+            while files.count(files[0]) < len(files) or finish:
+                totlen = files.count(files[0])
+                callchunk = chunks[:, :totlen, :]
+                logits = np.transpose(np.argmax(callchunk, -1), (1, 0))
+                label_blank = np.zeros((logits.shape[0], logits.shape[1] + 200))
+                try:
+                    out, outstr = ctcdecoder(logits, label_blank, pre=callchunk, decoder=args.decoder,
+                                             beam_size=args.beamsize)
+                except:
+                    # failure in decoding
+                    out = ""
+                    outstr = ""
+                    pass
+                seq = ""
+                if len(out) != len(outstr):
+                    sys.stderr.write("FAIL:", len(out), len(outstr), files[0])
+                    sys.exit(1)
+                for j in range(len(out)):
+                    seq += outstr[j]
+                readid = os.path.splitext(os.path.basename(files[0]))[0]
+                print(">" + readid)
+                if args.reverse:
+                    print(seq[::-1])
+                else:
+                    print(seq)
+                newchunks = chunks[:, totlen:, :]
+                chunks = newchunks
+                files = files[totlen:]
+                totprocessed += 1
+                if finish and not len(files): break
+            if finish: break
+
+
+vocab = {1: "A", 2: "C", 3: "G", 4: "T"}
+alphabet = "".join(["N"] + list(vocab.values()))
+
+
+def ctcdecoder(logits, label, blank=False, decoder='viterbi', beam_size=5, alphabet=alphabet, pre=None):
+    # print('Decoding with {}'.format(decoder), flush=True)
+    ret = np.zeros((label.shape[0], label.shape[1] + 50))
+    retstr = []
+    for i in range(logits.shape[0]):
+        if pre is not None:
+            if decoder == 'viterbi':
+                beamcur = viterbi_search(torch.softmax(torch.tensor(pre[:, i, :]), dim=-1).cpu().detach().numpy(),
+                                         alphabet=alphabet)[0]
+            elif decoder == 'beam_search':
+                beamcur = \
+                beam_search(torch.softmax(torch.tensor(pre[:, i, :]), dim=-1).cpu().detach().numpy(), alphabet=alphabet,
+                            beam_size=beam_size)[0]
+            else:
+                if args.debug: print('Decoder not defined!')
+        prev = None
+        cur = []
+        pos = 0
+        for j in range(logits.shape[1]):
+            if not blank:
+                if logits[i, j] != prev:
+                    prev = logits[i, j]
+                    try:
+                        if prev != 0:
+                            ret[i, pos] = prev
+                            pos += 1
+                            cur.append(vocab[prev])
+                    except:
+                        sys.stderr.write("ctcdecoder: fail on i:", i, "pos:", pos)
+            else:
+                if logits[i, j] == 0:
+                    break
+                ret[i, pos] = logits[i, j]  # is this right?
+                cur.append(vocab[logits[i, pos]])
+                pos += 1
+        if pre is not None:
+            retstr.append(beamcur)
+        else:
+            retstr.append("".join(cur))
+    return ret, retstr
+
+
+if __name__ == "__main__":
+    tic = time.time()
+
+    parser = argparse.ArgumentParser(description='Basecall fast5 files')
+    parser.add_argument("--fast5dir", default=None, type=str)
+    parser.add_argument("--list_filenames", default=None)
+    parser.add_argument("-a", "--arch", default=None, type=str, help="architecture settings")
+    parser.add_argument("-m", "--model", default="rna.torch", type=str, help="default: rna.torch")
+    parser.add_argument("-r", "--reverse", default=True, action="store_true", help="reverse for RNA (default: True)")
+    parser.add_argument("-b", "--batchsize", default=200, type=int, help="default: 200")
+    parser.add_argument("--decoder", default="viterbi", help="beam_search or viterbi")
+    parser.add_argument("-B", "--beamsize", default=5, type=int, help="CTC beam search size (default: 5)")
+    parser.add_argument("-e", "--errors", default=False, action="store_true")
+    parser.add_argument("-d", "--debug", default=False, action="store_true")
+    args = parser.parse_args()
+
+    torchdict = torch.load(args.model, map_location="cpu")
+    origconfig = torchdict["config"]
+
+    if args.debug:
+        print(origconfig)
+    origconfig["debug"] = args.debug
+    config = Objectview(origconfig)
+    config.batchsize = args.batchsize
+
+    if args.arch != None:
+        if args.debug: print("Loading architecture from:", args.arch)
+        args.arch = eval(open(args.arch, "r").read())
+    else:
+        args.arch = default_rnaarch
+
+    if args.debug: print("Using sequence len:", int(config.seqlen))
+
+    torch.backends.cudnn.enabled = True
+    torch.backends.cudnn.deterministic = True
+
+    call_queue = Queue()
+    write_queue = Queue()
+    p1 = Process(target=mp_files, args=(call_queue, config, args,))
+    p2 = Process(target=mp_gpu, args=(call_queue, write_queue, config, args,))
+    p3 = Process(target=mp_write, args=(write_queue, config, args,))
+    p1.start()
+    p2.start()
+    p3.start()
+    p1.join()
+    p2.join()
+    p3.join()
+
+    toc = time.time()
+    if args.debug: print('Finished in {:.1f} mins'.format((toc - tic) / 60), flush=True)

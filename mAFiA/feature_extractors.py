@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from fast_ctc_decode import beam_search, viterbi_search
 
-from mAFIA.models import Objectview, Rodan
+from mAFiA.models import Objectview, Rodan
 
 CTC_MODE = 'viterbi'
 if CTC_MODE == 'beam':
