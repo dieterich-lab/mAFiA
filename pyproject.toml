@@ -3,7 +3,7 @@ requires = ['setuptools']
 build-backend = 'setuptools.build_meta'
 
 [project]
-name = 'mAFIA'
+name = 'mAFiA'
 version = '0.0.1'
 dependencies = [
   'biopython==1.80',
@@ -20,10 +20,10 @@ dependencies = [
 ]
 
 [project.scripts]
-test_mAFiA = 'mAFIA.test_mAFiA:main'
+test_mAFiA = 'mAFiA.test_mAFiA:main'
 
 [tool.setuptools.packages.find]
-include = ["mAFIA"]
+include = ["mAFiA"]
 
 [tool.setuptools.package-data]
 mafia = ["noarch"]

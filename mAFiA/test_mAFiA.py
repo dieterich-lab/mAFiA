@@ -2,11 +2,11 @@ import os
 import pandas as pd
 from tqdm import tqdm
 from Bio import SeqIO
-from mAFIA.arg_parsers import MRNATestArgsParser
-from mAFIA.data_containers import mRNASite, mRNADataContainer
-from mAFIA.feature_extractors import BackboneNetwork
-from mAFIA.feature_classifiers import load_motif_classifiers
-from mAFIA.output_writers import Site_Writer, BAM_Writer
+from mAFiA.arg_parsers import MRNATestArgsParser
+from mAFiA.data_containers import mRNASite, mRNADataContainer
+from mAFiA.feature_extractors import BackboneNetwork
+from mAFiA.feature_classifiers import load_motif_classifiers
+from mAFiA.output_writers import Site_Writer, BAM_Writer
 
 
 def load_genome_reference(ref_file):
