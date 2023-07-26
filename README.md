@@ -5,7 +5,7 @@
 Here we provide a brief walkthrough to run mAFiA, using the example of chromosome X. Complete dataset can be downloaded from [???](url).
 
 ## 0. Preliminary
-- Get code, activate virtual environment, and install dependencies, e.g.:
+- Get code and activate virtual environment, e.g.:
 ```
 git clone git@github.com:dieterich-lab/mAFiA.git
 cd mAFiA
@@ -16,6 +16,7 @@ source mafia-venv/bin/activate
 ```
 python3 -m pip install --upgrade pip
 ```
+Then install dependencies
 ```
 pip install -e .
 ```
