@@ -39,8 +39,10 @@ num_test_sites = [[tup[3] for tup in train_test_corr_num if tup[1]==motif][0] fo
 composite_test_names = [f'{x} ({y})' for (x, y) in zip(test_motifs, num_test_sites)]
 
 plt.figure(figsize=(16, 9))
-plt.imshow(corr_mat, vmin=0.8, cmap='plasma')
+plt.imshow(corr_mat, cmap='plasma', vmin=0.8)
 plt.xticks(np.arange(corr_mat.shape[1]), composite_test_names, rotation=-90)
 plt.yticks(np.arange(corr_mat.shape[0]), train_motifs)
 plt.xlabel('Test 5mer', fontsize=12)
 plt.ylabel('Train 5mer', fontsize=12)
+plt.colorbar()
+plt.title('mAFiA-GLORI correlation, chr X', fontsize=15)
