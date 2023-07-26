@@ -14,7 +14,7 @@ from torch.multiprocessing import Queue, Process
 from models import Objectview, Rodan
 import ont
 import h5py
-
+from tqdm import tqdm
 
 vocab = { 1:"A", 2:"C", 3:"G", 4:"T" }
 alphabet = "".join(["N"] + list(vocab.values()))
@@ -194,27 +194,28 @@ def get_basecall_and_features(in_base_probs, layer_activation):
         probs = exp / np.sum(exp, axis=-1, keepdims=True)
         this_pred_label, pred_locs = decoder(probs, alphabet=alphabet)
         pred_labels.append(this_pred_label)
-        out_features.append(layer_activation[pred_locs, i, :])
 
-        # pred_locs_corrected = []
-        # for loc_ind in range(len(this_pred_label)):
-        #     start_loc = pred_locs[loc_ind]
-        #     if loc_ind < (len(this_pred_label) - 1):
-        #         end_loc = pred_locs[loc_ind + 1]
-        #     else:
-        #         end_loc = probs.shape[0]
-        #     pred_locs_corrected.append(
-        #         start_loc + np.argmax(probs[start_loc:end_loc, alphabet_to_num[this_pred_label[loc_ind]]]))
-        #
-        # if args.feature_width == 0:
-        #     this_feature = layer_activation[pred_locs_corrected, i, :]
-        # else:
-        #     this_feature = []
-        #     for loc_shift in range(-args.feature_width, args.feature_width + 1):
-        #         shifted_locs = [max(min(x + loc_shift, num_locs - 1), 0) for x in pred_locs_corrected]
-        #         this_feature.append(layer_activation[shifted_locs, i, :])
-        #     this_feature = np.hstack(this_feature)
-        # out_features.append(this_feature)
+        pred_locs_corrected = []
+        for loc_ind in range(len(this_pred_label)):
+            start_loc = pred_locs[loc_ind]
+            if loc_ind < (len(this_pred_label) - 1):
+                end_loc = pred_locs[loc_ind + 1]
+            else:
+                end_loc = probs.shape[0]
+            pred_locs_corrected.append(
+                start_loc + np.argmax(probs[start_loc:end_loc, alphabet_to_num[this_pred_label[loc_ind]]]))
+
+        if args.feature_width == 0:
+            this_feature = layer_activation[pred_locs_corrected, i, :]
+        else:
+            this_feature = []
+            for loc_shift in range(-args.feature_width, args.feature_width + 1):
+                shifted_locs = [max(min(x + loc_shift, num_locs - 1), 0) for x in pred_locs_corrected]
+                this_feature.append(layer_activation[shifted_locs, i, :])
+            this_feature = np.hstack(this_feature)
+        out_features.append(this_feature)
+
+        # out_features.append(layer_activation[pred_locs, i, :])
 
     pred_labels = ''.join(pred_labels)
     out_features = np.vstack(out_features)
@@ -226,7 +227,7 @@ def get_basecall_and_features(in_base_probs, layer_activation):
     return pred_labels, out_features
 
 
-def mp_write(queue, config, args):
+def mp_write(queue, config, args, dict_features):
     files = None
     chunks = None
     totprocessed = 0
@@ -235,49 +236,48 @@ def mp_write(queue, config, args):
     # pid = os.getpid()
 
     with open(os.path.join(args.outdir, f'rodan.fasta'), 'w') as h_basecall:
-        with h5py.File(os.path.join(args.outdir, f'features.h5'), 'w') as h_features:
-            while True:
-                if queue.qsize() > 0:
-                    newchunk = queue.get()
-                    if type(newchunk[0]) == str:
-                        if not len(files): break
-                        finish = True
+        while True:
+            if queue.qsize() > 0:
+                newchunk = queue.get()
+                if type(newchunk[0]) == str:
+                    if not len(files): break
+                    finish = True
+                else:
+                    if chunks is not None:
+                        activations = np.concatenate((activations, newchunk[2]), axis=1)
+                        chunks = np.concatenate((chunks, newchunk[1]), axis=1)
+                        files = files + newchunk[0]
                     else:
-                        if chunks is not None:
-                            activations = np.concatenate((activations, newchunk[2]), axis=1)
-                            chunks = np.concatenate((chunks, newchunk[1]), axis=1)
-                            files = files + newchunk[0]
-                        else:
-                            activations = newchunk[2]
-                            chunks = newchunk[1]
-                            files = newchunk[0]
+                        activations = newchunk[2]
+                        chunks = newchunk[1]
+                        files = newchunk[0]
 
-                    while files.count(files[0]) < len(files) or finish:
-                        totlen = files.count(files[0])
-                        callchunk = chunks[:, :totlen, :]
-                        actichunk = activations[:, :totlen, :]
+                while files.count(files[0]) < len(files) or finish:
+                    totlen = files.count(files[0])
+                    callchunk = chunks[:, :totlen, :]
+                    actichunk = activations[:, :totlen, :]
 
-                        try:
-                            seq, features = get_basecall_and_features(callchunk, actichunk)
-                        except:
-                            seq = ''
-                            features = None
-                            pass
+                    try:
+                        seq, features = get_basecall_and_features(callchunk, actichunk)
+                    except:
+                        seq = ''
+                        features = None
+                        pass
 
-                        ### write out ###
-                        readid = os.path.splitext(os.path.basename(files[0]))[0]
-                        h_basecall.write(">" + readid + "\n")
-                        h_basecall.write(seq + "\n")
+                    ### write out ###
+                    readid = os.path.splitext(os.path.basename(files[0]))[0]
+                    h_basecall.write(">" + readid + "\n")
+                    h_basecall.write(seq + "\n")
 
-                        h_features.create_dataset(readid, data=features)
+                    dict_features[readid] = features
 
-                        newchunks = chunks[:, totlen:, :]
-                        chunks = newchunks
-                        files = files[totlen:]
-                        totprocessed += 1
-                        if totprocessed%500==0: print(f'{totprocessed} reads processed', flush=True)
-                        if finish and not len(files): break
-                    if finish: break
+                    newchunks = chunks[:, totlen:, :]
+                    chunks = newchunks
+                    files = files[totlen:]
+                    totprocessed += 1
+                    if totprocessed%500==0: print(f'{totprocessed} reads processed', flush=True)
+                    if finish and not len(files): break
+                if finish: break
         print(f'Total {totprocessed} reads')
 
 
@@ -321,17 +321,24 @@ if __name__ == "__main__":
     torch.backends.cudnn.enabled = True
     torch.backends.cudnn.deterministic = True
 
+    read_features = {}
+
     call_queue = Queue()
     write_queue = Queue()
     p1 = Process(target=mp_files, args=(call_queue, config, args,))
     p2 = Process(target=mp_gpu, args=(call_queue, write_queue, config, args,))
-    p3 = Process(target=mp_write, args=(write_queue, config, args,))
+    p3 = Process(target=mp_write, args=(write_queue, config, args, read_features))
     p1.start()
     p2.start()
     p3.start()
     p1.join()
     p2.join()
     p3.join()
+
+    print('Now dumping features...')
+    with h5py.File(os.path.join(args.outdir, f'features.h5'), 'w') as h_features:
+        for id, feat in tqdm(read_features.items()):
+            h_features.create_dataset(id, data=feat)
 
     toc = time.time()
     print('Finished in {:.1f} mins'.format((toc-tic)/60), flush=True)
