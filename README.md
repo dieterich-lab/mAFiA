@@ -11,7 +11,12 @@ git clone git@github.com:dieterich-lab/mAFiA.git
 cd mAFiA
 python3 -m venv mafia-venv
 source mafia-venv/bin/activate
+```
+(If you pip version is <21.3)
+```
 python3 -m pip install --upgrade pip
+```
+```
 pip install -e .
 ```
 - Download models and data from [phish_link](https://data.dieterichlab.org/s/dKb6KtmKX99Q5Ld)
