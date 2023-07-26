@@ -233,8 +233,6 @@ def mp_write(queue, config, args):
     totprocessed = 0
     finish = False
 
-    read_features = {}
-
     with h5py.File(os.path.join(args.outdir, f'features.h5'), 'w') as h_features:
         with open(os.path.join(args.outdir, f'rodan.fasta'), 'w') as h_basecall:
             while True:
@@ -280,7 +278,7 @@ def mp_write(queue, config, args):
                         files = files[totlen:]
 
                         totprocessed += 1
-                        if totprocessed%100==0: print(f'{totprocessed} reads processed', flush=True)
+                        if totprocessed%500==0: print(f'{totprocessed} reads processed', flush=True)
                         if finish and not len(files): break
                     if finish: break
             print(f'Total {totprocessed} reads')
