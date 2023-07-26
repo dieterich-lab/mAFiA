@@ -55,14 +55,14 @@ class Motif_Classifier:
         print(f'AUC {self.auc:.2f}')
 
     def test(self, test_nts, mod_thresh=0.5):
-        # print(f'Testing {len(test_nts)} NTs...')
+        print(f'Testing {len(test_nts)} NTs...')
         test_features = [nt.feature for nt in test_nts]
         mod_probs = self.binary_model.predict_proba(test_features)[:, 1]
         for this_nt, this_mod_prob in zip(test_nts, mod_probs):
             this_nt.mod_prob = this_mod_prob
         predictions = np.int32(mod_probs > mod_thresh)
         avg_mod_ratio = np.mean(predictions)
-        # print(f'Predicted mod. ratio {avg_mod_ratio:.2f}')
+        print(f'Predicted mod. ratio {avg_mod_ratio:.2f}')
         return avg_mod_ratio
 
     def save(self, out_model_path, draw_prc=False):
