@@ -32,7 +32,7 @@ pip install -e .
 - Assume that data and model are unzipped to ${data} and ${model} respectively. Your output directory is ${output}
 ```
 backbone="${models}/backbone.torch"
-classifier="${models}/mAFiA"
+classifiers="${models}/classifiers"
 fast5dir="${data}/fast5_chrX"
 ref="${data}/GRCh38_96.X.fa"
 mod="${data}/GLORI_chrX.bed"
@@ -75,7 +75,7 @@ test_mAFiA \
 --min_coverage 50 \
 --max_num_reads 1000 \
 --backbone_model_path ${backbone} \
---classifier_model_dir ${classifier} \
+--classifier_model_dir ${classifiers} \
 --mod_prob_thresh 0.5 \
 --out_dir ${output} &
 ```
