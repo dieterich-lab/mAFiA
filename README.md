@@ -12,7 +12,7 @@ cd mAFiA
 python3 -m venv mafia-venv
 source mafia-venv/bin/activate
 ```
-If you pip version is <21.3, tehn upgrade it to a newer version:
+If you pip version is <21.3, then upgrade it to a newer version:
 ```
 python3 -m pip install --upgrade pip
 ```
