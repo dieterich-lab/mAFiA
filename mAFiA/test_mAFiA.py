@@ -41,7 +41,7 @@ def main():
     reference = load_genome_reference(args.ref_file)
     motif_classifiers = load_motif_classifiers(args.classifier_model_dir)
     site_writer = SiteWriter(out_path=os.path.join(args.out_dir, 'mAFiA.sites.bed'))
-    bam_writer = BAMWriter(in_bam_path=args.in_bam_file, out_bam_path=os.path.join(args.out_dir, 'mAFiA.reads.bam'))
+    bam_writer = BAMWriter(in_bam_path=args.bam_file, out_bam_path=os.path.join(args.out_dir, 'mAFiA.reads.bam'))
 
     df_mod = pd.read_csv(args.mod_file, sep='\t')
     for _, row in tqdm(list(df_mod.iterrows())):
