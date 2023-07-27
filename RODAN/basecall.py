@@ -184,13 +184,12 @@ def mp_gpu(inqueue, outqueue, config, args):
             del logitspre
 
 
-def get_basecall_and_features(in_base_probs, layer_activation, dump_features=False):
+def get_basecall_and_features(in_base_probs, layer_activation=None, dump_features=False):
     if args.decoder == 'beam':
         decoder = beam_search
     elif args.decoder == 'viterbi':
         decoder = viterbi_search
 
-    num_locs = layer_activation.shape[0]
     pred_labels = []
     out_features = []
     for i in range(in_base_probs.shape[1]):
@@ -200,6 +199,7 @@ def get_basecall_and_features(in_base_probs, layer_activation, dump_features=Fal
         pred_labels.append(this_pred_label)
 
         if dump_features:
+            num_locs = layer_activation.shape[0]
             pred_locs_corrected = []
             for loc_ind in range(len(this_pred_label)):
                 start_loc = pred_locs[loc_ind]
@@ -265,13 +265,7 @@ def mp_write(queue, config, args):
                     callchunk = chunks[:, :totlen, :]
                     if args.dump_features:
                         actichunk = activations[:, :totlen, :]
-
-                    try:
-                        seq, features = get_basecall_and_features(callchunk, actichunk, args.dump_features)
-                    except:
-                        seq = ''
-                        features = None
-                        pass
+                    seq, features = get_basecall_and_features(callchunk, actichunk, args.dump_features)
 
                     readid = os.path.splitext(os.path.basename(files[0]))[0]
                     h_basecall.write(">" + readid + "\n")
