@@ -1,4 +1,5 @@
 import os
+import time
 import pandas as pd
 from tqdm import tqdm
 from Bio import SeqIO
@@ -21,6 +22,8 @@ def load_genome_reference(ref_file):
 
 
 def main():
+    tic = time.time()
+
     parser = mRNATestArgsParser()
     parser.parse_and_print()
     args = parser.args
@@ -73,3 +76,9 @@ def main():
 
     bam_writer.write_bam_with_mm_ml_tags(test_container)
     print(f'Total {bam_writer.read_counts} mod. reads written to {bam_writer.out_bam_path}')
+    toc = time.time()
+    print('Finished in {:.1f} mins'.format((toc - tic) / 60), flush=True)
+
+
+if __name__ == "__main__":
+    main()
