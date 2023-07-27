@@ -45,12 +45,11 @@ bam="${output}/minimap.q50.bam"
 ## 1. Basecalling
 The basecalling script is adapted from the [RODAN](https://github.com/biodlab/RODAN) repository. Assume that ${mafia} is your code directory.
 ```
-python3 ${mafia}/rodan_viterbi.py \
+python3 ${mafia}/RODAN/basecall.py \
 --fast5dir ${fast5dir} \
 --model ${backbone} \
---batchsize 2048 \
---decoder viterbi \
-> ${basecall} &
+--batchsize 4096 \
+--outdir ${output} &
 ```
 You should see the file ${basecall} growing. On a reasonably modern GPU machine, this step should take about 20 mins.
 
@@ -68,8 +67,8 @@ samtools index ${bam}
 After the standard procedures, we can now measure m<sup>6</sup>A stoichiometry of the sites specified in ${mod}.
 ```
 test_mAFiA \
---test_bam_file ${bam} \
---test_fast5_dir ${fast5dir} \
+--bam_file ${bam} \
+--fast5_dir ${fast5dir} \
 --ref_file ${ref} \
 --mod_file ${mod} \
 --min_coverage 50 \
