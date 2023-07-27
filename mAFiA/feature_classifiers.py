@@ -14,7 +14,8 @@ from sklearn.metrics import precision_recall_curve, auc
 import matplotlib.pyplot as plt
 import pickle
 
-class Motif_Classifier:
+
+class MotifClassifier:
     def __init__(self, motif, classifier_type, scaler):
         self.motif = motif
         self.classifier_type = classifier_type
