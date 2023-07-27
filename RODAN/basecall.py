@@ -127,9 +127,8 @@ def mp_files(queue, config, args):
     queue.put(("end", None))
 
 
-def get_base_probs_and_activations(in_chunks, in_model, in_device):
-    event = torch.unsqueeze(torch.FloatTensor(in_chunks), 1).to(in_device, non_blocking=True)
-    base_probs = in_model.forward(event)
+def get_base_probs_and_activations(in_event, in_model, in_device):
+    base_probs = in_model.forward(in_event)
     layer_activation = activation[args.extraction_layer]
     return base_probs, layer_activation
 
@@ -153,11 +152,12 @@ def mp_gpu(inqueue, outqueue, config, args):
         for i in range(0, chunks.shape[0], config.batchsize):
             end = i+config.batchsize
             if end > chunks.shape[0]: end = chunks.shape[0]
+            event = torch.unsqueeze(torch.FloatTensor(chunks[i:end]), 1).to(device, non_blocking=True)
 
-            # event = torch.unsqueeze(torch.FloatTensor(chunks[i:end]), 1).to(device, non_blocking=True)
-            # out = model.forward(event)
-
-            out, activations = get_base_probs_and_activations(chunks[i:end], model, device)
+            if args.dump_features:
+                out, activations = get_base_probs_and_activations(event, model, device)
+            else:
+                out = model.forward(event)
 
             if shtensor is None:
                 shtensor = torch.empty((out.shape), pin_memory=pin_memory, dtype=out.dtype)
@@ -166,21 +166,25 @@ def mp_gpu(inqueue, outqueue, config, args):
             logitspre = shtensor.copy_(out).numpy()
             if args.debug: print("mp_gpu:", logitspre.shape)
 
-            if actensor is None:
-                actensor = torch.empty((activations.shape), pin_memory=pin_memory, dtype=activations.dtype)
-            if activations.shape[0] != actensor.shape[0]:
-                actensor = torch.empty((activations.shape), pin_memory=pin_memory, dtype=activations.dtype)
-            np_activations = actensor.copy_(activations).numpy()
-            np_activations = np_activations.transpose((2, 0, 1))
+            if args.dump_features:
+                if actensor is None:
+                    actensor = torch.empty((activations.shape), pin_memory=pin_memory, dtype=activations.dtype)
+                if activations.shape[0] != actensor.shape[0]:
+                    actensor = torch.empty((activations.shape), pin_memory=pin_memory, dtype=activations.dtype)
+                np_activations = actensor.copy_(activations).numpy()
+                np_activations = np_activations.transpose((2, 0, 1))
 
-            outqueue.put((file, logitspre, np_activations))
+                outqueue.put((file, logitspre, np_activations))
+                del activations
+                del np_activations
+            else:
+                outqueue.put((file, logitspre))
+
             del out
             del logitspre
-            del activations
-            del np_activations
 
 
-def get_basecall_and_features(in_base_probs, layer_activation):
+def get_basecall_and_features(in_base_probs, layer_activation, dump_features=False):
     if args.decoder == 'beam':
         decoder = beam_search
     elif args.decoder == 'viterbi':
@@ -195,36 +199,39 @@ def get_basecall_and_features(in_base_probs, layer_activation):
         this_pred_label, pred_locs = decoder(probs, alphabet=alphabet)
         pred_labels.append(this_pred_label)
 
-        pred_locs_corrected = []
-        for loc_ind in range(len(this_pred_label)):
-            start_loc = pred_locs[loc_ind]
-            if loc_ind < (len(this_pred_label) - 1):
-                end_loc = pred_locs[loc_ind + 1]
+        if dump_features:
+            pred_locs_corrected = []
+            for loc_ind in range(len(this_pred_label)):
+                start_loc = pred_locs[loc_ind]
+                if loc_ind < (len(this_pred_label) - 1):
+                    end_loc = pred_locs[loc_ind + 1]
+                else:
+                    end_loc = probs.shape[0]
+                pred_locs_corrected.append(
+                    start_loc + np.argmax(probs[start_loc:end_loc, alphabet_to_num[this_pred_label[loc_ind]]]))
+
+            if args.feature_width == 0:
+                this_feature = layer_activation[pred_locs_corrected, i, :]
             else:
-                end_loc = probs.shape[0]
-            pred_locs_corrected.append(
-                start_loc + np.argmax(probs[start_loc:end_loc, alphabet_to_num[this_pred_label[loc_ind]]]))
-
-        if args.feature_width == 0:
-            this_feature = layer_activation[pred_locs_corrected, i, :]
-        else:
-            this_feature = []
-            for loc_shift in range(-args.feature_width, args.feature_width + 1):
-                shifted_locs = [max(min(x + loc_shift, num_locs - 1), 0) for x in pred_locs_corrected]
-                this_feature.append(layer_activation[shifted_locs, i, :])
-            this_feature = np.hstack(this_feature)
-        out_features.append(this_feature)
-
-        # out_features.append(layer_activation[pred_locs, i, :])
+                this_feature = []
+                for loc_shift in range(-args.feature_width, args.feature_width + 1):
+                    shifted_locs = [max(min(x + loc_shift, num_locs - 1), 0) for x in pred_locs_corrected]
+                    this_feature.append(layer_activation[shifted_locs, i, :])
+                this_feature = np.hstack(this_feature)
+            out_features.append(this_feature)
 
     pred_labels = ''.join(pred_labels)
-    out_features = np.vstack(out_features)
 
     if args.reverse:
         pred_labels = pred_labels[::-1]
-        out_features = out_features[::-1]
 
-    return pred_labels, out_features
+    if dump_features:
+        out_features = np.vstack(out_features)
+        if args.reverse:
+            out_features = out_features[::-1]
+        return pred_labels, out_features
+    else:
+        return pred_labels, None
 
 
 def mp_write(queue, config, args):
@@ -233,58 +240,63 @@ def mp_write(queue, config, args):
     totprocessed = 0
     finish = False
 
-    with h5py.File(os.path.join(args.outdir, f'features.h5'), 'w') as h_features:
-        with open(os.path.join(args.outdir, f'rodan.fasta'), 'w') as h_basecall:
-            while True:
-                if queue.qsize() > 0:
-                    newchunk = queue.get()
-                    if type(newchunk[0]) == str:
-                        if not len(files): break
-                        finish = True
-                    else:
-                        if chunks is not None:
+    read_features = {}
+    with open(os.path.join(args.outdir, f'rodan.fasta'), 'w') as h_basecall:
+        while True:
+            if queue.qsize() > 0:
+                newchunk = queue.get()
+                if type(newchunk[0]) == str:
+                    if not len(files): break
+                    finish = True
+                else:
+                    if chunks is not None:
+                        if args.dump_features:
                             activations = np.concatenate((activations, newchunk[2]), axis=1)
-                            chunks = np.concatenate((chunks, newchunk[1]), axis=1)
-                            files = files + newchunk[0]
-                        else:
+                        chunks = np.concatenate((chunks, newchunk[1]), axis=1)
+                        files = files + newchunk[0]
+                    else:
+                        if args.dump_features:
                             activations = newchunk[2]
-                            chunks = newchunk[1]
-                            files = newchunk[0]
+                        chunks = newchunk[1]
+                        files = newchunk[0]
 
-                    while files.count(files[0]) < len(files) or finish:
-                        totlen = files.count(files[0])
-                        callchunk = chunks[:, :totlen, :]
+                while files.count(files[0]) < len(files) or finish:
+                    totlen = files.count(files[0])
+                    callchunk = chunks[:, :totlen, :]
+                    if args.dump_features:
                         actichunk = activations[:, :totlen, :]
 
-                        try:
-                            seq, features = get_basecall_and_features(callchunk, actichunk)
-                        except:
-                            seq = ''
-                            features = None
-                            pass
+                    try:
+                        seq, features = get_basecall_and_features(callchunk, actichunk, args.dump_features)
+                    except:
+                        seq = ''
+                        features = None
+                        pass
 
-                        ### write out ###
-                        readid = os.path.splitext(os.path.basename(files[0]))[0]
-                        h_basecall.write(">" + readid + "\n")
-                        h_basecall.write(seq + "\n")
+                    readid = os.path.splitext(os.path.basename(files[0]))[0]
+                    h_basecall.write(">" + readid + "\n")
+                    h_basecall.write(seq + "\n")
 
-                        # read_features[readid] = features
-                        h_features.create_dataset(readid, data=features)
+                    newchunks = chunks[:, totlen:, :]
+                    chunks = newchunks
+                    files = files[totlen:]
 
+                    if args.dump_features:
+                        read_features[readid] = features
                         newactivations = activations[:, totlen:, :]
                         activations = newactivations
-                        newchunks = chunks[:, totlen:, :]
-                        chunks = newchunks
-                        files = files[totlen:]
 
-                        totprocessed += 1
-                        if totprocessed%500==0: print(f'{totprocessed} reads processed', flush=True)
-                        if finish and not len(files): break
-                    if finish: break
-            print(f'Total {totprocessed} reads')
+                    totprocessed += 1
+                    if totprocessed%500==0: print(f'{totprocessed} reads processed', flush=True)
+                    if finish and not len(files): break
+                if finish: break
+        print(f'Total {totprocessed} reads')
 
-    # print('Now dumping features...')
-    #     for id, feat in tqdm(read_features.items()):
+    if args.dump_feature:
+        print('Now dumping features...')
+        with h5py.File(os.path.join(args.outdir, f'features.h5'), 'w') as h_features:
+            for id, feat in tqdm(read_features.items()):
+                h_features.create_dataset(id, data=feat)
 
 
 if __name__ == "__main__":
@@ -304,16 +316,18 @@ if __name__ == "__main__":
     parser.add_argument("-B", "--beamsize", default=5, type=int, help="CTC beam search size (default: 5)")
     parser.add_argument("-e", "--errors", default=False, action="store_true")
     parser.add_argument("-d", "--debug", default=False, action="store_true")
+    parser.add_argument("--dump_features", default=False, action="store_true")
     args = parser.parse_args()
 
-    print('Running RODAN basecaller with feature dump', flush=True)
+    print('Running RODAN basecaller', flush=True)
 
     os.makedirs(args.outdir, exist_ok=True)
 
     torchdict = torch.load(args.model, map_location="cpu")
     origconfig = torchdict["config"]
 
-    if args.debug: print(origconfig)
+    if args.debug:
+        print(origconfig)
     origconfig["debug"] = args.debug
     config = Objectview(origconfig)
     config.batchsize = args.batchsize
