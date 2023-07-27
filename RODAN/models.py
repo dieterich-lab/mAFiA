@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+#
+# RODAN
+# v1.0
+# (c) 2020,2021,2022 Don Neumann
+#
+
 import sys
 import numpy as np
 import torch

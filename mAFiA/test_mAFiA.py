@@ -1,6 +1,4 @@
-import os, sys
-HOME = os.path.expanduser('~')
-sys.path.append(os.path.join(HOME, 'git/MAFIA'))
+import os
 import pandas as pd
 from tqdm import tqdm
 from Bio import SeqIO
@@ -9,8 +7,6 @@ from data_containers import mRNA_Site, FeatureContainer
 from feature_classifiers import load_motif_classifiers
 from output_writers import Site_Writer, BAM_Writer
 
-parser = mRNA_Test_Args_Parser()
-parser.parse_and_print()
 
 def load_genome_reference(ref_file):
     print(f'Parsing genome reference {os.path.basename(ref_file)}...')
@@ -22,7 +18,11 @@ def load_genome_reference(ref_file):
             ref['M'] = str(record.seq)
     return ref
 
-def main(args):
+def main():
+    parser = mRNA_Test_Args_Parser()
+    parser.parse_and_print()
+    args = parser.args
+
     if not os.path.exists(args.out_dir):
         os.makedirs(args.out_dir, exist_ok=True)
 
@@ -61,4 +61,4 @@ def main(args):
     print(f'Total {bam_writer.read_counts} mod. reads written to {bam_writer.out_bam_path}')
 
 if __name__ == "__main__":
-    main(parser.args)
+    main()

@@ -2,7 +2,7 @@ import os, sys
 HOME = os.path.expanduser('~')
 import torch
 import numpy as np
-from models import Objectview, Rodan
+from RODAN.models import Objectview, Rodan
 from fast_ctc_decode import beam_search, viterbi_search
 
 CTC_MODE='viterbi'
