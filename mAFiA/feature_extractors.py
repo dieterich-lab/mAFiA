@@ -154,7 +154,7 @@ class BackboneNetwork:
 
             pred_motif = this_chunk_basecalls[aligned_read.read_pos-2 : aligned_read.read_pos+3]
             if pred_motif != aligned_read.query_5mer:
-                print(f'\n!!! Error: Predicted motif {pred_motif} =/= aligned {aligned_read.query_5mer} !!!\n')
+                # print(f'\n!!! Error: Predicted motif {pred_motif} =/= aligned {aligned_read.query_5mer} !!!\n')
                 continue
 
             nt_feature = this_chunk_features[aligned_read.read_pos]
