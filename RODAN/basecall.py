@@ -265,6 +265,8 @@ def mp_write(queue, config, args):
                     callchunk = chunks[:, :totlen, :]
                     if args.dump_features:
                         actichunk = activations[:, :totlen, :]
+                    else:
+                        actichunk = None
                     seq, features = get_basecall_and_features(callchunk, actichunk, args.dump_features)
 
                     readid = os.path.splitext(os.path.basename(files[0]))[0]
