@@ -1,9 +1,11 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 glori_file = '/home/adrian/Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv'
 res_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/chrX_generalized_5mer/mAFiA.sites.bed'
+img_out = '/home/adrian/img_out'
 
 df_glori = pd.read_csv(glori_file, usecols=['Chr', 'Sites', 'Strand', 'Ratio', 'P_adjust'])
 df_glori = df_glori[df_glori['Chr']=='chrX']
@@ -35,14 +37,36 @@ for ind_train, this_train_motif in enumerate(train_motifs):
         corr_mat[ind_train, ind_test] = corr
 
 num_test_sites = [[tup[3] for tup in train_test_corr_num if tup[1]==motif][0] for motif in test_motifs]
+composite_test_motifs = [f'{x} ({y})' for (x, y) in zip(test_motifs, num_test_sites)]
 
-composite_test_names = [f'{x} ({y})' for (x, y) in zip(test_motifs, num_test_sites)]
+### visualize ###
+divider = 8
+vmin = 0.8
+vmax = 0.9
+sub_mat = corr_mat[:, divider:]
+plt.figure(figsize=(8, 5))
+im = plt.imshow(sub_mat, cmap='plasma', vmin=vmin, vmax=vmax)
+plt.xticks(np.arange(sub_mat.shape[1]), composite_test_motifs[divider:], rotation=-90)
+plt.yticks(np.arange(sub_mat.shape[0]), train_motifs)
+plt.xlabel('Test 5-mer', fontsize=12)
+plt.ylabel('Train 5-mer', fontsize=12)
+cb = plt.colorbar(im, fraction=0.04, pad=0.04)
+cb.set_ticks(np.arange(vmin, vmax+0.01, 0.05))
+cb.set_label('Correlation', fontsize=12, rotation=-90, labelpad=20)
+plt.title('mAFiA-GLORI correlation by train / test 5-mers\nchr X', fontsize=15)
+plt.savefig(os.path.join(img_out, 'corr_by_train_test_5mer_NGACN.png'), bbox_inches='tight')
 
-plt.figure(figsize=(16, 9))
-plt.imshow(corr_mat, cmap='plasma', vmin=0.8)
-plt.xticks(np.arange(corr_mat.shape[1]), composite_test_names, rotation=-90)
-plt.yticks(np.arange(corr_mat.shape[0]), train_motifs)
-plt.xlabel('Test 5mer', fontsize=12)
-plt.ylabel('Train 5mer', fontsize=12)
-plt.colorbar()
-plt.title('mAFiA-GLORI correlation, chr X', fontsize=15)
+vmin = 0.6
+vmax = 0.8
+sub_mat = corr_mat[:, :divider]
+plt.figure(figsize=(8, 5))
+im = plt.imshow(sub_mat, cmap='plasma', vmin=vmin, vmax=vmax)
+plt.xticks(np.arange(sub_mat.shape[1]), composite_test_motifs[:divider], rotation=-90)
+plt.yticks(np.arange(sub_mat.shape[0]), train_motifs)
+plt.xlabel('Test 5-mer', fontsize=12)
+plt.ylabel('Train 5-mer', fontsize=12)
+cb = plt.colorbar(im, fraction=0.04, pad=0.04)
+cb.set_ticks(np.arange(vmin, vmax+0.01, 0.05))
+cb.set_label('Correlation', fontsize=12, rotation=-90, labelpad=20)
+plt.title('mAFiA-GLORI correlation by train / test 5-mers\nchr X', fontsize=15)
+plt.savefig(os.path.join(img_out, 'corr_by_train_test_5mer_NAACN.png'), bbox_inches='tight')
