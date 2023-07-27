@@ -221,7 +221,7 @@ class mRNADataContainer(DataContainer):
         super().__init__(name, bam_path)
         self._index_fast5_files(fast5_dir, index_bam_queries_only=False)
 
-    def collect_nucleotides_aligned_to_mrna_site(self, extractor, site, thresh_coverage=1, max_num_reads=1000,
+    def collect_nucleotides_aligned_to_mRNA_site(self, extractor, site, thresh_coverage=1, max_num_reads=1000,
                                                  enforce_ref_5mer=False):
         all_aligned_reads = []
         for pileupcolumn in self.bam.pileup(site.chr, site.start, site.start + 1, truncate=True):
