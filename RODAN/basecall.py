@@ -212,16 +212,17 @@ def get_basecall_and_features(in_base_probs, layer_activation=None, dump_feature
     elif args.decoder == 'viterbi':
         decoder = viterbi_search
 
+    exp = np.exp(in_base_probs)
+    softmax = exp / np.sum(exp, axis=-1, keepdims=True)
+
     pred_labels = []
     out_features = []
-    for i in range(in_base_probs.shape[1]):
-        exp = np.exp(in_base_probs[:, i, :])
-        probs = exp / np.sum(exp, axis=-1, keepdims=True)
+    for i in range(softmax.shape[1]):
+        probs = softmax[:, i, :]
         this_pred_label, pred_locs = decoder(probs, alphabet=alphabet)
         pred_labels.append(this_pred_label)
 
         if dump_features:
-            num_locs = layer_activation.shape[0]
             pred_locs_corrected = []
             for loc_ind in range(len(this_pred_label)):
                 start_loc = pred_locs[loc_ind]
@@ -236,6 +237,7 @@ def get_basecall_and_features(in_base_probs, layer_activation=None, dump_feature
                 this_feature = layer_activation[pred_locs_corrected, i, :]
             else:
                 this_feature = []
+                num_locs = layer_activation.shape[0]
                 for loc_shift in range(-args.feature_width, args.feature_width + 1):
                     shifted_locs = [max(min(x + loc_shift, num_locs - 1), 0) for x in pred_locs_corrected]
                     this_feature.append(layer_activation[shifted_locs, i, :])
