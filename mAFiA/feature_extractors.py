@@ -1,10 +1,10 @@
-import os, sys
+import os
+import sys
 import torch
 import numpy as np
 from RODAN.models import Objectview, Rodan
 from fast_ctc_decode import beam_search, viterbi_search
 
-from mAFiA.models import Objectview, Rodan
 
 CTC_MODE = 'viterbi'
 if CTC_MODE == 'beam':
