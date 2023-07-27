@@ -49,7 +49,7 @@ class Aligned_Read:
             strand = self.strand
         )
 
-class mRNA_Site:
+class mRNASite:
     def __init__(self, row, ref):
         self.chr = row['chrom']
         self.start = row['chromStart']  # 0-based
@@ -66,7 +66,7 @@ class mRNA_Site:
         print(f'chr{self.chr}, start{self.start}, strand{self.strand}')
         print(f'Reference motif {self.ref_5mer}')
 
-class Data_Container:
+class DataContainer:
     def __init__(self, name, bam_path):
         print(f'Loading data {name}')
         self.name = name
@@ -132,7 +132,7 @@ class Data_Container:
         self.nucleotides.clear()
         return pd.concat(dfs).reset_index(drop=True)
 
-class Oligo_Data_Container(Data_Container):
+class OligoDataContainer(DataContainer):
     def __init__(self, name, bam_path, fast5_dir):
         super().__init__(name, bam_path, fast5_dir)
         self._index_fast5_files(fast5_dir, index_bam_queries_only=True)
@@ -203,7 +203,7 @@ class Oligo_Data_Container(Data_Container):
                         valid_counts += 1
         return all_nts
 
-class mRNA_Data_Container(Data_Container):
+class mRNADataContainer(DataContainer):
     def __init__(self, name, bam_path, fast5_dir):
         super().__init__(name, bam_path, fast5_dir)
         self._index_fast5_files(fast5_dir, index_bam_queries_only=False)
@@ -253,7 +253,7 @@ class mRNA_Data_Container(Data_Container):
             self.nucleotides[site.ind] = site_nts
 
 
-class FeatureContainer(Data_Container):
+class FeatureContainer(DataContainer):
     def __init__(self, name, bam_path, feature_path):
         super().__init__(name, bam_path)
         self.features = h5py.File(feature_path, 'r')

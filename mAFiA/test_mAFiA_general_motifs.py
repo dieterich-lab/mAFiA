@@ -4,12 +4,12 @@ sys.path.append(os.path.join(HOME, 'git/MAFIA'))
 import pandas as pd
 from tqdm import tqdm
 from Bio import SeqIO
-from arg_parsers import mRNA_Test_Args_Parser
-from data_containers import mRNA_Site, FeatureContainer
+from arg_parsers import mRNATestArgsParser
+from data_containers import mRNASite, FeatureContainer
 from feature_classifiers import load_motif_classifiers
-from output_writers import Site_Writer, BAM_Writer
+from output_writers import SiteWriter, BAMWriter
 
-parser = mRNA_Test_Args_Parser()
+parser = mRNATestArgsParser()
 parser.parse_and_print()
 
 def load_genome_reference(ref_file):
@@ -31,12 +31,12 @@ def main(args):
     reference = load_genome_reference(args.ref_file)
     motif_classifiers = load_motif_classifiers(args.classifier_model_dir)
 
-    site_writer = Site_Writer(out_path=os.path.join(args.out_dir, 'mAFiA.sites.bed'))
-    bam_writer = BAM_Writer(in_bam_path=args.in_bam_file, out_bam_path=os.path.join(args.out_dir, 'mAFiA.reads.bam'))
+    site_writer = SiteWriter(out_path=os.path.join(args.out_dir, 'mAFiA.sites.bed'))
+    bam_writer = BAMWriter(in_bam_path=args.in_bam_file, out_bam_path=os.path.join(args.out_dir, 'mAFiA.reads.bam'))
 
     df_mod = pd.read_csv(args.mod_file, sep='\t')
     for _, row in tqdm(list(df_mod.iterrows())):
-        this_mRNA_site = mRNA_Site(row, reference)
+        this_mRNA_site = mRNASite(row, reference)
 
         test_container.collect_nucleotides_aligned_to_mRNA_site(
             site=this_mRNA_site,

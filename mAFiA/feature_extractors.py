@@ -1,5 +1,4 @@
 import os, sys
-HOME = os.path.expanduser('~')
 import torch
 import numpy as np
 from RODAN.models import Objectview, Rodan
@@ -24,7 +23,7 @@ def convert_statedict(state_dict):
     return new_checkpoint
 
 
-class Backbone_Network:
+class BackboneNetwork:
     def __init__(self, model_path, extraction_layer, feature_width, batchsize=2048):
         print('Finding my backbone...')
         torchdict = torch.load(model_path, map_location="cpu")

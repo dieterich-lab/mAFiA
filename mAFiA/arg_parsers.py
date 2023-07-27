@@ -1,6 +1,7 @@
 import argparse
 
-class Args_Parser(argparse.ArgumentParser):
+
+class ArgsParser(argparse.ArgumentParser):
     def __init__(self):
         super().__init__()
         self.add_argument('--ref_file')
@@ -12,6 +13,7 @@ class Args_Parser(argparse.ArgumentParser):
         self.add_argument('--feature_width', type=int, default=0)
         self.add_argument('--classifier_type', default='logistic_regression')
         self.add_argument('--classifier_model_dir')
+        self.args = None
 
     def parse_and_print(self):
         self.args = self.parse_args()
@@ -20,13 +22,15 @@ class Args_Parser(argparse.ArgumentParser):
             print(f'{k} : {v}')
         print('=========================================================')
 
-class Test_Args_Parser(Args_Parser):
+
+class TestArgsParser(ArgsParser):
     def __init__(self):
         super().__init__()
-        self.add_argument('--in_bam_file')
+        self.add_argument('--bam_file')
+        self.add_argument('--fast5_dir')
         self.add_argument('--out_dir')
 
-class Train_Args_Parser(Args_Parser):
+class TrainArgsParser(ArgsParser):
     def __init__(self):
         super().__init__()
         self.add_argument('--unm_bam_file')
@@ -35,10 +39,10 @@ class Train_Args_Parser(Args_Parser):
         self.add_argument('--mod_fast5_dir')
         self.add_argument('--scaler', default=None)
 
-class mRNA_Test_Args_Parser(Test_Args_Parser):
+class mRNATestArgsParser(TestArgsParser):
     def __init__(self):
         super().__init__()
-        self.add_argument('--in_feat_file')
+        self.add_argument('--features_file', default=None)
         self.add_argument('--mod_file')
         self.add_argument('--mod_prob_thresh', type=float, default=0.5)
         self.add_argument('--output_mod_probs', action='store_true')
