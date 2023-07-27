@@ -51,7 +51,7 @@ python3 ${mafia}/RODAN/basecall.py \
 --batchsize 4096 \
 --outdir ${output} &
 ```
-You should see the file ${basecall} growing. On a reasonably modern GPU machine, this step should take less than 30 mins.
+On a reasonably modern GPU machine, this step should take less than 30 mins.
 
 ## 2. Alignment
 Align basecalling results to reference genome. Filter, sort, and index BAM file.
