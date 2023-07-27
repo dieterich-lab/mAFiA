@@ -11,8 +11,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import precision_recall_curve, auc
 import pickle
 
-random.seed(0)
-
 
 class MotifClassifier:
     def __init__(self, motif, classifier_type, scaler):

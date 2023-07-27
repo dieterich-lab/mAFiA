@@ -4,7 +4,7 @@ import pysam
 import numpy as np
 
 
-class Dataframe_Writer:
+class DataframeWriter:
     def __init__(self, out_path, fmt_precision=6):
         self.out_path = out_path
         self.fmt_precision = fmt_precision
@@ -20,7 +20,7 @@ class Dataframe_Writer:
         self.df_out.to_csv(self.out_path, sep='\t', index=False)
 
 
-class Site_Writer(Dataframe_Writer):
+class SiteWriter(DataframeWriter):
     def __init__(self, out_path):
         super().__init__(out_path)
 
@@ -42,14 +42,16 @@ class Site_Writer(Dataframe_Writer):
         self.site_counts += 1
         self.df_out = pd.concat([self.df_out, df_glori_nts])
 
-    def update_site_df(self, in_row, cov, ratio, ref_5mer):
+    def update_site_df(self, in_row, cov, ratio, ref_5mer, train_5mer=None):
         in_row['coverage'] = cov
         in_row['modRatio'] = round(ratio*100.0)
         in_row['ref5mer'] = ref_5mer
+        if train_5mer:
+            in_row['train5mer'] = train_5mer
         self.site_counts += 1
         self.df_out = pd.concat([self.df_out, pd.DataFrame(in_row).T])
 
-class BAM_Writer:
+class BAMWriter:
     def __init__(self, in_bam_path, out_bam_path):
         self.in_bam_path = in_bam_path
         self.out_bam_path = out_bam_path

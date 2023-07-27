@@ -17,7 +17,7 @@ class ArgsParser(argparse.ArgumentParser):
 
     def parse_and_print(self):
         self.args = self.parse_args()
-        print('=========================================================')
+        print('\n=========================================================')
         for k, v in vars(self.args).items():
             print(f'{k} : {v}')
         print('=========================================================')
@@ -26,8 +26,8 @@ class ArgsParser(argparse.ArgumentParser):
 class TestArgsParser(ArgsParser):
     def __init__(self):
         super().__init__()
-        self.add_argument('--test_bam_file')
-        self.add_argument('--test_fast5_dir')
+        self.add_argument('--bam_file')
+        self.add_argument('--fast5_dir')
         self.add_argument('--out_dir')
 
 
@@ -41,9 +41,10 @@ class TrainArgsParser(ArgsParser):
         self.add_argument('--scaler', default=None)
 
 
-class MRNATestArgsParser(TestArgsParser):
+class mRNATestArgsParser(TestArgsParser):
     def __init__(self):
         super().__init__()
+        self.add_argument('--features_file', default=None)
         self.add_argument('--mod_file')
         self.add_argument('--mod_prob_thresh', type=float, default=0.5)
         self.add_argument('--output_mod_probs', action='store_true')
