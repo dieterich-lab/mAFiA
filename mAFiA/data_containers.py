@@ -63,8 +63,8 @@ class mRNASite:
             self.ref_5mer = ref_5mer
 
     def print(self):
-        print(f'chr{self.chr}, start{self.start}, strand{self.strand}')
-        print(f'Reference motif {self.ref_5mer}')
+        print(f'chr{self.chr}, start{self.start}, strand{self.strand}', flush=True)
+        print(f'Reference motif {self.ref_5mer}', flush=True)
 
 class DataContainer:
     def __init__(self, name, bam_path):
