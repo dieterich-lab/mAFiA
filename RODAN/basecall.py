@@ -292,7 +292,7 @@ def mp_write(queue, config, args):
                 if finish: break
         print(f'Total {totprocessed} reads')
 
-    if args.dump_feature:
+    if args.dump_features:
         print('Now dumping features...')
         with h5py.File(os.path.join(args.outdir, f'features.h5'), 'w') as h_features:
             for id, feat in tqdm(read_features.items()):
