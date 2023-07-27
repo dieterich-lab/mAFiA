@@ -205,6 +205,7 @@ class OligoDataContainer(DataContainer):
 
 class mRNADataContainer(DataContainer):
     def __init__(self, name, bam_path, fast5_dir):
+        print('Starting with fast5')
         super().__init__(name, bam_path, fast5_dir)
         self._index_fast5_files(fast5_dir, index_bam_queries_only=False)
 
@@ -255,6 +256,7 @@ class mRNADataContainer(DataContainer):
 
 class FeatureContainer(DataContainer):
     def __init__(self, name, bam_path, feature_path):
+        print('Starting with features')
         super().__init__(name, bam_path)
         self.features = h5py.File(feature_path, 'r')
 
