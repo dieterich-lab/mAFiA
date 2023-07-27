@@ -57,7 +57,7 @@ def main():
                 enforce_ref_5mer=args.enforce_ref_5mer
             )
         else:
-            test_container.collect_nucleotides_aligned_to_mrna_site(
+            test_container.collect_nucleotides_aligned_to_mRNA_site(
                 ivt_backbone, this_mRNA_site,
                 thresh_coverage=args.min_coverage,
                 max_num_reads=args.max_num_reads,
