@@ -23,7 +23,7 @@ dependencies = [
 test_mAFiA = 'mAFiA.test_mAFiA:main'
 
 [tool.setuptools.packages.find]
-include = ["mAFiA"]
+include = ["mAFiA", "RODAN"]
 
 [tool.setuptools.package-data]
 mafia = ["noarch"]
