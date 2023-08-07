@@ -7,10 +7,12 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 #DATASET=50_WT_50_IVT
 #DATASET=75_WT_25_IVT
 #DATASET=100_WT_0_IVT
-DATASET=P2_WT
+#DATASET=P2_WT
 ########################################################################################################################
+#WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/HEK293/${DATASET}
 
-WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/HEK293/${DATASET}
+DATASET=JK_HEK293_DMSO_1_2_RTA
+WORKSPACE=/prj/TRR319_RMaP/Project_B01/Adrian/${DATASET}
 mkdir -p ${WORKSPACE}
 cd ${WORKSPACE}
 
@@ -50,7 +52,7 @@ fi
 ########################################################################################################################
 #### align to genome ###################################################################################################
 ########################################################################################################################
-REF_GENOME=${HOME}/Data/genomes/GRCh38_96.fa
+REF_GENOME=/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa
 SAM_GENOME=${WORKSPACE}/genome_mapped.sam
 BAM_GENOME=${WORKSPACE}/genome_filtered_q50.bam
 
@@ -75,8 +77,8 @@ BAM_TRANSCRIPTOME=${WORKSPACE}/transcriptome_mapped.bam
 
 module purge
 module load minimap2
-minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF_TRANSCRIPTOME} ${WORKSPACE}/basecall_merged.fasta > ${SAM_TRANSCRIPTOME}
-
+#minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF_TRANSCRIPTOME} ${WORKSPACE}/basecall_merged.fasta > ${SAM_TRANSCRIPTOME}
+minimap2 --secondary=no -ax map-ont -k14 -t 36 --cs ${REF_TRANSCRIPTOME} ${WORKSPACE}/basecall_merged.fasta > ${SAM_TRANSCRIPTOME}
 ### check stats and accuracy ###
 samtools flagstats ${SAM_TRANSCRIPTOME} > transcriptome_qc.txt
 #${HOME}/git/renata/accuracy.py ${SAM_TRANSCRIPTOME} ${REF_TRANSCRIPTOME} >> transcriptome_qc.txt
