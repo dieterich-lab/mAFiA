@@ -6,11 +6,11 @@ from tqdm import tqdm
 import os
 
 workspace = '/home/darthvader/Data/TRR319_RMaP/Project_B01/Adrian/JK_HEK293_DMSO_1_2_RTA'
-in_mod_file = os.path.join(workspace, 'mAFiA/mAFiA.sites.bed')
-genome_bam_file = os.path.join(workspace, 'mAFiA/mAFiA.reads.bam')
+in_mod_file = os.path.join(workspace, '_mAFiA/mAFiA.sites.bed')
+genome_bam_file = os.path.join(workspace, '_mAFiA/mAFiA.reads.bam')
 transcriptome_ref_file = '/home/darthvader/Data/GRCh38_102/GRCh38.cdna.all.fa'
 transcriptome_bam_file = os.path.join(workspace, 'transcriptome_mapped.bam')
-out_mod_file = os.path.join(workspace, 'mAFiA/mAFiA.sites.bed.annotated')
+out_mod_file = os.path.join(workspace, '_mAFiA/mAFiA.sites.bed.annotated.new')
 
 df_mod = pd.read_csv(in_mod_file, sep='\t')
 
@@ -104,13 +104,28 @@ for _, row in tqdm(df_mod.iterrows()):
     print(transcript_modRatios)
 
     df_out = pd.DataFrame()
+    transcriptName = []
+    transcriptCoverage = []
+    transcriptModRatio = []
     for this_transcript, (this_coverage, this_modRatio) in transcript_modRatios.items():
-        new_row = row.copy()
-        new_row['transcriptName'] = this_transcript
-        new_row['transcriptCoverage'] = this_coverage
-        new_row['transcriptModRatio'] = this_modRatio
-        df_out = pd.concat([df_out, pd.DataFrame(new_row).T])
+        transcriptName.append(this_transcript)
+        transcriptCoverage.append(this_coverage)
+        transcriptModRatio.append(this_modRatio)
         transcripts_collected += 1
+
+    indMax = np.argmax(transcriptModRatio)
+    indMin = np.argmin(transcriptModRatio)
+
+    deltaModRatio = transcriptModRatio[indMax] - transcriptModRatio[indMin]
+    deltaCoverage = int(np.abs((transcriptCoverage[indMax] - transcriptCoverage[indMin])) / (transcriptCoverage[indMax] + transcriptCoverage[indMin]) * 100.0)
+
+    new_row = row.copy()
+    new_row['transcriptName'] = ','.join(transcriptName)
+    new_row['transcriptCoverage'] = ','.join([str(cov) for cov in transcriptCoverage])
+    new_row['transcriptModRatio'] = ','.join([str(mr) for mr in transcriptModRatio])
+    new_row['deltaModRatio'] = deltaModRatio
+    new_row['deltaCoverage'] = deltaCoverage
+    df_out = pd.concat([df_out, pd.DataFrame(new_row).T])
 
     if os.path.exists(out_mod_file):
         df_out.to_csv(out_mod_file, sep='\t', index=False, header=False, mode='a')
