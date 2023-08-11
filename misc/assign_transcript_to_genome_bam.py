@@ -6,11 +6,11 @@ from tqdm import tqdm
 import os
 
 workspace = '/home/darthvader/Data/TRR319_RMaP/Project_B01/Adrian/JK_HEK293_DMSO_1_2_RTA'
-in_mod_file = os.path.join(workspace, '_mAFiA/mAFiA.sites.bed')
-genome_bam_file = os.path.join(workspace, '_mAFiA/mAFiA.reads.bam')
+in_mod_file = os.path.join(workspace, 'mAFiA/mAFiA.sites.bed')
+genome_bam_file = os.path.join(workspace, 'mAFiA/mAFiA.reads.bam')
 transcriptome_ref_file = '/home/darthvader/Data/GRCh38_102/GRCh38.cdna.all.fa'
 transcriptome_bam_file = os.path.join(workspace, 'transcriptome_mapped.bam')
-out_mod_file = os.path.join(workspace, '_mAFiA/mAFiA.sites.bed.annotated.new')
+out_mod_file = os.path.join(workspace, 'mAFiA/mAFiA.sites.bed.annotated.new')
 
 df_mod = pd.read_csv(in_mod_file, sep='\t')
 
@@ -36,7 +36,6 @@ def get_transcript_modRatios(modProbs, thresh=127):
 
 min_coverage = 10
 min_splitting = 20
-
 
 sites_collected = 0
 transcripts_collected = 0
