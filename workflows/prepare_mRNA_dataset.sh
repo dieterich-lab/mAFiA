@@ -13,7 +13,8 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 
 #DATASET=JK_HEK293_DMSO_1_2_RTA
 #DATASET=JK_HEK293_DMSO_3_4_RTA
-DATASET=JK_HEK293_STM2457_5_6_RTA
+#DATASET=JK_HEK293_STM2457_5_6_RTA
+DATASET=JK_HEK293_STM2457_7_8_RTA
 WORKSPACE=/prj/TRR319_RMaP/Project_B01/Adrian/${DATASET}
 mkdir -p ${WORKSPACE}
 cd ${WORKSPACE}
@@ -40,7 +41,7 @@ split -a3 -l10 -d ${WORKSPACE}/fast5_paths_all ${WORKSPACE}/${FILENAME_PREFIX}
 NUM_ARRAYS=""
 for f in ${WORKSPACE}/fast5_paths_part*; do ff=${f##*part}; NUM_ARRAYS+="${ff},"; done
 NUM_ARRAYS=${NUM_ARRAYS%,*}
-sbatch --array=${NUM_ARRAYS} --export=ALL,WORKSPACE=${WORKSPACE},FILENAME_PREFIX=${FILENAME_PREFIX},ARCH=${ARCH},MODEL=${MODEL} ${HOME}/git/MAFIA/workflows/array_basecaller.sh
+sbatch --array=${NUM_ARRAYS} --export=ALL,WORKSPACE=${WORKSPACE},FILENAME_PREFIX=${FILENAME_PREFIX},ARCH=${ARCH},MODEL=${MODEL} ${HOME}/git/mAFiA_dev/workflows/array_basecaller.sh
 
 #for f in ${WORKSPACE}/part*.fasta; do echo $f; grep '>' $f | wc -l; done
 
