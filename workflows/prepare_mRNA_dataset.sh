@@ -11,7 +11,9 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 ########################################################################################################################
 #WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/HEK293/${DATASET}
 
-DATASET=JK_HEK293_DMSO_1_2_RTA
+#DATASET=JK_HEK293_DMSO_1_2_RTA
+#DATASET=JK_HEK293_DMSO_3_4_RTA
+DATASET=JK_HEK293_STM2457_5_6_RTA
 WORKSPACE=/prj/TRR319_RMaP/Project_B01/Adrian/${DATASET}
 mkdir -p ${WORKSPACE}
 cd ${WORKSPACE}
