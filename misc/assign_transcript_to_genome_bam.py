@@ -4,13 +4,14 @@ from Bio import SeqIO
 import pysam
 from tqdm import tqdm
 import os
+HOME = os.path.expanduser('~')
 
-workspace = '/home/darthvader/Data/TRR319_RMaP/Project_B01/Adrian/JK_HEK293_DMSO_1_2_RTA'
+workspace = os.path.join(HOME, 'Data/TRR319_RMaP/Project_B01/Adrian/JK_HEK293_DMSO_merged')
 in_mod_file = os.path.join(workspace, 'mAFiA/mAFiA.sites.bed')
 genome_bam_file = os.path.join(workspace, 'mAFiA/mAFiA.reads.bam')
-transcriptome_ref_file = '/home/darthvader/Data/GRCh38_102/GRCh38.cdna.all.fa'
+transcriptome_ref_file = os.path.join(HOME, 'Data/GRCh38_102/GRCh38.cdna.all.fa')
 transcriptome_bam_file = os.path.join(workspace, 'transcriptome_mapped.bam')
-out_mod_file = os.path.join(workspace, 'mAFiA/mAFiA.sites.bed.annotated.new')
+out_mod_file = os.path.join(workspace, 'mAFiA/mAFiA.sites.bed.annotated')
 
 df_mod = pd.read_csv(in_mod_file, sep='\t')
 
@@ -99,8 +100,8 @@ for _, row in tqdm(df_mod.iterrows()):
     if (np.max(all_modRatios) - np.min(all_modRatios)) < min_splitting:
         continue
 
-    print(row)
-    print(transcript_modRatios)
+    # print(row)
+    # print(transcript_modRatios)
 
     df_out = pd.DataFrame()
     transcriptName = []
