@@ -84,4 +84,4 @@ In your ${output} directory, you should now see two files:
 - "mAFiA.sites.bed": List of sites with coverage above minimum threshold (default 50). The column "modRatio" lists the site's stoichiometry.
 - "mAFiA.reads.bam": Aligned reads identical to those in the input BAM file ${bam}, but with additional MM and ML tags that mark the location and modification probability in each individual read. The results can be visualized with, eg, [IGV](https://software.broadinstitute.org/software/igv/).
 
-The complete HEK293 WT dataset can be downloaded from [zenodo](https://zenodo.org/record/8319583).
+The complete HEK293 WT dataset for all chromosomes can be downloaded from [zenodo](https://zenodo.org/record/8319583).
