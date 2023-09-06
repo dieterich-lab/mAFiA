@@ -49,7 +49,7 @@ python3 ${mafia}/RODAN/basecall.py \
 --fast5dir ${fast5dir} \
 --model ${backbone} \
 --batchsize 4096 \
---outdir ${output} &
+--outdir ${output}
 ```
 On a reasonably modern GPU machine, this step should take less than 30 mins.
 
@@ -76,7 +76,7 @@ test_mAFiA \
 --backbone_model_path ${backbone} \
 --classifier_model_dir ${classifiers} \
 --mod_prob_thresh 0.5 \
---out_dir ${output} &
+--out_dir ${output}
 ```
 The last step should take less than 1 hour. We are currently working on integrating the feature extraction step directly into basecalling. The run-time should then be significantly reduced.
 
