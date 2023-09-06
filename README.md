@@ -2,7 +2,7 @@
 
 # mAFiA - (Another) m<sup>6</sup>A Finding Algorithm
 
-Here we provide a brief walkthrough to run mAFiA, using the example of chromosome X. Complete HEK293 WT dataset can be downloaded from [zenodo](https://zenodo.org/record/8319583).
+Here we provide a brief walkthrough to run mAFiA, using the example of chromosome X. A complete HEK293 WT dataset can be downloaded from [zenodo](https://zenodo.org/record/8319583).
 
 ## 0. Preliminary
 - Get code and activate virtual environment, e.g.:
@@ -20,7 +20,7 @@ Install package
 ```
 pip install -e .
 ```
-- Download models and data from [here](https://data.dieterichlab.org/s/dKb6KtmKX99Q5Ld)
+- Download models and data from [here](https://zenodo.org/record/8321727)
     - The folder "models" contains:
         - backbone.torch: [RODAN](https://github.com/biodlab/RODAN)-based neural network for basecalling and feature extraction
         - backbone.config: training configuration for backbone
