@@ -2,7 +2,7 @@
 
 # mAFiA - (Another) m<sup>6</sup>A Finding Algorithm
 
-Here we provide a brief walkthrough to run mAFiA, using the example of chromosome X. A complete HEK293 WT dataset can be downloaded from [zenodo](https://zenodo.org/record/8319583).
+Here we provide a brief walkthrough to run mAFiA, using the example of chromosome X.
 
 ## 0. Preliminary
 - Get code and activate virtual environment, e.g.:
@@ -83,3 +83,5 @@ The last step should take less than 1 hour. We are currently working on integrat
 In your ${output} directory, you should now see two files:
 - "mAFiA.sites.bed": List of sites with coverage above minimum threshold (default 50). The column "modRatio" lists the site's stoichiometry.
 - "mAFiA.reads.bam": Aligned reads identical to those in the input BAM file ${bam}, but with additional MM and ML tags that mark the location and modification probability in each individual read. The results can be visualized with, eg, [IGV](https://software.broadinstitute.org/software/igv/).
+
+The complete HEK293 WT dataset can be downloaded from [zenodo](https://zenodo.org/record/8319583).
