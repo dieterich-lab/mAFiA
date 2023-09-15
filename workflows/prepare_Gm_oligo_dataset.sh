@@ -8,6 +8,7 @@ fasta=${workspace}/${dataset}/rodan.fasta
 oligo_ref=${workspace}/oligo_reference/oligo_${dataset}.fasta
 sam=${workspace}/${dataset}/spomelette.sam
 ligation_ref=${workspace}/${dataset}/ligation_ref.fasta
+filter_score=70
 
 arch=${HOME}/git/renata/rnaarch
 backbone=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
@@ -45,25 +46,25 @@ python3 -u ${HOME}/git/Gmorah/oligo/spanish_omelette_alignment.py \
 --write_cs
 
 ### filter by quality ###
-echo "Filtering and converting ${SAM}"
-FILTERED_SAM=${SAM/.sam/_q${FILTER_SCORE}.sam}
-samtools view -h -q${FILTER_SCORE} ${SAM} > ${FILTERED_SAM}
+echo "Filtering and converting ${sam}"
+sam_filtered=${sam/.sam/_q${filter_score}.sam}
+samtools view -h -q${filter_score} ${sam} > ${sam_filtered}
 
 ### check read num and accuracy ###
 echo "Quality control"
-samtools flagstats ${FILTERED_SAM} > ${WORKSPACE}/qc_q${FILTER_SCORE}.txt
-${HOME}/git/renata/accuracy.py ${FILTERED_SAM} ${LIGATION_REF} >> ${WORKSPACE}/qc_q${FILTER_SCORE}.txt
+samtools flagstats ${sam_filtered} > ${workspace}/${dataset}/qc_q${filter_score}.txt
+${HOME}/git/renata/accuracy.py ${sam_filtered} ${ligation_ref} >> ${workspace}/${dataset}/qc_q${filter_score}.txt
 
 
 #### Convert to BAM ###
-BAM=${FILTERED_SAM//.sam/.bam}
-echo "Converting to ${BAM}"
-samtools view -bST ${LIGATION_REF} ${FILTERED_SAM} | samtools sort - > ${BAM}
-samtools index ${BAM}
+bam=${sam_filtered//.sam/.bam}
+echo "Converting to ${bam}"
+samtools view -bST ${ligation_ref} ${sam_filtered} | samtools sort - > ${bam}
+samtools index ${bam}
 
 ### align with minimap ###
-echo "Aligning with minimap"
-minimap2 -ax map-ont --secondary=no -t 8 ${LIGATION_REF} ${FASTA} | samtools view -F 2324 -b - | samtools sort -o renata.minimap.bam
-samtools index renata.minimap.bam
+#echo "Aligning with minimap"
+#minimap2 -ax map-ont --secondary=no -t 8 ${LIGATION_REF} ${FASTA} | samtools view -F 2324 -b - | samtools sort -o renata.minimap.bam
+#samtools index renata.minimap.bam
 
-echo "${DATASET} finished"
+echo "${dataset} finished"

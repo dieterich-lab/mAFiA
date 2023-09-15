@@ -2,7 +2,7 @@ import os, sys
 HOME = os.path.expanduser('~')
 sys.path.append(os.path.join(HOME, 'git/MAFIA'))
 from arg_parsers import Test_Args_Parser, Output_Writer
-from oligo_processors import Oligo_Reference_Generator
+from oligo_processors import OligoReferenceGenerator
 from data_containers import Oligo_Data_Container
 from feature_extractors import Backbone_Network
 from feature_classifiers import load_motif_classifiers
@@ -18,7 +18,7 @@ def main(args):
 
     test_container.collect_features_from_reads(ivt_backbone, args.max_num_reads)
 
-    oligo_ref_generator = Oligo_Reference_Generator(ligation_ref_file=args.ref_file)
+    oligo_ref_generator = OligoReferenceGenerator(ligation_ref_file=args.ref_file)
     oligo_ref_generator.collect_motif_oligos()
 
     motif_classifiers = load_motif_classifiers(args.classifier_model_dir)
