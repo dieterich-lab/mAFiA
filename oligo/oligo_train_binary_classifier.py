@@ -10,6 +10,8 @@ from mAFiA.feature_classifiers import MotifClassifier
 parser = TrainArgsParser()
 parser.parse_and_print()
 
+### todo: collect unm and mod features in same BAM file ###
+
 def main(args):
     os.makedirs(args.classifier_model_dir, exist_ok=True)
 
