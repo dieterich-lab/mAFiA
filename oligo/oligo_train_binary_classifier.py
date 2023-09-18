@@ -1,4 +1,6 @@
-import os
+import os, sys
+HOME = os.path.expanduser('~')
+sys.path.append(os.path.join(HOME, 'git/Gmorah'))
 from mAFiA.arg_parsers import TrainArgsParser
 from oligo_processors import OligoReferenceGenerator
 from mAFiA.data_containers import OligoDataContainer
