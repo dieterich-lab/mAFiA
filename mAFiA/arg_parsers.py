@@ -37,6 +37,7 @@ class TrainArgsParser(ArgsParser):
         self.add_argument('--unm_fast5_dir')
         self.add_argument('--mod_bam_file')
         self.add_argument('--mod_fast5_dir')
+        self.add_argument('--annotation')
         self.add_argument('--scaler', default=None)
 
 class mRNATestArgsParser(TestArgsParser):

@@ -45,8 +45,10 @@ class MotifClassifier:
         all_features = np.array(unm_features + mod_features)
 
         X_train, X_test, y_train, y_test, train_nts, test_nts = train_test_split(all_features, labels, sample_unm_nts+sample_mod_nts, test_size=frac_test_split)
-        self.train_nts = train_nts
-        self.test_nts = test_nts
+        # self.train_nts = train_nts
+        # self.test_nts = test_nts
+        self.num_train_nts = len(train_nts)
+        self.num_test_nts = len(test_nts)
 
         self.binary_model = self.binary_model.fit(X_train, y_train)
         y_score = self.binary_model.decision_function(X_test)
@@ -77,7 +79,7 @@ class MotifClassifier:
             plt.xlabel('Recall')
             plt.ylabel('Precision')
             plt.ylim([0, 1.05])
-            plt.title(f'{self.motif}\n{len(self.train_nts)} train NTs, {len(self.test_nts)} test NTs\n AUC = {self.auc:.2f}')
+            plt.title(f'{self.motif}\n{self.num_train_nts} train NTs, {self.num_test_nts} test NTs\n AUC = {self.auc:.2f}')
             plt.savefig(out_img_path, bbox_inches='tight')
             plt.close('all')
 

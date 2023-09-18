@@ -1,5 +1,6 @@
 import os, re
 import numpy as np
+import pandas as pd
 from calcs import trim, annotate, call_cstag
 from Bio import SeqIO
 from Bio.Seq import Seq
@@ -8,7 +9,7 @@ from Bio.Align import PairwiseAligner, Alignment
 from Bio.Align.sam import AlignmentWriter
 
 class OligoReferenceGenerator:
-    def __init__(self, oligo_ref_file=None, ligation_ref_file=None, oligo_fmt='-M([0-9]+)S([0-9]+)'):
+    def __init__(self, oligo_ref_file=None, ligation_ref_file=None, annotation_file=None, mod_type=None, oligo_fmt='-M([0-9]+)S([0-9]+)'):
         self.oligo_fmt = oligo_fmt
         if ligation_ref_file:
             self.ligation_ref = {}
@@ -31,6 +32,13 @@ class OligoReferenceGenerator:
                 self.ligation_ref[ref.id] = ref
         self.oligo_lens = [len(ref.seq) for ref in self.oligo_ref]
         self.min_segment_len = min([len(ref.seq) for ref in self.oligo_ref]) // 2
+
+        if annotation_file:
+            self.annotation = pd.read_csv(annotation_file, sep='\t')
+            if mod_type=='mod':
+                self.annotation = self.annotation[self.annotation['modRatio']==100]
+            elif mod_type=='unm':
+                self.annotation = self.annotation[self.annotation['modRatio']==0]
 
     def _generate_ligation_ref_id(self, seg_seq):
         oligo_ids = [self.oligo_ref[i].id for i in seg_seq]
@@ -57,19 +65,30 @@ class OligoReferenceGenerator:
         return ligation_ref_record
 
     def collect_motif_oligos(self):
-        motif_oligo_name_size_center = {}
-        for this_oligo_ref in self.oligo_ref:
-            motif_seq_indices = re.findall(self.oligo_fmt, this_oligo_ref.id)
-            if len(motif_seq_indices) == 1:
-                this_oligo_name = this_oligo_ref.id
-                # this_oligo_index = motif_seq_indices[0][0]
-                this_oligo_size = len(this_oligo_ref.seq)
-                this_oligo_center = this_oligo_size // 2
-                this_oligo_motif = str(this_oligo_ref.seq[this_oligo_center-2 : this_oligo_center+3])
-                if this_oligo_motif not in motif_oligo_name_size_center.keys():
-                    motif_oligo_name_size_center[this_oligo_motif] = {}
-                motif_oligo_name_size_center[this_oligo_motif][this_oligo_name] = (this_oligo_size, this_oligo_center)
-        self.motif_oligos = motif_oligo_name_size_center
+        motif_oligo_name_size_pos = {}
+
+        if self.annotation is None:
+            for this_oligo_ref in self.oligo_ref:
+                motif_seq_indices = re.findall(self.oligo_fmt, this_oligo_ref.id)
+                if len(motif_seq_indices) == 1:
+                    this_oligo_name = this_oligo_ref.id
+                    # this_oligo_index = motif_seq_indices[0][0]
+                    this_oligo_size = len(this_oligo_ref.seq)
+                    this_oligo_location = this_oligo_size // 2
+                    this_oligo_motif = str(this_oligo_ref.seq[this_oligo_location-2 : this_oligo_location+3])
+                    if this_oligo_motif not in motif_oligo_name_size_pos.keys():
+                        motif_oligo_name_size_pos[this_oligo_motif] = {}
+                    motif_oligo_name_size_pos[this_oligo_motif][this_oligo_name] = (this_oligo_size, this_oligo_location)
+        else:
+            for _, this_row in self.annotation.iterrows():
+                this_oligo_name, this_oligo_location, this_modRatio, this_oligo_motif = this_row[['chrom', 'chromStart', 'modRatio', 'ref5mer']]
+                this_oligo_size = len(self.ligation_ref[this_oligo_name].seq)
+                if this_oligo_motif not in motif_oligo_name_size_pos.keys():
+                    motif_oligo_name_size_pos[this_oligo_motif] = {}
+                motif_oligo_name_size_pos[this_oligo_motif][this_oligo_name] = (this_oligo_size, this_oligo_location)
+
+
+        self.motif_oligos = motif_oligo_name_size_pos
         self.flat_oligo_dims = {kk: vv for k, v in self.motif_oligos.items() for kk, vv in v.items()}
 
     def get_motif_relevant_ligation_ref_ids_and_positions(self, in_motif):

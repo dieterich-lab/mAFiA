@@ -134,7 +134,7 @@ class DataContainer:
 
 class OligoDataContainer(DataContainer):
     def __init__(self, name, bam_path, fast5_dir):
-        super().__init__(name, bam_path, fast5_dir)
+        super().__init__(name, bam_path)
         self._index_fast5_files(fast5_dir, index_bam_queries_only=True)
 
     def collect_features_from_reads(self, extractor, max_num_reads):
@@ -153,13 +153,14 @@ class OligoDataContainer(DataContainer):
         self.read_bases_features = read_bases_features
 
     def collect_motif_nucleotides(self, reference_motif, reference_generator, enforce_ref_5mer=False):
-        print(f'Collecting nucleotides for motif {reference_motif}')
+        print(f'Collecting nucleotides for motif {reference_motif}, {self.name}')
 
         motif_relevant_ligation_ref_ids_and_positions = reference_generator.get_motif_relevant_ligation_ref_ids_and_positions(reference_motif)
-        relevant_contigs = [k for k in motif_relevant_ligation_ref_ids_and_positions.keys() if k in self.bam.references]
+        bam_refs = list(self.bam.references)
+        relevant_contigs = [k for k in motif_relevant_ligation_ref_ids_and_positions.keys() if k in bam_refs]
 
         this_motif_nts = []
-        for contig in relevant_contigs:
+        for contig in tqdm(relevant_contigs):
             for pos in motif_relevant_ligation_ref_ids_and_positions[contig]:
                 this_tPos_nts = self.collect_nucleotides_aligned_to_target_pos(contig, pos, reference_motif, enforce_ref_5mer)
                 if len(this_tPos_nts) > 0:
