@@ -14,12 +14,13 @@ def main(args):
     os.makedirs(args.classifier_model_dir, exist_ok=True)
 
     unm_container = OligoDataContainer('unm', args.unm_bam_file, args.unm_fast5_dir)
-    mod_container = OligoDataContainer('mod', args.mod_bam_file, args.mod_fast5_dir)
+    mod_container = OligoDataContainer('mod', args.mod_bam_file)
 
     ivt_backbone = BackboneNetwork(args.backbone_model_path, args.extraction_layer, args.feature_width)
 
     unm_container.collect_features_from_reads(ivt_backbone, args.max_num_reads)
-    mod_container.collect_features_from_reads(ivt_backbone, args.max_num_reads)
+    # mod_container.collect_features_from_reads(ivt_backbone, args.max_num_reads)
+    mod_container.copy_features_from(unm_container)
 
     unm_ref_generator = OligoReferenceGenerator(ligation_ref_file=args.ref_file, annotation_file=args.annotation, mod_type='unm', oligo_fmt='-A([0-9]+)')
     unm_ref_generator.collect_motif_oligos()

@@ -152,6 +152,9 @@ class OligoDataContainer(DataContainer):
             read_bases_features[query_name] = (this_read_bases, this_read_features)
         self.read_bases_features = read_bases_features
 
+    def copy_features_from(self, source_container):
+        self.read_bases_features = source_container.read_bases_features.copy()
+
     def collect_motif_nucleotides(self, reference_motif, reference_generator, enforce_ref_5mer=False):
         print(f'Collecting nucleotides for motif {reference_motif}, {self.name}')
 
