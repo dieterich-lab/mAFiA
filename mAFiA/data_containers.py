@@ -139,7 +139,7 @@ class OligoDataContainer(DataContainer):
             self._index_fast5_files(fast5_dir, index_bam_queries_only=True)
 
     def copy_read_index_from(self, source_container):
-        print(f'Copying index from {source_container.name}')
+        print(f'Copying index from {source_container.name} to {self.name}')
         self.indexed_read_ids = source_container.indexed_read_ids
 
     def collect_features_from_reads(self, extractor, max_num_reads):
@@ -158,7 +158,7 @@ class OligoDataContainer(DataContainer):
         self.read_bases_features = read_bases_features
 
     def copy_features_from(self, source_container):
-        print(f'Copying features from {source_container.name}')
+        print(f'Copying features from {source_container.name} to {self.name}')
         self.read_bases_features = source_container.read_bases_features
 
     def collect_motif_nucleotides(self, reference_motif, reference_generator, enforce_ref_5mer=False):
