@@ -14,7 +14,8 @@ def main(args):
     os.makedirs(args.classifier_model_dir, exist_ok=True)
 
     unm_container = OligoDataContainer('unm', args.unm_bam_file, args.unm_fast5_dir)
-    mod_container = OligoDataContainer('mod', args.mod_bam_file, args.unm_fast5_dir)
+    mod_container = OligoDataContainer('mod', args.mod_bam_file)
+    mod_container.copy_read_index_from(unm_container)
 
     ivt_backbone = BackboneNetwork(args.backbone_model_path, args.extraction_layer, args.feature_width)
 

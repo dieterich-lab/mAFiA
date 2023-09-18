@@ -133,9 +133,13 @@ class DataContainer:
         return pd.concat(dfs).reset_index(drop=True)
 
 class OligoDataContainer(DataContainer):
-    def __init__(self, name, bam_path, fast5_dir):
+    def __init__(self, name, bam_path, fast5_dir=None):
         super().__init__(name, bam_path)
-        self._index_fast5_files(fast5_dir, index_bam_queries_only=True)
+        if fast5_dir:
+            self._index_fast5_files(fast5_dir, index_bam_queries_only=True)
+
+    def copy_read_index_from(self, source_container):
+        self.indexed_read_ids = source_container.indexed_read_ids
 
     def collect_features_from_reads(self, extractor, max_num_reads):
         print(f'Now extracting features from {self.name}')
