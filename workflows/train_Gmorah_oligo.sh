@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:turing:1
-#SBATCH --mem=250GB
+#SBATCH --mem=120GB
 #SBATCH --nodes=1
 #SBATCH --verbose
-#SBATCH --job-name=train_Gmorah
-#SBATCH --output=/home/achan/slurm/train_Gmorah_oligo_%A.out
+#SBATCH --job-name=Gmorah_D9-12
+#SBATCH --output=/home/achan/slurm/Gmorah_D9-12.out
 
 eval "$(/home/achan/miniconda3/condabin/conda shell.bash hook)"
 conda activate MAFIA
@@ -19,7 +19,18 @@ annotation=${prj_dir}/oligo_reference/oligo_mod_location.bed
 ############################################################################################
 #train_ds=A1-4
 #train_ds=A5-8
-train_ds=A9-12
+#train_ds=A9-12
+
+#train_ds=B1-4
+#train_ds=B5-8
+
+#train_ds=C1-4
+#train_ds=C5-8
+#train_ds=C9-12
+
+#train_ds=D1-4
+#train_ds=D5-8
+train_ds=D9-12
 
 ############################################################################################
 ### Backbone settings ######################################################################
