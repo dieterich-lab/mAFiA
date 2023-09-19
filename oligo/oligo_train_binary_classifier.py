@@ -23,9 +23,9 @@ def main(args):
     # mod_container.collect_features_from_reads(ivt_backbone, args.max_num_reads)
     mod_container.copy_features_from(unm_container)
 
-    unm_ref_generator = OligoReferenceGenerator(ligation_ref_file=args.ref_file, annotation_file=args.annotation, mod_type='unm', oligo_fmt='-A([0-9]+)')
+    unm_ref_generator = OligoReferenceGenerator(ligation_ref_file=args.ref_file, annotation_file=args.annotation, mod_type='unm', oligo_fmt='-[ABCD]([0-9]+)')
     unm_ref_generator.collect_motif_oligos()
-    mod_ref_generator = OligoReferenceGenerator(ligation_ref_file=args.ref_file, annotation_file=args.annotation, mod_type='mod', oligo_fmt='-A([0-9]+)')
+    mod_ref_generator = OligoReferenceGenerator(ligation_ref_file=args.ref_file, annotation_file=args.annotation, mod_type='mod', oligo_fmt='-[ABCD]([0-9]+)')
     mod_ref_generator.collect_motif_oligos()
 
     for this_motif in mod_ref_generator.motif_oligos.keys():
