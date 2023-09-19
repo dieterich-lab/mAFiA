@@ -4,7 +4,7 @@
 #dataset=A5-8
 #dataset=A9-12
 
-dataset=B1-4
+#dataset=B1-4
 #dataset=B5-8
 
 #dataset=C1-4
@@ -13,7 +13,7 @@ dataset=B1-4
 
 #dataset=D1-4
 #dataset=D5-8
-#dataset=D9-12
+dataset=D9-12
 
 workspace=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/Gm
 fast5dir=/prj/TRR319_RMaP/Project_BaseCalling/Gm/Train_Datasets/${dataset}_Ligation/Fast5_Files
@@ -47,7 +47,7 @@ backbone=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch2
 #> ${fasta}
 
 ### align with spomelette ###
-deactivate
+#deactivate
 eval "$(/home/achan/miniconda3/condabin/conda shell.bash hook)"
 conda activate MAFIA
 
@@ -70,6 +70,7 @@ echo "Quality control"
 samtools flagstats ${sam_filtered} > ${workspace}/${dataset}/qc_q${filter_score}.txt
 ${HOME}/git/renata/accuracy.py ${sam_filtered} ${ligation_ref} >> ${workspace}/${dataset}/qc_q${filter_score}.txt
 
+cat ${workspace}/${dataset}/qc_q${filter_score}.txt
 
 #### Convert to BAM ###
 bam=${sam_filtered//.sam/.bam}
