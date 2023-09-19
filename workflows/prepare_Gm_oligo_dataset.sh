@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-dataset=A1-4
+#dataset=A1-4
+dataset=A5-8
+
 workspace=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/Gm
 fast5dir=/prj/TRR319_RMaP/Project_BaseCalling/Gm/Train_Datasets/${dataset}_Ligation/Fast5_Files
 fasta=${workspace}/${dataset}/rodan.fasta
@@ -28,7 +30,7 @@ python3 -u ${HOME}/git/renata/basecall_viterbi.py \
 --fast5dir ${fast5pass} \
 --arch ${arch} \
 --model ${backbone} \
---batchsize 2048 \
+--batchsize 4096 \
 --decoder viterbi \
 > ${fasta}
 

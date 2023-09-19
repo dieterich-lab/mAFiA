@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #SBATCH --partition=gpu
 #SBATCH --nodelist=gpu-g3-1
+#SBATCH --gres=gpu:turing:1
 #SBATCH --mem=250GB
 #SBATCH --nodes=1
 #SBATCH --verbose
