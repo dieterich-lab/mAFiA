@@ -82,6 +82,8 @@ class OligoReferenceGenerator:
         else:
             for _, this_row in self.annotation.iterrows():
                 this_oligo_name, this_oligo_location, this_modRatio, this_oligo_motif = this_row[['chrom', 'chromStart', 'modRatio', 'ref5mer']]
+                if this_oligo_name not in self.ligation_ref.keys():
+                    continue
                 this_oligo_size = len(self.ligation_ref[this_oligo_name].seq)
                 if this_oligo_motif not in motif_oligo_name_size_pos.keys():
                     motif_oligo_name_size_pos[this_oligo_motif] = {}
