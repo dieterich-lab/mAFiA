@@ -8,8 +8,8 @@
 #SBATCH --job-name=train_Gmorah
 #SBATCH --output=/home/achan/slurm/train_Gmorah_oligo_%A.out
 
-eval "$(conda shell.bash hook)"
-#eval "$(/home/achan/miniconda3/condabin/conda shell.bash hook)"
+#eval "$(conda shell.bash hook)"
+eval "$(/home/achan/miniconda3/condabin/conda shell.bash hook)"
 conda activate MAFIA
 set -e -f
 
@@ -19,7 +19,8 @@ annotation=${prj_dir}/oligo_reference/oligo_mod_location.bed
 ############################################################################################
 ### Training data ##########################################################################
 ############################################################################################
-train_ds=A1-4
+#train_ds=A1-4
+train_ds=A5-8
 
 ############################################################################################
 ### Backbone settings ######################################################################
