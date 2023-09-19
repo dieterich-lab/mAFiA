@@ -1,7 +1,19 @@
 #!/usr/bin/env bash
 
 #dataset=A1-4
-dataset=A5-8
+#dataset=A5-8
+#dataset=A9-12
+
+dataset=B1-4
+#dataset=B5-8
+
+#dataset=C1-4
+#dataset=C5-8
+#dataset=C9-12
+
+#dataset=D1-4
+#dataset=D5-8
+#dataset=D9-12
 
 workspace=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/Gm
 fast5dir=/prj/TRR319_RMaP/Project_BaseCalling/Gm/Train_Datasets/${dataset}_Ligation/Fast5_Files
