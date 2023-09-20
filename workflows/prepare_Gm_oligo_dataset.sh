@@ -11,9 +11,9 @@
 #dataset=C5-8
 #dataset=C9-12
 
-#dataset=D1-4
+dataset=D1-4
 #dataset=D5-8
-dataset=D9-12
+#dataset=D9-12
 
 workspace=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/Gm
 fast5dir=/prj/TRR319_RMaP/Project_BaseCalling/Gm/Train_Datasets/${dataset}_Ligation/Fast5_Files
@@ -27,27 +27,33 @@ filter_score=70
 arch=${HOME}/git/renata/rnaarch
 backbone=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 
+cd ${workspace}/${dataset}
+
 ### softlink to fast5 pass files ###
-#fast5pass=${workspace}/${dataset}/fast5_pass
-#mkdir -p ${fast5pass}
-#cd ${fast5pass}
+#fast5=${workspace}/${dataset}/fast5_pass
+#mkdir -p ${fast5}
 #for f in ${fast5dir}/*pass*.fast5; do ln -s $f; done
 
+### softlink to all fast5 files ###
+fast5=${workspace}/${dataset}/fast5_all
+mkdir -p ${fast5}
+for f in ${fast5dir}/*.fast5; do ln -s $f; done
+
 #### basecall with Rodan IVT ###
-#source ${HOME}/git/renata/virtualenv/bin/activate
-#
-#echo "Basecalling ${fast5pass}"
-#srun --partition=gpu --gres=gpu:turing:1 --cpus-per-task=8 --mem-per-cpu=8GB \
-#python3 -u ${HOME}/git/renata/basecall_viterbi.py \
-#--fast5dir ${fast5pass} \
-#--arch ${arch} \
-#--model ${backbone} \
-#--batchsize 4096 \
-#--decoder viterbi \
-#> ${fasta}
+source ${HOME}/git/renata/virtualenv/bin/activate
+
+echo "Basecalling ${fast5}"
+srun --partition=gpu --gres=gpu:turing:1 --cpus-per-task=8 --mem-per-cpu=8GB \
+python3 -u ${HOME}/git/renata/basecall_viterbi.py \
+--fast5dir ${fast5} \
+--arch ${arch} \
+--model ${backbone} \
+--batchsize 4096 \
+--decoder viterbi \
+> ${fasta}
 
 ### align with spomelette ###
-#deactivate
+deactivate
 eval "$(/home/achan/miniconda3/condabin/conda shell.bash hook)"
 conda activate MAFIA
 
