@@ -55,6 +55,10 @@ class BAMWriter:
         self.out_bam_path = out_bam_path
         self.dict_read_mod = {}
         self.read_counts = 0
+        self.dict_ChEBI = {
+            'm6A': '21891',
+            'Gm': '19229'
+        }
 
     def build_dict_read_mod(self, site_nts):
         all_nts = [nt for k, v in site_nts.items() for nt in v]
@@ -64,7 +68,8 @@ class BAMWriter:
                     self.dict_read_mod[this_nt.read_id] = []
                 self.dict_read_mod[this_nt.read_id].append((this_nt.read_pos, this_nt.strand, this_nt.mod_prob, this_nt.pred_5mer, this_nt.ref_5mer))
 
-    def generate_mm_ml_tags(self, read_mods, mod_base='N', mod_code='21891'):
+    def generate_mm_ml_tags(self, read_mods, mod_base='N', mod_name='m6A'):
+        mod_code = self.dict_ChEBI[mod_name]
         dists = [read_mods[0][0]] + list(np.diff([mod[0] for mod in read_mods])-1)
         unique_strands = np.unique([mod[1] for mod in read_mods])
         mod_probs = [mod[2] for mod in read_mods]
@@ -79,7 +84,7 @@ class BAMWriter:
         ml_tag = rescaled_mod_probs
         return mm_tag, ml_tag
 
-    def write_bam_with_mm_ml_tags(self, container):
+    def write_bam_with_mm_ml_tags(self, container, site):
         self.build_dict_read_mod(container.nucleotides)
         with pysam.Samfile(self.in_bam_path, "rb") as fi:
             with pysam.Samfile(self.out_bam_path, "wb", template=fi) as fo:
@@ -87,7 +92,7 @@ class BAMWriter:
                     this_read_mods = self.dict_read_mod.get(this_read.query_name)
                     if this_read_mods:
                         this_read_mods.sort(key=lambda x: x[0])
-                        mm, ml = self.generate_mm_ml_tags(this_read_mods)
+                        mm, ml = self.generate_mm_ml_tags(this_read_mods, site.mod_name)
                         this_read.set_tag('MM', mm)
                         this_read.set_tag('ML', ml)
                     fo.write(this_read)

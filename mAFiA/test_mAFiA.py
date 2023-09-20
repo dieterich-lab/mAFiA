@@ -69,14 +69,14 @@ def main():
             print('=========================================================')
             this_mRNA_site.print()
             this_site_mod_ratio = motif_classifiers[this_mRNA_site.ref_5mer].test(
-				test_container.nucleotides[this_mRNA_site.ind]
-			)
+                test_container.nucleotides[this_mRNA_site.ind]
+            )
             print('=========================================================\n')
             site_writer.update_site_df(row, this_site_coverage, this_site_mod_ratio, this_mRNA_site.ref_5mer)
             site_writer.write_df()
     print(f'Total {site_writer.site_counts} mod. sites written to {site_writer.out_path}')
 
-    bam_writer.write_bam_with_mm_ml_tags(test_container)
+    bam_writer.write_bam_with_mm_ml_tags(test_container, this_mRNA_site)
     print(f'Total {bam_writer.read_counts} mod. reads written to {bam_writer.out_bam_path}')
     toc = time.time()
     print('Finished in {:.1f} mins'.format((toc - tic) / 60), flush=True)

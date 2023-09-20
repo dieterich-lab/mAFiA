@@ -54,6 +54,7 @@ class mRNASite:
         self.chr = row['chrom']
         self.start = row['chromStart']  # 0-based
         self.strand = row['strand']
+        self.mod_name = row['name']
         self.ind = f'{self.chr}.{self.start}'
 
         ref_5mer = ref[self.chr][self.start-2:self.start+3]
