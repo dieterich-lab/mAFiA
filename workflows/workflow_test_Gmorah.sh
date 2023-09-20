@@ -15,7 +15,7 @@ test_ds=Dataset1
 
 set -e -u
 
-python3 ${HOME}/git/Gmorah/test_mAFiA.py \
+python3 ${HOME}/git/Gmorah/mAFiA/test_mAFiA.py \
 --ref_file ${prj}/Gm/References/test_reference.fasta \
 --backbone_model_path ${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch \
 --classifier_model_dir ${prj}/Adrian/Gm/Gmorah_models/combined \
