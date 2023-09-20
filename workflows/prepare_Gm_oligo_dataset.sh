@@ -27,17 +27,16 @@ filter_score=70
 arch=${HOME}/git/renata/rnaarch
 backbone=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 
-mkdir -p ${workspace}/${dataset}
-cd ${workspace}/${dataset}
-
 ### softlink to fast5 pass files ###
 #fast5=${workspace}/${dataset}/fast5_pass
 #mkdir -p ${fast5}
+#cd ${fast5}
 #for f in ${fast5dir}/*pass*.fast5; do ln -s $f; done
 
 ### softlink to all fast5 files ###
 fast5=${workspace}/${dataset}/fast5_all
 mkdir -p ${fast5}
+cd ${fast5}
 for f in ${fast5dir}/*.fast5; do ln -s $f; done
 
 #### basecall with Rodan IVT ###
