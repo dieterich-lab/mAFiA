@@ -10,14 +10,17 @@ from mAFiA.feature_classifiers import load_motif_classifiers
 from mAFiA.output_writers import SiteWriter, BAMWriter
 
 
-def load_genome_reference(ref_file):
+def load_reference(ref_file, is_genome=False):
     print(f'Parsing genome reference {os.path.basename(ref_file)}...')
     ref = {}
     for record in SeqIO.parse(ref_file, 'fasta'):
-        if (record.id.isnumeric()) or (record.id in ['X', 'Y']):
+        if is_genome:
+            if (record.id.isnumeric()) or (record.id in ['X', 'Y']):
+                ref[record.id] = str(record.seq)
+            elif record.id=='MT':
+                ref['M'] = str(record.seq)
+        else:
             ref[record.id] = str(record.seq)
-        elif record.id=='MT':
-            ref['M'] = str(record.seq)
     return ref
 
 
@@ -38,7 +41,7 @@ def main():
         test_container.build_dict_read_ref()
         ivt_backbone = BackboneNetwork(args.backbone_model_path, args.extraction_layer, args.feature_width)
 
-    reference = load_genome_reference(args.ref_file)
+    reference = load_reference(args.ref_file)
     motif_classifiers = load_motif_classifiers(args.classifier_model_dir)
     site_writer = SiteWriter(out_path=os.path.join(args.out_dir, 'mAFiA.sites.bed'))
     bam_writer = BAMWriter(in_bam_path=args.bam_file, out_bam_path=os.path.join(args.out_dir, 'mAFiA.reads.bam'))
