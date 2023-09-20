@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:turing:1
-#SBATCH --mem=128GB
+#SBATCH --mem=250GB
 #SBATCH --verbose
 #SBATCH --job-name=test_Gmorah_Dataset1
 #SBATCH --output=/home/achan/slurm/test_Gmorah_Dataset1.out
