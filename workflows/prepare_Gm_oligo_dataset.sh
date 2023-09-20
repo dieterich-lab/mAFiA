@@ -27,6 +27,7 @@ filter_score=70
 arch=${HOME}/git/renata/rnaarch
 backbone=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 
+mkdir -p ${workspace}/${dataset}
 cd ${workspace}/${dataset}
 
 ### softlink to fast5 pass files ###
