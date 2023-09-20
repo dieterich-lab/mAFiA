@@ -1,4 +1,6 @@
-import os
+import os, sys
+HOME = os.path.expanduser('~')
+sys.path.append(os.path.join(HOME, 'git/Gmorah'))
 import time
 import pandas as pd
 from tqdm import tqdm
