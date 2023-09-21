@@ -8,7 +8,7 @@
 
 ### eg: sbatch --array=0-4 --export=challenge=Challenge_1,test_ds=Dataset1 array_test_Gmorah.sh ###
 
-eval "$(conda shell.bash hook)"
+eval "$(/home/achan/miniconda3/condabin/conda shell.bash hook)"
 conda activate MAFIA
 
 prj=/prj/TRR319_RMaP/Project_BaseCalling
