@@ -6,18 +6,17 @@
 #SBATCH --job-name=test_Gmorah
 #SBATCH --output=/home/achan/slurm/test_Gmorah_%A_%a.out
 
-### eg: sbatch --array=0-4 --export=challenge=Challenge_1,test_ds=Dataset1 array_test_Gmorah.sh ###
+### eg: sbatch --array=0-4 --export=test_ds=Dataset1 array_test_Gmorah.sh ###
 
 eval "$(/home/achan/miniconda3/condabin/conda shell.bash hook)"
 conda activate MAFIA
 
 prj=/prj/TRR319_RMaP/Project_BaseCalling
-#challenge=Challenge_1
 #test_ds=Dataset1
 #batch=0
 batch=${SLURM_ARRAY_TASK_ID}
 
-echo "Running Gmorah on ${challenge}, ${test_ds}, ${batch}"
+echo "Running Gmorah on ${test_ds}, ${batch}"
 
 set -e -u
 
