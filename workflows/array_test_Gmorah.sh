@@ -3,7 +3,7 @@
 #SBATCH --gres=gpu:turing:1
 #SBATCH --mem=120GB
 #SBATCH --verbose
-#SBATCH --job-name=test_Gmorah_%A_%a
+#SBATCH --job-name=test_Gmorah
 #SBATCH --output=/home/achan/slurm/test_Gmorah_%A_%a.out
 
 ### eg: sbatch --array=0-4 --export=challenge=Challenge_1,test_ds=Dataset1 array_test_Gmorah.sh ###
