@@ -16,7 +16,7 @@ prj=/prj/TRR319_RMaP/Project_BaseCalling
 #batch=0
 batch=${SLURM_ARRAY_TASK_ID}
 
-echo "Running Gmorah on ${test_ds}, ${batch}"
+echo "Running Gmorah on ${test_ds}, batch${batch}"
 
 set -e -u
 
