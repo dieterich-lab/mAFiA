@@ -27,5 +27,5 @@ echo "Running Gmorah on ${challenge}, ${test_ds}, ${batch}"
 #--classifier_model_dir ${prj}/Adrian/Gm/Gmorah_models/combined \
 #--bam_file ${prj}/Adrian/Gm/Test/${test_ds}/minimap.bam \
 #--fast5_dir ${prj}/Adrian/Gm/Test/${test_ds}/fast5_batch${batch} \
-#--out_dir ${prj}/Adrian/Gm/Test/${test_ds}/Gmorah \
+#--out_dir ${prj}/Adrian/Gm/Test/${test_ds}/Gmorah_batch${batch} \
 #--mod_file ${prj}/Gm/References/Gm_test_sites.bed
