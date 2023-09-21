@@ -89,11 +89,13 @@ class BAMWriter:
         with pysam.Samfile(self.in_bam_path, "rb") as fi:
             with pysam.Samfile(self.out_bam_path, "wb", template=fi) as fo:
                 for this_read in fi.fetch():
+                    if this_read.query_name not in container.indexed_read_ids.keys():
+                        continue
                     this_read_mods = self.dict_read_mod.get(this_read.query_name)
                     if this_read_mods:
                         this_read_mods.sort(key=lambda x: x[0])
                         mm, ml = self.generate_mm_ml_tags(this_read_mods, site.mod_name)
                         this_read.set_tag('MM', mm)
                         this_read.set_tag('ML', ml)
-                        fo.write(this_read)
-                        self.read_counts += 1
+                    fo.write(this_read)
+                    self.read_counts += 1
