@@ -95,5 +95,5 @@ class BAMWriter:
                         mm, ml = self.generate_mm_ml_tags(this_read_mods, site.mod_name)
                         this_read.set_tag('MM', mm)
                         this_read.set_tag('ML', ml)
-                    fo.write(this_read)
-                    self.read_counts += 1
+                        fo.write(this_read)
+                        self.read_counts += 1
