@@ -7,7 +7,8 @@ import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import sys
-sys.path.append('~/git/mAFia_dev')
+HOME = os.path.expanduser("~")
+sys.path.append(os.path.join(HOME, '/git/mAFia_dev'))
 from oligo.oligo_processors import Oligo_Reference_Generator, Query_Container, Local_Aligner, Splitter, Chainer, Writer
 
 parser = argparse.ArgumentParser(description='Map oligo basecalls through the Spanish omelette method')
