@@ -10,6 +10,6 @@ DB=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/oligo/db_ISA_mixes1-4.tsv
   while read -r o r m h l
   do
     echo "ORIG=$o, RUN=$r, MOD=$m, HOMOPOLYMER=$h, LOC=$l"
-    bash ${HOME}/git/MAFIA/workflows/prepare_single_oligo_dataset.sh -o "$o" -r "$r" -m "$m" -h "$h" -l "$l" &
+    bash ${HOME}/git/mAFiA_dev/workflows/prepare_single_oligo_dataset.sh -o "$o" -r "$r" -m "$m" -h "$h" -l "$l" &
   done
 } < $DB
