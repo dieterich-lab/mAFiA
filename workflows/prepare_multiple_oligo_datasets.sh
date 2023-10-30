@@ -3,7 +3,7 @@
 #DB=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/oligo/db_ISA_run2.tsv
 #DB=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/oligo/db_ISA_run4.tsv
 #DB=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/oligo/db_WUE_batch3.tsv
-DB=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/oligo/db_ISA_mixes1-4.tsv
+DB=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/oligo/db_ISA_mixes1-4.tsv
 
 {
   read -r
