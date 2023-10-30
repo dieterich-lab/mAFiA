@@ -12,20 +12,20 @@ do
   esac
 done
 
-PRJ_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian
+PRJ_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A
 ARCH=${HOME}/git/renata/rnaarch
 MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 FILTER_SCORE=70
 REF=${PRJ_DIR}/reference/${ORIG}_oligo_ref_${RUN}.fasta
 DATASET=${ORIG}_${RUN}_${MOD}
 WORKSPACE=${PRJ_DIR}/oligo/${DATASET}
-FAST5_DIR=${WORKSPACE}/fast5
+READS=${WORKSPACE}/fast5
 FASTA=${WORKSPACE}/renata.fasta
 SAM=${WORKSPACE}/spomelette.sam
 LIGATION_REF=${WORKSPACE}/ligation_ref.fasta
 
 ### softlink fast5 files ###
-#mkdir -p ${FAST5_DIR} && cd "$_"
+#mkdir -p ${READS} && cd "$_"
 #echo "Creating softlinks from ${LOC}"
 #for f in ${LOC}/**/*.fast5
 #do
@@ -34,7 +34,7 @@ LIGATION_REF=${WORKSPACE}/ligation_ref.fasta
 #cd ${WORKSPACE}
 
 ### check links ###
-#for my_link in ${FAST5_DIR}/*.fast5
+#for my_link in ${READS}/*.fast5
 #do
 #  if [ -L ${my_link} ]
 #  then
@@ -52,13 +52,16 @@ LIGATION_REF=${WORKSPACE}/ligation_ref.fasta
 #  fi
 #done
 
+### convert pod5 back to fast5 ###
+for f in ${LOC}/**/*.pod5; do pod5 convert to_fast5 $f --output ${READS}; done
+
 #### basecall with Rodan IVT ###
 source ${HOME}/git/renata/virtualenv/bin/activate
 
-echo "Basecalling ${FAST5_DIR}"
+echo "Basecalling ${READS}"
 srun --partition=gpu --gres=gpu:turing:1 --cpus-per-task=8 --mem-per-cpu=8GB \
 python3 -u ${HOME}/git/renata/basecall_viterbi.py \
---fast5dir ${FAST5_DIR} \
+--fast5dir ${READS} \
 --arch ${ARCH} \
 --model ${MODEL} \
 --batchsize 2048 \
@@ -67,7 +70,7 @@ python3 -u ${HOME}/git/renata/basecall_viterbi.py \
 
 ### align with spomelette ###
 echo "Basecalling finished. Now aligning ${FASTA} to ${REF}"
-python3 -u ${HOME}/git/MAFIA/spanish_omelette_alignment.py \
+python3 -u ${HOME}/git/mAFiA_dev/misc/spanish_omelette_alignment.py \
 --ref_file ${REF} \
 --query_file ${FASTA} \
 --recon_ref_file ${LIGATION_REF} \

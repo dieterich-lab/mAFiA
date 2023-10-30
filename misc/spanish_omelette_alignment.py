@@ -6,7 +6,7 @@ import os, argparse
 import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-from oligo_processors import Oligo_Reference_Generator, Query_Container, Local_Aligner, Splitter, Chainer, Writer
+from oligo.oligo_processors import Oligo_Reference_Generator, Query_Container, Local_Aligner, Splitter, Chainer, Writer
 
 parser = argparse.ArgumentParser(description='Map oligo basecalls through the Spanish omelette method')
 parser.add_argument("--ref_file", type=str)
