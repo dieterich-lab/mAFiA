@@ -29,7 +29,10 @@ DATA_DIR=${PRJ_DIR}/oligo
 #TRAIN_DATASET=ISA-WUE
 
 ### ISA 12 more ###
-TRAIN_DATASET=ISA_mix1
+#TRAIN_DATASET=ISA_mix1
+TRAIN_DATASET=ISA_mix2
+#TRAIN_DATASET=ISA_mix3
+#TRAIN_DATASET=ISA_mix4
 
 ############################################################################################
 ### Backbone settings ######################################################################
