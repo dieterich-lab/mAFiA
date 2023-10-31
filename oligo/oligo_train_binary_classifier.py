@@ -1,11 +1,11 @@
 import os, sys
 HOME = os.path.expanduser('~')
-sys.path.append(os.path.join(HOME, 'git/MAFIA'))
-from arg_parsers import Train_Args_Parser
-from oligo_processors import Oligo_Reference_Generator
-from data_containers import Oligo_Data_Container
-from feature_extractors import Backbone_Network
-from feature_classifiers import Motif_Classifier
+sys.path.append(os.path.join(HOME, 'git/mAFiA_dev'))
+from mAFiA.arg_parsers import Train_Args_Parser
+from oligo.oligo_processors import Oligo_Reference_Generator
+from mAFiA.data_containers import Oligo_Data_Container
+from mAFiA.feature_extractors import Backbone_Network
+from mAFiA.feature_classifiers import Motif_Classifier
 
 parser = Train_Args_Parser()
 parser.parse_and_print()
