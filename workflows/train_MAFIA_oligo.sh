@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #SBATCH --partition=gpu
-#SBATCH --nodelist=gpu-g3-1
+#SBATCH --gres=gpu:turing:1
 #SBATCH --mem=120GB
 #SBATCH --nodes=1
 #SBATCH --verbose
@@ -45,7 +45,7 @@ UNM_BAM=${DATA_DIR}/${TRAIN_DATASET}_A/spomelette_q70.bam
 UNM_FAST5=${DATA_DIR}/${TRAIN_DATASET}_A/fast5
 MOD_BAM=${DATA_DIR}/${TRAIN_DATASET}_m6A/spomelette_q70.bam
 MOD_FAST5=${DATA_DIR}/${TRAIN_DATASET}_m6A/fast5
-REF=${DATA_DIR}/${TRAIN_DATASET}_A_m6A/ligation_ref.fasta
+REF=${DATA_DIR}/ligation_ref/ligation_ref_${TRAIN_DATASET}_A_m6A.fasta
 OUTDIR=${PRJ_DIR}/MAFIA_classifiers/${TRAIN_DATASET}
 
 python3 -u ${HOME}/git/mAFiA_dev/oligo/oligo_train_binary_classifier.py \
