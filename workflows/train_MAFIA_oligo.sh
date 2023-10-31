@@ -48,7 +48,7 @@ MOD_FAST5=${DATA_DIR}/${TRAIN_DATASET}_m6A/fast5
 REF=${DATA_DIR}/${TRAIN_DATASET}_A_m6A/ligation_ref.fasta
 OUTDIR=${PRJ_DIR}/MAFIA_classifiers/${TRAIN_DATASET}
 
-python3 -u oligo_train_binary_classifier.py \
+python3 -u ${HOME}/git/mAFiA_dev/oligo/oligo_train_binary_classifier.py \
 --unm_bam_file ${UNM_BAM} \
 --unm_fast5_dir ${UNM_FAST5} \
 --mod_bam_file ${MOD_BAM} \

@@ -101,3 +101,16 @@ samtools index ${BAM}
 #samtools index renata.minimap.bam
 
 echo "${DATASET} finished"
+
+### merge ligation ref ###
+for RUN in ISA_mix1 ISA_mix2 ISA_mix3 ISA_mix4
+do
+  MERGE_REF_INPUTS=""
+  for MOD in A m6A
+  do
+    MERGE_REF_INPUTS+="${PRJ_DIR}/oligo/${RUN}_${MOD}/ligation_ref.fasta "
+  done
+  mkdir ${PRJ_DIR}/oligo/ligation_ref
+  MERGE_REF_OUTPUT="${PRJ_DIR}/oligo/ligation_ref/ligation_ref_${RUN}_A_m6A.fasta"
+  awk '/^>/{p=seen[$0]++}!p' ${MERGE_REF_INPUTS} > ${MERGE_REF_OUTPUT}
+done
