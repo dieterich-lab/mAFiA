@@ -7,7 +7,7 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Align import PairwiseAligner, Alignment
 from Bio.Align.sam import AlignmentWriter
 
-class Oligo_Reference_Generator:
+class OligoReferenceGenerator:
     def __init__(self, oligo_ref_file=None, ligation_ref_file=None, oligo_fmt='-M([0-9]+)S([0-9]+)'):
         self.oligo_fmt = oligo_fmt
         if ligation_ref_file:
@@ -96,7 +96,7 @@ class Oligo_Reference_Generator:
 
         return relevant_ligation_ref_ids_positions
 
-class Query_Container:
+class QueryContainer:
     def __init__(self, query_file):
         format = os.path.basename(query_file).split('.')[-1]
         self.records = list(SeqIO.parse(query_file, format=format))
@@ -110,7 +110,7 @@ class Query_Container:
     def __len__(self):
         return len(self.records)
 
-class Local_Aligner(PairwiseAligner):
+class LocalAligner(PairwiseAligner):
     def __init__(self):
         super().__init__()
         self.mode = 'local'
@@ -135,7 +135,7 @@ class Local_Aligner(PairwiseAligner):
 
         return chosen_ref_ind, chosen_score, target_start, target_end, chosen_alignment
 
-class Global_Aligner(PairwiseAligner):
+class GlobalAligner(PairwiseAligner):
     def __init__(self):
         super().__init__()
         self.mode = 'global'
