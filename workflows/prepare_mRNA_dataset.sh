@@ -1,3 +1,5 @@
+shopt -s globstar
+
 ARCH=${HOME}/git/renata/rnaarch
 MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 
@@ -8,20 +10,26 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 #DATASET=75_WT_25_IVT
 #DATASET=100_WT_0_IVT
 #DATASET=P2_WT
-########################################################################################################################
+
 #WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/HEK293/${DATASET}
+
+########################################################################################################################
 
 #DATASET=JK_HEK293_DMSO_1_2_RTA
 #DATASET=JK_HEK293_DMSO_3_4_RTA
 #DATASET=JK_HEK293_STM2457_5_6_RTA
 #DATASET=JK_HEK293_STM2457_7_8_RTA
-DATASET=JK_HEK293_DMSO_merged
-WORKSPACE=/prj/TRR319_RMaP/Project_B01/Adrian/${DATASET}
+#DATASET=JK_HEK293_DMSO_merged
+#WORKSPACE=/prj/TRR319_RMaP/Project_B01/Adrian/${DATASET}
+
+########################################################################################################################
+DATASET=40-26
+
+WORKSPACE=/prj/Dewenter_TAC_Backs_lab/achan/${DATASET}
+DATA_DIR=/prj/Dewenter_TAC_Backs_lab/raw_data/Nanopore_dRNA/Cologne
+########################################################################################################################
 mkdir -p ${WORKSPACE}
 cd ${WORKSPACE}
-
-FAST5_DIR=${WORKSPACE}/fast5
-mkdir -p ${FAST5_DIR}
 
 #if test -f basecall_merged.fasta
 #then
@@ -30,11 +38,13 @@ mkdir -p ${FAST5_DIR}
 #  mv basecall_merged.fasta.backup filtered_q50.bam filtered_q50.bam.bai mapped.sam _old
 #fi
 
-source ${HOME}/git/renata/virtualenv/bin/activate
-
 ########################################################################################################################
 ### basecall large number of reads #####################################################################################
 ########################################################################################################################
+source ${HOME}/git/renata/virtualenv/bin/activate
+
+FAST5_DIR=${DATA_DIR}/${DATASET}/*/fast5_pass
+
 FILENAME_PREFIX=fast5_paths_part
 ls -1 ${FAST5_DIR}/*.fast5 > ${WORKSPACE}/fast5_paths_all
 split -a3 -l10 -d ${WORKSPACE}/fast5_paths_all ${WORKSPACE}/${FILENAME_PREFIX}
