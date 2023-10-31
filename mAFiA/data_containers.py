@@ -134,7 +134,7 @@ class DataContainer:
 
 class OligoDataContainer(DataContainer):
     def __init__(self, name, bam_path, fast5_dir):
-        super().__init__(name, bam_path, fast5_dir)
+        super().__init__(name, bam_path)
         self._index_fast5_files(fast5_dir, index_bam_queries_only=True)
 
     def collect_features_from_reads(self, extractor, max_num_reads):
