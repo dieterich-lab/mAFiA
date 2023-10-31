@@ -66,7 +66,8 @@ fi
 ########################################################################################################################
 #### align to genome ###################################################################################################
 ########################################################################################################################
-REF_GENOME=/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa
+#REF_GENOME=/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa
+REF_GENOME=/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa
 SAM_GENOME=${WORKSPACE}/genome_mapped.sam
 BAM_GENOME=${WORKSPACE}/genome_filtered_q50.bam
 
@@ -85,21 +86,21 @@ samtools index ${BAM_GENOME}
 ########################################################################################################################
 #### align to transcriptome ############################################################################################
 ########################################################################################################################
-REF_TRANSCRIPTOME=/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38.cdna.all.fa
-SAM_TRANSCRIPTOME=${WORKSPACE}/transcriptome_mapped.sam
-BAM_TRANSCRIPTOME=${WORKSPACE}/transcriptome_mapped.bam
-
-module purge
-module load minimap2
-#minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF_TRANSCRIPTOME} ${WORKSPACE}/basecall_merged.fasta > ${SAM_TRANSCRIPTOME}
-minimap2 --secondary=no -ax map-ont -k14 -t 36 --cs ${REF_TRANSCRIPTOME} ${WORKSPACE}/basecall_merged.fasta > ${SAM_TRANSCRIPTOME}
-### check stats and accuracy ###
-samtools flagstats ${SAM_TRANSCRIPTOME} > transcriptome_qc.txt
-#${HOME}/git/renata/accuracy.py ${SAM_TRANSCRIPTOME} ${REF_TRANSCRIPTOME} >> transcriptome_qc.txt
-
-#### Convert to BAM and index ###
-samtools view -bST ${REF_TRANSCRIPTOME} ${SAM_TRANSCRIPTOME} | samtools sort - > ${BAM_TRANSCRIPTOME}
-samtools index ${BAM_TRANSCRIPTOME}
+#REF_TRANSCRIPTOME=/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38.cdna.all.fa
+#SAM_TRANSCRIPTOME=${WORKSPACE}/transcriptome_mapped.sam
+#BAM_TRANSCRIPTOME=${WORKSPACE}/transcriptome_mapped.bam
+#
+#module purge
+#module load minimap2
+##minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF_TRANSCRIPTOME} ${WORKSPACE}/basecall_merged.fasta > ${SAM_TRANSCRIPTOME}
+#minimap2 --secondary=no -ax map-ont -k14 -t 36 --cs ${REF_TRANSCRIPTOME} ${WORKSPACE}/basecall_merged.fasta > ${SAM_TRANSCRIPTOME}
+#### check stats and accuracy ###
+#samtools flagstats ${SAM_TRANSCRIPTOME} > transcriptome_qc.txt
+##${HOME}/git/renata/accuracy.py ${SAM_TRANSCRIPTOME} ${REF_TRANSCRIPTOME} >> transcriptome_qc.txt
+#
+##### Convert to BAM and index ###
+#samtools view -bST ${REF_TRANSCRIPTOME} ${SAM_TRANSCRIPTOME} | samtools sort - > ${BAM_TRANSCRIPTOME}
+#samtools index ${BAM_TRANSCRIPTOME}
 
 ########################################################################################################################
 ### clean up ###########################################################################################################

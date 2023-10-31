@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #SBATCH --partition=gpu
 #SBATCH --nodelist=gpu-g3-1
-#SBATCH --mem=180GB
+#SBATCH --mem=120GB
 #SBATCH --nodes=1
 #SBATCH --verbose
 #SBATCH --job-name=train_MAFIA_oligo
@@ -11,9 +11,9 @@ eval "$(conda shell.bash hook)"
 #eval "$(/home/achan/miniconda3/condabin/conda shell.bash hook)"
 conda activate MAFIA
 set -e -f
-cd ${HOME}/git/MAFIA
+cd ${HOME}/git/mAFiA_dev
 
-PRJ_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian
+PRJ_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A
 DATA_DIR=${PRJ_DIR}/oligo
 
 ############################################################################################
@@ -26,7 +26,10 @@ DATA_DIR=${PRJ_DIR}/oligo
 #TRAIN_DATASET=WUE_batches1-2
 
 ### ISA-WUE ###
-TRAIN_DATASET=ISA-WUE
+#TRAIN_DATASET=ISA-WUE
+
+### ISA 12 more ###
+TRAIN_DATASET=ISA_mix1
 
 ############################################################################################
 ### Backbone settings ######################################################################
