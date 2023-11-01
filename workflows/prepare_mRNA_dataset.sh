@@ -23,7 +23,15 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 #WORKSPACE=/prj/TRR319_RMaP/Project_B01/Adrian/${DATASET}
 
 ########################################################################################################################
-DATASET=40-26
+#DATASET=40-26
+DATASET=40-27
+#DATASET=40-28
+#DATASET=40-29
+#DATASET=40-30
+#DATASET=40-31
+#DATASET=40-32
+#DATASET=40-33
+#DATASET=40-34
 
 WORKSPACE=/prj/Dewenter_TAC_Backs_lab/achan/${DATASET}
 DATA_DIR=/prj/Dewenter_TAC_Backs_lab/raw_data/Nanopore_dRNA/Cologne
@@ -56,32 +64,32 @@ sbatch --array=${NUM_ARRAYS} --export=ALL,WORKSPACE=${WORKSPACE},FILENAME_PREFIX
 
 #for f in ${WORKSPACE}/part*.fasta; do echo $f; grep '>' $f | wc -l; done
 
-if test -f basecall_merged.fasta
-then
-  cat ${WORKSPACE}/part*.fasta >> ${WORKSPACE}/basecall_merged.fasta
-else
-  cat ${WORKSPACE}/part*.fasta > ${WORKSPACE}/basecall_merged.fasta
-fi
+#if test -f basecall_merged.fasta
+#then
+#  cat ${WORKSPACE}/part*.fasta >> ${WORKSPACE}/basecall_merged.fasta
+#else
+#  cat ${WORKSPACE}/part*.fasta > ${WORKSPACE}/basecall_merged.fasta
+#fi
 
 ########################################################################################################################
 #### align to genome ###################################################################################################
 ########################################################################################################################
 #REF_GENOME=/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa
-REF_GENOME=/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa
-SAM_GENOME=${WORKSPACE}/genome_mapped.sam
-BAM_GENOME=${WORKSPACE}/genome_filtered_q50.bam
-
-module purge
-module load minimap2
-minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF_GENOME} ${WORKSPACE}/basecall_merged.fasta > ${SAM_GENOME}
-
-### check stats and accuracy ###
-samtools flagstats ${SAM_GENOME} > genome_qc.txt
-${HOME}/git/renata/accuracy.py ${SAM_GENOME} ${REF_GENOME} >> genome_qc.txt
-
-#### Convert to BAM and index ###
-samtools view -bST ${REF_GENOME} -q50 ${SAM_GENOME} | samtools sort - > ${BAM_GENOME}
-samtools index ${BAM_GENOME}
+#REF_GENOME=/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa
+#SAM_GENOME=${WORKSPACE}/genome_mapped.sam
+#BAM_GENOME=${WORKSPACE}/genome_filtered_q50.bam
+#
+#module purge
+#module load minimap2
+#minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF_GENOME} ${WORKSPACE}/basecall_merged.fasta > ${SAM_GENOME}
+#
+#### check stats and accuracy ###
+#samtools flagstats ${SAM_GENOME} > genome_qc.txt
+#${HOME}/git/renata/accuracy.py ${SAM_GENOME} ${REF_GENOME} >> genome_qc.txt
+#
+##### Convert to BAM and index ###
+#samtools view -bST ${REF_GENOME} -q50 ${SAM_GENOME} | samtools sort - > ${BAM_GENOME}
+#samtools index ${BAM_GENOME}
 
 ########################################################################################################################
 #### align to transcriptome ############################################################################################
@@ -105,5 +113,5 @@ samtools index ${BAM_GENOME}
 ########################################################################################################################
 ### clean up ###########################################################################################################
 ########################################################################################################################
-rm ${WORKSPACE}/part*.fasta
-rm ${WORKSPACE}/fast5_paths_all
+#rm ${WORKSPACE}/part*.fasta
+#rm ${WORKSPACE}/fast5_paths_all
