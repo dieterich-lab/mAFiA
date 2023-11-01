@@ -43,7 +43,7 @@ CLASSIFIER_MODEL_DIR=${PRJ_DIR}/MAFIA_classifiers/${TRAIN_DATASET}
 mkdir -p ${OUTDIR}
 
 NUM_ARRAYS=""
-for f in ${MOD_FILE}.part*; do ff=${f##*part}; NUM_ARRAYS+="${ff},"; done
+for f in ${MOD_FILE}.part*; do ff=${f##*part}; ff=$(echo $ff | sed 's/^0*//'); NUM_ARRAYS+="${ff},"; done
 NUM_ARRAYS=${NUM_ARRAYS%,*}
 
 sbatch --array=${NUM_ARRAYS} \
