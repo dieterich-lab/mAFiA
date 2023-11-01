@@ -15,7 +15,7 @@ set -e -f
 
 printf -v PART '%02d' "${SLURM_ARRAY_TASK_ID}"
 
-python3 -u ${HOME}/git/MAFIA/mRNA_test_binary_classifier.py \
+python3 -u ${HOME}/git/mAFiA_dev/mAFiA/test_mAFiA.py \
 --test_bam_file ${BAM} \
 --test_fast5_dir ${FAST5_DIR} \
 --ref_file ${REF} \
