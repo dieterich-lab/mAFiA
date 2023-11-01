@@ -3,6 +3,9 @@ import time
 import pandas as pd
 from tqdm import tqdm
 from Bio import SeqIO
+HOME = os.path.expanduser('~')
+import sys
+sys.path.append(os.path.join(HOME, 'git/mAFiA_dev'))
 from mAFiA.arg_parsers import mRNATestArgsParser
 from mAFiA.data_containers import mRNASite, mRNADataContainer, FeatureContainer
 from mAFiA.feature_extractors import BackboneNetwork
