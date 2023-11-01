@@ -27,7 +27,6 @@ TEST_DIR=${PRJ_DIR}/HEK293/${TEST_DATASET}
 FAST5_DIR=${TEST_DIR}/fast5
 BAM=${TEST_DIR}/genome_filtered_q50.bam
 OUTDIR=${PRJ_DIR}/results/train_${TRAIN_DATASET}_test_${TEST_DATASET}
-OUTFILE=${OUTDIR}/res_train_${TRAIN_DATASET}_test_${TEST_DATASET}.tsv
 
 #FAST5_DIR=${TEST_DIR}/fast5_chrX
 #BAM=${TEST_DIR}/chrX_q50.bam
@@ -55,7 +54,7 @@ BAM=${BAM},\
 MOD_FILE=${MOD_FILE},\
 BACKBONE_MODEL=${BACKBONE_MODEL},\
 CLASSIFIER_MODEL_DIR=${CLASSIFIER_MODEL_DIR},\
-OUTFILE=${OUTFILE} \
+OUTDIR=${OUTDIR} \
 ${HOME}/git/mAFiA_dev/workflows/array_test_MAFIA_mRNA.sh
 
 ### concat output ###
