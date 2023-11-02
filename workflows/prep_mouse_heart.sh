@@ -1,27 +1,15 @@
 #!/usr/bin/env bash
+#SBATCH --partition=general
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=256GB
+#SBATCH --verbose
+#SBATCH --job-name=prep_mouse_heart
+#SBATCH --output=/home/achan/slurm/prep_mouse_heart_%A.out
+
 shopt -s globstar
 
 ARCH=${HOME}/git/renata/rnaarch
 MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
-
-### new HEK293 #########################################################################################################
-#DATASET=0_WT_100_IVT
-#DATASET=25_WT_75_IVT
-#DATASET=50_WT_50_IVT
-#DATASET=75_WT_25_IVT
-#DATASET=100_WT_0_IVT
-#DATASET=P2_WT
-
-#WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/HEK293/${DATASET}
-
-########################################################################################################################
-
-#DATASET=JK_HEK293_DMSO_1_2_RTA
-#DATASET=JK_HEK293_DMSO_3_4_RTA
-#DATASET=JK_HEK293_STM2457_5_6_RTA
-#DATASET=JK_HEK293_STM2457_7_8_RTA
-#DATASET=JK_HEK293_DMSO_merged
-#WORKSPACE=/prj/TRR319_RMaP/Project_B01/Adrian/${DATASET}
 
 ########################################################################################################################
 #DATASET=40-26
