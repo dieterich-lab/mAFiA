@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 shopt -s globstar
 
 ARCH=${HOME}/git/renata/rnaarch
