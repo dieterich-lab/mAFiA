@@ -36,8 +36,8 @@ DATASET=40-27
 WORKSPACE=/prj/Dewenter_TAC_Backs_lab/achan/${DATASET}
 DATA_DIR=/prj/Dewenter_TAC_Backs_lab/raw_data/Nanopore_dRNA/Cologne
 ########################################################################################################################
-mkdir -p ${WORKSPACE}
-cd ${WORKSPACE}
+#mkdir -p ${WORKSPACE}
+#cd ${WORKSPACE}
 
 #if test -f basecall_merged.fasta
 #then
@@ -49,47 +49,47 @@ cd ${WORKSPACE}
 ########################################################################################################################
 ### basecall large number of reads #####################################################################################
 ########################################################################################################################
-source ${HOME}/git/renata/virtualenv/bin/activate
-
-FAST5_DIR=${DATA_DIR}/${DATASET}/*/fast5_pass
-
-FILENAME_PREFIX=fast5_paths_part
-ls -1 ${FAST5_DIR}/*.fast5 > ${WORKSPACE}/fast5_paths_all
-split -a3 -l10 -d ${WORKSPACE}/fast5_paths_all ${WORKSPACE}/${FILENAME_PREFIX}
-
-NUM_ARRAYS=""
-for f in ${WORKSPACE}/fast5_paths_part*; do ff=${f##*part}; NUM_ARRAYS+="${ff},"; done
-NUM_ARRAYS=${NUM_ARRAYS%,*}
-sbatch --array=${NUM_ARRAYS} --export=ALL,WORKSPACE=${WORKSPACE},FILENAME_PREFIX=${FILENAME_PREFIX},ARCH=${ARCH},MODEL=${MODEL} ${HOME}/git/mAFiA_dev/workflows/array_basecaller.sh
+#source ${HOME}/git/renata/virtualenv/bin/activate
+#
+#FAST5_DIR=${DATA_DIR}/${DATASET}/*/fast5_pass
+#
+#FILENAME_PREFIX=fast5_paths_part
+#ls -1 ${FAST5_DIR}/*.fast5 > ${WORKSPACE}/fast5_paths_all
+#split -a3 -l10 -d ${WORKSPACE}/fast5_paths_all ${WORKSPACE}/${FILENAME_PREFIX}
+#
+#NUM_ARRAYS=""
+#for f in ${WORKSPACE}/fast5_paths_part*; do ff=${f##*part}; NUM_ARRAYS+="${ff},"; done
+#NUM_ARRAYS=${NUM_ARRAYS%,*}
+#sbatch --array=${NUM_ARRAYS} --export=ALL,WORKSPACE=${WORKSPACE},FILENAME_PREFIX=${FILENAME_PREFIX},ARCH=${ARCH},MODEL=${MODEL} ${HOME}/git/mAFiA_dev/workflows/array_basecaller.sh
 
 #for f in ${WORKSPACE}/part*.fasta; do echo $f; grep '>' $f | wc -l; done
 
-#if test -f basecall_merged.fasta
-#then
-#  cat ${WORKSPACE}/part*.fasta >> ${WORKSPACE}/basecall_merged.fasta
-#else
-#  cat ${WORKSPACE}/part*.fasta > ${WORKSPACE}/basecall_merged.fasta
-#fi
+if test -f basecall_merged.fasta
+then
+  cat ${WORKSPACE}/part*.fasta >> ${WORKSPACE}/basecall_merged.fasta
+else
+  cat ${WORKSPACE}/part*.fasta > ${WORKSPACE}/basecall_merged.fasta
+fi
 
 ########################################################################################################################
 #### align to genome ###################################################################################################
 ########################################################################################################################
 #REF_GENOME=/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa
-#REF_GENOME=/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa
-#SAM_GENOME=${WORKSPACE}/genome_mapped.sam
-#BAM_GENOME=${WORKSPACE}/genome_filtered_q50.bam
-#
-#module purge
-#module load minimap2
-#minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF_GENOME} ${WORKSPACE}/basecall_merged.fasta > ${SAM_GENOME}
-#
-#### check stats and accuracy ###
-#samtools flagstats ${SAM_GENOME} > genome_qc.txt
-#${HOME}/git/renata/accuracy.py ${SAM_GENOME} ${REF_GENOME} >> genome_qc.txt
-#
-##### Convert to BAM and index ###
-#samtools view -bST ${REF_GENOME} -q50 ${SAM_GENOME} | samtools sort - > ${BAM_GENOME}
-#samtools index ${BAM_GENOME}
+REF_GENOME=/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa
+SAM_GENOME=${WORKSPACE}/genome_mapped.sam
+BAM_GENOME=${WORKSPACE}/genome_filtered_q50.bam
+
+module purge
+module load minimap2
+minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF_GENOME} ${WORKSPACE}/basecall_merged.fasta > ${SAM_GENOME}
+
+### check stats and accuracy ###
+samtools flagstats ${SAM_GENOME} > genome_qc.txt
+${HOME}/git/renata/accuracy.py ${SAM_GENOME} ${REF_GENOME} >> genome_qc.txt
+
+#### Convert to BAM and index ###
+samtools view -bST ${REF_GENOME} -q50 ${SAM_GENOME} | samtools sort - > ${BAM_GENOME}
+samtools index ${BAM_GENOME}
 
 ########################################################################################################################
 #### align to transcriptome ############################################################################################
