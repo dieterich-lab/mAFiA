@@ -6,6 +6,7 @@ from tqdm import tqdm
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from collections import Counter
+from sklearn.metrics import auc
 
 #######################################################################
 cm = 1/2.54  # centimeters in inches
@@ -17,27 +18,22 @@ mpl.rcParams['ytick.labelsize'] = 5
 mpl.rcParams['xtick.major.size'] = 1
 mpl.rcParams['ytick.major.size'] = 1
 mpl.rcParams['font.family'] = 'Arial'
-# FMT = 'pdf'
-FMT = 'png'
+FMT = 'pdf'
+# FMT = 'png'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
-# train_dataset = 'ISA-WUE'
-# results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
-
-# train_dataset = 'CHEUI'
-# results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/CHEUI/'
-
-train_dataset = 'm6Anet'
-results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6Anet'
+mAFiA_results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/results'
+CHEUI_results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/CHEUI/oligo'
+m6Anet_results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/m6Anet/oligo'
 
 test_datasets = [
     'WUE_batch3_AB_BA',
-    'WUE_batch3_ABBA',
+    # 'WUE_batch3_ABBA',
 ]
 ds_names = {
     'WUE_batch3_AB_BA' : 'AB | BA',
-    'WUE_batch3_ABBA' : 'AB - BA',
+    # 'WUE_batch3_ABBA' : 'AB - BA',
 }
 target_pattern = 'M0S1'
 
@@ -45,7 +41,8 @@ thresh_q = 70
 block_size = 13
 block_center = 6
 
-img_out = os.path.join(HOME, 'img_out/MAFIA', 'res_train_{}_test_WUE_batch3_AB+BA_minimap'.format(train_dataset))
+# img_out = os.path.join(HOME, 'img_out/MAFIA', 'res_train_{}_test_WUE_batch3_AB+BA_minimap'.format(train_dataset))
+img_out = os.path.join(HOME, 'img_out/NCOMMS_rev', 'res_test_WUE_batch3_AB+BA_minimap')
 if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
 
@@ -65,13 +62,34 @@ def get_longest_continuous_indices(indices):
     grouped_indices.append(this_group)
     return grouped_indices[np.argmax([len(l) for l in grouped_indices])]
 
+
+def filter_ref_pos_mod_prob(refPos, modProb, readPos=[], tol_pos=2):
+    if len(readPos)==0:
+        readPos = refPos
+    diff_readPos = np.diff(readPos)
+    diff_refPos = np.diff(refPos)
+    if np.any(np.abs(diff_readPos - block_size) > tol_pos) or np.any(np.abs(diff_refPos - block_size) > tol_pos):
+        return [], []
+    sel_indices = np.where(np.abs(diff_readPos - diff_refPos) <= tol_pos)[0]
+    if (len(sel_indices) == 0):
+        return [], []
+
+    if not np.all(np.diff(sel_indices) == 1):
+        sel_indices = get_longest_continuous_indices(sel_indices)
+
+    sel_indices = np.concatenate([sel_indices, [sel_indices[-1] + 1]])
+    sel_refPos = refPos[sel_indices]
+    sel_modProb = modProb[sel_indices]
+
+    return sel_refPos, sel_modProb
+
+
 def import_mAFiA_res(res_dir):
-    tol_pos = 2
     ds_pos_prob = {}
     for test_ds in test_datasets:
         print('\nDataset {}'.format(test_ds))
         # path = os.path.join(res_dir, 'res_train_{}_test_{}_q{}.tsv'.format(train_dataset, test_ds, thresh_q))
-        path = os.path.join(res_dir, 'res_train_{}_test_{}_minimap.tsv'.format(train_dataset, test_ds))
+        path = os.path.join(res_dir, 'res_train_ISA-WUE_test_{}_minimap.tsv'.format(test_ds))
         df = pd.read_csv(path, sep='\t').rename(columns={'Unnamed: 0': 'index'})
         unique_reads = df['read_id'].unique()
         ds_pos_prob[test_ds] = {}
@@ -84,22 +102,9 @@ def import_mAFiA_res(res_dir):
             refPos = np.int64(sub_df['ref_pos'].values)
             modProb = sub_df['mod_prob'].values
 
-            diff_readPos = np.diff(readPos)
-            diff_refPos = np.diff(refPos)
-            if np.any(np.abs(diff_readPos-block_size)>tol_pos) or np.any(np.abs(diff_refPos-block_size)>tol_pos):
-                continue
-            sel_indices = np.where(np.abs(diff_readPos - diff_refPos)<=tol_pos)[0]
-            if (len(sel_indices)==0):
-                continue
-
-            if not np.all(np.diff(sel_indices)==1):
-                sel_indices = get_longest_continuous_indices(sel_indices)
-
-            sel_indices = np.concatenate([sel_indices, [sel_indices[-1]+1]])
-            sel_refPos = refPos[sel_indices]
-            sel_modProb = modProb[sel_indices]
-
-            ds_pos_prob[test_ds][this_read] = list(zip(sel_refPos, sel_modProb))
+            sel_refPos, sel_modProb = filter_ref_pos_mod_prob(refPos, modProb, readPos)
+            if len(sel_refPos):
+                ds_pos_prob[test_ds][this_read] = list(zip(sel_refPos, sel_modProb))
 
     return ds_pos_prob
 
@@ -123,7 +128,9 @@ def import_m6Anet_res(res_dir):
             refPos = np.int64(sub_df['transcript_position'].values)
             modProb = sub_df['probability_modified'].values
 
-            ds_pos_prob[test_ds][this_read] = list(zip(refPos, modProb))
+            sel_refPos, sel_modProb = filter_ref_pos_mod_prob(refPos, modProb)
+            if len(sel_refPos):
+                ds_pos_prob[test_ds][this_read] = list(zip(refPos, modProb))
 
     return ds_pos_prob
 
@@ -163,188 +170,284 @@ def import_CHEUI_res(res_dir):
 
             refPos = np.int64(sub_df['ref_pos'].values)
             modProb = sub_df['mod_prob'].values
-            ds_pos_prob[test_ds][this_read] = list(zip(refPos, modProb))
+
+            sel_refPos, sel_modProb = filter_ref_pos_mod_prob(refPos, modProb)
+            if len(sel_refPos):
+                ds_pos_prob[test_ds][this_read] = list(zip(refPos, modProb))
 
     return ds_pos_prob
 
-if train_dataset=='ISA-WUE':
-    ds_refPos_modProbs = import_mAFiA_res(results_dir)
-elif train_dataset=='m6Anet':
-    ds_refPos_modProbs = import_m6Anet_res(results_dir)
-elif train_dataset=='CHEUI':
-    ds_refPos_modProbs = import_CHEUI_res(results_dir)
+
+def get_even_odd_probs(read_mod_prob, block_size=13):
+    ref_pos, mod_prob = np.vstack(read_mod_prob).T
+    ref_pos = np.int32(ref_pos)
+    highest_p_pos = ref_pos[np.argmax(mod_prob)]
+    ref_pos - highest_p_pos
+    even_mask = np.array([(pos / block_size) % 2 == 0 for pos in (ref_pos - highest_p_pos)])
+    odd_mask = np.array([(pos / block_size) % 2 == 1 for pos in (ref_pos - highest_p_pos)])
+    even_probs = mod_prob[even_mask]
+    odd_probs = mod_prob[odd_mask]
+    return even_probs, odd_probs
+
+
+def get_ds_even_odd_probs(ds_refPos_modProbs):
+    even_odd_probs = {}
+    even_odd_probs['even'] = []
+    even_odd_probs['odd'] = []
+    for read_refPos_modProbs in ds_refPos_modProbs.values():
+        even_ps, odd_ps = get_even_odd_probs(read_refPos_modProbs)
+        even_odd_probs['even'].extend(even_ps)
+        even_odd_probs['odd'].extend(odd_ps)
+    return even_odd_probs
+
+mAFiA_refPos_modProbs = import_mAFiA_res(mAFiA_results_dir)
+m6Anet_refPos_modProbs = import_m6Anet_res(m6Anet_results_dir)
+CHEUI_refPos_modProbs = import_CHEUI_res(CHEUI_results_dir)
+
+mAFiA_even_odd_probs = get_ds_even_odd_probs(mAFiA_refPos_modProbs['WUE_batch3_AB_BA'])
+m6Anet_even_odd_probs = get_ds_even_odd_probs(m6Anet_refPos_modProbs['WUE_batch3_AB_BA'])
+CHEUI_even_odd_probs = get_ds_even_odd_probs(CHEUI_refPos_modProbs['WUE_batch3_AB_BA'])
+
+########################################################################################################################
+### vlnplot ############################################################################################################
+########################################################################################################################
+num_rows = 1
+num_cols = 1
+xtick_pos = [1, 2]
+colors = ['pink', 'cyan']
+cycles = ['even', 'odd']
+fig_vlnplot, ax = plt.subplots(nrows=num_rows, ncols=num_cols, figsize=(3*cm, 3*cm))
+mod_probs = [mAFiA_even_odd_probs[cycle] for cycle in cycles]
+parts = ax.violinplot(mod_probs, xtick_pos, showmeans=False, showmedians=False, showextrema=False)
+for pc, color in zip(parts['bodies'], colors):
+    pc.set_facecolor(color)
+    pc.set_edgecolor('black')
+    pc.set_alpha(1)
+
+    ax.set_xticks(xtick_pos, cycles)
+
+    # if row_ind==(num_rows-1):
+        # ax.set_xlabel('Aligned pattern')
+    # else:
+    #     ax.set_xticks([])
+    ax.set_yticks(np.arange(0, 1.01, 0.5))
+    # ax.set_ylabel(ds_names[test_ds])
+
+    ax.set_xlim([0.5, 2.5])
+    ax.set_ylim([-0.05, 1.05])
+fig_vlnplot.savefig(os.path.join(img_out, f'vlnplot_mAFiA.{FMT}'), **fig_kwargs)
+
+########################################################################################################################
+### precision-recall curve #############################################################################################
+########################################################################################################################
+def calc_prc(pattern_modProbs):
+    thresholds = np.arange(0, 1.0, 0.01)
+    prec = []
+    rec = []
+    for thresh in thresholds:
+        tp = (pattern_modProbs['even'] > thresh).sum()
+        fa = (pattern_modProbs['odd'] > thresh).sum()
+        all_pos = len(pattern_modProbs['even'])
+
+        if (tp==0) and (fa==0):
+            break
+
+        prec.append(tp / (tp + fa))
+        rec.append(tp / all_pos)
+    prec.append(1.0)
+    rec.append(0.0)
+    area = auc(rec[::-1], prec[::-1])
+    return prec, rec, area
+
+mAFiA_precisions, mAFiA_recalls, mAFiA_auprc = calc_prc(mAFiA_even_odd_probs)
+CHEUI_precisions, CHEUI_recalls, CHEUI_auprc = calc_prc(CHEUI_even_odd_probs)
+m6Anet_precisions, m6Anet_recalls, m6Anet_auprc = calc_prc(m6Anet_even_odd_probs)
+
+fig_prc, ax = plt.subplots(nrows=1, ncols=1, figsize=(5*cm, 5*cm))
+ax.plot(mAFiA_recalls, mAFiA_precisions, label=f'mAFiA, {mAFiA_auprc:.2f}')
+ax.plot(CHEUI_recalls, CHEUI_precisions, label=f'CHEUI, {CHEUI_auprc:.2f}')
+ax.plot(m6Anet_recalls, m6Anet_precisions, label=f'm6Anet, {m6Anet_auprc:.2f}')
+ax.set_xticks(np.arange(0, 1.01, 0.5))
+ax.set_yticks(np.arange(0, 1.01, 0.5))
+ax.set_xlim(-0.05, 1.05)
+ax.set_ylim(-0.05, 1.05)
+ax.legend(loc='lower left')
+
+fig_prc.savefig(os.path.join(img_out, f'prc_cf_CHEUI_m6Anet.{FMT}'), **fig_kwargs)
+
+
 
 ########################################################################################################################
 ### construct probality mat ############################################################################################
 ########################################################################################################################
-min_pos = 6
-extent = 80
-min_cycles = 2
-
-for vmin in np.arange(0.1, 1, 0.1):
-
-    ds_mat_modProb = {}
-    for test_ds in test_datasets:
-        refPos_modProbs = ds_refPos_modProbs[test_ds]
-        # mod_probs = [pair for pair in ds_pattern_modProbs[test_ds][c_pattern] if np.max(pair)>=vmin]
-        # print(test_ds, c_pattern, len(mod_probs), np.mean(np.vstack(mod_probs), axis=0))
-
-        sample_refPos_modProbs = list(refPos_modProbs.values())
-        mat_mod_prob = np.zeros([len(refPos_modProbs), extent])
-        i = 0
-        for pos_probs in sample_refPos_modProbs:
-            refPos = np.array([tup[0] for tup in pos_probs])
-            modProbs = np.array([tup[1] for tup in pos_probs])
-            if np.sum(modProbs>vmin)<min_cycles:
-                continue
-
-            first_high_ind = np.where(modProbs>vmin)[0][0]
-            # if first_high_ind==0:
-            #     filtered_refPos = refPos
-            #     filtered_modProbs = modProbs
-            #     shifted_refPos = filtered_refPos - np.min(filtered_refPos) + min_pos + block_size
-            # else:
-            filtered_refPos = refPos[first_high_ind:]
-            filtered_modProbs = modProbs[first_high_ind:]
-            shifted_refPos = filtered_refPos - np.min(filtered_refPos) + min_pos
-
-            extent_mask = shifted_refPos<extent
-            shifted_refPos = shifted_refPos[extent_mask]
-            filtered_modProbs = filtered_modProbs[extent_mask]
-
-            # if np.max(shifted_pos)>=extent:
-            #     continue
-            # mat_mod_prob[i, filtered_pos] = filtered_probs
-            mat_mod_prob[i, shifted_refPos] = filtered_modProbs
-            i+=1
-
-        mat_mod_prob = mat_mod_prob[~np.all(mat_mod_prob==0, axis=1)]
-        ds_mat_modProb[test_ds] = mat_mod_prob
-        print(f"{test_ds}: {len(mat_mod_prob)} samples")
-
-    ########################################################################################################################
-    ### visualize ##########################################################################################################
-    ########################################################################################################################
-    num_samples = 30
-
-    # num_samples = 10
-    # ytick_pos = [0, 4, 9]
-
-    fig_width = 5*cm
-    fig_height = 5*cm
-
-    num_rows = 2
-    num_cols = 1
-
-    # cax_yticks = np.linspace(vmin, 1, 3)
-    xticks = np.arange(min_pos, extent, block_size)
-    ytick_pos = np.concatenate([[0], np.arange(num_samples//2-1, num_samples, num_samples//2)])
-    yticks = [f'read {i+1}' for i in ytick_pos]
-
-    fig_single_read = plt.figure(figsize=(fig_width, fig_height))
-    for subplot_ind, test_ds in enumerate(test_datasets):
-        full_mat = ds_mat_modProb[test_ds]
-        # sel_rows = np.arange(num_samples)
-        sel_rows = np.argpartition(np.max(np.abs(np.diff(full_mat[:, np.arange(min_pos, extent, block_size)], axis=1)), axis=1), -num_samples)[-num_samples:]
-        display_mat = full_mat[sel_rows]
-        ax = fig_single_read.add_subplot(num_rows, num_cols, subplot_ind+1)
-        im = ax.imshow(display_mat, vmin=vmin, vmax=1, cmap='plasma')
-        # ax.set_xticks(xticks)
-        if subplot_ind==(num_rows-1):
-            ax.set_xticks(xticks)
-            ax.set_xlabel('Aligned Position')
-        else:
-            ax.set_xticks([])
-        ax.set_yticks([])
-        ax.set_yticks(ytick_pos, yticks)
-        ax.set_xlim([-0.5, extent-0.5])
-        # ax.set_title(ds_names[test_ds])
-
-    fig_single_read.tight_layout(rect=[0.1, 0.1, 0.8, 0.9])
-    fig_single_read.subplots_adjust(left=0.1, bottom=0.1, right=0.8, top=0.9)
-    cax = fig_single_read.add_axes([0.85, 0.3, 0.03, 0.4])
-    plt.colorbar(im, cax=cax)
-    # plt.yticks([0.8, 0.9, 1.0])
-    plt.yticks(np.linspace(vmin, 1.0, 3))
-    plt.ylabel('P(m6A)', rotation=-90, labelpad=10)
-
-    fig_single_read.savefig(os.path.join(img_out, f'single_read_vmin{vmin:.1f}.{FMT}'), **fig_kwargs)
-    plt.close('all')
-
-    ########################################################################################################################
-    ### bar plots ##########################################################################################################
-    ########################################################################################################################
-    thresh_modProb = vmin
-    fig_barplot = plt.figure(figsize=(fig_width, fig_height))
-    ds_contrast = {}
-    for subplot_ind, test_ds in enumerate(test_datasets):
-        x_pos = np.arange(min_pos, extent, block_size)
-        prob_mat = ds_mat_modProb[test_ds][:, x_pos]
-        avg_mod_ratio = np.sum(prob_mat>=thresh_modProb, axis=0) / np.sum(prob_mat>0, axis=0)
-        ds_contrast[test_ds] = np.mean(avg_mod_ratio[[2, 4]] - avg_mod_ratio[[1, 3]])
-
-        ax = fig_barplot.add_subplot(num_rows, num_cols, subplot_ind+1)
-        ax.bar(x_pos, avg_mod_ratio, width=5, label=f'{ds_names[test_ds]}')
-        ax.axhline(y=0.5, c='r', linestyle='--', alpha=0.5)
-        if subplot_ind==(num_rows-1):
-            ax.set_xticks(xticks)
-            ax.set_xlabel('Aligned Position')
-        else:
-            ax.set_xticks([])
-        ax.set_ylim([0.0, 1.05])
-        ax.set_ylabel(f'Mod. Ratio')
-        # if subplot_ind==1:
-        #     ax.set_ylabel(f'Mod. Ratio')
-            # ax.set_ylabel(f'% NTs with P(m6A)>={thresh_modProb:.1f}')
-            # ax.set_ylabel('Mean P(m6A)')
-        ax.legend(loc='upper right')
-        # ax.set_yticks([])
-        # ax.set_yticks(ytick_pos, yticks)
-        # ax.set_title(ds_names[test_ds])
-    full_contrast = ds_contrast['WUE_batch3_AB_BA'] - ds_contrast['WUE_batch3_ABBA']
-    fig_barplot.savefig(os.path.join(img_out, f'barplot_vmin{vmin:.1f}_contrast{full_contrast:.2f}.{FMT}'), **fig_kwargs)
-    plt.close('all')
-
-    ########################################################################################################################
-    ### block distances ####################################################################################################
-    ########################################################################################################################
-    ds_diff = {}
-    fig_dist_freq = plt.figure(figsize=(fig_width, fig_height))
-    for subplot_ind, test_ds in enumerate(test_datasets):
-        mat_thresh = (ds_mat_modProb[test_ds]>=thresh_modProb)
-        i_ind, j_ind = np.where(mat_thresh)
-        dists = []
-        for i in np.unique(i_ind):
-            js = j_ind[i_ind == i]
-            dists.extend(list(np.diff(js)))
-        dist_counts = Counter(dists).most_common()
-        # block_dists = [int(tup[0]/block_size) for tup in dist_counts]
-        nt_dists = [int(tup[0]) for tup in dist_counts]
-        counts = [tup[1] for tup in dist_counts]
-        sorted_counts = np.array(counts)[np.argsort(nt_dists)]
-        freq = sorted_counts / np.sum(sorted_counts)
-        # block_dists = np.array(block_dists)[np.argsort(block_dists)]
-        nt_dists = np.array(nt_dists)[np.argsort(nt_dists)]
-
-        ds_diff[test_ds] = np.sum((freq[np.isin(nt_dists, [26, 52])] - freq[np.isin(nt_dists, [13, 39])]))
-
-        ax = fig_dist_freq.add_subplot(num_rows, num_cols, subplot_ind+1)
-        ax.bar(np.arange(len(nt_dists)), freq, width=0.5, label=ds_names[test_ds])
-        if subplot_ind==(num_rows-1):
-            ax.set_xticks(np.arange(len(nt_dists)), nt_dists)
-            ax.set_xlabel('m6A Distance')
-        else:
-            ax.set_xticks([])
-        ax.set_ylabel('Norm. Frequency')
-        ax.set_xlim([-0.5, 3.5])
-        ax.set_ylim([0.0, 0.65])
-        ax.set_yticks(np.arange(0, 0.65, 0.2))
-        ax.legend(loc='upper right')
-        # ax.set_title(ds_names[test_ds])
-
-    inter_ds_diff = ds_diff['WUE_batch3_AB_BA'] - ds_diff['WUE_batch3_ABBA']
-    # high = ds_diff['WUE_batch3_AB_BA']
-    # low = ds_diff['WUE_batch3_ABBA']
-
-    fig_dist_freq.savefig(os.path.join(img_out, f'distFreq_vmin{vmin:.1f}_diff{inter_ds_diff:.2f}.{FMT}'), **fig_kwargs)
-    plt.close('all')
+# min_pos = 6
+# extent = 80
+# min_cycles = 2
+#
+# for vmin in np.arange(0.1, 1, 0.1):
+#
+#     ds_mat_modProb = {}
+#     for test_ds in test_datasets:
+#         refPos_modProbs = ds_refPos_modProbs[test_ds]
+#         # mod_probs = [pair for pair in ds_pattern_modProbs[test_ds][c_pattern] if np.max(pair)>=vmin]
+#         # print(test_ds, c_pattern, len(mod_probs), np.mean(np.vstack(mod_probs), axis=0))
+#
+#         sample_refPos_modProbs = list(refPos_modProbs.values())
+#         mat_mod_prob = np.zeros([len(refPos_modProbs), extent])
+#         i = 0
+#         for pos_probs in sample_refPos_modProbs:
+#             refPos = np.array([tup[0] for tup in pos_probs])
+#             modProbs = np.array([tup[1] for tup in pos_probs])
+#             if np.sum(modProbs>vmin)<min_cycles:
+#                 continue
+#
+#             first_high_ind = np.where(modProbs>vmin)[0][0]
+#             # if first_high_ind==0:
+#             #     filtered_refPos = refPos
+#             #     filtered_modProbs = modProbs
+#             #     shifted_refPos = filtered_refPos - np.min(filtered_refPos) + min_pos + block_size
+#             # else:
+#             filtered_refPos = refPos[first_high_ind:]
+#             filtered_modProbs = modProbs[first_high_ind:]
+#             shifted_refPos = filtered_refPos - np.min(filtered_refPos) + min_pos
+#
+#             extent_mask = shifted_refPos<extent
+#             shifted_refPos = shifted_refPos[extent_mask]
+#             filtered_modProbs = filtered_modProbs[extent_mask]
+#
+#             # if np.max(shifted_pos)>=extent:
+#             #     continue
+#             # mat_mod_prob[i, filtered_pos] = filtered_probs
+#             mat_mod_prob[i, shifted_refPos] = filtered_modProbs
+#             i+=1
+#
+#         mat_mod_prob = mat_mod_prob[~np.all(mat_mod_prob==0, axis=1)]
+#         ds_mat_modProb[test_ds] = mat_mod_prob
+#         print(f"{test_ds}: {len(mat_mod_prob)} samples")
+#
+#     ########################################################################################################################
+#     ### visualize ##########################################################################################################
+#     ########################################################################################################################
+#     num_samples = 30
+#
+#     # num_samples = 10
+#     # ytick_pos = [0, 4, 9]
+#
+#     fig_width = 5*cm
+#     fig_height = 5*cm
+#
+#     num_rows = 2
+#     num_cols = 1
+#
+#     # cax_yticks = np.linspace(vmin, 1, 3)
+#     xticks = np.arange(min_pos, extent, block_size)
+#     ytick_pos = np.concatenate([[0], np.arange(num_samples//2-1, num_samples, num_samples//2)])
+#     yticks = [f'read {i+1}' for i in ytick_pos]
+#
+#     fig_single_read = plt.figure(figsize=(fig_width, fig_height))
+#     for subplot_ind, test_ds in enumerate(test_datasets):
+#         full_mat = ds_mat_modProb[test_ds]
+#         # sel_rows = np.arange(num_samples)
+#         sel_rows = np.argpartition(np.max(np.abs(np.diff(full_mat[:, np.arange(min_pos, extent, block_size)], axis=1)), axis=1), -num_samples)[-num_samples:]
+#         display_mat = full_mat[sel_rows]
+#         ax = fig_single_read.add_subplot(num_rows, num_cols, subplot_ind+1)
+#         im = ax.imshow(display_mat, vmin=vmin, vmax=1, cmap='plasma')
+#         # ax.set_xticks(xticks)
+#         if subplot_ind==(num_rows-1):
+#             ax.set_xticks(xticks)
+#             ax.set_xlabel('Aligned Position')
+#         else:
+#             ax.set_xticks([])
+#         ax.set_yticks([])
+#         ax.set_yticks(ytick_pos, yticks)
+#         ax.set_xlim([-0.5, extent-0.5])
+#         # ax.set_title(ds_names[test_ds])
+#
+#     fig_single_read.tight_layout(rect=[0.1, 0.1, 0.8, 0.9])
+#     fig_single_read.subplots_adjust(left=0.1, bottom=0.1, right=0.8, top=0.9)
+#     cax = fig_single_read.add_axes([0.85, 0.3, 0.03, 0.4])
+#     plt.colorbar(im, cax=cax)
+#     # plt.yticks([0.8, 0.9, 1.0])
+#     plt.yticks(np.linspace(vmin, 1.0, 3))
+#     plt.ylabel('P(m6A)', rotation=-90, labelpad=10)
+#
+#     fig_single_read.savefig(os.path.join(img_out, f'single_read_vmin{vmin:.1f}.{FMT}'), **fig_kwargs)
+#     plt.close('all')
+#
+#     ########################################################################################################################
+#     ### bar plots ##########################################################################################################
+#     ########################################################################################################################
+#     thresh_modProb = vmin
+#     fig_barplot = plt.figure(figsize=(fig_width, fig_height))
+#     ds_contrast = {}
+#     for subplot_ind, test_ds in enumerate(test_datasets):
+#         x_pos = np.arange(min_pos, extent, block_size)
+#         prob_mat = ds_mat_modProb[test_ds][:, x_pos]
+#         avg_mod_ratio = np.sum(prob_mat>=thresh_modProb, axis=0) / np.sum(prob_mat>0, axis=0)
+#         ds_contrast[test_ds] = np.mean(avg_mod_ratio[[2, 4]] - avg_mod_ratio[[1, 3]])
+#
+#         ax = fig_barplot.add_subplot(num_rows, num_cols, subplot_ind+1)
+#         ax.bar(x_pos, avg_mod_ratio, width=5, label=f'{ds_names[test_ds]}')
+#         ax.axhline(y=0.5, c='r', linestyle='--', alpha=0.5)
+#         if subplot_ind==(num_rows-1):
+#             ax.set_xticks(xticks)
+#             ax.set_xlabel('Aligned Position')
+#         else:
+#             ax.set_xticks([])
+#         ax.set_ylim([0.0, 1.05])
+#         ax.set_ylabel(f'Mod. Ratio')
+#         # if subplot_ind==1:
+#         #     ax.set_ylabel(f'Mod. Ratio')
+#             # ax.set_ylabel(f'% NTs with P(m6A)>={thresh_modProb:.1f}')
+#             # ax.set_ylabel('Mean P(m6A)')
+#         ax.legend(loc='upper right')
+#         # ax.set_yticks([])
+#         # ax.set_yticks(ytick_pos, yticks)
+#         # ax.set_title(ds_names[test_ds])
+#     full_contrast = ds_contrast['WUE_batch3_AB_BA'] - ds_contrast['WUE_batch3_ABBA']
+#     fig_barplot.savefig(os.path.join(img_out, f'barplot_vmin{vmin:.1f}_contrast{full_contrast:.2f}.{FMT}'), **fig_kwargs)
+#     plt.close('all')
+#
+#     ########################################################################################################################
+#     ### block distances ####################################################################################################
+#     ########################################################################################################################
+#     ds_diff = {}
+#     fig_dist_freq = plt.figure(figsize=(fig_width, fig_height))
+#     for subplot_ind, test_ds in enumerate(test_datasets):
+#         mat_thresh = (ds_mat_modProb[test_ds]>=thresh_modProb)
+#         i_ind, j_ind = np.where(mat_thresh)
+#         dists = []
+#         for i in np.unique(i_ind):
+#             js = j_ind[i_ind == i]
+#             dists.extend(list(np.diff(js)))
+#         dist_counts = Counter(dists).most_common()
+#         # block_dists = [int(tup[0]/block_size) for tup in dist_counts]
+#         nt_dists = [int(tup[0]) for tup in dist_counts]
+#         counts = [tup[1] for tup in dist_counts]
+#         sorted_counts = np.array(counts)[np.argsort(nt_dists)]
+#         freq = sorted_counts / np.sum(sorted_counts)
+#         # block_dists = np.array(block_dists)[np.argsort(block_dists)]
+#         nt_dists = np.array(nt_dists)[np.argsort(nt_dists)]
+#
+#         ds_diff[test_ds] = np.sum((freq[np.isin(nt_dists, [26, 52])] - freq[np.isin(nt_dists, [13, 39])]))
+#
+#         ax = fig_dist_freq.add_subplot(num_rows, num_cols, subplot_ind+1)
+#         ax.bar(np.arange(len(nt_dists)), freq, width=0.5, label=ds_names[test_ds])
+#         if subplot_ind==(num_rows-1):
+#             ax.set_xticks(np.arange(len(nt_dists)), nt_dists)
+#             ax.set_xlabel('m6A Distance')
+#         else:
+#             ax.set_xticks([])
+#         ax.set_ylabel('Norm. Frequency')
+#         ax.set_xlim([-0.5, 3.5])
+#         ax.set_ylim([0.0, 0.65])
+#         ax.set_yticks(np.arange(0, 0.65, 0.2))
+#         ax.legend(loc='upper right')
+#         # ax.set_title(ds_names[test_ds])
+#
+#     inter_ds_diff = ds_diff['WUE_batch3_AB_BA'] - ds_diff['WUE_batch3_ABBA']
+#     # high = ds_diff['WUE_batch3_AB_BA']
+#     # low = ds_diff['WUE_batch3_ABBA']
+#
+#     fig_dist_freq.savefig(os.path.join(img_out, f'distFreq_vmin{vmin:.1f}_diff{inter_ds_diff:.2f}.{FMT}'), **fig_kwargs)
+#     plt.close('all')

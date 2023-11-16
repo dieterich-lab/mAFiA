@@ -17,8 +17,8 @@ def add_block(base_list, add_list, base_names, add_names):
             )
     return new_list, new_names
 
-max_blocks = 8
-ref_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/reference'
+max_blocks = 10
+ref_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/reference'
 ### WUE batch 1 ###
 # base_fasta = os.path.join(ref_dir, 'WUE_batch1_w_splint.fasta')
 # out_fasta = os.path.join(ref_dir, 'WUE_batch1_blocks{}.fasta'.format(max_blocks))
@@ -31,8 +31,11 @@ ref_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/reference'
 ### Isabel 3+3 ###
 # base_fasta = os.path.join(ref_dir, 'RL_Mix1_Mix3.fasta')
 # out_fasta = os.path.join(ref_dir, 'RL_Mix1_Mix3_blocks{}.fasta'.format(max_blocks))
-base_fasta = os.path.join(ref_dir, 'RL_Mix2_Mix4.fasta')
-out_fasta = os.path.join(ref_dir, 'RL_Mix2_Mix4_blocks{}.fasta'.format(max_blocks))
+# base_fasta = os.path.join(ref_dir, 'RL_Mix2_Mix4.fasta')
+# out_fasta = os.path.join(ref_dir, 'RL_Mix2_Mix4_blocks{}.fasta'.format(max_blocks))
+
+base_fasta = os.path.join(ref_dir, 'ISA_M4_M5.fasta')
+out_fasta = os.path.join(ref_dir, 'ISA_M4_M5_blocks{}.fasta'.format(max_blocks))
 
 base_sequences = []
 for record in SeqIO.parse(base_fasta, 'fasta'):

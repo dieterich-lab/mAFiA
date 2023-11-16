@@ -29,11 +29,17 @@ fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 xtick_spacing = 0.5
 ytick_spacing = 0.1
 
+
+def get_df_samples(in_df, sample_size=10000):
+    return in_df.iloc[sample(range(len(in_df)), sample_size)]
+
 def get_norm_counts(in_df, sel_motif):
-    df_motif = in_df[
+    df_motif_all = in_df[
         (in_df['ref_motif']==sel_motif)
         # & (df['pred_motif']==sel_motif)
     ]
+
+    df_motif = get_df_samples(df_motif_all)
 
     ### histogram of mod prob per read ###
     num_bins = 100
@@ -56,18 +62,18 @@ def get_precision_recall_curve(bin_A_m6A_counts):
 def get_auc(rec, prec):
     return np.sum((prec[1:] + prec[:-1]) * 0.5 * np.abs(np.diff(rec)))
 
-results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
+results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/results'
 # training_dataset = 'ISA'
 # training_dataset = 'WUE'
 training_dataset = 'ISA-WUE'
 
 # testing_datasets = ['ISA_A', 'ISA_m6A']
-testing_datasets = ['WUE_A', 'WUE_m6A']
-# testing_datasets = ['ISA-WUE_A', 'ISA-WUE_m6A']
+# testing_datasets = ['WUE_A', 'WUE_m6A']
+testing_datasets = ['ISA-WUE_A', 'ISA-WUE_m6A']
 
 ds_colors = {ds : c for ds, c in zip(testing_datasets, ['b', 'r'])}
 
-img_out = os.path.join(HOME, 'img_out/MAFIA', 'oligo_train_{}_test_{}'.format(training_dataset, '_'.join(testing_datasets[0].split('_')[:-1])))
+img_out = os.path.join(HOME, 'img_out/NCOMMS_rev', 'res_train_{}_test_{}'.format(training_dataset, training_dataset))
 if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
 
@@ -106,10 +112,17 @@ for subplot_ind, this_motif in enumerate(motifs):
         # this_motif_bin_A_m6A_counts['{}_counts'.format(A_m6A)] = ds_real_counts
         this_motif_bin_A_m6A_counts['{}_counts'.format(A_m6A)] = ds_norm_counts
 
-        y_max = max(y_max, (ds_norm_counts.max() // 0.05 + 1) * 0.05)
+        if A_m6A=='A':
+            label = 'UNM'
+        elif A_m6A=='m6A':
+            label = 'MOD'
+
+        # y_max = max(y_max, (ds_norm_counts.max() // 0.05 + 1) * 0.05)
         # y_max = 0.2
         # axes_hist[subplot_ind].step(ds_bin_centers, ds_norm_counts, color=ds_colors[ds], label='{}, {} NTs'.format(ds.split('_')[-1], len(ds_motif)))
-        axes_hist[subplot_ind].step(ds_bin_centers, ds_norm_counts, color=ds_colors[ds], label='{}'.format(ds.split('_')[-1]))
+        # axes_hist[subplot_ind].step(ds_bin_centers, ds_norm_counts, color=ds_colors[ds], label='{}'.format(ds.split('_')[-1]))
+        axes_hist[subplot_ind].step(ds_bin_centers, ds_real_counts, color=ds_colors[ds], label=label)
+
     if subplot_ind>=(num_rows-1)*num_cols:
         # axes_hist[subplot_ind].set_xlabel('Mod. Prob.')
         axes_hist[subplot_ind].set_xticks(xticks)
@@ -119,14 +132,12 @@ for subplot_ind, this_motif in enumerate(motifs):
     # if subplot_ind%num_cols==0:
     #     axes_hist[subplot_ind].set_ylabel('Norm. frequency')
 
-    yticks = np.round(np.linspace(0, y_max, 3), 3)
-    axes_hist[subplot_ind].set_yticks(yticks)
+    # yticks = np.round(np.linspace(0, y_max, 3), 3)
+    # axes_hist[subplot_ind].set_yticks(yticks)
 
     axes_hist[subplot_ind].set_title('{}'.format(this_motif), pad=-10)
-
-
     axes_hist[subplot_ind].set_xlim([-0.01, 1.01])
-    axes_hist[subplot_ind].set_ylim([-0.001, y_max])
+    # axes_hist[subplot_ind].set_ylim([-0.001, y_max])
     if subplot_ind==0:
         axes_hist[subplot_ind].legend(loc='upper left')
     motif_bin_A_m6A_counts[this_motif] = this_motif_bin_A_m6A_counts
@@ -135,7 +146,9 @@ for subplot_ind, this_motif in enumerate(motifs):
 fig_hist.tight_layout(pad=0.5)
 fig_hist.savefig(os.path.join(img_out, f'hist_oligo_modProbs.{FMT}'), **fig_kwargs)
 
-### precision-recall curve ###
+########################################################################################################################
+### precision-recall curve #############################################################################################
+########################################################################################################################
 all_aucs = {}
 fig_prc = plt.figure(figsize=(fig_width, fig_height))
 axes_prc = fig_prc.subplots(num_rows, num_cols).flatten()
