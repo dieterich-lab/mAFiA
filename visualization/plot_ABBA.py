@@ -23,9 +23,14 @@ FMT = 'pdf'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
-mAFiA_results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/results'
-CHEUI_results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/CHEUI/oligo'
-m6Anet_results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/m6Anet/oligo'
+# mAFiA_results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/results'
+mAFiA_results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/oligo/WUE_ABBA/mAFiA'
+
+# CHEUI_results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/CHEUI/oligo'
+CHEUI_results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/oligo/WUE_ABBA/CHEUI'
+
+# m6Anet_results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/m6Anet/oligo'
+m6Anet_results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/oligo/WUE_ABBA/m6Anet'
 
 test_datasets = [
     'WUE_batch3_AB_BA',
@@ -42,7 +47,7 @@ block_size = 13
 block_center = 6
 
 # img_out = os.path.join(HOME, 'img_out/MAFIA', 'res_train_{}_test_WUE_batch3_AB+BA_minimap'.format(train_dataset))
-img_out = os.path.join(HOME, 'img_out/NCOMMS_rev', 'res_test_WUE_batch3_AB+BA_minimap')
+img_out = os.path.join(HOME, 'img_out/NCOMMS_rev', 'WUE_ABBA')
 if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
 
@@ -68,14 +73,14 @@ def filter_ref_pos_mod_prob(refPos, modProb, readPos=[], tol_pos=2):
         readPos = refPos
     diff_readPos = np.diff(readPos)
     diff_refPos = np.diff(refPos)
-    if np.any(np.abs(diff_readPos - block_size) > tol_pos) or np.any(np.abs(diff_refPos - block_size) > tol_pos):
-        return [], []
+    # if np.any(np.abs(diff_readPos - block_size) > tol_pos) or np.any(np.abs(diff_refPos - block_size) > tol_pos):
+    #     return [], []
     sel_indices = np.where(np.abs(diff_readPos - diff_refPos) <= tol_pos)[0]
     if (len(sel_indices) == 0):
         return [], []
 
     if not np.all(np.diff(sel_indices) == 1):
-        sel_indices = get_longest_continuous_indices(sel_indices)
+        sel_indices = get_longest_continuous_indices(list(sel_indices))
 
     sel_indices = np.concatenate([sel_indices, [sel_indices[-1] + 1]])
     sel_refPos = refPos[sel_indices]
@@ -89,7 +94,9 @@ def import_mAFiA_res(res_dir):
     for test_ds in test_datasets:
         print('\nDataset {}'.format(test_ds))
         # path = os.path.join(res_dir, 'res_train_{}_test_{}_q{}.tsv'.format(train_dataset, test_ds, thresh_q))
-        path = os.path.join(res_dir, 'res_train_ISA-WUE_test_{}_minimap.tsv'.format(test_ds))
+        # path = os.path.join(res_dir, 'res_train_ISA-WUE_test_{}_minimap.tsv'.format(test_ds))
+        path = os.path.join(res_dir, 'pos_modProb.tsv')
+
         df = pd.read_csv(path, sep='\t').rename(columns={'Unnamed: 0': 'index'})
         unique_reads = df['read_id'].unique()
         ds_pos_prob[test_ds] = {}
@@ -103,6 +110,7 @@ def import_mAFiA_res(res_dir):
             modProb = sub_df['mod_prob'].values
 
             sel_refPos, sel_modProb = filter_ref_pos_mod_prob(refPos, modProb, readPos)
+            # sel_refPos, sel_modProb = filter_ref_pos_mod_prob(refPos, modProb)
             if len(sel_refPos):
                 ds_pos_prob[test_ds][this_read] = list(zip(sel_refPos, sel_modProb))
 
@@ -112,7 +120,7 @@ def import_m6Anet_res(res_dir):
     ds_pos_prob = {}
     for test_ds in test_datasets:
         print('\nDataset {}'.format(test_ds))
-        path = os.path.join(res_dir, test_ds, 'data.indiv_proba.csv')
+        path = os.path.join(res_dir, 'data.indiv_proba.csv')
         df = pd.read_csv(path, sep=',', dtype = {
             'read_index': np.int64,
             'transcript_position': np.int64,
@@ -138,7 +146,7 @@ def import_CHEUI_res(res_dir):
     ds_pos_prob = {}
     for test_ds in test_datasets:
         print('\nDataset {}'.format(test_ds))
-        path = os.path.join(res_dir, test_ds, 'read_level_m6A_predictions.txt')
+        path = os.path.join(res_dir, 'read_level_m6A_predictions.txt')
         df = pd.read_csv(path, sep='\t', names=['site', 'mod_prob', 'replicate'], dtype={'mod_prob': np.float64})
 
         contig = []
@@ -187,6 +195,11 @@ def get_even_odd_probs(read_mod_prob, block_size=13):
     odd_mask = np.array([(pos / block_size) % 2 == 1 for pos in (ref_pos - highest_p_pos)])
     even_probs = mod_prob[even_mask]
     odd_probs = mod_prob[odd_mask]
+
+    if len(even_probs)!=len(odd_probs):
+        min_len = min(len(even_probs), len(odd_probs))
+        return even_probs[:min_len], odd_probs[:min_len]
+
     return even_probs, odd_probs
 
 
@@ -201,12 +214,17 @@ def get_ds_even_odd_probs(ds_refPos_modProbs):
     return even_odd_probs
 
 mAFiA_refPos_modProbs = import_mAFiA_res(mAFiA_results_dir)
-m6Anet_refPos_modProbs = import_m6Anet_res(m6Anet_results_dir)
-CHEUI_refPos_modProbs = import_CHEUI_res(CHEUI_results_dir)
-
 mAFiA_even_odd_probs = get_ds_even_odd_probs(mAFiA_refPos_modProbs['WUE_batch3_AB_BA'])
+num_samples = len(mAFiA_even_odd_probs['even']) + len(mAFiA_even_odd_probs['odd'])
+
+m6Anet_refPos_modProbs = import_m6Anet_res(m6Anet_results_dir)
 m6Anet_even_odd_probs = get_ds_even_odd_probs(m6Anet_refPos_modProbs['WUE_batch3_AB_BA'])
+
+CHEUI_refPos_modProbs = import_CHEUI_res(CHEUI_results_dir)
 CHEUI_even_odd_probs = get_ds_even_odd_probs(CHEUI_refPos_modProbs['WUE_batch3_AB_BA'])
+
+with open(os.path.join(img_out, 'num_samples_ABBA.tsv'), 'w') as h:
+    h.write(f'GGACU\t{num_samples}\n')
 
 ########################################################################################################################
 ### vlnplot ############################################################################################################
@@ -216,7 +234,7 @@ num_cols = 1
 xtick_pos = [1, 2]
 colors = ['pink', 'cyan']
 cycles = ['even', 'odd']
-fig_vlnplot, ax = plt.subplots(nrows=num_rows, ncols=num_cols, figsize=(3*cm, 3*cm))
+fig_vlnplot, ax = plt.subplots(nrows=num_rows, ncols=num_cols, figsize=(5*cm, 5*cm))
 mod_probs = [mAFiA_even_odd_probs[cycle] for cycle in cycles]
 parts = ax.violinplot(mod_probs, xtick_pos, showmeans=False, showmedians=False, showextrema=False)
 for pc, color in zip(parts['bodies'], colors):

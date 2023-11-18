@@ -34,6 +34,9 @@ ref_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/referenc
 # base_fasta = os.path.join(ref_dir, 'RL_Mix2_Mix4.fasta')
 # out_fasta = os.path.join(ref_dir, 'RL_Mix2_Mix4_blocks{}.fasta'.format(max_blocks))
 
+# base_fasta = os.path.join(ref_dir, 'ISA_M4_M5.fasta')
+# out_fasta = os.path.join(ref_dir, 'ISA_M4_M5_blocks{}.fasta'.format(max_blocks))
+
 base_fasta = os.path.join(ref_dir, 'ISA_M4_M5.fasta')
 out_fasta = os.path.join(ref_dir, 'ISA_M4_M5_blocks{}.fasta'.format(max_blocks))
 
