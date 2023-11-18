@@ -14,10 +14,7 @@ def load_genome_reference(ref_file):
     print(f'Parsing genome reference {os.path.basename(ref_file)}...', flush=True)
     ref = {}
     for record in SeqIO.parse(ref_file, 'fasta'):
-        if (record.id.isnumeric()) or (record.id in ['X', 'Y']):
-            ref[record.id] = str(record.seq)
-        elif record.id == 'MT':
-            ref['M'] = str(record.seq)
+        ref[record.id] = str(record.seq)
     return ref
 
 
