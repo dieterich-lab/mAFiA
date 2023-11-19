@@ -23,14 +23,19 @@ FMT = 'pdf'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
+source_data_dir = '/home/adrian/NCOMMS_revision/source_data/TEST2'
+
 # mAFiA_results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/results'
-mAFiA_results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/oligo/WUE_ABBA/mAFiA'
+# mAFiA_results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/oligo/WUE_ABBA/mAFiA'
+mAFiA_results_dir = os.path.join(source_data_dir, 'mAFiA')
 
 # CHEUI_results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/CHEUI/oligo'
-CHEUI_results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/oligo/WUE_ABBA/CHEUI'
+# CHEUI_results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/oligo/WUE_ABBA/CHEUI'
+CHEUI_results_dir = os.path.join(source_data_dir, 'CHEUI')
 
 # m6Anet_results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/m6Anet/oligo'
-m6Anet_results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/oligo/WUE_ABBA/m6Anet'
+# m6Anet_results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/oligo/WUE_ABBA/m6Anet'
+m6Anet_results_dir = os.path.join(source_data_dir, 'm6Anet')
 
 test_datasets = [
     'WUE_batch3_AB_BA',
@@ -47,7 +52,8 @@ block_size = 13
 block_center = 6
 
 # img_out = os.path.join(HOME, 'img_out/MAFIA', 'res_train_{}_test_WUE_batch3_AB+BA_minimap'.format(train_dataset))
-img_out = os.path.join(HOME, 'img_out/NCOMMS_rev', 'WUE_ABBA')
+# img_out = os.path.join(HOME, 'img_out/NCOMMS_rev', 'WUE_ABBA')
+img_out = '/home/adrian/NCOMMS_revision/images/TEST2'
 if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
 
@@ -126,10 +132,13 @@ def import_m6Anet_res(res_dir):
             'transcript_position': np.int64,
             'probability_modified': np.float64
         })
-        unique_reads = df['read_index'].unique()
+
+        df_read_index = pd.read_csv(os.path.join(res_dir, 'renata.fasta.index.fai'), sep='\t', names=['read_id'], usecols=[0])
+
+        unique_read_indices = df['read_index'].unique()
         ds_pos_prob[test_ds] = {}
-        for this_read in tqdm(unique_reads):
-            sub_df = df[df['read_index']==this_read]
+        for this_read_index in tqdm(unique_read_indices):
+            sub_df = df[df['read_index']==this_read_index]
             if len(sub_df)<2:
                 continue
 
@@ -138,7 +147,8 @@ def import_m6Anet_res(res_dir):
 
             sel_refPos, sel_modProb = filter_ref_pos_mod_prob(refPos, modProb)
             if len(sel_refPos):
-                ds_pos_prob[test_ds][this_read] = list(zip(refPos, modProb))
+                this_read_id = df_read_index.loc[this_read_index].values[0]
+                ds_pos_prob[test_ds][this_read_id] = list(zip(refPos, modProb))
 
     return ds_pos_prob
 
@@ -172,16 +182,18 @@ def import_CHEUI_res(res_dir):
             if len(sub_df) < 2:
                 continue
 
-            unique_contigs = sub_df['contig'].unique()
-            longest_contig = unique_contigs[np.argmax([len(c) for c in unique_contigs])]
-            sub_df = sub_df[sub_df['contig'] == longest_contig]
+            # unique_contigs = sub_df['contig'].unique()
+            # longest_contig = unique_contigs[np.argmax([len(c) for c in unique_contigs])]
+            # sub_df = sub_df[sub_df['contig'] == longest_contig]
 
             refPos = np.int64(sub_df['ref_pos'].values)
             modProb = sub_df['mod_prob'].values
 
             sel_refPos, sel_modProb = filter_ref_pos_mod_prob(refPos, modProb)
+            # sel_refPos, sel_modProb = refPos, modProb
+
             if len(sel_refPos):
-                ds_pos_prob[test_ds][this_read] = list(zip(refPos, modProb))
+                ds_pos_prob[test_ds][this_read] = list(zip(sel_refPos, sel_modProb))
 
     return ds_pos_prob
 
@@ -213,15 +225,40 @@ def get_ds_even_odd_probs(ds_refPos_modProbs):
         even_odd_probs['odd'].extend(odd_ps)
     return even_odd_probs
 
+
+def filter_by_readPos(in_modProbs, filter_modProbs):
+    out_modProbs = {}
+    for ds in in_modProbs.keys():
+        out_modProbs[ds] = {}
+        for readID in in_modProbs[ds].keys():
+            if readID in filter_modProbs[ds].keys():
+                read_list = []
+                filter_pos = [x[0] for x in filter_modProbs[ds][readID]]
+                for tup in in_modProbs[ds][readID]:
+                    if tup[0] in filter_pos:
+                        read_list.append(tup)
+                if len(read_list):
+                    out_modProbs[ds][readID] = read_list
+        samples_before = np.sum([len(in_modProbs[ds][read]) for read in in_modProbs[ds].keys()])
+        samples_after = np.sum([len(out_modProbs[ds][read]) for read in out_modProbs[ds].keys()])
+        print(f'Before: {samples_before} samples')
+        print(f'After: {samples_after}')
+    return out_modProbs
+
+
 mAFiA_refPos_modProbs = import_mAFiA_res(mAFiA_results_dir)
 mAFiA_even_odd_probs = get_ds_even_odd_probs(mAFiA_refPos_modProbs['WUE_batch3_AB_BA'])
 num_samples = len(mAFiA_even_odd_probs['even']) + len(mAFiA_even_odd_probs['odd'])
 
 m6Anet_refPos_modProbs = import_m6Anet_res(m6Anet_results_dir)
-m6Anet_even_odd_probs = get_ds_even_odd_probs(m6Anet_refPos_modProbs['WUE_batch3_AB_BA'])
+# m6Anet_filtered_refPos_modProbs = filter_by_readPos(m6Anet_refPos_modProbs, mAFiA_refPos_modProbs)
+m6Anet_filtered_refPos_modProbs = m6Anet_refPos_modProbs
+m6Anet_even_odd_probs = get_ds_even_odd_probs(m6Anet_filtered_refPos_modProbs['WUE_batch3_AB_BA'])
 
 CHEUI_refPos_modProbs = import_CHEUI_res(CHEUI_results_dir)
-CHEUI_even_odd_probs = get_ds_even_odd_probs(CHEUI_refPos_modProbs['WUE_batch3_AB_BA'])
+# CHEUI_filtered_refPos_modProbs = filter_by_readPos(CHEUI_refPos_modProbs, mAFiA_refPos_modProbs)
+CHEUI_filtered_refPos_modProbs = CHEUI_refPos_modProbs
+CHEUI_even_odd_probs = get_ds_even_odd_probs(CHEUI_filtered_refPos_modProbs['WUE_batch3_AB_BA'])
 
 with open(os.path.join(img_out, 'num_samples_ABBA.tsv'), 'w') as h:
     h.write(f'GGACU\t{num_samples}\n')

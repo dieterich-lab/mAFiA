@@ -28,7 +28,16 @@ FMT = 'pdf'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
-results_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/results'
+# mAFiA_source_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/results'
+# CHEUI_source_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/CHEUI/oligo'
+# m6Anet_source_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/m6Anet/oligo'
+
+source_data_dir = '/home/adrian/NCOMMS_revision/source_data/TEST1'
+
+mAFiA_source_dir = os.path.join(source_data_dir, 'mAFiA')
+CHEUI_source_dir = os.path.join(source_data_dir, 'CHEUI')
+m6Anet_source_dir = os.path.join(source_data_dir, 'm6Anet')
+
 train_dataset = 'ISA-WUE'
 test_datasets = [
     # 'ISA_run4_M4M5',
@@ -71,7 +80,8 @@ thresh_q = 70
 block_size = 21
 block_center = 10
 
-img_out = os.path.join(HOME, 'img_out/NCOMMS_rev', 'res_train_{}_test_ISA_run4_M4M5_minimap'.format(train_dataset))
+# img_out = os.path.join(HOME, 'img_out/NCOMMS_rev', 'res_train_{}_test_ISA_run4_M4M5_minimap'.format(train_dataset))
+img_out = '/home/adrian/NCOMMS_revision/images/TEST1'
 if not os.path.exists(img_out):
     os.makedirs(img_out, exist_ok=True)
 
@@ -80,8 +90,8 @@ if not os.path.exists(img_out):
 ########################################################################################################################
 dfs = {}
 for test_dataset in test_datasets:
-    # path = os.path.join(results_dir, 'res_train_{}_test_{}_q{}.tsv'.format(train_dataset, test_dataset, thresh_q))
-    path = os.path.join(results_dir, 'res_train_{}_test_{}_minimap.tsv'.format(train_dataset, test_dataset))
+    # path = os.path.join(mAFiA_source_dir, 'res_train_{}_test_{}_q{}.tsv'.format(train_dataset, test_dataset, thresh_q))
+    path = os.path.join(mAFiA_source_dir, 'res_train_{}_test_{}_minimap.tsv'.format(train_dataset, test_dataset))
     this_df = pd.read_csv(path, sep='\t').rename(columns={'Unnamed: 0': 'index'})
     dfs[test_dataset] = this_df
     # dfs[test_dataset] = this_df[this_df['ref_motif']==this_df['pred_motif']]
@@ -94,6 +104,11 @@ for test_ds in test_datasets:
     for motif in list(contig_motifs.values()):
         ds_pattern_modProbs[test_ds][motif] = df[df['ref_motif']==motif]['mod_prob'].values
 
+sample_sizes = {f'{ds_names[k]}_{kk}': len(vv) for k, v in ds_pattern_modProbs.items() for kk, vv in v.items()}
+with open(os.path.join(img_out, 'sample_counts.tsv'), 'w') as h:
+    for k, v in sample_sizes.items():
+        h.write(f'{k}\t{v}\n')
+
 ########################################################################################################################
 ### vlnplot ############################################################################################################
 ########################################################################################################################
@@ -101,7 +116,7 @@ num_rows = 2
 num_cols = 1
 xtick_pos = [1, 2]
 colors = ['pink', 'cyan']
-fig_vlnplot, axs = plt.subplots(nrows=num_rows, ncols=num_cols, figsize=(3*cm, 5*cm))
+fig_vlnplot, axs = plt.subplots(nrows=num_rows, ncols=num_cols, figsize=(3*cm, 4.5*cm))
 for row_ind, test_ds in enumerate(test_datasets):
     mod_probs = [ds_pattern_modProbs[test_ds][motif] for motif in list(contig_motifs.values())]
     ax = axs[row_ind]
@@ -111,7 +126,7 @@ for row_ind, test_ds in enumerate(test_datasets):
         pc.set_edgecolor('black')
         pc.set_alpha(1)
 
-    ax.set_xticks(xtick_pos, contig_motifs.values())
+    ax.set_xticks(xtick_pos, [m.replace('T', 'U') for m in contig_motifs.values()])
 
     # if row_ind==(num_rows-1):
         # ax.set_xlabel('Aligned pattern')
@@ -122,16 +137,14 @@ for row_ind, test_ds in enumerate(test_datasets):
 
     ax.set_xlim([0.5, 2.5])
     ax.set_ylim([-0.05, 1.05])
-fig_vlnplot.savefig(os.path.join(img_out, f'vlnplot_q{thresh_q}.{FMT}'), **fig_kwargs)
+fig_vlnplot.savefig(os.path.join(img_out, f'vlnplot.{FMT}'), **fig_kwargs)
 
 ########################################################################################################################
 ### parse CHEUI output #################################################################################################
 ########################################################################################################################
-CHEUI_output_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/CHEUI/oligo'
-
 CHEUI_pattern_modProbs = {}
 for test_ds in test_datasets:
-    df = pd.read_csv(os.path.join(CHEUI_output_dir, test_ds, 'm6A/read_level_m6A_predictions.txt'), sep='\t', names=['segment', 'mod_prob', 'rep'])
+    df = pd.read_csv(os.path.join(CHEUI_source_dir, test_ds, 'm6A/read_level_m6A_predictions.txt'), sep='\t', names=['segment', 'mod_prob', 'rep'])
     CHEUI_pattern_modProbs[test_ds] = {}
     mod_probs = df['mod_prob'].values
     segs = np.array([seg.split('_')[3] for seg in df['segment'].values])
@@ -141,13 +154,11 @@ for test_ds in test_datasets:
 ########################################################################################################################
 ### parse m6Anet output ################################################################################################
 ########################################################################################################################
-m6Anet_output_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/m6Anet/oligo'
-
 m6Anet_pattern_modProbs = {}
 for test_ds in test_datasets:
     m6Anet_pattern_modProbs[test_ds] = {}
-    df_indiv = pd.read_csv(os.path.join(m6Anet_output_dir, test_ds, 'data.indiv_proba.csv'))
-    df_site = pd.read_csv(os.path.join(m6Anet_output_dir, test_ds, 'data.site_proba.csv'))
+    df_indiv = pd.read_csv(os.path.join(m6Anet_source_dir, test_ds, 'data.indiv_proba.csv'))
+    df_site = pd.read_csv(os.path.join(m6Anet_source_dir, test_ds, 'data.site_proba.csv'))
     df_indiv_central = df_indiv[df_indiv['transcript_position'] % 21 == 10]
 
     kmers = []
