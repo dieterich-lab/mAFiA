@@ -33,26 +33,26 @@ def get_sample_sizes(nts, df_labels):
 clf_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/MAFIA_classifiers/ISA-WUE'
 labels = get_labels()
 
-motif_sample_sizes = {}
-for clf_path in glob(os.path.join(clf_dir, '*.pkl')):
-    with open(clf_path, 'rb') as h_clf:
-        clf = pickle.load(h_clf)
-        print(clf.motif)
-        motif_sample_sizes[clf.motif] = {}
-
-        motif_sample_sizes[clf.motif]['train'] = {}
-        num_train_unm, num_train_mod = get_sample_sizes(clf.train_nts, labels)
-        motif_sample_sizes[clf.motif]['train']['UNM'] = num_train_unm
-        motif_sample_sizes[clf.motif]['train']['MOD'] = num_train_mod
-
-        motif_sample_sizes[clf.motif]['validate'] = {}
-        num_validate_unm, num_validate_mod = get_sample_sizes(clf.test_nts, labels)
-        motif_sample_sizes[clf.motif]['validate']['UNM'] = num_validate_unm
-        motif_sample_sizes[clf.motif]['validate']['MOD'] = num_validate_mod
-
-df_sample_sizes = pd.DataFrame([[motif] + [vv for k, v in counts.items() for kk, vv in v.items()] for motif, counts in motif_sample_sizes.items()])
-df_sample_sizes.rename(columns=dict(zip(range(5), ['motif', 'train_unm', 'train_mod', 'validate_unm', 'validate_mod'])), inplace=True)
-df_sample_sizes.to_csv(os.path.join(img_out, 'oligo_train_validate_sample_sizes.tsv'), sep='\t', index=False)
+# motif_sample_sizes = {}
+# for clf_path in glob(os.path.join(clf_dir, '*.pkl')):
+#     with open(clf_path, 'rb') as h_clf:
+#         clf = pickle.load(h_clf)
+#         print(clf.motif)
+#         motif_sample_sizes[clf.motif] = {}
+#
+#         motif_sample_sizes[clf.motif]['train'] = {}
+#         num_train_unm, num_train_mod = get_sample_sizes(clf.train_nts, labels)
+#         motif_sample_sizes[clf.motif]['train']['UNM'] = num_train_unm
+#         motif_sample_sizes[clf.motif]['train']['MOD'] = num_train_mod
+#
+#         motif_sample_sizes[clf.motif]['validate'] = {}
+#         num_validate_unm, num_validate_mod = get_sample_sizes(clf.test_nts, labels)
+#         motif_sample_sizes[clf.motif]['validate']['UNM'] = num_validate_unm
+#         motif_sample_sizes[clf.motif]['validate']['MOD'] = num_validate_mod
+#
+# df_sample_sizes = pd.DataFrame([[motif] + [vv for k, v in counts.items() for kk, vv in v.items()] for motif, counts in motif_sample_sizes.items()])
+# df_sample_sizes.rename(columns=dict(zip(range(5), ['motif', 'train_unm', 'train_mod', 'validate_unm', 'validate_mod'])), inplace=True)
+# df_sample_sizes.to_csv(os.path.join(img_out, 'oligo_train_validate_sample_sizes.tsv'), sep='\t', index=False)
 
 ########################################################################################################################
 ### reschuffle #########################################################################################################
