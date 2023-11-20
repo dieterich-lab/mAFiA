@@ -39,7 +39,7 @@ def main():
     site_writer = SiteWriter(out_path=os.path.join(args.out_dir, 'mAFiA.sites.bed'))
     bam_writer = BAMWriter(in_bam_path=args.bam_file, out_bam_path=os.path.join(args.out_dir, 'mAFiA.reads.bam'))
 
-    df_mod = pd.read_csv(args.mod_file, sep='\t')
+    df_mod = pd.read_csv(args.mod_file, sep='\t', dtype={'chrom': str})
     for _, row in tqdm(list(df_mod.iterrows())):
         this_mRNA_site = mRNASite(row, reference)
         if this_mRNA_site.ref_5mer not in motif_classifiers.keys():
