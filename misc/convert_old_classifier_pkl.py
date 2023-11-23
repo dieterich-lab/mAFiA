@@ -6,8 +6,8 @@ import pickle
 from mAFiA.feature_classifiers import MotifClassifier
 from mAFiA.data_containers import Nucleotide
 
-clf_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/MAFIA_classifiers/ISA-WUE'
-out_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/MAFIA_classifiers/ISA-WUE_new'
+clf_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/MAFIA_classifiers/_WUE'
+out_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/MAFIA_classifiers/WUE'
 os.makedirs(out_dir, exist_ok=True)
 
 for clf_path in glob(os.path.join(clf_dir, '*.pkl')):
