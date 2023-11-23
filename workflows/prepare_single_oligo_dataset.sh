@@ -30,8 +30,8 @@ echo "Creating softlinks from ${LOC}"
 for f in ${LOC}/**/*.fast5
 do
   ln -s $f
-#done
-#cd ${WORKSPACE}
+done
+cd ${WORKSPACE}
 
 ### check links ###
 #for my_link in ${READS}/*.fast5
