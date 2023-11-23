@@ -64,7 +64,7 @@ python3 -u ${HOME}/git/mAFiA/RODAN/basecall.py \
 --fast5dir ${READS} \
 --model ${MODEL} \
 --batchsize 4096 \
-> ${FASTA}
+--outdir ${WORKSPACE}
 
 ### align with spomelette ###
 #echo "Basecalling finished. Now aligning ${FASTA} to ${REF}"
