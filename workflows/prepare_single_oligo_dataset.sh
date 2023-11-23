@@ -56,16 +56,14 @@ do
 #for f in ${LOC}/**/*.pod5; do pod5 convert to_fast5 $f --output ${READS}; done
 
 #### basecall with Rodan IVT ###
-source ${HOME}/git/renata/virtualenv/bin/activate
+source ${HOME}/git/mAFiA/mafia-venv/bin/activate
 
 echo "Basecalling ${READS}"
 srun --partition=gpu --gres=gpu:turing:1 --cpus-per-task=8 --mem-per-cpu=8GB \
-python3 -u ${HOME}/git/renata/basecall_viterbi.py \
+python3 -u ${HOME}/git/mAFiA/RODAN/basecall.py \
 --fast5dir ${READS} \
---arch ${ARCH} \
 --model ${MODEL} \
---batchsize 2048 \
---decoder viterbi \
+--batchsize 4096 \
 > ${FASTA}
 
 ### align with spomelette ###
