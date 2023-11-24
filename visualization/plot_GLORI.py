@@ -23,8 +23,8 @@ fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
 source_data_dir = '/home/adrian/NCOMMS_revision/source_data/HEK293/WT'
-chrs = [str(i) for i in range(2, 8)] + ['18']
-img_out = '/home/adrian/NCOMMS_revision/images/HEK293'
+chrs = [str(i) for i in range(2, 11)] + ['13', '14', '18', '20']
+img_out = '/home/adrian/NCOMMS_revision/images/GLORI'
 os.makedirs(img_out, exist_ok=True)
 
 glori_path = '/home/adrian/Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv'
@@ -109,9 +109,60 @@ fig_cov_stoichio.savefig(os.path.join(img_out, f'coverage_stoichiometry.{FMT}'),
 
 
 ########################################################################################################################
+### correlation vs. coverage ###########################################################################################
+########################################################################################################################
+coverage_corr = []
+for this_thresh_cov in range(10, 100):
+    this_df_mAFiA_thresh = df_mAFiA[df_mAFiA['coverage'] >= this_thresh_cov]
+    this_df_merged = pd.merge(this_df_mAFiA_thresh, df_glori, on=['chrom', 'chromStart'], suffixes=('_mafia', '_glori'))
+    this_corr = np.corrcoef(this_df_merged[['modRatio_mafia', 'modRatio_glori']].values.T)[0, 1]
+    coverage_corr.append((this_thresh_cov, this_corr))
+coverage_corr = np.vstack(coverage_corr).T
+
+fig_cov_corr, ax = plt.subplots(nrows=1, ncols=1, figsize=(5*cm, 5*cm))
+ax.plot(coverage_corr[0], coverage_corr[1])
+ax.set_xlabel('Min. Coverage')
+ax.set_ylabel('Corr. with GLORI')
+fig_cov_corr.savefig(os.path.join(img_out, f'cov_corr.{FMT}'), **fig_kwargs)
+
+########################################################################################################################
+### correlation vs. stoichiometry ######################################################################################
+########################################################################################################################
+thresh_coverage = 60
+df_mAFiA_thresh = df_mAFiA[df_mAFiA['coverage'] >= thresh_coverage]
+df_merged = pd.merge(df_mAFiA_thresh, df_glori, on=['chrom', 'chromStart'], suffixes=('_mafia', '_glori'))
+
+bin_width = 10
+stoichio_lbins = np.arange(10, 100, bin_width)
+bin_centers = (stoichio_lbins + stoichio_lbins + bin_width) / 2
+
+stoichio_rms = []
+for this_lbin in stoichio_lbins:
+    sub_df_merged = df_merged[(df_merged['modRatio_glori']>=this_lbin) * (df_merged['modRatio_glori']<(this_lbin+bin_width))]
+    # mafia_normed = np.float64(sub_df_merged['modRatio_mafia'].values)
+    # mafia_normed -= mafia_normed.mean()
+    # mafia_normed /= mafia_normed.std()
+    # glori_normed = np.float64(sub_df_merged['modRatio_glori'].values)
+    # glori_normed -= glori_normed.mean()
+    # glori_normed /= glori_normed.std()
+    # stoichio_corr.append(np.corrcoef(mafia_normed, glori_normed)[0, 1])
+    stoichio_rms.append(np.sqrt(((sub_df_merged['modRatio_mafia'] - sub_df_merged['modRatio_glori'])**2).mean()))
+
+xticks = list(stoichio_lbins)
+xticks.append(stoichio_lbins[-1]+bin_width)
+
+fig_stoichio_rms, ax = plt.subplots(nrows=1, ncols=1, figsize=(5*cm, 5*cm))
+ax.plot(bin_centers, stoichio_rms)
+ax.set_xticks(xticks)
+ax.set_xlim([10, 100])
+ax.set_xlabel('Stoichiometry Range')
+ax.set_ylabel('RMS mAFiA-GLORI')
+fig_stoichio_rms.savefig(os.path.join(img_out, f'stoichio_RMS.{FMT}'), **fig_kwargs)
+
+
+########################################################################################################################
 ### venn diagram #######################################################################################################
 ########################################################################################################################
-thresh_coverage = 50
 thresh_stoichio = 80
 
 def draw_venn_diagram(dict_dfs, thresh_stoichiometry=80):
@@ -141,6 +192,8 @@ fig_venn.savefig(os.path.join(img_out, f'venn_diagram.{FMT}'), **fig_kwargs)
 ########################################################################################################################
 ### correlation ########################################################################################################
 ########################################################################################################################
+thresh_coverage = 60
+df_mAFiA_thresh = df_mAFiA[df_mAFiA['coverage'] >= thresh_coverage]
 df_merged = pd.merge(df_mAFiA_thresh, df_glori, on=['chrom', 'chromStart'], suffixes=('_mafia', '_glori'))
 # df_merged_sel = df_merged[df_merged['P_adjust'] < 1E-10]
 df_merged_sel = df_merged
@@ -150,24 +203,28 @@ motifs = [pair[0] for pair in motif_counts]
 total_num_sites = df_merged_sel.shape[0]
 total_corr = np.corrcoef(df_merged_sel['modRatio_glori'], df_merged_sel['modRatio_mafia'])[0, 1]
 
-ordered_motifs = ['GGACT', 'GGACA', 'GAACT', 'AGACT', 'GGACC', 'TGACT']
-num_rows = 3
-num_cols = 2
+# ordered_motifs = ['GGACT', 'GGACA', 'GAACT', 'AGACT', 'GGACC', 'TGACT']
 
-fig_corr, axs = plt.subplots(nrows=num_rows, ncols=num_cols, figsize=(4*cm, 6*cm))
+num_motifs = 9
+ordered_motifs = [k for k, v in Counter(df_merged['ref5mer']).most_common()][:num_motifs]
+
+num_rows = 3
+num_cols = 3
+fig_corr, axs = plt.subplots(nrows=num_rows, ncols=num_cols, figsize=(7*cm, 7*cm))
 for ind, motif in enumerate(ordered_motifs):
     ax = axs[ind // num_cols, ind % num_cols]
     sub_df = df_merged_sel[df_merged_sel['ref5mer'] == motif]
     corr = np.corrcoef(sub_df['modRatio_glori'], sub_df['modRatio_mafia'])[0, 1]
     # plt.subplot(num_rows, num_cols, ind + 1)
-    label = f"{motif.replace('T', 'U')}\n{corr:.2f}"
+    # label = f"{motif.replace('T', 'U')}\n{corr:.2f}"
+    label = f"{motif.replace('T', 'U')}"
     ax.scatter(sub_df['modRatio_glori'], sub_df['modRatio_mafia'], s=0.1)
     # ax.set_title(f'{motif}, {corr:.2f}', x=0.26, y=1.0, pad=-15, backgroundcolor='black', color='white')
     # ax.set_title(f"{motif.replace('T', 'U')}", y=0.85)
     ax.set_xlim([-5, 105])
     ax.set_ylim([-5, 105])
     # ax.legend(loc='upper left', handlelength=0.1)
-    ax.text(0, 75, label)
+    ax.text(0, 85, label)
 
     ax.set_xticks(range(0, 101, 25))
     ax.set_yticks(range(0, 101, 25))
