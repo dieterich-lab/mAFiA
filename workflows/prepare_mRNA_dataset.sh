@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 shopt -s globstar
 
-ARCH=${HOME}/git/renata/rnaarch
+#ARCH=${HOME}/git/renata/rnaarch
 MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 
 ### new HEK293 #########################################################################################################
@@ -11,8 +11,9 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 #DATASET=75_WT_25_IVT
 #DATASET=100_WT_0_IVT
 #DATASET=P2_WT
+DATASET=Mettl3-KO
 
-#WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/HEK293/${DATASET}
+WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/HEK293/${DATASET}
 
 ########################################################################################################################
 
@@ -25,7 +26,7 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 
 ########################################################################################################################
 #DATASET=40-26
-DATASET=40-27
+#DATASET=40-27
 #DATASET=40-28
 #DATASET=40-29
 #DATASET=40-30
@@ -34,8 +35,8 @@ DATASET=40-27
 #DATASET=40-33
 #DATASET=40-34
 
-WORKSPACE=/prj/Dewenter_TAC_Backs_lab/achan/${DATASET}
-DATA_DIR=/prj/Dewenter_TAC_Backs_lab/raw_data/Nanopore_dRNA/Cologne
+#WORKSPACE=/prj/Dewenter_TAC_Backs_lab/achan/${DATASET}
+#DATA_DIR=/prj/Dewenter_TAC_Backs_lab/raw_data/Nanopore_dRNA/Cologne
 ########################################################################################################################
 #mkdir -p ${WORKSPACE}
 #cd ${WORKSPACE}
@@ -50,18 +51,20 @@ DATA_DIR=/prj/Dewenter_TAC_Backs_lab/raw_data/Nanopore_dRNA/Cologne
 ########################################################################################################################
 ### basecall large number of reads #####################################################################################
 ########################################################################################################################
-source ${HOME}/git/renata/virtualenv/bin/activate
-#
+#source ${HOME}/git/renata/virtualenv/bin/activate
+#source ${HOME}/git/mAFiA/mafia-venv/bin/activate
+
 #FAST5_DIR=${DATA_DIR}/${DATASET}/*/fast5_pass
-#
-#FILENAME_PREFIX=fast5_paths_part
-#ls -1 ${FAST5_DIR}/*.fast5 > ${WORKSPACE}/fast5_paths_all
-#split -a3 -l10 -d ${WORKSPACE}/fast5_paths_all ${WORKSPACE}/${FILENAME_PREFIX}
-#
-#NUM_ARRAYS=""
-#for f in ${WORKSPACE}/fast5_paths_part*; do ff=${f##*part}; NUM_ARRAYS+="${ff},"; done
-#NUM_ARRAYS=${NUM_ARRAYS%,*}
-#sbatch --array=${NUM_ARRAYS} --export=ALL,WORKSPACE=${WORKSPACE},FILENAME_PREFIX=${FILENAME_PREFIX},ARCH=${ARCH},MODEL=${MODEL} ${HOME}/git/mAFiA_dev/workflows/array_basecaller.sh
+FAST5_DIR=${WORKSPACE}/fast5
+
+FILENAME_PREFIX=fast5_paths_part
+ls -1 ${FAST5_DIR}/*.fast5 > ${WORKSPACE}/fast5_paths_all
+split -a3 -l10 -d ${WORKSPACE}/fast5_paths_all ${WORKSPACE}/${FILENAME_PREFIX}
+
+NUM_ARRAYS=""
+for f in ${WORKSPACE}/fast5_paths_part*; do ff=${f##*part}; NUM_ARRAYS+="${ff},"; done
+NUM_ARRAYS=${NUM_ARRAYS%,*}
+sbatch --array=${NUM_ARRAYS} --export=ALL,WORKSPACE=${WORKSPACE},FILENAME_PREFIX=${FILENAME_PREFIX},ARCH=${ARCH},MODEL=${MODEL} ${HOME}/git/mAFiA_dev/workflows/array_basecaller.sh
 
 #for f in ${WORKSPACE}/part*.fasta; do echo $f; grep '>' $f | wc -l; done
 
