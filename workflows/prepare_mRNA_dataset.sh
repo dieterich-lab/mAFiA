@@ -95,6 +95,14 @@ minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF_GENOME} ${WORKSPACE
 samtools view -bST ${REF_GENOME} -q50 ${SAM_GENOME} | samtools sort - > ${BAM_GENOME}
 samtools index ${BAM_GENOME}
 
+### split bam file ###
+for chr in {1..22}
+do
+#  mkdir chr${chr}
+#  samtools view -h genome_filtered_q50.bam $chr | samtools sort - > chr${chr}/sorted.chr${chr}.bam
+  samtools index chr${chr}/sorted.chr${chr}.bam
+done
+
 ########################################################################################################################
 #### align to transcriptome ############################################################################################
 ########################################################################################################################
