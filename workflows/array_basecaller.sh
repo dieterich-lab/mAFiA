@@ -24,6 +24,6 @@ python3 ${HOME}/git/mAFiA_dev/RODAN/basecall.py \
 --list_filenames ${LIST_FILENAMES} \
 --model ${MODEL} \
 --batchsize 4096 \
---outdir
+--outdir ${OUTDIR}
 
 rm ${LIST_FILENAMES}
