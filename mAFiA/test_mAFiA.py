@@ -42,7 +42,7 @@ def main():
     else:
         test_container = mRNADataContainer('test', args.bam_file, args.fast5_dir)
         test_container.build_dict_read_ref()
-        ivt_backbone = BackboneNetwork(args.backbone_model_path, args.extraction_layer, args.feature_width)
+        ivt_backbone = BackboneNetwork(args.backbone_model_path, args.extraction_layer, args.feature_width, args.batchsize)
 
     reference = load_genome_reference(args.ref_file)
     motif_classifiers = load_motif_classifiers(args.classifier_model_dir)
