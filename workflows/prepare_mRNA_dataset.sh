@@ -78,8 +78,8 @@ fi
 ########################################################################################################################
 #### align to genome ###################################################################################################
 ########################################################################################################################
-#REF_GENOME=/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa
-REF_GENOME=/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa
+REF_GENOME=/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa
+#REF_GENOME=/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa
 SAM_GENOME=${WORKSPACE}/genome_mapped.sam
 BAM_GENOME=${WORKSPACE}/genome_filtered_q50.bam
 
@@ -88,8 +88,8 @@ module load minimap2
 minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF_GENOME} ${WORKSPACE}/basecall_merged.fasta > ${SAM_GENOME}
 
 ### check stats and accuracy ###
-samtools flagstats ${SAM_GENOME} > genome_qc.txt
-${HOME}/git/renata/accuracy.py ${SAM_GENOME} ${REF_GENOME} >> genome_qc.txt
+#samtools flagstats ${SAM_GENOME} > genome_qc.txt
+#${HOME}/git/renata/accuracy.py ${SAM_GENOME} ${REF_GENOME} >> genome_qc.txt
 
 #### Convert to BAM and index ###
 samtools view -bST ${REF_GENOME} -q50 ${SAM_GENOME} | samtools sort - > ${BAM_GENOME}
