@@ -6,17 +6,19 @@ from tqdm import tqdm
 import pandas as pd
 
 # ref_file = '/home/adrian/Data/GRCh38_102/GRCh38_102.fa'
-ref_file = '/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa'
+# ref_file = '/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa'
+ref_file = '/home/adrian/Data/genomes/Arabidopsis/TAIR10_chr_all.fasta'
+# out_dir = '/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/site_annotations'
+out_dir = '/home/adrian/Data/genomes/Arabidopsis'
+os.makedirs(out_dir, exist_ok=True)
+
 ref = {}
 for record in SeqIO.parse(ref_file, 'fasta'):
     if (record.id.isnumeric()) or (record.id in ['X', 'Y', 'MT']):
         ref[record.id] = str(record.seq)
 
 all_chroms = [str(xx) for xx in sorted([int(x) for x in ref.keys() if x.isnumeric()])]
-all_chroms.extend(['X', 'Y', 'MT'])
-
-out_dir = '/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/site_annotations'
-os.makedirs(out_dir, exist_ok=True)
+# all_chroms.extend(['X', 'Y', 'MT'])
 
 DRACH_motifs = [
     'AAACA',
@@ -70,4 +72,5 @@ for this_chrom in all_chroms:
     this_chrom_df = this_chrom_df[fields]
 
     print(f'Writing out {len(this_chrom_df)} sites')
-    this_chrom_df.to_csv(os.path.join(out_dir, f'DRACH.GRCh38_102.chr{this_chrom}.bed'), sep='\t', index=False, header=True)
+    # this_chrom_df.to_csv(os.path.join(out_dir, f'DRACH.GRCh38_102.chr{this_chrom}.bed'), sep='\t', index=False, header=True)
+    this_chrom_df.to_csv(os.path.join(out_dir, f'DRACH.chr{this_chrom}.bed'), sep='\t', index=False, header=True)
