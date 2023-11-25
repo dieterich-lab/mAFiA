@@ -29,7 +29,7 @@ class TestArgsParser(ArgsParser):
         self.add_argument('--bam_file')
         self.add_argument('--fast5_dir')
         self.add_argument('--out_dir')
-
+        self.add_argument('--batchsize')
 
 class TrainArgsParser(ArgsParser):
     def __init__(self):
