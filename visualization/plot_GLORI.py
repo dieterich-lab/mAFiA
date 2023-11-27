@@ -205,42 +205,47 @@ total_corr = np.corrcoef(df_merged_sel['modRatio_glori'], df_merged_sel['modRati
 
 # ordered_motifs = ['GGACT', 'GGACA', 'GAACT', 'AGACT', 'GGACC', 'TGACT']
 
-num_motifs = 9
-ordered_motifs = [k for k, v in Counter(df_merged['ref5mer']).most_common()][:num_motifs]
+# num_motifs = 6
+# num_rows = 2
+# num_cols = 3
 
-num_rows = 3
-num_cols = 3
-fig_corr, axs = plt.subplots(nrows=num_rows, ncols=num_cols, figsize=(7*cm, 7*cm))
-for ind, motif in enumerate(ordered_motifs):
-    ax = axs[ind // num_cols, ind % num_cols]
-    sub_df = df_merged_sel[df_merged_sel['ref5mer'] == motif]
-    corr = np.corrcoef(sub_df['modRatio_glori'], sub_df['modRatio_mafia'])[0, 1]
-    # plt.subplot(num_rows, num_cols, ind + 1)
-    # label = f"{motif.replace('T', 'U')}\n{corr:.2f}"
-    label = f"{motif.replace('T', 'U')}"
-    ax.scatter(sub_df['modRatio_glori'], sub_df['modRatio_mafia'], s=0.1)
-    # ax.set_title(f'{motif}, {corr:.2f}', x=0.26, y=1.0, pad=-15, backgroundcolor='black', color='white')
-    # ax.set_title(f"{motif.replace('T', 'U')}", y=0.85)
-    ax.set_xlim([-5, 105])
-    ax.set_ylim([-5, 105])
-    # ax.legend(loc='upper left', handlelength=0.1)
-    ax.text(0, 85, label)
+def scatter_plot_mafia_vs_glori(num_motifs, num_rows, num_cols, plot_name, figsize):
+    ordered_motifs = [k for k, v in Counter(df_merged['ref5mer']).most_common()][:num_motifs]
+    fig_corr, axs = plt.subplots(nrows=num_rows, ncols=num_cols, figsize=figsize)
+    for ind, motif in enumerate(ordered_motifs):
+        ax = axs[ind // num_cols, ind % num_cols]
+        sub_df = df_merged_sel[df_merged_sel['ref5mer'] == motif]
+        # corr = np.corrcoef(sub_df['modRatio_glori'], sub_df['modRatio_mafia'])[0, 1]
+        # plt.subplot(num_rows, num_cols, ind + 1)
+        # label = f"{motif.replace('T', 'U')}\n{corr:.2f}"
+        label = f"{motif.replace('T', 'U')}"
+        if len(sub_df):
+            ax.scatter(sub_df['modRatio_glori'], sub_df['modRatio_mafia'], s=0.1)
+        # ax.set_title(f'{motif}, {corr:.2f}', x=0.26, y=1.0, pad=-15, backgroundcolor='black', color='white')
+        # ax.set_title(f"{motif.replace('T', 'U')}", y=0.85)
+        ax.set_xlim([-5, 105])
+        ax.set_ylim([-5, 105])
+        # ax.legend(loc='upper left', handlelength=0.1)
+        ax.text(0, 85, label)
 
-    ax.set_xticks(range(0, 101, 25))
-    ax.set_yticks(range(0, 101, 25))
-
-    if ind%num_cols == 0:
-        ax.set_yticks(range(0, 101, 25))
-    else:
-        ax.set_yticks([])
-    if ind>=(num_rows-1)*num_cols:
         ax.set_xticks(range(0, 101, 25))
-    else:
-        ax.set_xticks([])
+        ax.set_yticks(range(0, 101, 25))
 
-    # if ind%num_cols == 0:
-    #     ax.set_ylabel('mAFiA')
-    # if ind>=(num_rows-1)*num_cols:
-    #     ax.set_xlabel('GLORI')
-# fig_corr.suptitle(f'HEK293 WT\nTotal {total_num_sites} sites\nCorr. {total_corr:.2f}')
-fig_corr.savefig(os.path.join(img_out, f'corr_mAFiA_GLORI_DRACH.{FMT}'), **fig_kwargs)
+        if ind%num_cols == 0:
+            ax.set_yticks(range(0, 101, 25))
+        else:
+            ax.set_yticks([])
+        if ind>=(num_rows-1)*num_cols:
+            ax.set_xticks(range(0, 101, 25))
+        else:
+            ax.set_xticks([])
+
+        # if ind%num_cols == 0:
+        #     ax.set_ylabel('mAFiA')
+        # if ind>=(num_rows-1)*num_cols:
+        #     ax.set_xlabel('GLORI')
+    # fig_corr.suptitle(f'HEK293 WT\nTotal {total_num_sites} sites\nCorr. {total_corr:.2f}')
+    fig_corr.savefig(os.path.join(img_out, plot_name), **fig_kwargs)
+
+scatter_plot_mafia_vs_glori(num_motifs=6, num_rows=2, num_cols=3, plot_name=f'corr_mAFiA_GLORI_DRACH_6motifs.{FMT}', figsize=(7.5*cm, 5*cm))
+scatter_plot_mafia_vs_glori(num_motifs=18, num_rows=3, num_cols=6, plot_name=f'corr_mAFiA_GLORI_DRACH_18motifs.{FMT}', figsize=(15*cm, 8*cm))
