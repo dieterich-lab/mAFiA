@@ -40,8 +40,14 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 ########################################################################################################################
 
 #DATASET=col0
-DATASET=vir1
-WORKSPACE=/scratch/achan/Arabidopsis_thaliana/${DATASET}
+#DATASET=vir1
+#WORKSPACE=/scratch/achan/Arabidopsis_thaliana/${DATASET}
+
+########################################################################################################################
+
+#DATASET=WT
+DATASET=IME4_KO
+WORKSPACE=/scratch/achan/Saccharomyces_cerevisiae/${DATASET}
 
 ########################################################################################################################
 
@@ -87,7 +93,8 @@ fi
 ########################################################################################################################
 #REF_GENOME=/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa
 #REF_GENOME=/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa
-REF_GENOME='/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/Arabidopsis_thaliana/reference/TAIR10_chr_all.fasta'
+#REF_GENOME='/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/Arabidopsis_thaliana/reference/TAIR10_chr_all.fasta'
+REF_GENOME='/biodb/genomes/saccharomyces_cerevisiae/R64-1-1_96/R64-1-1_96.fa'
 SAM_GENOME=${WORKSPACE}/genome_mapped.sam
 BAM_GENOME=${WORKSPACE}/genome_filtered_q50.bam
 
