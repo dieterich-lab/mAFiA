@@ -11,9 +11,9 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 #DATASET=75_WT_25_IVT
 #DATASET=100_WT_0_IVT
 #DATASET=P2_WT
-DATASET=Mettl3-KO
+#DATASET=Mettl3-KO
 
-WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/HEK293/${DATASET}
+#WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/HEK293/${DATASET}
 
 ########################################################################################################################
 
@@ -38,6 +38,13 @@ WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/HEK293/${DATASE
 #WORKSPACE=/prj/Dewenter_TAC_Backs_lab/achan/${DATASET}
 #DATA_DIR=/prj/Dewenter_TAC_Backs_lab/raw_data/Nanopore_dRNA/Cologne
 ########################################################################################################################
+
+#DATASET=col0
+DATASET=vir1
+WORKSPACE=/scratch/achan/Arabidopsis_thaliana/${DATASET}
+
+########################################################################################################################
+
 #mkdir -p ${WORKSPACE}
 #cd ${WORKSPACE}
 
@@ -78,8 +85,9 @@ fi
 ########################################################################################################################
 #### align to genome ###################################################################################################
 ########################################################################################################################
-REF_GENOME=/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa
+#REF_GENOME=/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa
 #REF_GENOME=/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa
+REF_GENOME='/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/Arabidopsis_thaliana/reference/TAIR10_chr_all.fasta'
 SAM_GENOME=${WORKSPACE}/genome_mapped.sam
 BAM_GENOME=${WORKSPACE}/genome_filtered_q50.bam
 
@@ -88,18 +96,19 @@ module load minimap2
 minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF_GENOME} ${WORKSPACE}/basecall_merged.fasta > ${SAM_GENOME}
 
 ### check stats and accuracy ###
-#samtools flagstats ${SAM_GENOME} > genome_qc.txt
-#${HOME}/git/renata/accuracy.py ${SAM_GENOME} ${REF_GENOME} >> genome_qc.txt
+samtools flagstats ${SAM_GENOME} > genome_qc.txt
+${HOME}/git/renata/accuracy.py ${SAM_GENOME} ${REF_GENOME} >> genome_qc.txt
 
 #### Convert to BAM and index ###
 samtools view -bST ${REF_GENOME} -q50 ${SAM_GENOME} | samtools sort - > ${BAM_GENOME}
 samtools index ${BAM_GENOME}
 
 ### split bam file ###
-for chr in {1..22}
+#for chr in {1..22}
+for chr in {1..5}
 do
-#  mkdir chr${chr}
-#  samtools view -h genome_filtered_q50.bam $chr | samtools sort - > chr${chr}/sorted.chr${chr}.bam
+  mkdir chr${chr}
+  samtools view -h genome_filtered_q50.bam $chr | samtools sort - > chr${chr}/sorted.chr${chr}.bam
   samtools index chr${chr}/sorted.chr${chr}.bam
 done
 
