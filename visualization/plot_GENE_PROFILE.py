@@ -33,7 +33,6 @@ def load_genome_reference(ref_file, chrs):
 
 ref_file = '/home/adrian/Data/GRCh38_102/GRCh38_102.fa'
 annot_file = '/home/adrian/Data/GRCh38_102/GRCh38_102.bed'
-bed_file = '/home/adrian/NCOMMS_revision/source_data/GENE_PROFILE/merged.mAFiA.sites.bed'
 transcript_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/HEK293/100_WT_0_IVT/transcriptome_filtered_q50.bam'
 bam_file = '/home/adrian/NCOMMS_revision/source_data/GENE_PROFILE/merged.mAFiA.reads.bam'
 img_out = '/home/adrian/NCOMMS_revision/images/GENE_PROFILE'
@@ -42,14 +41,14 @@ img_out = '/home/adrian/NCOMMS_revision/images/GENE_PROFILE'
 ### histogram of p(m6A) at single sites ################################################################################
 ########################################################################################################################
 sel_chrom = '6'
-chromStart = 31815543
-chromEnd = 31817946
+sel_chromStart = 31815543
+sel_chromEnd = 31817946
 
 ref = load_genome_reference(ref_file, [sel_chrom])
 
 ref_pos_mod_probs = {}
 with pysam.AlignmentFile(bam_file, 'rb') as bam:
-    for col in bam.pileup(sel_chrom, chromStart, chromEnd, truncate=True):
+    for col in bam.pileup(sel_chrom, sel_chromStart, sel_chromEnd, truncate=True):
         if ref[sel_chrom][col.pos]=='A':
             # print("\ncoverage at base %s = %s" % (col.pos, col.n))
 
@@ -87,36 +86,51 @@ plt.close('all')
 ########################################################################################################################
 N_BINS = 10000
 
-def calc_profile(in_df, start, end, strand='+', num_bins=N_BINS):
+def calc_profile(in_df, start, end, num_bins=N_BINS):
     break_pts = np.linspace(start, end, num_bins+1)
     site_binIndex_modRatio = []
     for _, row in in_df.iterrows():
         this_start = row['chromStart']
         this_mod_ratio = row['modRatio']
         this_bin_ind = np.where(this_start>=break_pts)[0][-1]
-        if strand == '-':
-            this_bin_ind = num_bins - this_bin_ind
         site_binIndex_modRatio.append((this_bin_ind, this_mod_ratio))
     return site_binIndex_modRatio
 
-def calc_avg_profile(in_bin_stoichios, num_bins=N_BINS):
+def calc_avg_profile(in_bin_stoichios, plot_name, num_bins=N_BINS):
     binned_avg_stoichio = np.zeros(num_bins)
     for i in range(num_bins):
         all_stoichios = [stoichio for (bin, stoichio) in in_bin_stoichios if bin == i]
         if len(all_stoichios):
-            binned_avg_stoichio[i] = np.mean(all_stoichios)
+            # binned_avg_stoichio[i] = np.max(all_stoichios)
+            binned_avg_stoichio[i] = np.median(all_stoichios)
         else:
             binned_avg_stoichio[i] = 0
     return binned_avg_stoichio
 
+def plot_chromosome_profile(bed_file, plot_name, xticks=False):
+    df_bed = pd.read_csv(bed_file, sep='\t', dtype={'chrom': str})
+    df_bed_chrom = df_bed[
+        (df_bed['chrom']==sel_chrom)
+        # * (df_bed['chromStart']>=sel_chromStart)
+        # * (df_bed['chromEnd']<sel_chromEnd)
+    ]
+    ref_len = len(ref['6'])
+    avg_profile = calc_avg_profile(calc_profile(df_bed_chrom, 0, ref_len))
 
-df_bed = pd.read_csv(bed_file, sep='\t', dtype={'chrom': str})
-df_bed_chrom = df_bed[
-    (df_bed['chrom']==sel_chrom)
-]
-ref_len = len(ref['6'])
-avg_profile = calc_avg_profile(calc_profile(df_bed_chrom, 0, ref_len))
+    plt.figure(figsize=(3*cm, 1.5*cm))
+    plt.plot(avg_profile, linewidth=0.2)
+    plt.xlim([0, N_BINS])
+    plt.ylim([0, 100])
+    if xticks:
+        plt.xticks(np.linspace(0.5, N_BINS-0.5, 4), [np.format_float_scientific(x, precision=1) for x in np.linspace(1, ref_len, 4)], rotation=90)
+        # plt.xlabel('Chromosome Position')
+    else:
+        plt.xticks(np.linspace(0.5, N_BINS - 0.5, 4), [])
+    # plt.ylabel('Median S')
+    plt.savefig(os.path.join(img_out, plot_name), **fig_kwargs)
 
+WT_bed_file = '/home/adrian/NCOMMS_revision/source_data/GENE_PROFILE/merged.mAFiA.sites.bed'
+plot_chromosome_profile(WT_bed_file, plot_name=f'avg_profile_WT_chr{sel_chrom}.{FMT}', xticks=False)
 
 
 ########################################################################################################################
@@ -164,38 +178,38 @@ avg_profile = calc_avg_profile(calc_profile(df_bed_chrom, 0, ref_len))
 ########################################################################################################################
 ### parse transcript mapping ###########################################################################################
 ########################################################################################################################
-transcriptome_file = '/home/adrian/Data/GRCh38_102/GRCh38.cdna.all.fa'
-transcriptome = {}
-for record in SeqIO.parse(transcriptome_file, 'fasta'):
-    transcriptome[record.id] = str(record.seq)
-
-def get_transcript_bin_stoichio(in_read, readPos_modProbs):
-    dict_aligned_pos = {read_pos: ref_pos for read_pos, ref_pos in in_read.get_aligned_pairs() if ref_pos is not None}
-    ref_len = len(transcriptome[in_read.reference_name])
-    bin_modProbs = []
-    for pos, prob in readPos_modProbs:
-        if pos in dict_aligned_pos.keys():
-            trans_pos = dict_aligned_pos[pos]
-            bin_ind = int((trans_pos / ref_len) * 100)
-            bin_modProbs.append((bin_ind, prob/255.0))
-    return bin_modProbs
-
-
-transcript_bin_stoichio = {}
-with pysam.AlignmentFile(bam_file, 'rb') as bam_genome:
-    with pysam.AlignmentFile(transcript_file, 'rb') as bam_transcriptome:
-        for read in tqdm(bam_genome.fetch(sel_chrom)):
-            dict_mod = read.modified_bases_forward
-            if dict_mod is not None:
-                mod_bases = dict_mod.get(('N', 0, 21891), [])
-                if len(mod_bases):
-                    # print(mod_bases)
-                    for read_trans in bam_transcriptome.fetch():
-                        if read_trans.query_name==read.query_name:
-                            # print(read_trans, mod_bases)
-                            if read_trans.reference_name not in transcript_bin_stoichio.keys():
-                                transcript_bin_stoichio[read_trans.reference_name] = []
-                            transcript_bin_stoichio[read_trans.reference_name].extend(get_transcript_bin_stoichio(read_trans, mod_bases))
-
-
-avg_profile = calc_avg_profile([vv for k, v in transcript_bin_stoichio.items() for vv in v])
+# transcriptome_file = '/home/adrian/Data/GRCh38_102/GRCh38.cdna.all.fa'
+# transcriptome = {}
+# for record in SeqIO.parse(transcriptome_file, 'fasta'):
+#     transcriptome[record.id] = str(record.seq)
+#
+# def get_transcript_bin_stoichio(in_read, readPos_modProbs):
+#     dict_aligned_pos = {read_pos: ref_pos for read_pos, ref_pos in in_read.get_aligned_pairs() if ref_pos is not None}
+#     ref_len = len(transcriptome[in_read.reference_name])
+#     bin_modProbs = []
+#     for pos, prob in readPos_modProbs:
+#         if pos in dict_aligned_pos.keys():
+#             trans_pos = dict_aligned_pos[pos]
+#             bin_ind = int((trans_pos / ref_len) * 100)
+#             bin_modProbs.append((bin_ind, prob/255.0))
+#     return bin_modProbs
+#
+#
+# transcript_bin_stoichio = {}
+# with pysam.AlignmentFile(bam_file, 'rb') as bam_genome:
+#     with pysam.AlignmentFile(transcript_file, 'rb') as bam_transcriptome:
+#         for read in tqdm(bam_genome.fetch(sel_chrom)):
+#             dict_mod = read.modified_bases_forward
+#             if dict_mod is not None:
+#                 mod_bases = dict_mod.get(('N', 0, 21891), [])
+#                 if len(mod_bases):
+#                     # print(mod_bases)
+#                     for read_trans in bam_transcriptome.fetch():
+#                         if read_trans.query_name==read.query_name:
+#                             # print(read_trans, mod_bases)
+#                             if read_trans.reference_name not in transcript_bin_stoichio.keys():
+#                                 transcript_bin_stoichio[read_trans.reference_name] = []
+#                             transcript_bin_stoichio[read_trans.reference_name].extend(get_transcript_bin_stoichio(read_trans, mod_bases))
+#
+#
+# avg_profile = calc_avg_profile([vv for k, v in transcript_bin_stoichio.items() for vv in v])
