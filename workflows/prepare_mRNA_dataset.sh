@@ -112,7 +112,8 @@ samtools index ${BAM_GENOME}
 
 ### split bam file ###
 #for chr in {1..22}
-for chr in {1..5}
+#for chr in {1..5}
+for chr in I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI Mito
 do
   mkdir chr${chr}
   samtools view -h genome_filtered_q50.bam $chr | samtools sort - > chr${chr}/sorted.chr${chr}.bam
