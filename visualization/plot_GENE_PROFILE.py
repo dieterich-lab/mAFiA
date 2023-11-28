@@ -34,7 +34,7 @@ def load_genome_reference(ref_file, chrs):
 ref_file = '/home/adrian/Data/GRCh38_102/GRCh38_102.fa'
 annot_file = '/home/adrian/Data/GRCh38_102/GRCh38_102.bed'
 transcript_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/HEK293/100_WT_0_IVT/transcriptome_filtered_q50.bam'
-bam_file = '/home/adrian/NCOMMS_revision/source_data/GENE_PROFILE/merged.mAFiA.reads.bam'
+bam_file = '/home/adrian/NCOMMS_revision/source_data/GENE_PROFILE/100WT/merged.mAFiA.reads.bam'
 img_out = '/home/adrian/NCOMMS_revision/images/GENE_PROFILE'
 
 ########################################################################################################################
@@ -68,10 +68,10 @@ with pysam.AlignmentFile(bam_file, 'rb') as bam:
 
 ### plot histogram ###
 thresh_mod = 0.5
-# sel_pos = [31816450, 31817110, 31817566]
+sel_pos = [31816312, 31816986, 31817582]
 for ref_pos, mod_probs in ref_pos_mod_probs.items():
-    if len(mod_probs)>=400:
-    # if ref_pos in sel_pos:
+    # if len(mod_probs)>=400:
+    if ref_pos in sel_pos:
         mod_ratio = int(np.mean(np.array(mod_probs)>=thresh_mod) * 100)
         plt.figure(figsize=(3*cm, 2*cm))
         plt.hist(mod_probs, bins=100, range=[0, 1])
@@ -80,6 +80,49 @@ for ref_pos, mod_probs in ref_pos_mod_probs.items():
         plt.title(f'chr{sel_chrom}: {ref_pos}\nS={mod_ratio}%')
         plt.savefig(os.path.join(img_out, f'hist_mod_probs_chr{sel_chrom}_{ref_pos}.{FMT}'), **fig_kwargs)
 plt.close('all')
+
+########################################################################################################################
+### filter bam #########################################################################################################
+########################################################################################################################
+def generate_mm_ml_tags(read_mods, mod_base='N', mod_code='21891'):
+    dists = [read_mods[0][0]] + list(np.diff([mod[0] for mod in read_mods]) - 1)
+    mod_probs = [mod[1] for mod in read_mods]
+    strand = '+'
+    mm_tag = mod_base + strand + mod_code + ',' + ','.join([str(d) for d in dists]) + ';'
+    ml_tag = mod_probs
+    return mm_tag, ml_tag
+
+sel_motifs = [
+    'AGACT',
+    'GAACT',
+    'GGACA',
+    'GGACC',
+    'GGACT',
+    'TGACT',
+]
+
+out_bam_file = bam_file.replace('merged', f'chr{sel_chrom}_{sel_chromStart}_{sel_chromEnd}').replace('reads.bam', 'reads.6motifs.bam')
+with pysam.AlignmentFile(bam_file, 'rb') as bam_in:
+    with pysam.AlignmentFile(out_bam_file, 'wb', template=bam_in) as bam_out:
+        for read in bam_in.fetch(sel_chrom, sel_chromStart, sel_chromEnd):
+            old_read_mods = read.modified_bases_forward.get(('N', 0, 21891), [])
+            if len(old_read_mods):
+                dict_aligned_pos = {read_pos: ref_pos for read_pos, ref_pos in read.get_aligned_pairs() if
+                                    ref_pos is not None}
+                new_read_mods = []
+                for mod_pos, mod_probs in old_read_mods:
+                    motif = ref[sel_chrom][dict_aligned_pos[mod_pos]-2:dict_aligned_pos[mod_pos]+3]
+                    if motif in sel_motifs:
+                        # print(motif)
+                        new_read_mods.append((mod_pos, mod_probs))
+                if len(new_read_mods):
+                    new_mm, new_ml = generate_mm_ml_tags(new_read_mods)
+                    read.set_tag('MM', new_mm)
+                    read.set_tag('ML', new_ml)
+                    bam_out.write(read)
+
+
+
 
 ########################################################################################################################
 ### scatter plot #######################################################################################################
