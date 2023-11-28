@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from sklearn.metrics import auc
+import seaborn as sn
 
 #######################################################################
 cm = 1/2.54  # centimeters in inches
@@ -66,7 +67,7 @@ def get_sample_sizes(nts, in_labels):
 
 source_data_dir = '/home/adrian/NCOMMS_revision/source_data/VALIDATION'
 
-train = 'ISA'
+train = 'ISA-WUE'
 validate = 'ISA-WUE'
 
 read_ids_A_path = os.path.join(source_data_dir, 'read_ids_ISA-WUE_A.txt')
@@ -162,6 +163,26 @@ fig_hist.tight_layout(pad=0.5)
 fig_hist.savefig(os.path.join(img_out, f'hist_oligo_modProbs.{FMT}'), **fig_kwargs)
 
 
+########################################################################################################################
+### confusion matrix ###################################################################################################
+########################################################################################################################
+THRESH_PROB = 0.5
+def calculate_confusion_matrix(mod_probs, thresh_prob=THRESH_PROB):
+    mat00 = np.sum(mod_probs['UNM'] < thresh_prob)
+    mat01 = np.sum(mod_probs['UNM'] >= thresh_prob)
+    mat10 = np.sum(mod_probs['MOD'] < thresh_prob)
+    mat11 = np.sum(mod_probs['MOD'] >= thresh_prob)
+    return pd.DataFrame([[mat00, mat01], [mat10, mat11]], index=['UNM', 'MOD'], columns=['UNM', 'MOD'])
+
+fig_confusion = plt.figure(figsize=(11, 6))
+axes_confusion = fig_confusion.subplots(num_rows, num_cols).flatten()
+for subplot_ind, this_motif in enumerate(ordered_motifs):
+    this_motif_confusion_mat = calculate_confusion_matrix(motif_mod_probs[this_motif])
+    # axes_confusion[subplot_ind].matshow(this_motif_confusion_mat)
+    sn.heatmap(ax=axes_confusion[subplot_ind], data=this_motif_confusion_mat, annot=True, fmt='d')
+    axes_confusion[subplot_ind].set_title('{}'.format(this_motif.replace('T', 'U')))
+
+fig_confusion.savefig(os.path.join(img_out, f'confusion_matrix_thresh{THRESH_PROB}.{FMT}'), **fig_kwargs)
 ########################################################################################################################
 ### precision-recall curve #############################################################################################
 ########################################################################################################################

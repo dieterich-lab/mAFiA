@@ -5,6 +5,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib_venn import venn3
 from collections import Counter
+import pysam
 
 #######################################################################
 cm = 1/2.54  # centimeters in inches
@@ -27,8 +28,17 @@ chrs = [str(i) for i in range(2, 11)] + ['13', '14', '18', '20']
 img_out = '/home/adrian/NCOMMS_revision/images/GLORI'
 os.makedirs(img_out, exist_ok=True)
 
-glori_path = '/home/adrian/Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv'
-miclip_path = '/home/adrian/Data/DRACH/miCLIP_union_flat_exclude_Y_chromosome.bed'
+glori_path = '/home/adrian/Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.ref5mers.csv'
+miclip_path = '/home/adrian/Data/DRACH/miCLIP_union_flat_exclude_Y_chromosome.ref5mers.bed'
+
+sel_motifs = [
+    'GGACT',
+    'GAACT',
+    'GGACA',
+    'AGACT',
+    'GGACC',
+    'TGACT'
+]
 
 def import_mAFiA(thresh_coverage=10):
     dfs = []
@@ -36,6 +46,7 @@ def import_mAFiA(thresh_coverage=10):
         dfs.append(pd.read_csv(os.path.join(source_data_dir, f'chr{this_chr}', 'mAFiA.sites.bed'), dtype={'chrom': str}, sep='\t'))
     df_mAFiA = pd.concat(dfs, ignore_index=True)
     df_mAFiA_thresh = df_mAFiA[df_mAFiA['coverage']>=thresh_coverage]
+    df_mAFiA_thresh = df_mAFiA_thresh[df_mAFiA_thresh['ref5mer'].isin(sel_motifs)]
     return df_mAFiA_thresh
 
 def import_glori(thresh_pval=1E-3):
@@ -44,16 +55,19 @@ def import_glori(thresh_pval=1E-3):
     df_glori['chromStart'] = df_glori['Sites'] - 1
     df_glori['modRatio'] = np.int32(np.round(df_glori['NormeRatio'] * 100.0))
     df_glori_thresh = df_glori[df_glori['P_adjust']<thresh_pval]
+    df_glori_thresh = df_glori_thresh[df_glori_thresh['ref5mer'].isin(sel_motifs)]
 
     return df_glori_thresh
 
 def import_miclip(thresh_source_counts=3):
-    df_miclip = pd.read_csv(miclip_path, sep='\t',
-                            names=['chrom', 'chromStart', 'chromEnd', 'source', 'score', 'strand'],
+    df_miclip = pd.read_csv(miclip_path,
+                            # names=['chrom', 'chromStart', 'chromEnd', 'source', 'score', 'strand'],
                             dtype={'chrom': str})
     df_miclip['modRatio'] = 100
     df_miclip['source_counts'] = [len(this_source.split(',')) for this_source in df_miclip['source'].values]
     df_miclip_thresh = df_miclip[df_miclip['source_counts']>=thresh_source_counts]
+    df_miclip_thresh = df_miclip_thresh[df_miclip_thresh['ref5mer'].isin(sel_motifs)]
+
     return df_miclip_thresh
 
 df_mAFiA = import_mAFiA()
@@ -64,41 +78,41 @@ df_miclip = import_miclip()
 ########################################################################################################################
 ### histogram stoichiometry vs. coverage ###############################################################################
 ########################################################################################################################
-coverage = df_mAFiA['coverage'].values
-stoichio = df_mAFiA['modRatio'].values
-
-num_bins = 20
-coverage_range = [0, 500]
-stoichio_range = [0, 100]
-
-fig_cov_stoichio = plt.figure(figsize=(6, 6))
-gs = fig_cov_stoichio.add_gridspec(2, 2,  width_ratios=(4, 1), height_ratios=(1, 4),
-                      left=0.1, right=0.9, bottom=0.1, top=0.9,
-                      wspace=0.05, hspace=0.05)
-ax = fig_cov_stoichio.add_subplot(gs[1, 0])
-ax_histx = fig_cov_stoichio.add_subplot(gs[0, 0], sharex=ax)
-ax_histy = fig_cov_stoichio.add_subplot(gs[1, 1], sharey=ax)
-ax_histx.tick_params(axis="x", labelbottom=False)
-ax_histy.tick_params(axis="y", labelleft=False)
-
-bin_counts, bin_x, bin_y = np.histogram2d(coverage, stoichio, bins=num_bins, range=[coverage_range, stoichio_range])
-ax.imshow(np.log10(bin_counts+1), origin='lower')
-ax.set_xticks(np.arange(len(bin_x))[::2]-0.5, np.int32(bin_x)[::2])
-ax.set_yticks(np.arange(len(bin_y))[::2]-0.5, np.int32(bin_y)[::2])
-ax.set_xlabel('Coverage')
-ax.set_ylabel('Stoichiometry')
-
-x_bin_counts, _ = np.histogram(coverage, bins=bin_x)
-ax_histx.bar(np.arange(len(x_bin_counts)), x_bin_counts)
-ax_histx.set_xticks(np.arange(len(bin_x))[::2]-0.5, np.int32(bin_x)[::2])
-ax_histx.set_ylabel('Num. Sites')
-
-y_bin_counts, _ = np.histogram(stoichio, bins=bin_y)
-ax_histy.barh(np.arange(len(y_bin_counts)), y_bin_counts)
-ax_histy.set_yticks(np.arange(len(bin_y))[::2]-0.5, np.int32(bin_y)[::2])
-ax_histy.set_xlabel('Num. Sites')
-
-fig_cov_stoichio.savefig(os.path.join(img_out, f'coverage_stoichiometry.{FMT}'), **fig_kwargs)
+# coverage = df_mAFiA['coverage'].values
+# stoichio = df_mAFiA['modRatio'].values
+#
+# num_bins = 20
+# coverage_range = [0, 500]
+# stoichio_range = [0, 100]
+#
+# fig_cov_stoichio = plt.figure(figsize=(6, 6))
+# gs = fig_cov_stoichio.add_gridspec(2, 2,  width_ratios=(4, 1), height_ratios=(1, 4),
+#                       left=0.1, right=0.9, bottom=0.1, top=0.9,
+#                       wspace=0.05, hspace=0.05)
+# ax = fig_cov_stoichio.add_subplot(gs[1, 0])
+# ax_histx = fig_cov_stoichio.add_subplot(gs[0, 0], sharex=ax)
+# ax_histy = fig_cov_stoichio.add_subplot(gs[1, 1], sharey=ax)
+# ax_histx.tick_params(axis="x", labelbottom=False)
+# ax_histy.tick_params(axis="y", labelleft=False)
+#
+# bin_counts, bin_x, bin_y = np.histogram2d(coverage, stoichio, bins=num_bins, range=[coverage_range, stoichio_range])
+# ax.imshow(np.log10(bin_counts+1), origin='lower')
+# ax.set_xticks(np.arange(len(bin_x))[::2]-0.5, np.int32(bin_x)[::2])
+# ax.set_yticks(np.arange(len(bin_y))[::2]-0.5, np.int32(bin_y)[::2])
+# ax.set_xlabel('Coverage')
+# ax.set_ylabel('Stoichiometry')
+#
+# x_bin_counts, _ = np.histogram(coverage, bins=bin_x)
+# ax_histx.bar(np.arange(len(x_bin_counts)), x_bin_counts)
+# ax_histx.set_xticks(np.arange(len(bin_x))[::2]-0.5, np.int32(bin_x)[::2])
+# ax_histx.set_ylabel('Num. Sites')
+#
+# y_bin_counts, _ = np.histogram(stoichio, bins=bin_y)
+# ax_histy.barh(np.arange(len(y_bin_counts)), y_bin_counts)
+# ax_histy.set_yticks(np.arange(len(bin_y))[::2]-0.5, np.int32(bin_y)[::2])
+# ax_histy.set_xlabel('Num. Sites')
+#
+# fig_cov_stoichio.savefig(os.path.join(img_out, f'coverage_stoichiometry.{FMT}'), **fig_kwargs)
 
 # fig_hist_stoichio, ax = plt.subplots(nrows=1, ncols=1, figsize=(5*cm, 5*cm))
 # ax.hist(df_mAFiA['modRatio'].values, range=[0, 100], bins=100)
@@ -128,7 +142,7 @@ fig_cov_corr.savefig(os.path.join(img_out, f'cov_corr.{FMT}'), **fig_kwargs)
 ########################################################################################################################
 ### correlation vs. stoichiometry ######################################################################################
 ########################################################################################################################
-thresh_coverage = 60
+thresh_coverage = 50
 df_mAFiA_thresh = df_mAFiA[df_mAFiA['coverage'] >= thresh_coverage]
 df_merged = pd.merge(df_mAFiA_thresh, df_glori, on=['chrom', 'chromStart'], suffixes=('_mafia', '_glori'))
 
@@ -163,7 +177,22 @@ fig_stoichio_rms.savefig(os.path.join(img_out, f'stoichio_RMS.{FMT}'), **fig_kwa
 ########################################################################################################################
 ### venn diagram #######################################################################################################
 ########################################################################################################################
-thresh_stoichio = 80
+bam_file = '/home/adrian/NCOMMS_revision/source_data/GENE_PROFILE/100WT/merged.mAFiA.reads.bam'
+
+thresh_stoichio = 50
+
+def thresh_df_with_coverage(df_in, thresh_coverage=50):
+    with pysam.AlignmentFile(bam_file, "rb" ) as bam:
+        coverage = []
+        for _, row in df_in.iterrows():
+            this_row_coverage = 0
+            for pileupcolumn in bam.pileup(row['chrom'], row['chromStart'], row['chromStart']+1, truncate=True):
+                if pileupcolumn.pos==row['chromStart']:
+                    this_row_coverage = pileupcolumn.n
+                    break
+            coverage.append(this_row_coverage)
+    coverage = np.array(coverage)
+    return df_in[coverage>=thresh_coverage]
 
 def draw_venn_diagram(dict_dfs, thresh_stoichiometry=80):
     name_sites = {}
@@ -177,11 +206,13 @@ def draw_venn_diagram(dict_dfs, thresh_stoichiometry=80):
     return venn3(name_sites.values(), name_sites.keys())
 
 df_mAFiA_thresh = df_mAFiA[df_mAFiA['coverage']>=thresh_coverage]
+df_miclip_thresh = thresh_df_with_coverage(df_miclip)
+df_glori_thresh = thresh_df_with_coverage(df_glori)
 
 venn_dict = {
     'mAFiA': df_mAFiA_thresh,
-    'miClip': df_miclip,
-    'GLORI': df_glori
+    'miClip': df_miclip_thresh,
+    'GLORI': df_glori_thresh
 }
 
 fig_venn, ax = plt.subplots(nrows=1, ncols=1, figsize=(10*cm, 10*cm))
@@ -192,9 +223,9 @@ fig_venn.savefig(os.path.join(img_out, f'venn_diagram.{FMT}'), **fig_kwargs)
 ########################################################################################################################
 ### correlation ########################################################################################################
 ########################################################################################################################
-thresh_coverage = 60
+thresh_coverage = 50
 df_mAFiA_thresh = df_mAFiA[df_mAFiA['coverage'] >= thresh_coverage]
-df_merged = pd.merge(df_mAFiA_thresh, df_glori, on=['chrom', 'chromStart'], suffixes=('_mafia', '_glori'))
+df_merged = pd.merge(df_mAFiA_thresh, df_glori, on=['chrom', 'chromStart', 'ref5mer'], suffixes=('_mafia', '_glori'))
 # df_merged_sel = df_merged[df_merged['P_adjust'] < 1E-10]
 df_merged_sel = df_merged
 motif_counts = Counter(df_merged_sel['ref5mer']).most_common()
