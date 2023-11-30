@@ -67,8 +67,8 @@ def get_sample_sizes(nts, in_labels):
 
 source_data_dir = '/home/adrian/NCOMMS_revision/source_data/VALIDATION'
 
-train = 'ISA-WUE'
-validate = 'ISA-WUE'
+train = 'ISA'
+validate = 'WUE'
 
 read_ids_A_path = os.path.join(source_data_dir, 'read_ids_ISA-WUE_A.txt')
 read_ids_m6A_path = os.path.join(source_data_dir, 'read_ids_ISA-WUE_m6A.txt')
@@ -174,12 +174,12 @@ def calculate_confusion_matrix(mod_probs, thresh_prob=THRESH_PROB):
     mat11 = np.sum(mod_probs['MOD'] >= thresh_prob)
     return pd.DataFrame([[mat00, mat01], [mat10, mat11]], index=['UNM', 'MOD'], columns=['UNM', 'MOD'])
 
-fig_confusion = plt.figure(figsize=(11, 6))
+fig_confusion = plt.figure(figsize=(9*cm, 6*cm))
 axes_confusion = fig_confusion.subplots(num_rows, num_cols).flatten()
 for subplot_ind, this_motif in enumerate(ordered_motifs):
     this_motif_confusion_mat = calculate_confusion_matrix(motif_mod_probs[this_motif])
     # axes_confusion[subplot_ind].matshow(this_motif_confusion_mat)
-    sn.heatmap(ax=axes_confusion[subplot_ind], data=this_motif_confusion_mat, annot=True, fmt='d')
+    sn.heatmap(ax=axes_confusion[subplot_ind], data=this_motif_confusion_mat, annot=True, fmt='d', cbar=False)
     axes_confusion[subplot_ind].set_title('{}'.format(this_motif.replace('T', 'U')))
 
 fig_confusion.savefig(os.path.join(img_out, f'confusion_matrix_thresh{THRESH_PROB}.{FMT}'), **fig_kwargs)
