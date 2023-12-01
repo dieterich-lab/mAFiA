@@ -30,7 +30,7 @@ DATA_DIR=${PRJ_DIR}/oligo
 
 ### ISA 12 more ###
 #TRAIN_DATASET=ISA_mix1
-TRAIN_DATASET=ISA_mix2
+#TRAIN_DATASET=ISA_mix2
 #TRAIN_DATASET=ISA_mix3
 #TRAIN_DATASET=ISA_mix4
 
@@ -44,12 +44,22 @@ SCALER=MaxAbs
 ############################################################################################
 ############################################################################################
 
-UNM_BAM=${DATA_DIR}/${TRAIN_DATASET}_A/spomelette_q70.bam
-UNM_FAST5=${DATA_DIR}/${TRAIN_DATASET}_A/fast5
-MOD_BAM=${DATA_DIR}/${TRAIN_DATASET}_m6A/spomelette_q70.bam
-MOD_FAST5=${DATA_DIR}/${TRAIN_DATASET}_m6A/fast5
-REF=${DATA_DIR}/ligation_ref/ligation_ref_${TRAIN_DATASET}_A_m6A.fasta
-OUTDIR=${PRJ_DIR}/MAFIA_classifiers/${TRAIN_DATASET}
+#UNM_BAM=${DATA_DIR}/${TRAIN_DATASET}_A/spomelette_q70.bam
+#UNM_FAST5=${DATA_DIR}/${TRAIN_DATASET}_A/fast5
+#MOD_BAM=${DATA_DIR}/${TRAIN_DATASET}_m6A/spomelette_q70.bam
+#MOD_FAST5=${DATA_DIR}/${TRAIN_DATASET}_m6A/fast5
+#REF=${DATA_DIR}/ligation_ref/ligation_ref_${TRAIN_DATASET}_A_m6A.fasta
+#OUTDIR=${PRJ_DIR}/MAFIA_classifiers/${TRAIN_DATASET}
+
+unm_ds=ISA_mix17
+mod_ds=ISA_mix20
+
+UNM_BAM=${DATA_DIR}/${unm_ds}_A/spomelette_q70.bam
+UNM_FAST5=${DATA_DIR}/${unm_ds}_A/fast5
+MOD_BAM=${DATA_DIR}/${mod_ds}_m6A/spomelette_q70.bam
+MOD_FAST5=${DATA_DIR}/${mod_ds}_m6A/fast5
+REF=${DATA_DIR}/ligation_ref/ligation_ref_${unm_ds}_${mod_ds}_A_m6A.fasta
+OUTDIR=${PRJ_DIR}/MAFIA_classifiers/${unm_ds}_${mod_ds}
 
 python3 -u ${HOME}/git/mAFiA_dev/oligo/oligo_train_binary_classifier.py \
 --unm_bam_file ${UNM_BAM} \
@@ -59,5 +69,5 @@ python3 -u ${HOME}/git/mAFiA_dev/oligo/oligo_train_binary_classifier.py \
 --ref_file ${REF} \
 --backbone_model_path ${BACKBONE_MODEL} \
 --scaler ${SCALER} \
---min_coverage 10 \
+--min_coverage 1 \
 --classifier_model_dir ${OUTDIR}
