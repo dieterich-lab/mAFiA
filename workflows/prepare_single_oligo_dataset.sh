@@ -21,7 +21,7 @@ REF=${PRJ_DIR}/reference/ISA_m6A_oligos_allDRACH.fasta
 DATASET=${ORIG}_${RUN}_${MOD}
 WORKSPACE=${PRJ_DIR}/oligo/${DATASET}
 READS=${WORKSPACE}/fast5
-FASTA=${WORKSPACE}/renata.fasta
+FASTA=${WORKSPACE}/rodan.fasta
 SAM=${WORKSPACE}/spomelette.sam
 LIGATION_REF=${WORKSPACE}/ligation_ref.fasta
 
