@@ -25,6 +25,8 @@ FASTA=${WORKSPACE}/rodan.fasta
 SAM=${WORKSPACE}/spomelette.sam
 LIGATION_REF=${WORKSPACE}/ligation_ref.fasta
 
+source ${HOME}/git/mAFiA/mafia-venv/bin/activate
+
 ### softlink fast5 files ###
 #mkdir -p ${READS} && cd "$_"
 #echo "Creating softlinks from ${LOC}"
@@ -57,8 +59,6 @@ LIGATION_REF=${WORKSPACE}/ligation_ref.fasta
 #for f in ${LOC}/**/*.pod5; do pod5 convert to_fast5 $f --output ${READS}; done
 
 #### basecall with Rodan IVT ###
-#source ${HOME}/git/mAFiA/mafia-venv/bin/activate
-
 #echo "Basecalling ${READS}"
 #srun --partition=gpu --gres=gpu:turing:1 --cpus-per-task=8 --mem-per-cpu=8GB \
 #python3 -u ${HOME}/git/mAFiA/RODAN/basecall.py \
@@ -68,9 +68,6 @@ LIGATION_REF=${WORKSPACE}/ligation_ref.fasta
 #--outdir ${WORKSPACE}
 
 ### align with spomelette ###
-deactivate
-conda activate MAFIA
-
 echo "Basecalling finished. Now aligning ${FASTA} to ${REF}"
 python3 -u ${HOME}/git/mAFiA_dev/misc/spanish_omelette_alignment.py \
 --ref_file ${REF} \

@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import sys
 HOME = os.path.expanduser("~")
 sys.path.append(os.path.join(HOME, 'git/mAFiA_dev'))
-from oligo.oligo_processors import Oligo_Reference_Generator, Query_Container, Local_Aligner, Splitter, Chainer, Writer
+from oligo.oligo_processors import OligoReferenceGenerator, QueryContainer, LocalAligner, Splitter, Chainer, Writer
 
 parser = argparse.ArgumentParser(description='Map oligo basecalls through the Spanish omelette method')
 parser.add_argument("--ref_file", type=str)
@@ -42,9 +42,9 @@ def output_score_histogram(args, in_alignments, in_queries):
     plt.close('all')
 
 def main(args):
-    oligo_ref_generator = Oligo_Reference_Generator(args.ref_file)
-    queries = Query_Container(args.query_file)
-    local_aligner = Local_Aligner()
+    oligo_ref_generator = OligoReferenceGenerator(args.ref_file)
+    queries = QueryContainer(args.query_file)
+    local_aligner = LocalAligner()
     splitter = Splitter(in_aligner=local_aligner, min_segment_len=MIN_SEGMENT_LEN, thresh_mapq=args.thresh_mapq, homopolymer=args.homopolymer)
     chainer = Chainer()
     writer = Writer(out_sam_file=args.sam_file, out_ligation_ref_file=args.recon_ref_file, write_md=args.write_md, write_cs=args.write_cs)
