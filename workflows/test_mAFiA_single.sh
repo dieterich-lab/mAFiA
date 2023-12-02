@@ -5,12 +5,12 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=160GB
 #SBATCH --verbose
-#SBATCH --job-name=DRACH_v1_IVT_chr1
-#SBATCH --output=/home/achan/slurm/DRACH_v1_IVT_chr1.out
+#SBATCH --job-name=DRACH_v1_WT_chr1
+#SBATCH --output=/home/achan/slurm/DRACH_v1_WT_chr1.out
 
 #ds=Mettl3-KO
-#ds=100_WT_0_IVT
-ds=0_WT_100_IVT
+ds=100_WT_0_IVT
+#ds=0_WT_100_IVT
 chr=1
 
 #ds=col0
@@ -24,11 +24,11 @@ chr=1
 workspace=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/HEK293/${ds}
 #workspace=/scratch/achan/Arabidopsis_thaliana/${ds}
 #workspace=/scratch/achan/Saccharomyces_cerevisiae/${ds}
-#bam=${workspace}/chr${chr}/sorted.chr${chr}.bam
-bam=${workspace}/filtered_q50.bam
+bam=${workspace}/chr${chr}/sorted.chr${chr}.bam
+#bam=${workspace}/filtered_q50.bam
 
-#fast5_dir=${workspace}/chr${chr}/fast5
-fast5_dir=${workspace}/fast5
+fast5_dir=${workspace}/chr${chr}/fast5
+#fast5_dir=${workspace}/fast5
 
 ref=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/GRCh38_102/GRCh38_102.chr${chr}.fa
 #mod=/home/achan/Data/GLORI/bed_files/GLORI_chr${chr}.tsv

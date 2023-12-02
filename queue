@@ -1,0 +1,2245 @@
+[33mcommit c68cfca001551eb60d17768b73d772c534afcffc[m[33m ([m[1;36mHEAD -> [m[1;32mdev[m[33m, [m[1;31morigin/dev[m[33m)[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Sat Dec 2 15:17:00 2023 +0100
+
+    fixed len bug
+
+[33mcommit 6719749b6e0a20a90a3dcb070f0605d4020209b9[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Sat Dec 2 15:04:57 2023 +0100
+
+    calc fixed thresh
+
+[33mcommit 9ab544fd24587ccc41f667817ce56782634e4e36[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Sat Dec 2 14:50:07 2023 +0100
+
+    removed thresh
+
+[33mcommit b62869ee487c9b2580d856132f81bb6655a33021[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Sat Dec 2 14:49:20 2023 +0100
+
+    fix default batch size
+
+[33mcommit 68a1c478c001596bf16fcfb152fa5299df1fdaa9[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Sat Dec 2 14:31:53 2023 +0100
+
+    changed workflow
+
+[33mcommit 8c085ff03f6a0e727e91b3db9dd1893d8a932821[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Sat Dec 2 14:30:46 2023 +0100
+
+    variable threshold
+
+[33mcommit 4a8087124a9f1954fd65c8c53d6bed09061c881f[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Dec 1 16:22:20 2023 +0100
+
+    added small helper scripts for handling / retraining classifiers
+
+[33mcommit 908a9df7705b24d2dd7f8c40835b85b116f8cde9[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Fri Dec 1 11:51:21 2023 +0100
+
+    changed db name
+
+[33mcommit 2fab066800afb479c1dfe8527a223f80e7ea8e9c[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Dec 1 11:50:39 2023 +0100
+
+    updated train workflow
+
+[33mcommit e58ca79ff2d234e3ebac07f6259e24c4fec97f65[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Dec 1 11:01:09 2023 +0100
+
+    switched back to individual refs
+
+[33mcommit 61774f7846ecf255af11feca81e09c55a0797a3b[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Dec 1 10:38:53 2023 +0100
+
+    fixed class names
+
+[33mcommit 653df3cadd9602ce6ec53c7ef24c7dd0d6cb839d[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Dec 1 10:31:52 2023 +0100
+
+    use conda mafia instead
+
+[33mcommit 87ea660f0efdb57c6238c9634d072a0ff5dec3c9[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Dec 1 10:25:43 2023 +0100
+
+    activate venv
+
+[33mcommit 441dcb82b01d7c66e5c5b1a5875f7d9847977160[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Fri Dec 1 10:23:17 2023 +0100
+
+    changed params for test
+
+[33mcommit ee69a54f46ed450b263657895f588630724f2f13[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Dec 1 10:22:06 2023 +0100
+
+    arabidopsis
+
+[33mcommit 11630cdaa6d40990392b648eb520006c3ff02135[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Dec 1 10:21:50 2023 +0100
+
+    updated oligo workflow
+
+[33mcommit 7c09373039d06eb037ae72d13b99cd8b888c4bb2[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Nov 30 14:35:40 2023 +0100
+
+    updated vis scripts
+
+[33mcommit ca973ebeb5acfb7fbb0193e4f008df1e9787ec02[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Nov 29 16:21:03 2023 +0100
+
+    added script to plot yeast
+
+[33mcommit db718149e114394cd355289b54ce313915b3e901[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Nov 28 16:15:50 2023 +0100
+
+    added confusion matrix; venn diagram with detectable sites
+
+[33mcommit 48260a4c7f9ea2210466fb83d27f656cb252cb0e[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Nov 28 11:05:03 2023 +0100
+
+    limit DRACH sites to 6 motifs; added new data
+
+[33mcommit 36a2e40f5c2d57e32dda6a98d3b7759b60ef40fe[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Nov 28 11:04:31 2023 +0100
+
+    updated vis script
+
+[33mcommit 43ace3aea3e9dc00cdec0a0a03c2b60702d4b4e2[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Nov 27 16:12:45 2023 +0100
+
+    added yeast data
+
+[33mcommit 2050f2dcf4c535197380a78666f693108499f527[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Nov 27 16:12:28 2023 +0100
+
+    vis scripts update
+
+[33mcommit fd5abb448ebb2fbcec2adc1928083ba4c1ac8674[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Nov 27 11:49:00 2023 +0100
+
+    changed workflow for arabidopsis
+
+[33mcommit 10f5345e227e5639019e9cf525bf60380c75a00d[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Nov 27 11:48:22 2023 +0100
+
+    updated chromosome-wide profile
+
+[33mcommit 34beccfda8f385571abae0a26445aaa6e725fc3f[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Sat Nov 25 15:39:22 2023 +0100
+
+    coarse-grained m6A profile
+
+[33mcommit c31952d3a4fa8aefca599fc313eb94bed413d7bb[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Sat Nov 25 15:39:04 2023 +0100
+
+    generate DRACH sites in arabidopsis
+
+[33mcommit 43f8ee43696f5fa0cc6fbbcac241e8bb074e6fa5[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Sat Nov 25 13:07:34 2023 +0100
+
+    added routine to split bam
+
+[33mcommit 249500d70deda7e7a579922cc4072fd31f8adfa0[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Sat Nov 25 13:07:06 2023 +0100
+
+    changed paths in workflow
+
+[33mcommit 81eaf0f7bd76d6fec9485f28e680b689062b25c2[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Sat Nov 25 12:20:35 2023 +0100
+
+    fixed outdir arg
+
+[33mcommit 97ff8698aacefc0389a26f5adc2cea4bdb2cdf50[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Sat Nov 25 12:45:55 2023 +0100
+
+    small changes to prep workflow
+
+[33mcommit dd087190f9322952c03ee3f0b71ddab00739b930[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Sat Nov 25 12:45:29 2023 +0100
+
+    changed gene profile vis plot
+
+[33mcommit ac90aef6f96eef847f0615446fc47b281a7eabf9[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Sat Nov 25 12:45:13 2023 +0100
+
+    fixed batchsize arg type
+
+[33mcommit 6d030b3350050d0a2ed8d292b216fe92fe6dafc0[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Sat Nov 25 12:18:52 2023 +0100
+
+    added batchsize in args
+
+[33mcommit 9bc170f1b5557abb0588488682d0cc8b748cd72f[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Nov 24 15:16:24 2023 +0100
+
+    switch back to turing
+
+[33mcommit c8641dea404be1130efc1d09e833467ffa17a74a[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Nov 24 15:11:51 2023 +0100
+
+    changed workflow to prepare mRNA dataset
+
+[33mcommit 8853d16b3b33218062963519329f8ca4889e50c2[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Nov 24 14:36:20 2023 +0100
+
+    vis scripts to plot GENE_PROFILE and GLORI
+
+[33mcommit ba9d7f8f48ac239a4ce43b9fe7b2040609eb545f[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Nov 23 16:15:07 2023 +0100
+
+    alignment
+
+[33mcommit 153b8fedc9fe9d894f044082a5732ad95a970c1c[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Nov 23 15:51:40 2023 +0100
+
+    RODAN instead of renata
+
+[33mcommit 239bbbec1a36577a74c3c3b191a4f6b9f7c89cfd[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Thu Nov 23 15:41:25 2023 +0100
+
+    small fixes
+
+[33mcommit ab17dfde7c27e504d6fc8df298ddf9eef773e759[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Nov 23 15:40:47 2023 +0100
+
+    switched from renata to mAFiA
+
+[33mcommit 18c514dfcdb0bc20dd342a13d99314e6c5adbd1e[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Thu Nov 23 15:13:33 2023 +0100
+
+     Changes to be committed:
+            modified:   misc/generate_all_DRACH_sites_from_ref.py
+            modified:   workflows/test_mAFiA_single.sh
+
+[33mcommit 078677e457731a4f26d17a2ab48b704deeb6cab0[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Mon Nov 20 10:46:12 2023 +0100
+
+    changed single mRNA test workflow
+
+[33mcommit 3d482e58d1a3121766795f4d6e9f950407067327[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Nov 23 15:12:46 2023 +0100
+
+    update vis scripts; new oligo dataset
+
+[33mcommit 508acf10605e30288ffc3ae988fa024dd1f78cea[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Nov 20 10:44:34 2023 +0100
+
+    started script to find all DRACH sites
+
+[33mcommit da4b7b1561fb50707d40f180a8459d83da433eab[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Sun Nov 19 15:03:21 2023 +0100
+
+    updated vis script for validation figure
+
+[33mcommit c87bad8ef221ec5b8a9b41ef39a5b5225d51eb39[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Sun Nov 19 12:16:43 2023 +0100
+
+    vis TEST1 and TEST2 code back up
+
+[33mcommit 87156929ebdec0f928d017ddb9feca144b2decc5[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Sat Nov 18 16:34:02 2023 +0100
+
+    updated load ref and vis scripts
+
+[33mcommit a3196bc0257a7ed9acf9f7739ffc514f68dc01fd[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Nov 17 16:13:03 2023 +0100
+
+    reshuffle train / validate data
+
+[33mcommit 6148a7e09c507f2cdbdf55714577f30a1f124fb0[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Nov 17 11:44:00 2023 +0100
+
+    convert classifier class names; new vis script for oligo validation
+
+[33mcommit 006ce43b3a05445bf2ea47428ed3aa03e7502588[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Nov 16 14:28:44 2023 +0100
+
+    updated figures for manuscript
+
+[33mcommit a6c84b168f1cdcd5a421b1d90c43fd9acb26c13a[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Nov 2 12:56:23 2023 +0100
+
+    added script for testing mAFiA on mouse heart dRNA
+
+[33mcommit e88b2782fb9f8374a2f3c5998db31b3b0d6578b9[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Nov 2 11:00:08 2023 +0100
+
+    specific script for prep mouse heart
+
+[33mcommit fd21fd45bf0589a7aabac61aeac74219e954f0a5[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Nov 2 10:38:05 2023 +0100
+
+    make bash script
+
+[33mcommit c1ef9fd519011379016e19f1ba946045325dfe93[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Nov 2 10:36:36 2023 +0100
+
+    next stage of mRNA prep
+
+[33mcommit 31231d98a5b05c2b24fa33bb24698d1cce4a8e4f[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Nov 2 10:31:38 2023 +0100
+
+    updated visualization
+
+[33mcommit e858f923a060dc2b7e47b606a1b319e5466d16ba[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Nov 1 17:20:12 2023 +0100
+
+    new visualization
+
+[33mcommit d8bfe20181b3cb1454ac20907db0f89cf7d5bcb1[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Nov 1 16:35:12 2023 +0100
+
+    more mouse dataset
+
+[33mcommit 8e8766fb1d95cd9db78a44ab20dfac913d046dbf[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Nov 1 10:18:02 2023 +0100
+
+    fixed dtype
+
+[33mcommit 6b87ff549feb35618a3ee6fc2ddee5b8b4c93e32[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Nov 1 10:13:11 2023 +0100
+
+    fixed bed ext
+
+[33mcommit 3ff3402033d58aec5c1bc9822a0b3af70a33432b[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Nov 1 10:11:07 2023 +0100
+
+    strip left zeros from part
+
+[33mcommit e72aedbf8ee9ae20afe5038294c6227b397eb11e[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Nov 1 09:42:11 2023 +0100
+
+    changed args
+
+[33mcommit 34ca6003a923d4d74e464a18d299d54329caeaac[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Nov 1 09:34:37 2023 +0100
+
+    added path
+
+[33mcommit 90af8b7180dac2bde29f36ecb53850fe8865c9a9[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Nov 1 09:30:24 2023 +0100
+
+    changed file names
+
+[33mcommit 3dfb0ffb1d85286916502d6b8a389ba19ab79fde[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Oct 31 16:03:54 2023 +0100
+
+    more mixes
+
+[33mcommit 3afb8fe59251b6760b8b97462a8753b048a285c4[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Oct 31 15:53:30 2023 +0100
+
+    fixed container init
+
+[33mcommit 78b06b4d72fac4aedd203d7825b301eee3a98589[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Oct 31 15:46:46 2023 +0100
+
+    more class name fixes
+
+[33mcommit 730bb56292ae7a2dbfabe0b421eb090a58d622b4[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Oct 31 15:44:14 2023 +0100
+
+    fixed underscore in class names
+
+[33mcommit 829efb0dc0392d1be193d08eac07d3cecf3e5c4b[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Oct 31 15:41:03 2023 +0100
+
+    module update
+
+[33mcommit 787d80a642790afd1cca7decebc07963ee0ec6d7[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Tue Oct 31 15:37:29 2023 +0100
+
+    changed train script
+
+[33mcommit a2a648e04cc11d81b2942f6605d996a16b222969[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Oct 31 15:36:56 2023 +0100
+
+    updated train script
+
+[33mcommit 4585be0744ef3d3b79ad50ec38adbd2e69b3a060[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Oct 31 14:57:45 2023 +0100
+
+    changed oligo train script
+
+[33mcommit e57cf2becdb93feb58f75f2ee01793a7c0d8a3ec[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Oct 31 13:10:38 2023 +0100
+
+    updated db
+
+[33mcommit b51311ed297827353965a61c9573c19e7ff0ca9c[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Oct 30 11:55:08 2023 +0100
+
+    more path fix
+
+[33mcommit e1b637a3464ddbe658576983dd1c69f4073f8709[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Oct 30 11:53:39 2023 +0100
+
+    dir fix
+
+[33mcommit 78a5c2401a2978706da2f6d32b31af5d51f2e401[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Oct 30 11:52:19 2023 +0100
+
+    new DB for A oligos
+
+[33mcommit 9f05b29b87b8df1092e1ec53986e055ffb17635f[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Oct 30 11:44:25 2023 +0100
+
+    fix typo
+
+[33mcommit 8bc231f23e2860af1c46d079312849ab2e1a624d[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Oct 30 11:43:32 2023 +0100
+
+    HOME var
+
+[33mcommit 8d564dde086e8ca48a0704ad1c594c57f86d155c[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Oct 30 11:41:19 2023 +0100
+
+    sys path
+
+[33mcommit d7b7a83252929ed1d0ec69124b42bb3cbc5272a2[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Oct 30 11:38:10 2023 +0100
+
+    more module update
+
+[33mcommit d7370659979f3fb0b34c0a3cfbdad193aa1a5c2d[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Oct 30 11:35:32 2023 +0100
+
+    updated paths
+
+[33mcommit f8cb771143c63ad68dccd222207a90e75ec76a75[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Aug 15 11:00:23 2023 +0200
+
+    small updates
+
+[33mcommit b207e7ddae4d7ca6f3d5443f0eb6e1b91a0e89b9[m
+Author: ADHDrian <adrian.kaho.chan@gmail.com>
+Date:   Mon Aug 14 15:22:33 2023 +0200
+
+    updated data prep workflow
+
+[33mcommit e4c898eba0041289e1408409698d7ef7819ede9a[m
+Author: ADHDrian <adrian.kaho.chan@gmail.com>
+Date:   Mon Aug 14 11:28:24 2023 +0200
+
+    updated workflows
+
+[33mcommit d6b5068931a3bd3ee54a523baca1db6b1b3cd626[m
+Author: ADHDrian <adrian.kaho.chan@gmail.com>
+Date:   Fri Aug 11 09:42:30 2023 +0200
+
+    small update
+
+[33mcommit b9c1c223de63617f22dcc759362468db6bc08a0d[m
+Author: ADHDrian <adrian.kaho.chan@gmail.com>
+Date:   Thu Aug 10 10:28:58 2023 +0200
+
+    collapse all transcripts into one row; added cols deltaModRatio and deltaCoverage
+
+[33mcommit 3f4b7fafd11d63b3a735a5a1b5df80295477e552[m
+Author: ADHDrian <adrian.kaho.chan@gmail.com>
+Date:   Mon Aug 7 16:58:14 2023 +0200
+
+    added new script to assign transcripts
+
+[33mcommit a0f48c1e6578ea5f0960f255a1326d5e5a2d3da1[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 27 14:50:00 2023 +0200
+
+    flush print
+
+[33mcommit a6d67bf7e3446d2ebb2a199dab41532b83db8587[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 27 13:20:49 2023 +0200
+
+    small formatting
+
+[33mcommit da5bde7de132ae721ef6435d1cb4745271eae2d5[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 27 12:59:53 2023 +0200
+
+    little rewrite
+
+[33mcommit ea3d13398c116e13500be5654466a27cd11fdd30[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 27 11:52:47 2023 +0200
+
+    done with changes
+
+[33mcommit 412244b29a12b7c92640af64e0cf57a9dab267da[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 27 11:17:48 2023 +0200
+
+    fixed method name
+
+[33mcommit 5625ee27162563dc2b40f6d1c70363c0b2911143[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 27 11:13:16 2023 +0200
+
+    fixed init error
+
+[33mcommit 03c39e645e2f7fceed465948b154d30663df1376[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 27 11:11:10 2023 +0200
+
+    debug msgs
+
+[33mcommit fe717f2924ffccd251b9061f49e318d7a234a3f9[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 27 11:05:38 2023 +0200
+
+    more arg name fix
+
+[33mcommit 11b3bc58868210769b967229f7992fcbdcf9efc0[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 27 11:02:49 2023 +0200
+
+    fixed class name
+
+[33mcommit d791c7d4f0b41d8ae9fd8f12359e83e8923047fe[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 27 11:00:17 2023 +0200
+
+    added main()
+
+[33mcommit 77705df2592e2cdcd4ab10c4cdda5c19c802984b[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 27 10:49:04 2023 +0200
+
+    added option for using features / without in test_mAFiA
+
+[33mcommit 08fc5308d974799cd417454bb346f5f85a4fd499[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 27 10:18:04 2023 +0200
+
+    another fix
+
+[33mcommit e4e242eb2f51c19fc6dc020c5c1cff9a7dd75b25[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 27 10:16:28 2023 +0200
+
+    fixed bug
+
+[33mcommit 48fa254c08a0ad2031fee67935a7c1faad53a43e[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 27 10:13:31 2023 +0200
+
+    fixed argument error
+
+[33mcommit 1476310f1e7bfe6f340385772941b97dbe1074b3[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 27 10:03:45 2023 +0200
+
+    dump option in basecall
+
+[33mcommit c9b4650963436e54d32acb0139ab16d28fde1e46[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 27 09:35:51 2023 +0200
+
+    reorganized scripts
+
+[33mcommit aaf30e03d7070a5168323a86dee86f1fad72f712[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 27 09:23:13 2023 +0200
+
+    renamed folder
+
+[33mcommit c8e7bee004b7f4b038134cfc2bfc53c286a05bfb[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 27 09:22:03 2023 +0200
+
+    reorganize scripts
+
+[33mcommit 032a2248feb5f9b032464cd79714f04e6fa24eea[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 27 09:09:47 2023 +0200
+
+    renamed files and chmod
+
+[33mcommit ad5aca67758186c4e17eb63418656f77e1a92b3e[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jul 26 18:01:14 2023 +0200
+
+    more work on visualization
+
+[33mcommit e785322918d2956364cc7478fd7f8b4b1a4f31e5[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jul 26 17:43:42 2023 +0200
+
+    script for comparing generalized 5mers
+
+[33mcommit 8f1544c8ea0cee9ddc4947f4b559b50ffef5aaa7[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jul 26 16:21:39 2023 +0200
+
+    fix loop order
+
+[33mcommit b5a362203d122ed50e3bd59925693812bfb31bd2[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jul 26 16:13:49 2023 +0200
+
+    test general 5mers
+
+[33mcommit 727919b7f18d31d5ae8c915294c359c76883b48c[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jul 26 13:37:04 2023 +0200
+
+    do not print msg during testing
+
+[33mcommit 1218e7ed95ae6291e2bc12d76095a0d3eb2ea6e7[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jul 26 10:55:27 2023 +0200
+
+    display progress every 500 reads
+
+[33mcommit 87e2ba38dc29fe751892669692903254f0c2b059[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jul 26 10:38:04 2023 +0200
+
+    fixed activation bug
+
+[33mcommit 533190d0855b8958ce98003045db0748bef103c2[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jul 26 09:09:27 2023 +0200
+
+    small changes
+
+[33mcommit 37ba06aacc7ca44268c0f23119e66740a4d18045[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jul 26 08:16:51 2023 +0200
+
+    write hdf in queue
+
+[33mcommit 0fe875c969b1116c34149b09f93cd21d8b972a41[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jul 26 07:58:28 2023 +0200
+
+    dump features at the end
+
+[33mcommit 2e7f2e7ed9d8f0dbbdd84243c0eb95caa971d5a3[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jul 25 15:12:19 2023 +0200
+
+    do not correct location
+
+[33mcommit a8fd2e4ca64a24fde637ee213e7242f3d1d0e5d9[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jul 25 14:35:05 2023 +0200
+
+    use features dumped from basecall
+
+[33mcommit d7ae12610fec00a1eb45865b908bf0e0234370b3[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jul 25 13:28:31 2023 +0200
+
+    removed pid
+
+[33mcommit e86c4857acd11e7fe750a0001c2fef0188dd1c36[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jul 25 13:16:07 2023 +0200
+
+    separate output
+
+[33mcommit d9ca1ad11a23fe8559716f5531bb01bff61e9eca[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jul 25 11:41:59 2023 +0200
+
+    exception handling
+
+[33mcommit fd0fe2e071145adb47c041ff7eee6983cfe57333[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jul 25 11:26:32 2023 +0200
+
+    change index
+
+[33mcommit be7baa96fbeb6510012e3ce8298064e321c57fdd[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jul 25 11:23:37 2023 +0200
+
+    transpose before return
+
+[33mcommit 1e3fa1dae2db2f39c6e4ef1274e3e62240161edf[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jul 25 11:17:03 2023 +0200
+
+    separate transpose from copy
+
+[33mcommit ae9c886b4abb5075b173f87f3c1db22ac30a04a9[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jul 25 11:03:58 2023 +0200
+
+    renamed paths
+
+[33mcommit 3e25219e1035e4e3c501affd916d87999e700969[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jul 25 11:03:21 2023 +0200
+
+    integrated feature extraction into basecalling
+
+[33mcommit f0bd302f444cbd54a6b3d113bcc9587dba7f7c39[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Mon Jul 24 11:42:09 2023 +0200
+
+    added requirements file
+
+[33mcommit f5ce27c37533fa4602b66f60cba51c6633583721[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 21 16:15:11 2023 +0200
+
+    fixed path error
+
+[33mcommit fa798fb8d8d443d7f7087b190a0f29fe394d027c[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 21 16:07:32 2023 +0200
+
+    increased batch size
+
+[33mcommit a9c58a6bb8355aa68e7896418d75869a4d80c1e0[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 21 16:04:33 2023 +0200
+
+    name changes
+
+[33mcommit 03f754f3c102be77c18f14ba0c83ee73cd713f5a[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 21 15:29:34 2023 +0200
+
+    added rnaarch
+
+[33mcommit 9bebf8d28743bea00d57b701a071ec886b3f2009[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 21 14:48:59 2023 +0200
+
+    added rodan to repo
+
+[33mcommit dfe2eaeba5d0198313b8a3e61f79812561d2ec40[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 21 13:43:42 2023 +0200
+
+    removed redundant line
+
+[33mcommit a2dea0ea1a25061871bdc3de7a44ae81adb3c43b[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 21 13:38:16 2023 +0200
+
+    removed comments
+
+[33mcommit 3f79027edbb0fa7b4ff0f8c9732d882e2fca13c3[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 21 13:33:47 2023 +0200
+
+    raise Exception object
+
+[33mcommit 3566cd5269f65082cde357d17d07d290755b831f[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 21 13:28:03 2023 +0200
+
+    clean up models
+
+[33mcommit ec37dfb40d861e8ae2ba0ec3b0dae8ccc8f7922c[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 21 13:21:55 2023 +0200
+
+    decompose layer
+
+[33mcommit d9f03139e1bce427ec81563345f5d806857b21b5[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 21 11:35:17 2023 +0200
+
+    first batch of suggested changes
+
+[33mcommit 8bab1c530af6e0826155baeeced395a32b4f5b4c[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 21 11:21:03 2023 +0200
+
+    replaced [] by None in default args
+
+[33mcommit 312285b471e1fe563090bec8b649d11129528876[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 21 11:14:41 2023 +0200
+
+    with get_fast5_file() as f5
+
+[33mcommit a1c1b82edbb81bcc804322184cd9f82115d0a90c[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 21 10:59:13 2023 +0200
+
+    new str formatting style
+
+[33mcommit be68278437df1d9eef65b3bc92fb78bf1f0ab9f1[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 21 07:41:11 2023 +0200
+
+    revert to total read counts
+
+[33mcommit ef6f68db571d90d7248094fd9eb80e18fed6f152[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 20 16:34:41 2023 +0200
+
+    add BAM output with MM / ML tags
+
+[33mcommit 5ef63bba40c71921913afea71a9cd5961fef8cb2[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jul 19 16:35:30 2023 +0200
+
+    round instead of int
+
+[33mcommit c7e679fbc526e588afdfaad13f6c0b85736ced0f[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jul 19 15:31:11 2023 +0200
+
+    more var name changes
+
+[33mcommit 33285f1435b69dfadfdf76e30e601f07e1dbf3de[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jul 19 15:28:10 2023 +0200
+
+    changed variable name
+
+[33mcommit aa8c0f6628fc80031a29b55bd2fadbb2ce36d906[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jul 19 15:23:55 2023 +0200
+
+    progress bar
+
+[33mcommit 7ded9f40beb4789a511ee24323abe9724f1f7e13[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jul 19 14:27:57 2023 +0200
+
+    rework file in/out format
+
+[33mcommit 2b437cfbc114234143950d77e787bcd042095646[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jul 18 14:03:10 2023 +0200
+
+    changed * to &
+
+[33mcommit 32320404adae5e63afc0119a2ae1ec888f73abb1[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jul 18 13:52:10 2023 +0200
+
+    skip filtering at the end
+
+[33mcommit bb512b5ac3b157b9ca42832192e85e5f39e003af[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Jul 17 15:56:53 2023 +0200
+
+    updated workflows and vis
+
+[33mcommit 7173c23a8c99a9b434bdd2978795c65263886b82[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Sat Jul 15 12:17:23 2023 +0200
+
+    updated conversion files
+
+[33mcommit 3cf7193eb4e893284fcf23393de1f7e3baedb584[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Sat Jul 15 09:00:50 2023 +0200
+
+    ensure str type of Strand
+
+[33mcommit 7e1b798152b09050451458a1912fe41891c22236[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Sat Jul 15 07:39:39 2023 +0200
+
+    change * to &
+
+[33mcommit b4c32ead87dd3210ea6551c4951e807fcd8fcbb2[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 14 16:02:35 2023 +0200
+
+    fix df value
+
+[33mcommit e2a33c2f937903a469190d5b9fbd883d53452edc[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 14 15:33:40 2023 +0200
+
+    capitalize Strand
+
+[33mcommit c7aabb5ed001aeb2a02226f728a2c7b337f7db63[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 14 15:31:33 2023 +0200
+
+    fixed path
+
+[33mcommit 0f824edc114abe77aad00ef688814b18aae5d17e[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 14 15:29:18 2023 +0200
+
+    fix pos error in CHEUI conversion
+
+[33mcommit b25042ad724131004aa1d6661cceacc0d2aabbc5[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 14 13:40:09 2023 +0200
+
+    do not output index
+
+[33mcommit 02fdac4eb2bc28b3084fbc73181a4181c9e6427a[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 14 13:06:04 2023 +0200
+
+    fix
+
+[33mcommit 0da3c253b7651ced79d0763c92e2f1f4b05d42b7[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 14 13:02:28 2023 +0200
+
+    update
+
+[33mcommit fc9270a1588d009e199de986c9050b7ccd2485f5[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 14 08:05:48 2023 +0200
+
+    update workflow
+
+[33mcommit c1811a4ef8e45be5d8eace1ddeba1250185ad4a9[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 14 07:52:16 2023 +0200
+
+    path change
+
+[33mcommit 06b210ecba63d56f7da63ff654b4bd553d952b01[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 14 07:45:13 2023 +0200
+
+    update
+
+[33mcommit e534a0ed0f47ea7d6cea7dc229fc0f3190684a45[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Wed Jul 12 14:52:58 2023 +0200
+
+    small change
+
+[33mcommit 70b2e01a2b69417c73ded688f92278b7ac21a582[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 14 07:43:05 2023 +0200
+
+    update conversion script
+
+[33mcommit 4bb6fee56021f748f0825cd9ec668353c091b56b[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jul 12 14:52:24 2023 +0200
+
+    small fix
+
+[33mcommit fef3147317ed27ccbb1821475ce899738c7ca847[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jul 12 14:46:34 2023 +0200
+
+    updated CHEUI workflow
+
+[33mcommit fc93041fc417088ae811920279a78bfd2e2a8dd7[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jul 12 14:44:38 2023 +0200
+
+    tx -> cDNA coord conversion for CHEUI
+
+[33mcommit 452b9f93a6cdbca14900e812aa7e98ac3018a45e[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jul 12 11:09:22 2023 +0200
+
+    more splitting on CHEUI workflow
+
+[33mcommit 5e5105c1091ed90f5db5314a8e3b28ad0b75766b[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jul 12 07:50:41 2023 +0200
+
+    update
+
+[33mcommit 5b211932070e2292f878cb757a3071b291de1a1b[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jul 11 16:46:49 2023 +0200
+
+    scheduled start time
+
+[33mcommit 1561ad010a231d3d1737c24515b5164b0e4f4c47[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jul 11 15:30:03 2023 +0200
+
+    updated workflow for running CHEUI
+
+[33mcommit 1f9ee587794520b82539a28af2f725cefc26eb91[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Sat Jul 8 13:24:24 2023 +0200
+
+    move to scratch
+
+[33mcommit 1aa27ffc71038966fb2f2f79131a7d3e631ee1f3[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Sat Jul 8 12:24:45 2023 +0200
+
+    run CHEUI from preprocessing dir
+
+[33mcommit 928d305fe92a9c3d9b18d3621c59498537495afc[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Sat Jul 8 12:00:03 2023 +0200
+
+    switch to cpp CHEUI prep
+
+[33mcommit d81e34627d6bbbdc98407701e699a230af0f0c76[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jul 7 16:08:31 2023 +0200
+
+    restored ticks
+
+[33mcommit a139ac709d180f21e72ef284d75d29db118f7349[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 6 16:58:25 2023 +0200
+
+    replaced rev | cut | rev with one cut for faster performance
+
+[33mcommit 96e9e2681665d08ac86c88d7ccf8f53f6a388059[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 6 15:00:12 2023 +0200
+
+    updated GLORI vis script
+
+[33mcommit 680277cfc95b7fc2c5f38f422808af41db5cd77c[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 6 11:37:26 2023 +0200
+
+    updated m6Anet conversion script
+
+[33mcommit 5869ab66d21bfdcf97f4311110e1af0074a59655[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 6 08:31:46 2023 +0200
+
+    moved script
+
+[33mcommit 55ea8db737cbce78ecc56c0417073cf564e3c32e[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 6 08:31:21 2023 +0200
+
+    updated vis scripts
+
+[33mcommit d6db089d4f72c2bda2992f3169b83502373254ec[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jul 6 08:14:55 2023 +0200
+
+    updated m6Anet / CHEUI workflow
+
+[33mcommit f5e1a8a305f94d69513c9719ae46a2f53da7828a[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Jul 3 17:43:39 2023 +0200
+
+    back up vis
+
+[33mcommit f07d043b41969b86b986ce14dea404440b86d225[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Jul 3 17:29:16 2023 +0200
+
+    more debug msgs
+
+[33mcommit 814f1e4368edf285c1ffb3e0df8d71f98a71c091[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Jul 3 17:10:26 2023 +0200
+
+    remove srun
+
+[33mcommit 28b9177b511fd30aecd8d942a0df68ab47f94704[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Jul 3 17:09:31 2023 +0200
+
+    move to sbatch
+
+[33mcommit da464f044bf6247b99d703c16028f29d032ebc3d[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Jul 3 17:04:16 2023 +0200
+
+    added workflow for running nanopolish on HEK293
+
+[33mcommit bf0ee0820f0a6680dc5b37fbef94557d6ccf6737[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Jul 3 14:40:07 2023 +0200
+
+    M4M5
+
+[33mcommit 3170bd7898f151859fcb2ca3c13f32495c8272d6[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Jul 3 08:28:16 2023 +0200
+
+    updates to ABBA plot
+
+[33mcommit 899a108d19d863fe2fa934102df030a755f457fa[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Jul 3 08:27:26 2023 +0200
+
+    use minimap for benchmarking oligo tests
+
+[33mcommit 303203c80f6496f6fce4e9ee69afb738faf83881[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Fri Jun 30 13:48:19 2023 +0200
+
+    changes to ABBA names
+
+[33mcommit dd7092f691168146b50dd1d3c462d481d25e2f43[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 27 16:52:13 2023 +0200
+
+    skip basecalling in script
+
+[33mcommit 54228e0fb288c84391374510f7f7ca7d6c0013d8[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jun 30 13:46:39 2023 +0200
+
+    workflow for m6Anet
+
+[33mcommit 8b9330330d1f034493446fbfeb4e3970a4a035ec[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jun 30 10:27:18 2023 +0200
+
+    updated selection criteria for single reads in ABBA
+
+[33mcommit 92201220f015cfc743b0931c7c2cb6daff6b786f[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 29 13:57:12 2023 +0200
+
+    updated ABBA vis script
+
+[33mcommit 8831213360a3d37d783d5cecf98564c1d83ff31b[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jun 28 16:48:39 2023 +0200
+
+    more changes to vis scripts
+
+[33mcommit 92bf528031662e313bd4969a607ec81a0bc7fa94[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jun 28 14:04:29 2023 +0200
+
+    updated vis script for ABBA
+
+[33mcommit a1124b215e95da6b5a64164ea6f732a0cce139c8[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jun 28 14:04:09 2023 +0200
+
+    allow non-singlet in oligo ref
+
+[33mcommit cc9d1a75c41ec8412ec15d0f0483000c9dda1a22[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 27 16:51:00 2023 +0200
+
+    added chain in oligo ref
+
+[33mcommit 0766deb185d674b23306811376d3446af28328ec[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 27 09:22:49 2023 +0200
+
+    added WUE batch 3 in test
+
+[33mcommit 1f8ef02991c863b119c634036176cb69c6e319cd[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 27 08:57:12 2023 +0200
+
+    added WUE batch3
+
+[33mcommit c3b8b1b4a9471168596dfb3eee4c6477bd0841a4[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 20 15:54:23 2023 +0200
+
+    added histogram of isoform splitting
+
+[33mcommit b5fbef54dfa5757a7a93db2c7e839912d00143fa[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 20 11:44:06 2023 +0200
+
+    append df without header
+
+[33mcommit 057097ea65a8d43e91b0fee377c4587160cfb5bd[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 20 11:43:27 2023 +0200
+
+    added dot plot to isoform vis
+
+[33mcommit 87d13150a3f778b3eeab6000749a1c72c6e22693[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Jun 19 14:45:47 2023 +0200
+
+    final write out in transcript assignment; initial %counts in vis
+
+[33mcommit a72ed027e5dc41cfa3af8ce17f0c84952962ef20[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Jun 19 14:33:36 2023 +0200
+
+    separate plotting from transcript assignments
+
+[33mcommit bc2e15db1dcbebedf6600f66f6d0ce1525d6b5a9[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Jun 19 13:44:31 2023 +0200
+
+    empty df_out regularly
+
+[33mcommit 708ebf53fc253e5518739fc39056ca757d365f8d[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Jun 19 13:08:57 2023 +0200
+
+    once more
+
+[33mcommit 0562884a030a51e4f2adfaf1cccf1891053c6009[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Jun 19 13:06:57 2023 +0200
+
+    correct path
+
+[33mcommit 7c7ee17c88a9c1b648072bdfacd415f2ad980d40[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Jun 19 13:05:16 2023 +0200
+
+    server paths
+
+[33mcommit ccf6e6d4c6bc6545f4171a79fad8602b1724272b[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Jun 19 10:54:18 2023 +0200
+
+    updated assign transcript
+
+[33mcommit 6a8e1e875096fce860f9dd706962ddcc2e1e82e2[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Sat Jun 17 12:19:48 2023 +0200
+
+    script to add annotation
+
+[33mcommit c82e621b5596e080f379aa91e5df9921e7df9182[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jun 16 16:35:58 2023 +0200
+
+    output files
+
+[33mcommit 4e6e52a313c37d033b36ea8e8d4039f9dcc38401[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jun 16 16:00:27 2023 +0200
+
+    started bambu
+
+[33mcommit ee7453fc8d7fc9bfe4ab4253f59060c07569654f[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jun 16 16:00:13 2023 +0200
+
+    updated vis scripts
+
+[33mcommit f5ea046b47750a5312398bc72f7b6cd0f3afaa4a[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jun 16 10:05:49 2023 +0200
+
+    updated workflow
+
+[33mcommit 67a675696e1e52990738dea08e975e564b042604[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 15 17:11:31 2023 +0200
+
+    small updates to vis scripts
+
+[33mcommit 63dbc7f2b1c3429d86fc747fa3afa505f9d9ef06[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 15 15:12:39 2023 +0200
+
+    updated plot scripts
+
+[33mcommit 7ebb24aab9f7ae1ff4f44ceb24274fa745ecd7fd[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 15 13:29:34 2023 +0200
+
+    extend part suffix to 3 digits
+
+[33mcommit 93ef529ffb5cb637dc23f1a397ef762db7df4662[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 15 09:48:21 2023 +0200
+
+    updated plot script for new reference format
+
+[33mcommit 1275dff3f1b615ac71c6e9155a27df13d68163df[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 15 08:53:43 2023 +0200
+
+    switch raw counts to norm counts in prc
+
+[33mcommit b592d3e35ff3a5b33395c95f42e11e9d9acb9f5a[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jun 14 15:55:45 2023 +0200
+
+    added more datasets to loop
+
+[33mcommit ab7eee2fa5c53e82dd67541b613ec403902a5e01[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jun 14 15:37:56 2023 +0200
+
+    fix path error
+
+[33mcommit 09c51056f4cc22ecf7bb6b53f1b26e302cb494a5[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jun 14 15:23:57 2023 +0200
+
+    added M4M5 dataset
+
+[33mcommit 1bc809d3acd9929fa56627144143c03d5119fd40[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jun 14 15:23:36 2023 +0200
+
+    reformat figure output
+
+[33mcommit d0f74f397e43165978de492aafb6aba80c476a05[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 13 16:00:16 2023 +0200
+
+    changed oligo vis script
+
+[33mcommit 2ba64940d3480187c15fcaccaed474a05eef55eb[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 13 13:44:39 2023 +0200
+
+    shortened combined run names
+
+[33mcommit 6de6b58e6fb41fa8d62d2024fe9162b6c51f2a5a[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 13 13:30:47 2023 +0200
+
+    resolved conflict
+
+[33mcommit 6e012d5edc359c7ae5be15cde09ce4f3607c074c[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 13 13:18:13 2023 +0200
+
+    added oligo to path
+
+[33mcommit dc27de56bdcec6d422335389f2f8c80337452122[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 13 13:17:31 2023 +0200
+
+    added mod to test dataset
+
+[33mcommit bf933604a0c786e52acdbb7a527c2030f881fb13[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 13 13:10:04 2023 +0200
+
+    resolved conflict
+
+[33mcommit 7b02593b9dc3e18a3adb4a7f19c497952e51a85e[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 13 12:00:05 2023 +0200
+
+    uncomment
+
+[33mcommit b5c50ccd666ce5fa8771fea5c3db52fbdee5e946[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 13 11:58:32 2023 +0200
+
+    added multi-test MAFIA oligo
+
+[33mcommit f7d7d1990925dd280108c3d9eb1b24556ca721e4[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jun 9 16:03:16 2023 +0200
+
+    added suptitle to vis script
+
+[33mcommit a30e502460149e11a385bbe730f1fda7481cc81b[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Fri Jun 9 16:02:07 2023 +0200
+
+    array name change in main script
+
+[33mcommit 8cc7b228ab1a1d768286776959473ad3e07a142c[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jun 9 11:11:17 2023 +0200
+
+    small changes to workflows
+
+[33mcommit f32c40473dbf2a6687fa9510a049804ca20ecd20[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jun 9 09:19:49 2023 +0200
+
+    renamed workflows
+
+[33mcommit 62edef41662f10696a7d1c578add448c83243fde[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jun 9 09:12:00 2023 +0200
+
+    renamed scripts
+
+[33mcommit a634c13e99d4c332bd11ba50d664fa93f1d5a06b[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jun 9 09:09:27 2023 +0200
+
+    renamed test workflow
+
+[33mcommit f6c6e5abfaca4f4e2bae50a3c51a22ad85c1e63e[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jun 9 08:34:35 2023 +0200
+
+    switch to recursive search for fast5
+
+[33mcommit c28d672a91cbb2dffd5b136b11280eaec7df882e[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 8 15:36:47 2023 +0200
+
+    changed input from .fa to .fasta
+
+[33mcommit 89d632390fbcc58c5e87d25e2ce804e46eb8a75a[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 8 15:31:19 2023 +0200
+
+    added ISA-WUE to train workflow
+
+[33mcommit a6e29a96a2a53c7abbe0c6cbcb505fc41ab166d6[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 8 15:27:29 2023 +0200
+
+    remove superfluous orig
+
+[33mcommit 7d937d503458b6838676b9960633bc2ca20e7e26[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 8 15:22:05 2023 +0200
+
+    merge ISA and WUE
+
+[33mcommit ff39c35ce3c97180b1fcb305e991bc1722b5e071[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 8 12:50:13 2023 +0200
+
+    added link checks
+
+[33mcommit 4da1e7af8367d7e1fccf2e7c736e941d63dd90c9[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 8 12:27:34 2023 +0200
+
+    corrected output path
+
+[33mcommit 27d41c5a2d94b431a6ca2e51a70f2963eb6031cf[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 8 12:24:12 2023 +0200
+
+    small changes to shell scripts
+
+[33mcommit 93073bb7dc090fe82f9afba08c9a621652a80e9e[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 8 12:07:43 2023 +0200
+
+    rename and clean up train shell script
+
+[33mcommit e63d6d9bb5992ef178a74df0daafd4e4b069dec0[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 8 11:46:33 2023 +0200
+
+    samtools merge and sort
+
+[33mcommit 879ab3b109d97e1f764e21c5c0aa95e3dce804f5[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 8 11:40:49 2023 +0200
+
+    verbose output
+
+[33mcommit 8872fddeed94bab74afa542a34ea4c7ebb0bef5f[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 8 11:08:52 2023 +0200
+
+    fixed = error in args
+
+[33mcommit edec962d9c98a24097d3e88d8f2368240d360c0c[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 8 11:04:08 2023 +0200
+
+    bash instead of sbatch
+
+[33mcommit bd8ce90efa5bd9ef00d7eb39d1f06953616f35d5[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 8 11:00:44 2023 +0200
+
+    bash scripts to loop over multiple oligo datasets
+
+[33mcommit 036ea76aeb4235013ae896d86ba1cbbf1cf1bfa0[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 8 10:25:40 2023 +0200
+
+    input args for prep script
+
+[33mcommit 6bd55f13130f422c536fb735ca027f6dd9f4c477[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 8 09:16:06 2023 +0200
+
+    small fix
+
+[33mcommit ac47b7dbd347b753a8c4f7e3b8d478c036cc3449[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 8 09:13:23 2023 +0200
+
+    print progress
+
+[33mcommit f6090badaeee0bb4235a6cb15619b411888085cc[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 8 09:07:48 2023 +0200
+
+    cleaned up paths in oligo prep script
+
+[33mcommit 01f573991eab632c101f6cb64cf738a325c6700d[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Wed Jun 7 13:53:41 2023 +0200
+
+    resolve
+
+[33mcommit 019e633201dbab84d245ed683f896309e739a9cf[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Wed Jun 7 13:52:12 2023 +0200
+
+    resolve conflict
+
+[33mcommit ef1a40477783f8e57a1e01cffa5cff0e87b9ff19[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jun 7 13:50:42 2023 +0200
+
+    merge ISA datasets
+
+[33mcommit 05e64688175330e9f084af5c44bddecc4f5cead8[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jun 7 12:00:11 2023 +0200
+
+    updated oligo prep workflow
+
+[33mcommit 5124b6e34581386393d88efd15f6677435a690af[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jun 7 11:31:04 2023 +0200
+
+    merge also A and m6A
+
+[33mcommit 705f428643141eec7685d2a0e72b4182191bdf91[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed Jun 7 10:52:38 2023 +0200
+
+    added workflow to merge multiple oligo runs
+
+[33mcommit 9aa6015b77613ae3c8fc2a4a0f9225682b652144[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 6 16:19:28 2023 +0200
+
+    added M to load_genome_reference
+
+[33mcommit fec2baedd49dddcd0e1eb6ae3eece05d8548478e[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 6 13:18:36 2023 +0200
+
+    changed workflow to shell script
+
+[33mcommit f9527bf89cfbb4e86e9d41094cd8ed435d39960b[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 6 13:13:20 2023 +0200
+
+    fixed small arg error in spomelette script
+
+[33mcommit 2ba6c57fa0d888404ba36ec2832049b443103aef[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 6 13:05:11 2023 +0200
+
+    shorten name to classifier model dir
+
+[33mcommit 286e28f3cf06ea828c22e033e2b5c0d13a8f0ab6[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 6 13:04:14 2023 +0200
+
+    set u flag to python
+
+[33mcommit ab3d176dfd27f4c5d19a0aca15d020bd5071ed99[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 6 11:51:40 2023 +0200
+
+    small name changes
+
+[33mcommit a40011b72cbd2f2b7a7394217e5a3a7c8db06d94[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 6 10:33:23 2023 +0200
+
+    index only bam queries for oligo; false for mRNA
+
+[33mcommit bb3a4c0948d2ae15d203330eaa88e2a4dbf02cb7[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 6 10:09:36 2023 +0200
+
+    more refactoring of util functions; renamed util to arg_parsers
+
+[33mcommit ca9e0e625c2f278845dc19babf5478ea4fde5ac2[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 6 09:44:09 2023 +0200
+
+    renamed all classes with capital beginning
+
+[33mcommit 93abd3925f6c8d05ee4f75fd98b8e2f789841685[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 6 09:05:23 2023 +0200
+
+    classifier type arg to default
+
+[33mcommit af4a489d81cac2af9cafe5c2975db82d6a918ea9[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 6 09:03:02 2023 +0200
+
+    changed workflow dir
+
+[33mcommit 55b4dbcde31c5a72939a78ef3823b3f60eba0cc8[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 6 08:58:38 2023 +0200
+
+    updated test workflow
+
+[33mcommit 85ae542316c96ccb0b5e01154f2492673bd39a7c[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 6 08:55:08 2023 +0200
+
+    more refactoring of alignment script
+
+[33mcommit ef45c3a8c92c2e5d00333a49cd5e44f1b3cba11e[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue Jun 6 08:32:35 2023 +0200
+
+    updated batchsize and lig ref path
+
+[33mcommit bac007691680958233fbc1a38992e97abf80c20c[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Jun 5 16:56:54 2023 +0200
+
+    updated datasets
+
+[33mcommit 5e0f44212bb8417614d611c2c62320cebfc0d20c[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Jun 5 15:55:09 2023 +0200
+
+    don't import TkAgg
+
+[33mcommit f2a0c665f96da62606d7d6ab59a7cab2b882c086[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Jun 5 14:02:23 2023 +0200
+
+    fixed spelling mistake
+
+[33mcommit 8c66cd5caf6b0f17d77e194cfa02baad6f5d2aad[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Jun 5 14:00:41 2023 +0200
+
+    refactored oligo test
+
+[33mcommit 3f3e0ef70a1741a5f2d2d10ee686d4bbde62173e[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Jun 5 13:48:46 2023 +0200
+
+    updated paths in train workflow
+
+[33mcommit a5f39399bbc89fae2fde0f55f73b6e5053643a0c[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon Jun 5 13:36:19 2023 +0200
+
+    refactored oligo ref gen
+
+[33mcommit af95a5923211a091183f5fb8c8151c339d6994e5[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jun 2 15:18:34 2023 +0200
+
+    refactored spomelette alignment
+
+[33mcommit 38daa6a7161994b3995c5e55e1ac06c687ff2188[m[33m ([m[1;32mmain[m[33m)[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri Jun 2 10:08:55 2023 +0200
+
+    refactored feature extractor
+
+[33mcommit 2ee6d7162c34410eecc376f6cf646438844489cf[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 1 17:21:13 2023 +0200
+
+    moved basecaller script
+
+[33mcommit 837c6cc6c94e033e89966640342a5d724d7db604[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 1 16:59:03 2023 +0200
+
+    refactored argparse and added main functions to every script
+
+[33mcommit ee72ece2827dc16f77e7312221e29c759a97fbd5[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 1 16:08:25 2023 +0200
+
+    more update to writer
+
+[33mcommit 35810744f226c3a0c315c7f241612f0f687dcecd[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 1 15:02:18 2023 +0200
+
+    refactored writer
+
+[33mcommit feba9f4b95138bf0bdd1d5af2d69f180d846b145[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 1 14:35:13 2023 +0200
+
+    more refactoring of mRNA test
+
+[33mcommit 51514ec1964e486887d9d6072ec6679349d221a6[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 1 12:02:12 2023 +0200
+
+    refactored mRNA test
+
+[33mcommit 3dc4e0c5d05594732a35c68c7deac966a7f12b9a[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu Jun 1 08:29:16 2023 +0200
+
+    reorganize into folders
+
+[33mcommit 28e054e666c5f58fab26ef85ac5479249c3b801c[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 31 15:45:49 2023 +0200
+
+    more clean up
+
+[33mcommit 435a106943a447773ae61eb5ef402efe824f9ecf[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 31 15:41:25 2023 +0200
+
+    refactored oligo test
+
+[33mcommit 46b319ede81261fa8eebe78f21327b763119bc22[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 31 14:22:49 2023 +0200
+
+    refactored oligo train script
+
+[33mcommit d07757c4302af5400c6a0fbaf167d250bda037b4[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu May 25 09:44:02 2023 +0200
+
+    added vlnplot / boxplot to visualization script
+
+[33mcommit 61086cbd6d1890a9b8d61c45c21da108a7912648[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu May 25 06:59:42 2023 +0200
+
+    lowered q-threshold to 70
+
+[33mcommit b113e5d6774adc73c3755e39e566e94e4348c371[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 24 15:59:58 2023 +0200
+
+    fix small bug
+
+[33mcommit 1c7497670961803e444261972eb2a5a128f6fbc1[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 24 15:24:51 2023 +0200
+
+    added script to plot M4_M5 heteropolymers
+
+[33mcommit 9e65976c6542844c17a2b9f7c0b6ea4d61123b88[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 24 13:13:10 2023 +0200
+
+    added M4_M5 hetero to test data
+
+[33mcommit 9614c5b432aa10881d83ede526cc149d1cbb1639[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 24 11:42:44 2023 +0200
+
+    added single-read visualization of mRNA results
+
+[33mcommit 2b041d72f2027049284941bbd4a14ab8794f2312[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue May 23 16:03:41 2023 +0200
+
+    remove phred scores from fastq records to avoid sam writer errors
+
+[33mcommit ae540fedea2ac78a4061e78a381a13bbc1fd4532[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue May 23 15:22:28 2023 +0200
+
+    auto detection of query file format
+
+[33mcommit 2ec9718f7914f3b44708e4408633056f6de5bde5[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue May 23 11:53:30 2023 +0200
+
+    small updates to plot script
+
+[33mcommit 91a875ec62a5abb63e5d7647817e9e2fa521d464[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue May 23 09:26:41 2023 +0200
+
+    more updates to plot scripts
+
+[33mcommit 590dcdf5ebfb428dea469e442362d649faba7d04[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue May 23 08:56:17 2023 +0200
+
+    separated m6Anet plotting from cDNA conversion
+
+[33mcommit b274b31f9384955f6852e3c48a52e02f609cff8f[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue May 23 08:19:20 2023 +0200
+
+    fixed Pvalue key error
+
+[33mcommit 51f2ddc8e86684a062985ffbda6891e3ae909eb8[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon May 22 17:19:29 2023 +0200
+
+    implemented in-house cDNA -> gDNA coords conversion
+
+[33mcommit 1de959ff21e69214ac321be61a98d4b3c0e8f7a9[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon May 22 10:37:40 2023 +0200
+
+    small updates to plotting
+
+[33mcommit 23801bda8e16530d26e5a400b12e5337b6b31d4f[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon May 22 10:23:03 2023 +0200
+
+    updated oligo plot script
+
+[33mcommit 6ce244d43f394368e8fbe86c561bfacba8b5a2de[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon May 22 08:57:13 2023 +0200
+
+    remove output_mod_probs
+
+[33mcommit 4b700ab7b71663246092476c852032975596d6c0[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon May 22 08:34:30 2023 +0200
+
+    added ref_pos to nucleotide output
+
+[33mcommit 31a58d54911087276001bd7c6a4943eafaffbd1d[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri May 19 16:13:40 2023 +0200
+
+    first attempt to convert cDNA to gDNA coords in R
+
+[33mcommit 1ad8bbf8aea40045ad83e6244678c135a3af122f[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Fri May 19 10:34:54 2023 +0200
+
+    removed ext_layer from arguments
+
+[33mcommit aa75be4b2bb3fa3cc3c188d099459aad4da386da[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri May 19 10:15:34 2023 +0200
+
+    comment out debug msg
+
+[33mcommit bc9bcd79945fc2ecb4204599fb9b51c761befe71[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri May 19 10:06:01 2023 +0200
+
+    fixed bug for strand+/flag0 and strand-/flag16
+
+[33mcommit f3d174479b0aec9b66e258d45fa76f7a82f9bdbc[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu May 18 17:34:57 2023 +0200
+
+    small updates
+
+[33mcommit 24d62b7d23e5a789bea32c8067be5fa57b544feb[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu May 18 17:29:51 2023 +0200
+
+    added visualization of single-read m6A probs
+
+[33mcommit 2ac786f148147995d46bdafb159f19efdb784a85[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu May 18 15:50:59 2023 +0200
+
+    changed train dataset in oligo test
+
+[33mcommit 0b277b55a6385b54f0520ccdfcc42fc1806f0c24[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu May 18 12:22:14 2023 +0200
+
+    combined WUE 1+2
+
+[33mcommit 75ad5840086b49cd42966205448c7f1388c4da21[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu May 18 11:42:40 2023 +0200
+
+    clean up
+
+[33mcommit dd57957a811b4764f3e6e925193d093cba426459[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu May 18 11:39:44 2023 +0200
+
+    refactored oligo train script
+
+[33mcommit c56fd2f77d49ad75642ce3ce35034661e968c12a[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu May 18 10:18:43 2023 +0200
+
+    refactored feature collection; introduced nucleotide class
+
+[33mcommit cfbb7f9fd15d646d2304ec420fb6beb94c7ca853[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 17 17:01:27 2023 +0200
+
+    fixed bug with feature dict; more output from oligo test
+
+[33mcommit b52ae57e4ab81cddd9f7720085581767f4a7d2a3[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 17 14:18:31 2023 +0200
+
+    MAFIA_test_binary_classifier_oligo.sh
+
+[33mcommit 00eaf075442f80201ea99d6e8ca9b1b40766d643[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 17 14:07:34 2023 +0200
+
+    small change to bam name
+
+[33mcommit dcb01f9e143fb8ace193e762b77984087bee457b[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 17 14:04:55 2023 +0200
+
+    small changes to parameters
+
+[33mcommit 67f960653064ba45472059ae8a5828423084ae1d[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 17 13:50:35 2023 +0200
+
+    revert automatic name replacement
+
+[33mcommit b721f1ecd744607c41609f22a48a830e0e078ff2[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 17 13:45:58 2023 +0200
+
+    automatic replacement of filename
+
+[33mcommit 7cd91f9deba4661e8deb13c01c6c9734612391d5[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 17 13:41:44 2023 +0200
+
+    added homopolymer option
+
+[33mcommit d3eb39f81551e64a3ccb22032aa0ee6fde2c725d[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 17 13:25:47 2023 +0200
+
+    added homopolymer check
+
+[33mcommit b005332e7977e2d6e4b93bcec7db2caed8e4b421[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue May 16 16:39:48 2023 +0200
+
+    move xy labels
+
+[33mcommit 745af17d916c8101eb477a818340760ff9fe79c8[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon May 15 16:11:38 2023 +0200
+
+    small change in plot pars
+
+[33mcommit 079e3e8b89faca157ee09023ad6d8d3fab17612c[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon May 15 15:53:43 2023 +0200
+
+    small change in output msg
+
+[33mcommit fcc5242979282ba15fd33025f50797a1761f714d[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon May 15 13:11:48 2023 +0200
+
+    update plot script
+
+[33mcommit f79c6718bd6c605f30f086da0618b51e451d141a[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon May 15 13:11:20 2023 +0200
+
+    read index in restart
+
+[33mcommit 51ede8714df65c9a849d1a0ef9907ef17ddf3fed[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon May 15 11:32:57 2023 +0200
+
+    rename plot scripts
+
+[33mcommit 07eaffa63005f942e45137a781951d536a854a94[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Mon May 15 09:32:18 2023 +0200
+
+    more mem for SWARM job
+
+[33mcommit d84b7d2c27839a5bfd0640d17cd0de7f174542dc[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon May 15 08:58:32 2023 +0200
+
+    small update
+
+[33mcommit 9c1a9cb61ccfeb9f2a041b003cee4b10fd626e71[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Mon May 15 08:20:20 2023 +0200
+
+    cleaned up test arguments
+
+[33mcommit eac21e2163b0205f27d07d0f1417d83ba6b6ffaa[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri May 12 14:38:53 2023 +0200
+
+    promote MAFIA BOSS to shell script
+
+[33mcommit 66e874da18e416e9e1fdc4a326d5a4de8d6e9309[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri May 12 14:34:04 2023 +0200
+
+    cleaned up paths
+
+[33mcommit 01f4d73ad19f54335185f1f9dcc069999c4eed60[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri May 12 14:00:22 2023 +0200
+
+    added PR curve
+
+[33mcommit 070b39e872755d013c72e96c04aae08a2f06c8ed[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri May 12 13:58:32 2023 +0200
+
+    data prep workflow to update existing basecalls
+
+[33mcommit 8838f87f7d704f21697791b04db76351aabadeeb[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Fri May 12 10:28:21 2023 +0200
+
+    slight changes to oligo test sbatch script
+
+[33mcommit a47255f2cc2774e4b2f246fc2c8fac5676969d6f[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri May 12 09:56:33 2023 +0200
+
+    sbatch script for testing oligo
+
+[33mcommit f7e91284ed078d29c13f3f9bd6f58253ece0f304[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Fri May 12 09:42:42 2023 +0200
+
+    completed oligo test script and started plotting script
+
+[33mcommit d9d2e111a91571fe53e909d817ef5f0940cfa46e[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu May 11 16:58:51 2023 +0200
+
+    started work on testing oligo
+
+[33mcommit e4cbf6504af3ae577152fa42e58b34f9f29ff78a[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu May 11 16:58:36 2023 +0200
+
+    added new paths
+
+[33mcommit 19a02706ab1b49d2856543cc25bb6740c3af1d55[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu May 11 13:44:38 2023 +0200
+
+    cleaned up scripts
+
+[33mcommit 8878aa87e70f3a4fa29cbb0acc358041f9468a10[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu May 11 11:23:50 2023 +0200
+
+    simplify paths further
+
+[33mcommit ab4ecd305db88b2ce22c4c9cfa9b0e13c8aa31f8[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu May 11 11:20:54 2023 +0200
+
+    retrain WUE_batch2
+
+[33mcommit 3285438cde09fc91585f60721ebdb170096f2aa2[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu May 11 11:03:30 2023 +0200
+
+    update recon ref by motif ind
+
+[33mcommit c8297e3699a14f210f4b121d2f9d2d7f35ced067[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Thu May 11 09:25:36 2023 +0200
+
+    reformat ref naming scheme
+
+[33mcommit c9e404912f8f678fabe1cf1a4aed3fbb6b92657c[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 10 16:55:17 2023 +0200
+
+    changed local alignment scoring scheme
+
+[33mcommit 086aab24210a056ee4279deaa3bbe6e4a901f719[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 10 16:11:46 2023 +0200
+
+    changed path in train script
+
+[33mcommit f4231a84319971da9f22de177906ca9bc279f6e8[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 10 15:54:25 2023 +0200
+
+    back to RK top 6 dataset
+
+[33mcommit 2c6f3a41d569d93c1ebe5fd2612cccb44aa64634[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 10 15:53:59 2023 +0200
+
+    changed output txt name
+
+[33mcommit 63a276e1f99abf69fec35b577331000ddf5107a8[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Wed May 10 13:40:47 2023 +0200
+
+    fixed more type
+
+[33mcommit a7f5bec0518212242cf61d28fc47fee74243cb32[m
+Author: Adrian <adrian.kaho.chan@gmail.com>
+Date:   Wed May 10 13:39:03 2023 +0200
+
+    fixed small var error
+
+[33mcommit 40510383ef8a96a0db3ada26970d43f88babd438[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 10 13:37:23 2023 +0200
+
+    switch to WUE_batch_2
+
+[33mcommit 5faa45e6a76f429db11a47369aaef60e9c1e78bd[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 10 13:10:21 2023 +0200
+
+    changed default score in spomlette from 60 to 50
+
+[33mcommit 5e86afd585534d6ed462d2f52d5a24ebc403ad21[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 10 13:06:10 2023 +0200
+
+    small cosmetic changes in debug outputs
+
+[33mcommit b0cfea22c5e29205a8eefb67b6e961c702743ba0[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 10 11:54:30 2023 +0200
+
+    automatic calculation of block_size, min_seg_len
+
+[33mcommit 4950529075eae841bfdcec1350d1bfa607e60901[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 10 11:47:01 2023 +0200
+
+    fixed contig error when it doesn't exist in bam
+
+[33mcommit 8a7bfed5cb166c9e4c25f159e4aab12eb10424d4[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 10 10:48:42 2023 +0200
+
+    updated prepare and train script
+
+[33mcommit 3d9627aef500ba9738a9b2480dd45c156be23ed7[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 10 09:30:42 2023 +0200
+
+    display pass rate over total num reads
+
+[33mcommit eeb170a824d6d6d14ebcd8c1b60a20539ce27c83[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 10 09:20:57 2023 +0200
+
+    change output classifier dir
+
+[33mcommit 4d7f9e675b635dbf1dae7bf20e1b3162e6b5ee9c[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Wed May 10 09:19:31 2023 +0200
+
+    remove D on both ends of CIGAR string
+
+[33mcommit 0ef69d64d2b314920166949970fee1a9ebca4ed0[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue May 9 16:47:07 2023 +0200
+
+    updated oligo train script
+
+[33mcommit a451e79540ca8c6bd98c6c067964f9bd522c30c0[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue May 9 16:37:53 2023 +0200
+
+    added very short shell cmdline to combine references and remove duplicates
+
+[33mcommit 37c3bc9d6ae90152c4d485803a3f793c05e3b87a[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue May 9 16:09:03 2023 +0200
+
+    tested and worked
+
+[33mcommit d3c5cc1df1c89cafae142c03faf1470d1abdfade[m
+Author: Adrian Chan <adrian.kaho.chan@gmail.com>
+Date:   Tue May 9 16:04:34 2023 +0200
+
+    fix more query.seq
