@@ -127,13 +127,19 @@ with pysam.AlignmentFile(bam_file, 'rb') as bam_in:
 ########################################################################################################################
 ### scatter plot #######################################################################################################
 ########################################################################################################################
-WT_bed_file = '/home/adrian/NCOMMS_revision/source_data/GENE_PROFILE/100WT/merged.mAFiA.sites.bed'
-KO_bed_file = '/home/adrian/NCOMMS_revision/source_data/GENE_PROFILE/Mettl3-KO/chr6/mAFiA.sites.bed'
+sel_chrom = '6'
+thresh_cov = 100
+
+# WT_bed_file = '/home/adrian/NCOMMS_revision/source_data/GENE_PROFILE/100WT/merged.mAFiA.sites.bed'
+# KO_bed_file = '/home/adrian/NCOMMS_revision/source_data/GENE_PROFILE/Mettl3-KO/chr6/mAFiA.sites.bed'
+
+WT_bed_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/DRACH_replaced/100_WT_0_IVT/chr6/mAFiA.sites.bed'
+KO_bed_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/DRACH_replaced/Mettl3-KO/chr6/mAFiA.sites.bed'
 
 WT_bed = pd.read_csv(WT_bed_file, sep='\t', dtype={'chrom': str})
 WT_bed_chrom = WT_bed[
     (WT_bed['chrom'] == sel_chrom)
-    * (WT_bed['coverage'] >= 50)
+    * (WT_bed['coverage'] >= thresh_cov)
     # * (df_bed['chromStart']>=sel_chromStart)
     # * (df_bed['chromEnd']<sel_chromEnd)
     ]
@@ -141,29 +147,34 @@ WT_bed_chrom = WT_bed[
 KO_bed = pd.read_csv(KO_bed_file, sep='\t', dtype={'chrom': str})
 KO_bed_chrom = KO_bed[
     (KO_bed['chrom'] == sel_chrom)
-    * (KO_bed['coverage'] >= 50)
+    * (KO_bed['coverage'] >= thresh_cov)
     # * (df_bed['chromStart']>=sel_chromStart)
     # * (df_bed['chromEnd']<sel_chromEnd)
     ]
 
+# blacklist = ['AGACC', 'AAACA', 'TAACA', 'TAACT', 'GAACA', 'TGACC']
+blacklist = []
+
 merged_bed = pd.merge(WT_bed_chrom, KO_bed_chrom, how='inner', on=['chrom', 'chromStart', 'chromEnd', 'name', 'score', 'strand', 'ref5mer'], suffixes=['_WT', '_KO'])
-merged_bed_six = merged_bed[merged_bed['ref5mer'].isin(['GGACT', 'GGACC', 'GAACT', 'AGACT', 'GGACA', 'TGACT'])]
+merged_bed_sel = merged_bed[
+    ~merged_bed['ref5mer'].isin(blacklist)
+]
 
 plt.figure(figsize=(3*cm, 3*cm))
 # plt.scatter(merged_bed['modRatio_WT'], merged_bed['modRatio_KO'], s=0.2, alpha=0.5)
-plt.scatter(merged_bed_six['modRatio_WT'], merged_bed_six['modRatio_KO'], s=0.2, alpha=0.5)
+plt.scatter(merged_bed_sel['modRatio_WT'], merged_bed_sel['modRatio_KO'], s=0.2, alpha=0.5)
 plt.plot(np.arange(0, 100), np.arange(0, 100), c='r', linewidth=0.2, alpha=0.5)
 plt.xticks(np.arange(0, 101, 25))
 plt.yticks(np.arange(0, 101, 25))
 plt.xlim([0, 100])
 plt.ylim([0, 100])
-plt.savefig(os.path.join(img_out, f'scatter_WT_vs_KO_six_motifs.{FMT}'), **fig_kwargs)
+plt.savefig(os.path.join(img_out, f'scatter_WT_vs_KO.{FMT}'), **fig_kwargs)
 
 
 ########################################################################################################################
 ### whole-chromosome profile ###########################################################################################
 ########################################################################################################################
-N_BINS = 100000
+N_BINS = 1000000
 ref_len = len(ref[sel_chrom])
 
 def calc_profile(in_pos, in_mod_ratios, start, end, num_bins=N_BINS):
@@ -180,7 +191,8 @@ def calc_avg_profile(in_bin_stoichios, num_bins=N_BINS):
         all_stoichios = [stoichio for (bin, stoichio) in in_bin_stoichios if bin == i]
         if len(all_stoichios):
             # binned_avg_stoichio[i] = np.max(all_stoichios)
-            binned_avg_stoichio[i] = np.median(all_stoichios)
+            binned_avg_stoichio[i] = np.mean(all_stoichios)
+            # binned_avg_stoichio[i] = np.median(all_stoichios)
         else:
             binned_avg_stoichio[i] = 0
     return binned_avg_stoichio
@@ -201,8 +213,8 @@ def plot_chromosome_profile(pos, mod_ratios, plot_name, xticks=False):
     # plt.ylabel('Median S')
     plt.savefig(os.path.join(img_out, plot_name), **fig_kwargs)
 
-plot_chromosome_profile(merged_bed_six['chromStart'].values, merged_bed_six['modRatio_WT'].values, plot_name=f'avg_profile_WT_chr{sel_chrom}.{FMT}', xticks=False)
-plot_chromosome_profile(merged_bed_six['chromStart'].values, merged_bed_six['modRatio_KO'].values, plot_name=f'avg_profile_METTL3_KO_chr{sel_chrom}.{FMT}', xticks=True)
+plot_chromosome_profile(merged_bed_sel['chromStart'].values, merged_bed_sel['modRatio_WT'].values, plot_name=f'avg_profile_WT_chr{sel_chrom}.{FMT}', xticks=False)
+plot_chromosome_profile(merged_bed_sel['chromStart'].values, merged_bed_sel['modRatio_KO'].values, plot_name=f'avg_profile_METTL3_KO_chr{sel_chrom}.{FMT}', xticks=True)
 
 ########################################################################################################################
 ### S profile along transcript #########################################################################################

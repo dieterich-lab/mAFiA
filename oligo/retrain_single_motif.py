@@ -28,11 +28,66 @@ read_id_paths_mod = [
 #     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix19_mix22/AAACA.pkl')
 # ]
 
+### AAACC ###
+# old_clf_paths = [
+#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix2/AAACC.pkl'),
+# ]
+
+### AAACT ###
+# old_clf_paths = [
+#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix1/AAACT.pkl'),
+# ]
+
+### AGACA ###
+# old_clf_paths = [
+#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix3/AGACA.pkl'),
+# ]
+
+### AGACC ###
+# old_clf_paths = [
+#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix4/AGACC.pkl'),
+# ]
+
+### AGACT ###
+# old_clf_paths = [
+#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA-WUE/AGACT.pkl'),
+# ]
+
+### GAACA ###
+# old_clf_paths = [
+#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix1/GAACA.pkl'),
+# ]
+
+### GAACC ###
+# old_clf_paths = [
+#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix3/GAACC.pkl'),
+# ]
+
 ### GAACT ###
-old_clf_paths = [
-    os.path.join(prj_dir, 'MAFIA_classifiers/ISA-WUE/GAACT.pkl'),
-    os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix17_mix20/GAACT.pkl')
-]
+# old_clf_paths = [
+#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA-WUE/GAACT.pkl'),
+#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix17_mix20/GAACT.pkl')
+# ]
+
+### GGACA ###
+# old_clf_paths = [
+#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA-WUE/GGACA.pkl'),
+# ]
+
+### GGACC ###
+# old_clf_paths = [
+#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA-WUE/GGACC.pkl'),
+# ]
+
+### GGACT ###
+# old_clf_paths = [
+#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA-WUE/GGACT.pkl'),
+# ]
+
+### TAACA ###
+# old_clf_paths = [
+#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix1/TAACA.pkl')
+# ]
 
 ### TAACC ###
 # old_clf_paths = [
@@ -47,13 +102,23 @@ old_clf_paths = [
 #     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix18_mix21/TAACT.pkl')
 # ]
 
+### TGACA ###
+# old_clf_paths = [
+#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix2/TGACA.pkl')
+# ]
+
+### TGACC ###
+old_clf_paths = [
+    os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix3/TGACC.pkl')
+]
+
 ### TGACT ###
 # old_clf_paths = [
 #     os.path.join(prj_dir, 'MAFIA_classifiers/ISA-WUE/TGACT.pkl'),
 #     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix19_mix22/TGACT.pkl')
 # ]
 
-out_dir = os.path.join(prj_dir, 'MAFIA_classifiers/DRACH5_retrain')
+out_dir = os.path.join(prj_dir, 'MAFIA_classifiers/DRACH_weighted')
 os.makedirs(out_dir, exist_ok=True)
 
 read_ids_unm = []

@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib_venn import venn3
+# from matplotlib_venn import venn3
 from collections import Counter
 import pysam
 
@@ -23,22 +23,27 @@ FMT = 'pdf'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
-source_data_dir = '/home/adrian/NCOMMS_revision/source_data/HEK293/WT'
-chrs = [str(i) for i in range(2, 11)] + ['13', '14', '18', '20']
+# source_data_dir = '/home/adrian/NCOMMS_revision/source_data/HEK293/WT'
+# chrs = [str(i) for i in range(2, 11)] + ['13', '14', '18', '20']
+source_data_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/DRACH_replaced/100_WT_0_IVT'
+chrs = range(1, 7)
 img_out = '/home/adrian/NCOMMS_revision/images/GLORI'
 os.makedirs(img_out, exist_ok=True)
 
 glori_path = '/home/adrian/Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.ref5mers.csv'
 miclip_path = '/home/adrian/Data/DRACH/miCLIP_union_flat_exclude_Y_chromosome.ref5mers.bed'
 
-sel_motifs = [
-    'GGACT',
-    'GAACT',
-    'GGACA',
-    'AGACT',
-    'GGACC',
-    'TGACT'
-]
+# sel_motifs = [
+#     'GGACT',
+#     'GAACT',
+#     'GGACA',
+#     'AGACT',
+#     'GGACC',
+#     'TGACT'
+# ]
+
+# blacklist_motifs = ['AGACC', 'AAACA', 'TAACA', 'TAACT', 'GAACA', 'TGACC']
+blacklist_motifs = []
 
 def import_mAFiA(thresh_coverage=10):
     dfs = []
@@ -46,7 +51,7 @@ def import_mAFiA(thresh_coverage=10):
         dfs.append(pd.read_csv(os.path.join(source_data_dir, f'chr{this_chr}', 'mAFiA.sites.bed'), dtype={'chrom': str}, sep='\t'))
     df_mAFiA = pd.concat(dfs, ignore_index=True)
     df_mAFiA_thresh = df_mAFiA[df_mAFiA['coverage']>=thresh_coverage]
-    df_mAFiA_thresh = df_mAFiA_thresh[df_mAFiA_thresh['ref5mer'].isin(sel_motifs)]
+    df_mAFiA_thresh = df_mAFiA_thresh[~df_mAFiA_thresh['ref5mer'].isin(blacklist_motifs)]
     return df_mAFiA_thresh
 
 def import_glori(thresh_pval=1E-3):
@@ -55,7 +60,7 @@ def import_glori(thresh_pval=1E-3):
     df_glori['chromStart'] = df_glori['Sites'] - 1
     df_glori['modRatio'] = np.int32(np.round(df_glori['NormeRatio'] * 100.0))
     df_glori_thresh = df_glori[df_glori['P_adjust']<thresh_pval]
-    df_glori_thresh = df_glori_thresh[df_glori_thresh['ref5mer'].isin(sel_motifs)]
+    df_glori_thresh = df_glori_thresh[~df_glori_thresh['ref5mer'].isin(blacklist_motifs)]
 
     return df_glori_thresh
 
@@ -66,7 +71,7 @@ def import_miclip(thresh_source_counts=3):
     df_miclip['modRatio'] = 100
     df_miclip['source_counts'] = [len(this_source.split(',')) for this_source in df_miclip['source'].values]
     df_miclip_thresh = df_miclip[df_miclip['source_counts']>=thresh_source_counts]
-    df_miclip_thresh = df_miclip_thresh[df_miclip_thresh['ref5mer'].isin(sel_motifs)]
+    df_miclip_thresh = df_miclip_thresh[~df_miclip_thresh['ref5mer'].isin(blacklist_motifs)]
 
     return df_miclip_thresh
 
@@ -125,99 +130,99 @@ df_miclip = import_miclip()
 ########################################################################################################################
 ### correlation vs. coverage ###########################################################################################
 ########################################################################################################################
-coverage_corr = []
-for this_thresh_cov in range(10, 100):
-    this_df_mAFiA_thresh = df_mAFiA[df_mAFiA['coverage'] >= this_thresh_cov]
-    this_df_merged = pd.merge(this_df_mAFiA_thresh, df_glori, on=['chrom', 'chromStart'], suffixes=('_mafia', '_glori'))
-    this_corr = np.corrcoef(this_df_merged[['modRatio_mafia', 'modRatio_glori']].values.T)[0, 1]
-    coverage_corr.append((this_thresh_cov, this_corr))
-coverage_corr = np.vstack(coverage_corr).T
-
-fig_cov_corr, ax = plt.subplots(nrows=1, ncols=1, figsize=(5*cm, 5*cm))
-ax.plot(coverage_corr[0], coverage_corr[1])
-ax.set_xlabel('Min. Coverage')
-ax.set_ylabel('Corr. with GLORI')
-fig_cov_corr.savefig(os.path.join(img_out, f'cov_corr.{FMT}'), **fig_kwargs)
+# coverage_corr = []
+# for this_thresh_cov in range(10, 100):
+#     this_df_mAFiA_thresh = df_mAFiA[df_mAFiA['coverage'] >= this_thresh_cov]
+#     this_df_merged = pd.merge(this_df_mAFiA_thresh, df_glori, on=['chrom', 'chromStart'], suffixes=('_mafia', '_glori'))
+#     this_corr = np.corrcoef(this_df_merged[['modRatio_mafia', 'modRatio_glori']].values.T)[0, 1]
+#     coverage_corr.append((this_thresh_cov, this_corr))
+# coverage_corr = np.vstack(coverage_corr).T
+#
+# fig_cov_corr, ax = plt.subplots(nrows=1, ncols=1, figsize=(5*cm, 5*cm))
+# ax.plot(coverage_corr[0], coverage_corr[1])
+# ax.set_xlabel('Min. Coverage')
+# ax.set_ylabel('Corr. with GLORI')
+# fig_cov_corr.savefig(os.path.join(img_out, f'cov_corr.{FMT}'), **fig_kwargs)
 
 ########################################################################################################################
 ### correlation vs. stoichiometry ######################################################################################
 ########################################################################################################################
-thresh_coverage = 50
-df_mAFiA_thresh = df_mAFiA[df_mAFiA['coverage'] >= thresh_coverage]
-df_merged = pd.merge(df_mAFiA_thresh, df_glori, on=['chrom', 'chromStart'], suffixes=('_mafia', '_glori'))
-
-bin_width = 10
-stoichio_lbins = np.arange(10, 100, bin_width)
-bin_centers = (stoichio_lbins + stoichio_lbins + bin_width) / 2
-
-stoichio_rms = []
-for this_lbin in stoichio_lbins:
-    sub_df_merged = df_merged[(df_merged['modRatio_glori']>=this_lbin) * (df_merged['modRatio_glori']<(this_lbin+bin_width))]
-    # mafia_normed = np.float64(sub_df_merged['modRatio_mafia'].values)
-    # mafia_normed -= mafia_normed.mean()
-    # mafia_normed /= mafia_normed.std()
-    # glori_normed = np.float64(sub_df_merged['modRatio_glori'].values)
-    # glori_normed -= glori_normed.mean()
-    # glori_normed /= glori_normed.std()
-    # stoichio_corr.append(np.corrcoef(mafia_normed, glori_normed)[0, 1])
-    stoichio_rms.append(np.sqrt(((sub_df_merged['modRatio_mafia'] - sub_df_merged['modRatio_glori'])**2).mean()))
-
-xticks = list(stoichio_lbins)
-xticks.append(stoichio_lbins[-1]+bin_width)
-
-fig_stoichio_rms, ax = plt.subplots(nrows=1, ncols=1, figsize=(5*cm, 5*cm))
-ax.plot(bin_centers, stoichio_rms)
-ax.set_xticks(xticks)
-ax.set_xlim([10, 100])
-ax.set_xlabel('Stoichiometry Range')
-ax.set_ylabel('RMS mAFiA-GLORI')
-fig_stoichio_rms.savefig(os.path.join(img_out, f'stoichio_RMS.{FMT}'), **fig_kwargs)
+# thresh_coverage = 50
+# df_mAFiA_thresh = df_mAFiA[df_mAFiA['coverage'] >= thresh_coverage]
+# df_merged = pd.merge(df_mAFiA_thresh, df_glori, on=['chrom', 'chromStart'], suffixes=('_mafia', '_glori'))
+#
+# bin_width = 10
+# stoichio_lbins = np.arange(10, 100, bin_width)
+# bin_centers = (stoichio_lbins + stoichio_lbins + bin_width) / 2
+#
+# stoichio_rms = []
+# for this_lbin in stoichio_lbins:
+#     sub_df_merged = df_merged[(df_merged['modRatio_glori']>=this_lbin) * (df_merged['modRatio_glori']<(this_lbin+bin_width))]
+#     # mafia_normed = np.float64(sub_df_merged['modRatio_mafia'].values)
+#     # mafia_normed -= mafia_normed.mean()
+#     # mafia_normed /= mafia_normed.std()
+#     # glori_normed = np.float64(sub_df_merged['modRatio_glori'].values)
+#     # glori_normed -= glori_normed.mean()
+#     # glori_normed /= glori_normed.std()
+#     # stoichio_corr.append(np.corrcoef(mafia_normed, glori_normed)[0, 1])
+#     stoichio_rms.append(np.sqrt(((sub_df_merged['modRatio_mafia'] - sub_df_merged['modRatio_glori'])**2).mean()))
+#
+# xticks = list(stoichio_lbins)
+# xticks.append(stoichio_lbins[-1]+bin_width)
+#
+# fig_stoichio_rms, ax = plt.subplots(nrows=1, ncols=1, figsize=(5*cm, 5*cm))
+# ax.plot(bin_centers, stoichio_rms)
+# ax.set_xticks(xticks)
+# ax.set_xlim([10, 100])
+# ax.set_xlabel('Stoichiometry Range')
+# ax.set_ylabel('RMS mAFiA-GLORI')
+# fig_stoichio_rms.savefig(os.path.join(img_out, f'stoichio_RMS.{FMT}'), **fig_kwargs)
 
 
 ########################################################################################################################
 ### venn diagram #######################################################################################################
 ########################################################################################################################
-bam_file = '/home/adrian/NCOMMS_revision/source_data/GENE_PROFILE/100WT/merged.mAFiA.reads.bam'
-
-thresh_stoichio = 50
-
-def thresh_df_with_coverage(df_in, thresh_coverage=50):
-    with pysam.AlignmentFile(bam_file, "rb" ) as bam:
-        coverage = []
-        for _, row in df_in.iterrows():
-            this_row_coverage = 0
-            for pileupcolumn in bam.pileup(row['chrom'], row['chromStart'], row['chromStart']+1, truncate=True):
-                if pileupcolumn.pos==row['chromStart']:
-                    this_row_coverage = pileupcolumn.n
-                    break
-            coverage.append(this_row_coverage)
-    coverage = np.array(coverage)
-    return df_in[coverage>=thresh_coverage]
-
-def draw_venn_diagram(dict_dfs, thresh_stoichiometry=80):
-    name_sites = {}
-    for name, df in dict_dfs.items():
-        df_sel = df[(df['modRatio']>=thresh_stoichiometry)*(df['chrom'].isin(chrs))]
-        name_sites[name] = set([tuple(val) for val in df_sel[['chrom', 'chromStart']].values])
-
-        # num_intersection = len(set(df1_sites).intersection(set(df2_sites)))
-        # print(len(df1_sites), len(df2_sites), num_intersection)
-
-    return venn3(name_sites.values(), name_sites.keys())
-
-df_mAFiA_thresh = df_mAFiA[df_mAFiA['coverage']>=thresh_coverage]
-df_miclip_thresh = thresh_df_with_coverage(df_miclip)
-df_glori_thresh = thresh_df_with_coverage(df_glori)
-
-venn_dict = {
-    'mAFiA': df_mAFiA_thresh,
-    'miClip': df_miclip_thresh,
-    'GLORI': df_glori_thresh
-}
-
-fig_venn, ax = plt.subplots(nrows=1, ncols=1, figsize=(10*cm, 10*cm))
-v = draw_venn_diagram(venn_dict, thresh_stoichiometry=thresh_stoichio)
-fig_venn.savefig(os.path.join(img_out, f'venn_diagram.{FMT}'), **fig_kwargs)
+# bam_file = '/home/adrian/NCOMMS_revision/source_data/GENE_PROFILE/100WT/merged.mAFiA.reads.bam'
+#
+# thresh_stoichio = 50
+#
+# def thresh_df_with_coverage(df_in, thresh_coverage=50):
+#     with pysam.AlignmentFile(bam_file, "rb" ) as bam:
+#         coverage = []
+#         for _, row in df_in.iterrows():
+#             this_row_coverage = 0
+#             for pileupcolumn in bam.pileup(row['chrom'], row['chromStart'], row['chromStart']+1, truncate=True):
+#                 if pileupcolumn.pos==row['chromStart']:
+#                     this_row_coverage = pileupcolumn.n
+#                     break
+#             coverage.append(this_row_coverage)
+#     coverage = np.array(coverage)
+#     return df_in[coverage>=thresh_coverage]
+#
+# def draw_venn_diagram(dict_dfs, thresh_stoichiometry=80):
+#     name_sites = {}
+#     for name, df in dict_dfs.items():
+#         df_sel = df[(df['modRatio']>=thresh_stoichiometry)*(df['chrom'].isin(chrs))]
+#         name_sites[name] = set([tuple(val) for val in df_sel[['chrom', 'chromStart']].values])
+#
+#         # num_intersection = len(set(df1_sites).intersection(set(df2_sites)))
+#         # print(len(df1_sites), len(df2_sites), num_intersection)
+#
+#     return venn3(name_sites.values(), name_sites.keys())
+#
+# df_mAFiA_thresh = df_mAFiA[df_mAFiA['coverage']>=thresh_coverage]
+# df_miclip_thresh = thresh_df_with_coverage(df_miclip)
+# df_glori_thresh = thresh_df_with_coverage(df_glori)
+#
+# venn_dict = {
+#     'mAFiA': df_mAFiA_thresh,
+#     'miClip': df_miclip_thresh,
+#     'GLORI': df_glori_thresh
+# }
+#
+# fig_venn, ax = plt.subplots(nrows=1, ncols=1, figsize=(10*cm, 10*cm))
+# v = draw_venn_diagram(venn_dict, thresh_stoichiometry=thresh_stoichio)
+# fig_venn.savefig(os.path.join(img_out, f'venn_diagram.{FMT}'), **fig_kwargs)
 
 
 ########################################################################################################################
@@ -279,4 +284,5 @@ def scatter_plot_mafia_vs_glori(num_motifs, num_rows, num_cols, plot_name, figsi
     fig_corr.savefig(os.path.join(img_out, plot_name), **fig_kwargs)
 
 scatter_plot_mafia_vs_glori(num_motifs=6, num_rows=2, num_cols=3, plot_name=f'corr_mAFiA_GLORI_DRACH_6motifs.{FMT}', figsize=(7.5*cm, 5*cm))
+# scatter_plot_mafia_vs_glori(num_motifs=12, num_rows=3, num_cols=4, plot_name=f'corr_mAFiA_GLORI_DRACH_12motifs.{FMT}', figsize=(10*cm, 8*cm))
 scatter_plot_mafia_vs_glori(num_motifs=18, num_rows=3, num_cols=6, plot_name=f'corr_mAFiA_GLORI_DRACH_18motifs.{FMT}', figsize=(15*cm, 8*cm))

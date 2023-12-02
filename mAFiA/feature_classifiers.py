@@ -21,9 +21,9 @@ class MotifClassifier:
         self.classifier_type = classifier_type
         self.scaler = scaler
         if classifier_type == 'svm':
-            clf = SVC(gamma='auto', random_state=0, max_iter=1000)
+            clf = SVC(gamma='auto', random_state=0, max_iter=10000)
         elif classifier_type == 'logistic_regression':
-            clf = LogisticRegression(random_state=0, max_iter=1000)
+            clf = LogisticRegression(random_state=0, max_iter=10000, verbose=True)
         else:
             clf = None
 
@@ -33,6 +33,13 @@ class MotifClassifier:
             self.binary_model = make_pipeline(StandardScaler(), clf)
         else:
             self.binary_model = clf
+
+        if len(self.precision) and len(self.recall) and (self.thresholds):
+            fixed_prec = 0.995
+            fixed_rec = self.recall[np.where(self.precision >= fixed_prec)[0][0]]
+            self.fixed_thresh = 1.0 / (1.0 + np.exp(-self.thresholds[np.where(self.precision >= fixed_prec)[0][0]]))
+        else:
+            self.fixed_thresh = -1
 
     def train(self, unm_nts, mod_nts, frac_test_split=0.25):
         max_num_features = min(len(unm_nts), len(mod_nts))
@@ -55,7 +62,9 @@ class MotifClassifier:
 
         print(f'AUC {self.auc:.2f}')
 
-    def test(self, test_nts, mod_thresh=0.5):
+    def test(self, test_nts, mod_thresh=-1.0):
+        if mod_thresh<0:
+            mod_thresh = self.fixed_thresh
         print(f'Testing {len(test_nts)} NTs...', flush=True)
         test_features = [nt.feature for nt in test_nts]
         mod_probs = self.binary_model.predict_proba(test_features)[:, 1]
