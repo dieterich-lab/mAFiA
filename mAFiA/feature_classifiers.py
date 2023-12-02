@@ -57,14 +57,14 @@ class MotifClassifier:
 
     def test(self, test_nts, mod_thresh=-1.0):
         if len(self.precision) and len(self.recall) and len(self.thresholds):
-            fixed_prec = 0.995
-            fixed_rec = self.recall[np.where(self.precision >= fixed_prec)[0][0]]
+            fixed_prec = 0.95
+            # fixed_rec = self.recall[np.where(self.precision >= fixed_prec)[0][0]]
             self.fixed_thresh = 1.0 / (1.0 + np.exp(-self.thresholds[np.where(self.precision >= fixed_prec)[0][0]]))
         else:
             self.fixed_thresh = -1
         if mod_thresh<0:
             mod_thresh = self.fixed_thresh
-        print(f'Testing {len(test_nts)} NTs, thresh {mod_thresh}...', flush=True)
+        print(f'Testing {len(test_nts)} NTs, thresh {mod_thresh:.2f}...', flush=True)
         test_features = [nt.feature for nt in test_nts]
         mod_probs = self.binary_model.predict_proba(test_features)[:, 1]
         for this_nt, this_mod_prob in zip(test_nts, mod_probs):
