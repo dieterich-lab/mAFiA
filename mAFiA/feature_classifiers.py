@@ -56,7 +56,7 @@ class MotifClassifier:
         print(f'AUC {self.auc:.2f}')
 
     def test(self, test_nts, mod_thresh=-1.0):
-        if len(self.precision) and len(self.recall) and (self.thresholds):
+        if len(self.precision) and len(self.recall) and len(self.thresholds):
             fixed_prec = 0.995
             fixed_rec = self.recall[np.where(self.precision >= fixed_prec)[0][0]]
             self.fixed_thresh = 1.0 / (1.0 + np.exp(-self.thresholds[np.where(self.precision >= fixed_prec)[0][0]]))
