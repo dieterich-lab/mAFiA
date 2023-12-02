@@ -51,15 +51,16 @@ SCALER=MaxAbs
 #REF=${DATA_DIR}/ligation_ref/ligation_ref_${TRAIN_DATASET}_A_m6A.fasta
 #OUTDIR=${PRJ_DIR}/MAFIA_classifiers/${TRAIN_DATASET}
 
-unm_ds=ISA_mix17
-mod_ds=ISA_mix20
+orig=ISA
+unm_ds=mix19
+mod_ds=mix22
 
-UNM_BAM=${DATA_DIR}/${unm_ds}_A/spomelette_q70.bam
-UNM_FAST5=${DATA_DIR}/${unm_ds}_A/fast5
-MOD_BAM=${DATA_DIR}/${mod_ds}_m6A/spomelette_q70.bam
-MOD_FAST5=${DATA_DIR}/${mod_ds}_m6A/fast5
-REF=${DATA_DIR}/ligation_ref/ligation_ref_${unm_ds}_${mod_ds}_A_m6A.fasta
-OUTDIR=${PRJ_DIR}/MAFIA_classifiers/${unm_ds}_${mod_ds}
+UNM_BAM=${DATA_DIR}/${orig}_${unm_ds}_A/spomelette_q70.bam
+UNM_FAST5=${DATA_DIR}/${orig}_${unm_ds}_A/fast5
+MOD_BAM=${DATA_DIR}/${orig}_${mod_ds}_m6A/spomelette_q70.bam
+MOD_FAST5=${DATA_DIR}/${orig}_${mod_ds}_m6A/fast5
+REF=${DATA_DIR}/ligation_ref/ligation_ref_${orig}_${unm_ds}_${mod_ds}_A_m6A.fasta
+OUTDIR=${PRJ_DIR}/MAFIA_classifiers/${orig}_${unm_ds}_${mod_ds}
 
 python3 -u ${HOME}/git/mAFiA_dev/oligo/oligo_train_binary_classifier.py \
 --unm_bam_file ${UNM_BAM} \
