@@ -21,104 +21,90 @@ read_id_paths_mod = [
     os.path.join(prj_dir, 'oligo/read_ids_ISA_mix20-22_m6A.txt')
 ]
 
-### AAACA ###
-# old_clf_paths = [
-#     os.path.join(prj_dir, 'MAFIA_classifiers/_DRACH/AAACA.pkl'),
-#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix17_mix20/AAACA.pkl'),
-#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix19_mix22/AAACA.pkl')
-# ]
+dict_paths = {
+    'AAACA': [
+        os.path.join(prj_dir, 'MAFIA_classifiers/_DRACH/AAACA.pkl'),
+        os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix17_mix20/AAACA.pkl'),
+        os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix19_mix22/AAACA.pkl')
+    ],
 
-### AAACC ###
-# old_clf_paths = [
-#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix2/AAACC.pkl'),
-# ]
+    'AAACC': [
+        os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix2/AAACC.pkl'),
+    ],
 
-### AAACT ###
-# old_clf_paths = [
-#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix1/AAACT.pkl'),
-# ]
+    'AAACT': [
+        os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix1/AAACT.pkl'),
+    ],
 
-### AGACA ###
-# old_clf_paths = [
-#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix3/AGACA.pkl'),
-# ]
+    'AGACA': [
+        os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix3/AGACA.pkl'),
+    ],
 
-### AGACC ###
-# old_clf_paths = [
-#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix4/AGACC.pkl'),
-# ]
+    'AGACC': [
+        os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix4/AGACC.pkl'),
+    ],
 
-### AGACT ###
-# old_clf_paths = [
-#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA-WUE/AGACT.pkl'),
-# ]
+    'AGACT': [
+        os.path.join(prj_dir, 'MAFIA_classifiers/ISA-WUE/AGACT.pkl'),
+    ],
 
-### GAACA ###
-# old_clf_paths = [
-#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix1/GAACA.pkl'),
-# ]
+    'GAACA': [
+        os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix1/GAACA.pkl'),
+    ],
 
-### GAACC ###
-# old_clf_paths = [
-#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix3/GAACC.pkl'),
-# ]
+    'GAACC': [
+        os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix3/GAACC.pkl'),
+    ],
 
-### GAACT ###
-# old_clf_paths = [
-#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA-WUE/GAACT.pkl'),
-#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix17_mix20/GAACT.pkl')
-# ]
+    'GAACT': [
+        os.path.join(prj_dir, 'MAFIA_classifiers/ISA-WUE/GAACT.pkl'),
+        os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix17_mix20/GAACT.pkl')
+    ],
 
-### GGACA ###
-# old_clf_paths = [
-#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA-WUE/GGACA.pkl'),
-# ]
+    'GGACA': [
+        os.path.join(prj_dir, 'MAFIA_classifiers/ISA-WUE/GGACA.pkl'),
+    ],
 
-### GGACC ###
-# old_clf_paths = [
-#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA-WUE/GGACC.pkl'),
-# ]
+    'GGACC': [
+        os.path.join(prj_dir, 'MAFIA_classifiers/ISA-WUE/GGACC.pkl'),
+    ],
 
-### GGACT ###
-# old_clf_paths = [
-#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA-WUE/GGACT.pkl'),
-# ]
+    'GGACT': [
+        os.path.join(prj_dir, 'MAFIA_classifiers/ISA-WUE/GGACT.pkl'),
+    ],
 
-### TAACA ###
-# old_clf_paths = [
-#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix1/TAACA.pkl')
-# ]
+    'TAACA': [
+        os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix1/TAACA.pkl')
+    ],
 
-### TAACC ###
-# old_clf_paths = [
-#     os.path.join(prj_dir, 'MAFIA_classifiers/_DRACH/TAACC.pkl'),
-#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix18_mix21/TAACC.pkl')
-# ]
+    'TAACC': [
+        os.path.join(prj_dir, 'MAFIA_classifiers/_DRACH/TAACC.pkl'),
+        os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix18_mix21/TAACC.pkl')
+    ],
 
-### TAACT ###
-# old_clf_paths = [
-#     os.path.join(prj_dir, 'MAFIA_classifiers/_DRACH/TAACT.pkl'),
-#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix17_mix20/TAACT.pkl'),
-#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix18_mix21/TAACT.pkl')
-# ]
+    'TAACT': [
+        os.path.join(prj_dir, 'MAFIA_classifiers/_DRACH/TAACT.pkl'),
+        os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix17_mix20/TAACT.pkl'),
+        os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix18_mix21/TAACT.pkl')
+    ],
 
-### TGACA ###
-# old_clf_paths = [
-#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix2/TGACA.pkl')
-# ]
+    'TGACA': [
+        os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix2/TGACA.pkl')
+    ],
 
-### TGACC ###
-old_clf_paths = [
-    os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix3/TGACC.pkl')
-]
+    'TGACC': [
+        os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix3/TGACC.pkl')
+    ],
 
-### TGACT ###
-# old_clf_paths = [
-#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA-WUE/TGACT.pkl'),
-#     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix19_mix22/TGACT.pkl')
-# ]
+    'TGACT': [
+        os.path.join(prj_dir, 'MAFIA_classifiers/ISA-WUE/TGACT.pkl'),
+        os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix19_mix22/TGACT.pkl')
+    ],
 
-out_dir = os.path.join(prj_dir, 'MAFIA_classifiers/DRACH_weighted')
+}
+########################################################################################################################
+
+out_dir = os.path.join(prj_dir, 'MAFIA_classifiers/DRACH_var_thresh')
 os.makedirs(out_dir, exist_ok=True)
 
 read_ids_unm = []
@@ -137,36 +123,38 @@ for this_id in read_ids_unm:
 for this_id in read_ids_mod:
     dict_labels[this_id] = 1
 
-motif = [os.path.basename(path).split('.')[0] for path in old_clf_paths]
-if len(set(motif))>1:
-    print('Warning: non-unique motif!')
-    exit(0)
-else:
-    motif = motif[0]
 
-all_nts = []
-for this_path in old_clf_paths:
-    with open(this_path, 'rb') as h:
-        this_clf = pickle.load(h)
-    all_nts.append(this_clf.train_nts)
-    all_nts.append(this_clf.test_nts)
-all_nts = [this_nt for ll in all_nts for this_nt in ll]
-all_labels = [dict_labels.get(this_nt.read_id, -1) for this_nt in all_nts]
+for _, old_clf_paths in dict_paths.items():
+    motif = [os.path.basename(path).split('.')[0] for path in old_clf_paths]
+    if len(set(motif))>1:
+        print('Warning: non-unique motif!')
+        exit(0)
+    else:
+        motif = motif[0]
 
-unm_nts = []
-mod_nts = []
-for this_nt, this_label in zip(all_nts, all_labels):
-    if this_label==0:
-        unm_nts.append(this_nt)
-    elif this_label==1:
-        mod_nts.append(this_nt)
+    all_nts = []
+    for this_path in old_clf_paths:
+        with open(this_path, 'rb') as h:
+            this_clf = pickle.load(h)
+        all_nts.append(this_clf.train_nts)
+        all_nts.append(this_clf.test_nts)
+    all_nts = [this_nt for ll in all_nts for this_nt in ll]
+    all_labels = [dict_labels.get(this_nt.read_id, -1) for this_nt in all_nts]
 
-########################################################################################################################
-### Train new classifier ###############################################################################################
-########################################################################################################################
-new_classifier = MotifClassifier(motif=motif, classifier_type=classifier_type, scaler=scaler)
-new_classifier.train(unm_nts, mod_nts, frac_test_split=0.2)
-new_classifier.save(
-    out_model_path=os.path.join(out_dir, '{}.pkl'.format(motif)),
-    draw_prc=True
-)
+    unm_nts = []
+    mod_nts = []
+    for this_nt, this_label in zip(all_nts, all_labels):
+        if this_label==0:
+            unm_nts.append(this_nt)
+        elif this_label==1:
+            mod_nts.append(this_nt)
+
+    ########################################################################################################################
+    ### Train new classifier ###############################################################################################
+    ########################################################################################################################
+    new_classifier = MotifClassifier(motif=motif, classifier_type=classifier_type, scaler=scaler)
+    new_classifier.train(unm_nts, mod_nts, frac_test_split=0.2)
+    new_classifier.save(
+        out_model_path=os.path.join(out_dir, '{}.pkl'.format(motif)),
+        draw_prc=True
+    )

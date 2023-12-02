@@ -3,7 +3,7 @@ from glob import glob
 import pickle
 import numpy as np
 
-old_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/MAFIA_classifiers/_DRACH'
+old_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/MAFIA_classifiers/DRACH_var_thresh'
 new_dir = old_dir + '_stripped'
 os.makedirs(new_dir, exist_ok=True)
 
@@ -14,8 +14,8 @@ for this_clf_path in clf_paths:
 
         this_clf.train_nts = []
         this_clf.test_nts = []
-        # this_clf.precision = []
-        # this_clf.recall = []
-        # this_clf.thresholds = []
-        # this_clf.auc = -1
+        this_clf.precision = []
+        this_clf.recall = []
+        this_clf.thresholds = []
+        this_clf.auc = -1
         this_clf.save(os.path.join(new_dir, '{}.pkl'.format(this_clf.motif)))
