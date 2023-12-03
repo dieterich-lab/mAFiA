@@ -21,6 +21,7 @@ mpl.rcParams['ytick.major.size'] = 1
 mpl.rcParams['font.family'] = 'Arial'
 FMT = 'pdf'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
+# fig_kwargs = dict(format=FMT, dpi=1200)
 #######################################################################
 
 def load_genome_reference(ref_file, chrs):
@@ -46,40 +47,40 @@ sel_chromEnd = 31817946
 
 ref = load_genome_reference(ref_file, [sel_chrom])
 
-ref_pos_mod_probs = {}
-with pysam.AlignmentFile(bam_file, 'rb') as bam:
-    for col in bam.pileup(sel_chrom, sel_chromStart, sel_chromEnd, truncate=True):
-        if ref[sel_chrom][col.pos]=='A':
-            # print("\ncoverage at base %s = %s" % (col.pos, col.n))
-
-            all_mod_probs = []
-            for pileupread in col.pileups:
-                if not pileupread.is_del and not pileupread.is_refskip:
-                    # print('\tbase in read %s = %s' %
-                    #       (pileupread.alignment.query_name,
-                    #        pileupread.alignment.query_sequence[pileupread.query_position]))
-
-                    for mod_pos, mod_probs in pileupread.alignment.modified_bases_forward.get(('N', 0, 21891), []):
-                        if mod_pos==pileupread.query_position:
-                            all_mod_probs.append(mod_probs/255.0)
-
-            if len(all_mod_probs):
-                ref_pos_mod_probs[col.pos] = all_mod_probs
+# ref_pos_mod_probs = {}
+# with pysam.AlignmentFile(bam_file, 'rb') as bam:
+#     for col in bam.pileup(sel_chrom, sel_chromStart, sel_chromEnd, truncate=True):
+#         if ref[sel_chrom][col.pos]=='A':
+#             # print("\ncoverage at base %s = %s" % (col.pos, col.n))
+#
+#             all_mod_probs = []
+#             for pileupread in col.pileups:
+#                 if not pileupread.is_del and not pileupread.is_refskip:
+#                     # print('\tbase in read %s = %s' %
+#                     #       (pileupread.alignment.query_name,
+#                     #        pileupread.alignment.query_sequence[pileupread.query_position]))
+#
+#                     for mod_pos, mod_probs in pileupread.alignment.modified_bases_forward.get(('N', 0, 21891), []):
+#                         if mod_pos==pileupread.query_position:
+#                             all_mod_probs.append(mod_probs/255.0)
+#
+#             if len(all_mod_probs):
+#                 ref_pos_mod_probs[col.pos] = all_mod_probs
 
 ### plot histogram ###
-thresh_mod = 0.5
-sel_pos = [31816312, 31816986, 31817582]
-for ref_pos, mod_probs in ref_pos_mod_probs.items():
-    # if len(mod_probs)>=400:
-    if ref_pos in sel_pos:
-        mod_ratio = int(np.mean(np.array(mod_probs)>=thresh_mod) * 100)
-        plt.figure(figsize=(3*cm, 2*cm))
-        plt.hist(mod_probs, bins=100, range=[0, 1])
-        plt.xlim([-0.01, 1.01])
-        plt.axvline(x=0.5, c='r', linestyle='--', alpha=0.5, linewidth=0.5)
-        plt.title(f'chr{sel_chrom}: {ref_pos}\nS={mod_ratio}%')
-        plt.savefig(os.path.join(img_out, f'hist_mod_probs_chr{sel_chrom}_{ref_pos}.{FMT}'), **fig_kwargs)
-plt.close('all')
+# thresh_mod = 0.5
+# sel_pos = [31816312, 31816986, 31817582]
+# for ref_pos, mod_probs in ref_pos_mod_probs.items():
+#     # if len(mod_probs)>=400:
+#     if ref_pos in sel_pos:
+#         mod_ratio = int(np.mean(np.array(mod_probs)>=thresh_mod) * 100)
+#         plt.figure(figsize=(3*cm, 2*cm))
+#         plt.hist(mod_probs, bins=100, range=[0, 1])
+#         plt.xlim([-0.01, 1.01])
+#         plt.axvline(x=0.5, c='r', linestyle='--', alpha=0.5, linewidth=0.5)
+#         plt.title(f'chr{sel_chrom}: {ref_pos}\nS={mod_ratio}%')
+#         plt.savefig(os.path.join(img_out, f'hist_mod_probs_chr{sel_chrom}_{ref_pos}.{FMT}'), **fig_kwargs)
+# plt.close('all')
 
 ########################################################################################################################
 ### filter bam #########################################################################################################
@@ -101,25 +102,25 @@ sel_motifs = [
     'TGACT',
 ]
 
-out_bam_file = bam_file.replace('merged', f'chr{sel_chrom}_{sel_chromStart}_{sel_chromEnd}').replace('reads.bam', 'reads.6motifs.bam')
-with pysam.AlignmentFile(bam_file, 'rb') as bam_in:
-    with pysam.AlignmentFile(out_bam_file, 'wb', template=bam_in) as bam_out:
-        for read in bam_in.fetch(sel_chrom, sel_chromStart, sel_chromEnd):
-            old_read_mods = read.modified_bases_forward.get(('N', 0, 21891), [])
-            if len(old_read_mods):
-                dict_aligned_pos = {read_pos: ref_pos for read_pos, ref_pos in read.get_aligned_pairs() if
-                                    ref_pos is not None}
-                new_read_mods = []
-                for mod_pos, mod_probs in old_read_mods:
-                    motif = ref[sel_chrom][dict_aligned_pos[mod_pos]-2:dict_aligned_pos[mod_pos]+3]
-                    if motif in sel_motifs:
-                        # print(motif)
-                        new_read_mods.append((mod_pos, mod_probs))
-                if len(new_read_mods):
-                    new_mm, new_ml = generate_mm_ml_tags(new_read_mods)
-                    read.set_tag('MM', new_mm)
-                    read.set_tag('ML', new_ml)
-                    bam_out.write(read)
+# out_bam_file = bam_file.replace('merged', f'chr{sel_chrom}_{sel_chromStart}_{sel_chromEnd}').replace('reads.bam', 'reads.6motifs.bam')
+# with pysam.AlignmentFile(bam_file, 'rb') as bam_in:
+#     with pysam.AlignmentFile(out_bam_file, 'wb', template=bam_in) as bam_out:
+#         for read in bam_in.fetch(sel_chrom, sel_chromStart, sel_chromEnd):
+#             old_read_mods = read.modified_bases_forward.get(('N', 0, 21891), [])
+#             if len(old_read_mods):
+#                 dict_aligned_pos = {read_pos: ref_pos for read_pos, ref_pos in read.get_aligned_pairs() if
+#                                     ref_pos is not None}
+#                 new_read_mods = []
+#                 for mod_pos, mod_probs in old_read_mods:
+#                     motif = ref[sel_chrom][dict_aligned_pos[mod_pos]-2:dict_aligned_pos[mod_pos]+3]
+#                     if motif in sel_motifs:
+#                         # print(motif)
+#                         new_read_mods.append((mod_pos, mod_probs))
+#                 if len(new_read_mods):
+#                     new_mm, new_ml = generate_mm_ml_tags(new_read_mods)
+#                     read.set_tag('MM', new_mm)
+#                     read.set_tag('ML', new_ml)
+#                     bam_out.write(read)
 
 
 
@@ -128,13 +129,17 @@ with pysam.AlignmentFile(bam_file, 'rb') as bam_in:
 ### scatter plot #######################################################################################################
 ########################################################################################################################
 sel_chrom = '6'
-thresh_cov = 100
+thresh_cov = 50
 
 # WT_bed_file = '/home/adrian/NCOMMS_revision/source_data/GENE_PROFILE/100WT/merged.mAFiA.sites.bed'
 # KO_bed_file = '/home/adrian/NCOMMS_revision/source_data/GENE_PROFILE/Mettl3-KO/chr6/mAFiA.sites.bed'
 
 WT_bed_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/DRACH_replaced/100_WT_0_IVT/chr6/mAFiA.sites.bed'
 KO_bed_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/DRACH_replaced/Mettl3-KO/chr6/mAFiA.sites.bed'
+
+# WT_bed_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/_DRACH_var_thresh/100_WT_0_IVT/chr6/mAFiA.sites.bed'
+# KO_bed_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/_DRACH_var_thresh/Mettl3-KO/chr6/mAFiA.sites.bed'
+
 
 WT_bed = pd.read_csv(WT_bed_file, sep='\t', dtype={'chrom': str})
 WT_bed_chrom = WT_bed[
@@ -152,29 +157,42 @@ KO_bed_chrom = KO_bed[
     # * (df_bed['chromEnd']<sel_chromEnd)
     ]
 
+whitelist = ['GGACT', 'GGACA', 'GAACT', 'AGACT', 'GGACC', 'TGACT']
 # blacklist = ['AGACC', 'AAACA', 'TAACA', 'TAACT', 'GAACA', 'TGACC']
 blacklist = []
 
 merged_bed = pd.merge(WT_bed_chrom, KO_bed_chrom, how='inner', on=['chrom', 'chromStart', 'chromEnd', 'name', 'score', 'strand', 'ref5mer'], suffixes=['_WT', '_KO'])
 merged_bed_sel = merged_bed[
     ~merged_bed['ref5mer'].isin(blacklist)
+    # * merged_bed['ref5mer'].isin(whitelist)
 ]
 
-plt.figure(figsize=(3*cm, 3*cm))
+num_bins = 20
+ticks = np.int32(np.linspace(0, num_bins, 5) * 100 / num_bins)
+
+vmax = 6
+
+fig = plt.figure(figsize=(3.5*cm, 4*cm))
 # plt.scatter(merged_bed['modRatio_WT'], merged_bed['modRatio_KO'], s=0.2, alpha=0.5)
-plt.scatter(merged_bed_sel['modRatio_WT'], merged_bed_sel['modRatio_KO'], s=0.2, alpha=0.5)
-plt.plot(np.arange(0, 100), np.arange(0, 100), c='r', linewidth=0.2, alpha=0.5)
-plt.xticks(np.arange(0, 101, 25))
-plt.yticks(np.arange(0, 101, 25))
-plt.xlim([0, 100])
-plt.ylim([0, 100])
-plt.savefig(os.path.join(img_out, f'scatter_WT_vs_KO.{FMT}'), **fig_kwargs)
+# plt.scatter(merged_bed_sel['modRatio_WT'], merged_bed_sel['modRatio_KO'], s=0.2, alpha=0.5)
+# plt.plot(np.arange(0, 100), np.arange(0, 100), c='r', linewidth=0.2, alpha=0.5)
+counts, bin_x, bin_y = np.histogram2d(
+    merged_bed_sel['modRatio_KO'], merged_bed_sel['modRatio_WT'],
+    bins=[num_bins, num_bins], range=[[0, 100], [0, 100]],
+)
+ax = fig.add_subplot()
+im = ax.imshow(counts, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
+ax.set_xticks(np.linspace(0, num_bins, 5)-0.5, ticks)
+ax.set_yticks(np.linspace(0, num_bins, 5)-0.5, ticks)
+cbar = fig.colorbar(im, orientation='horizontal', location='top', fraction=0.046, pad=0.04)
+cbar.set_ticks(np.linspace(0, vmax, 3))
+fig.savefig(os.path.join(img_out, f'hist2d_WT_vs_KO.{FMT}'), **fig_kwargs)
 
 
 ########################################################################################################################
 ### whole-chromosome profile ###########################################################################################
 ########################################################################################################################
-N_BINS = 1000000
+N_BINS = 100000
 ref_len = len(ref[sel_chrom])
 
 def calc_profile(in_pos, in_mod_ratios, start, end, num_bins=N_BINS):
@@ -191,8 +209,8 @@ def calc_avg_profile(in_bin_stoichios, num_bins=N_BINS):
         all_stoichios = [stoichio for (bin, stoichio) in in_bin_stoichios if bin == i]
         if len(all_stoichios):
             # binned_avg_stoichio[i] = np.max(all_stoichios)
-            binned_avg_stoichio[i] = np.mean(all_stoichios)
-            # binned_avg_stoichio[i] = np.median(all_stoichios)
+            # binned_avg_stoichio[i] = np.mean(all_stoichios)
+            binned_avg_stoichio[i] = np.median(all_stoichios)
         else:
             binned_avg_stoichio[i] = 0
     return binned_avg_stoichio

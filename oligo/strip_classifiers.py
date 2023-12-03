@@ -3,7 +3,7 @@ from glob import glob
 import pickle
 import numpy as np
 
-old_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/MAFIA_classifiers/DRACH_var_thresh'
+old_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/MAFIA_classifiers/DRACH5_retrain'
 new_dir = old_dir + '_stripped'
 os.makedirs(new_dir, exist_ok=True)
 

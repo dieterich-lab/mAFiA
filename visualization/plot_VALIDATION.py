@@ -67,8 +67,8 @@ def get_sample_sizes(nts, in_labels):
 
 source_data_dir = '/home/adrian/NCOMMS_revision/source_data/VALIDATION'
 
-train = 'ISA'
-validate = 'WUE'
+train = 'WUE'
+validate = 'ISA'
 
 read_ids_A_path = os.path.join(source_data_dir, 'read_ids_ISA-WUE_A.txt')
 read_ids_m6A_path = os.path.join(source_data_dir, 'read_ids_ISA-WUE_m6A.txt')
