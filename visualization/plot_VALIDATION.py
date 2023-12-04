@@ -26,7 +26,8 @@ fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 
 
 def get_histogram(mod_probs):
-    num_bins = 100
+    # num_bins = 100
+    num_bins = 20
     bin_edges = np.linspace(0, 1, num_bins + 1)
     bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
     bin_counts, _ = np.histogram(mod_probs, bins=bin_edges)
@@ -67,8 +68,11 @@ def get_sample_sizes(nts, in_labels):
 
 source_data_dir = '/home/adrian/NCOMMS_revision/source_data/VALIDATION'
 
-train = 'WUE'
-validate = 'ISA'
+# train = 'WUE'
+# validate = 'ISA'
+
+train = 'ISA_retrain_GAACT_TGACT'
+validate = 'WUE'
 
 read_ids_A_path = os.path.join(source_data_dir, 'read_ids_ISA-WUE_A.txt')
 read_ids_m6A_path = os.path.join(source_data_dir, 'read_ids_ISA-WUE_m6A.txt')

@@ -23,10 +23,10 @@ FMT = 'pdf'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
-# source_data_dir = '/home/adrian/NCOMMS_revision/source_data/HEK293/WT'
+source_data_dir = '/home/adrian/NCOMMS_revision/source_data/HEK293/DRACH_replaced/100_WT_0_IVT'
 # chrs = [str(i) for i in range(2, 11)] + ['13', '14', '18', '20']
-source_data_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/DRACH_replaced/100_WT_0_IVT'
-chrs = list(range(1, 12)) + [13, 14]
+# source_data_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/DRACH_replaced/100_WT_0_IVT'
+chrs = list(range(1, 23)) + ['X']
 img_out = '/home/adrian/NCOMMS_revision/images/GLORI'
 os.makedirs(img_out, exist_ok=True)
 
