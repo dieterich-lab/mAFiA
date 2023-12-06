@@ -3,6 +3,62 @@ import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
+import pysam
+from tqdm import tqdm
+from Bio.Seq import Seq
+from collections import Counter
+
+def correct_mod_ratio(bam_file, df_orig):
+    corr_mod_ratio = []
+    corr_coverage = []
+    with pysam.AlignmentFile(bam_file, 'rb') as bam:
+        for _, row in tqdm(df_orig.iterrows()):
+            pred5mers = []
+            for this_col in bam.pileup(row['chrom'], row['chromStart'], row['chromEnd'], truncate=True):
+                if this_col.reference_pos == row['chromStart']:
+                    # total_reads = 0
+                    # corr_reads = 0
+                    col_mod_probs = []
+                    for pileupread in this_col.pileups:
+                        if not pileupread.is_del and not pileupread.is_refskip:
+                            # this_pred5mer = pileupread.alignment.get_forward_sequence()[pileupread.query_position-2:pileupread.query_position+3]
+                            this_pred5mer = pileupread.alignment.query_sequence[
+                                            pileupread.query_position - 2:pileupread.query_position + 3]
+                            if pileupread.alignment.is_reverse:
+                                this_pred5mer = str(Seq(this_pred5mer).reverse_complement())
+
+                            if (
+                                    len(this_pred5mer)
+                                    and (pileupread.alignment.modified_bases is not None)
+                                    and len(pileupread.alignment.modified_bases)
+                                    and this_pred5mer == row['ref5mer']
+                            ):
+                                list_mod_probs = [pair[1] for pair in
+                                                  list(pileupread.alignment.modified_bases.values())[0] if
+                                                  pair[0] == pileupread.query_position]
+                                if len(list_mod_probs):
+                                    col_mod_probs.append(list_mod_probs[0])
+
+                            if len(this_pred5mer):
+                                pred5mers.append(this_pred5mer)
+
+                    print(row['ref5mer'], Counter(pred5mers).most_common())
+                    # print(col_mod_probs)
+                    if len(col_mod_probs):
+                        # pos = sum([x >= 204 for x in col_mod_probs])
+                        # neg = sum([x < 51 for x in col_mod_probs])
+                        # corr_mod_ratio.append(np.round(pos / (pos + neg) * 100))
+                        # corr_coverage.append(pos + neg)
+
+                        corr_mod_ratio.append(np.round(np.mean([x>=128 for x in col_mod_probs])*100))
+                        corr_coverage.append(len(col_mod_probs))
+
+                        print(this_col.n, len(col_mod_probs))
+                    else:
+                        corr_mod_ratio.append(0)
+                        corr_coverage.append(0)
+
+    return corr_mod_ratio, corr_coverage
 
 #######################################################################
 cm = 1/2.54  # centimeters in inches
@@ -21,12 +77,15 @@ FMT = 'pdf'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
-source_data_dir = '/home/adrian/NCOMMS_revision/source_data/ARABIDOPSIS/'
+# source_data_dir = '/home/adrian/NCOMMS_revision/source_data/ARABIDOPSIS/'
+source_data_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/DRACH_v1/Arabidopsis_thaliana'
 
 sel_chr = '1'
+col0_file = os.path.join(source_data_dir, f'col0/chr{sel_chr}/mAFiA.sites.bed')
+vir1_file = os.path.join(source_data_dir, f'vir1/chr{sel_chr}/mAFiA.sites.bed')
+col0_bam_file = os.path.join(source_data_dir, f'col0/chr{sel_chr}/mAFiA.reads.bam')
+vir1_bam_file = os.path.join(source_data_dir, f'vir1/chr{sel_chr}/mAFiA.reads.bam')
 
-col0_file = os.path.join(source_data_dir, 'col0/chr1/mAFiA.sites.bed')
-vir1_file = os.path.join(source_data_dir, 'vir1/chr1/mAFiA.sites.bed')
 miclip_file = os.path.join(source_data_dir, 'parker_miclip_sites.tds')
 
 img_out = '/home/adrian/NCOMMS_revision/images/ARABIDOPSIS'
@@ -34,13 +93,43 @@ os.makedirs(img_out, exist_ok=True)
 
 df_col0 = pd.read_csv(col0_file, sep='\t', dtype={'chrom': str})
 df_vir1 = pd.read_csv(vir1_file, sep='\t', dtype={'chrom': str})
-df_merged = pd.merge(df_col0, df_vir1, on=['chrom', 'chromStart', 'chromEnd', 'name', 'score', 'strand', 'ref5mer'], suffixes=['_col0', '_vir1'])
 
+# col0_mod_ratio_corr, col0_coverage_corr = correct_mod_ratio(col0_bam_file, df_col0)
+# df_col0['modRatio_corr'] = col0_mod_ratio_corr
+# df_col0['coverage_corr'] = col0_coverage_corr
+#
+# vir1_mod_ratio_corr, vir1_coverage_corr = correct_mod_ratio(vir1_bam_file, df_vir1)
+# df_vir1['modRatio_corr'] = vir1_mod_ratio_corr
+# df_vir1['coverage_corr'] = vir1_coverage_corr
+
+df_merged = pd.merge(df_col0, df_vir1, on=['chrom', 'chromStart', 'chromEnd', 'name', 'score', 'strand', 'ref5mer'], suffixes=['_col0', '_vir1'])
+df_merged = df_merged[(df_merged['coverage_col0']>=50) * (df_merged['coverage_vir1']>=50)]
+
+sel_motifs = [
+    'GGACT',
+    'GGACA',
+    'GAACT',
+    'AGACT',
+    'GGACC',
+    'TGACT'
+]
+
+plt.figure(figsize=(10, 6))
+for ind, motif in enumerate(sel_motifs):
+    sub_df = df_merged[df_merged['ref5mer']==motif]
+    plt.subplot(2, 3, ind+1)
+    plt.scatter(sub_df['modRatio_col0'], sub_df['modRatio_vir1'], c='b', alpha=0.5)
+    # plt.scatter(sub_df['modRatio_corr_col0'], sub_df['modRatio_corr_vir1'], s=1.5, c='r', alpha=0.5)
+    plt.xlim([-1, 101])
+    plt.ylim([-1, 101])
+    plt.title(motif)
+
+df_merged_sel = df_merged[df_merged['ref5mer'].isin(sel_motifs)]
 num_bins = 20
 vmax = 6
 ticks = np.int32(np.linspace(0, num_bins, 5) * 100 / num_bins)
 counts, bin_x, bin_y = np.histogram2d(
-    df_merged['modRatio_vir1'], df_merged['modRatio_col0'],
+    df_merged_sel['modRatio_vir1'], df_merged_sel['modRatio_col0'],
     bins=[num_bins, num_bins], range=[[0, 100], [0, 100]],
 )
 counts_log1p = np.log10(counts + 1)
