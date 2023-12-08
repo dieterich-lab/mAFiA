@@ -80,19 +80,24 @@ fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 # source_data_dir = '/home/adrian/NCOMMS_revision/source_data/ARABIDOPSIS/'
 source_data_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/DRACH_v1/Arabidopsis_thaliana'
 
-sel_chr = '1'
-col0_file = os.path.join(source_data_dir, f'col0/chr{sel_chr}/mAFiA.sites.bed')
-vir1_file = os.path.join(source_data_dir, f'vir1/chr{sel_chr}/mAFiA.sites.bed')
-col0_bam_file = os.path.join(source_data_dir, f'col0/chr{sel_chr}/mAFiA.reads.bam')
-vir1_bam_file = os.path.join(source_data_dir, f'vir1/chr{sel_chr}/mAFiA.reads.bam')
-
-miclip_file = os.path.join(source_data_dir, 'parker_miclip_sites.tds')
+miclip_file = os.path.join('/home/adrian/NCOMMS_revision/source_data/ARABIDOPSIS/parker_miclip_sites.tds')
 
 img_out = '/home/adrian/NCOMMS_revision/images/ARABIDOPSIS'
 os.makedirs(img_out, exist_ok=True)
 
-df_col0 = pd.read_csv(col0_file, sep='\t', dtype={'chrom': str})
-df_vir1 = pd.read_csv(vir1_file, sep='\t', dtype={'chrom': str})
+sel_chrs = ['1', '2', '3', '4', '5']
+
+df_col0 = []
+df_vir1 = []
+for this_chr in sel_chrs:
+    col0_file = os.path.join(source_data_dir, f'col0/chr{this_chr}/mAFiA.sites.bed')
+    vir1_file = os.path.join(source_data_dir, f'vir1/chr{this_chr}/mAFiA.sites.bed')
+    col0_bam_file = os.path.join(source_data_dir, f'col0/chr{this_chr}/mAFiA.reads.bam')
+    vir1_bam_file = os.path.join(source_data_dir, f'vir1/chr{this_chr}/mAFiA.reads.bam')
+    df_col0.append(pd.read_csv(col0_file, sep='\t', dtype={'chrom': str}))
+    df_vir1.append(pd.read_csv(vir1_file, sep='\t', dtype={'chrom': str}))
+df_col0 = pd.concat(df_col0, ignore_index=True)
+df_vir1 = pd.concat(df_vir1, ignore_index=True)
 
 # col0_mod_ratio_corr, col0_coverage_corr = correct_mod_ratio(col0_bam_file, df_col0)
 # df_col0['modRatio_corr'] = col0_mod_ratio_corr
@@ -118,7 +123,7 @@ plt.figure(figsize=(10, 6))
 for ind, motif in enumerate(sel_motifs):
     sub_df = df_merged[df_merged['ref5mer']==motif]
     plt.subplot(2, 3, ind+1)
-    plt.scatter(sub_df['modRatio_col0'], sub_df['modRatio_vir1'], c='b', alpha=0.5)
+    plt.scatter(sub_df['modRatio_col0'], sub_df['modRatio_vir1'], c='b', s=1, alpha=0.5)
     # plt.scatter(sub_df['modRatio_corr_col0'], sub_df['modRatio_corr_vir1'], s=1.5, c='r', alpha=0.5)
     plt.xlim([-1, 101])
     plt.ylim([-1, 101])
@@ -126,7 +131,7 @@ for ind, motif in enumerate(sel_motifs):
 
 df_merged_sel = df_merged[df_merged['ref5mer'].isin(sel_motifs)]
 num_bins = 20
-vmax = 6
+vmax = 2
 ticks = np.int32(np.linspace(0, num_bins, 5) * 100 / num_bins)
 counts, bin_x, bin_y = np.histogram2d(
     df_merged_sel['modRatio_vir1'], df_merged_sel['modRatio_col0'],
@@ -137,20 +142,44 @@ counts_log1p = np.log10(counts + 1)
 # fig_scatter = plt.figure(figsize=(3*cm, 3*cm))
 # plt.scatter(df_merged['modRatio_col0'], df_merged['modRatio_vir1'], s=0.5, alpha=0.5)
 
-fig = plt.figure(figsize=(4*cm, 4.5*cm))
-ax = fig.add_subplot()
-im = ax.imshow(counts, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
-ax.set_xticks(np.linspace(0, num_bins, 5)-0.5, ticks)
-ax.set_yticks(np.linspace(0, num_bins, 5)-0.5, ticks)
-cbar = fig.colorbar(im, fraction=0.046, pad=0.04, orientation='horizontal', location='top')
+fig_hist2d = plt.figure(figsize=(4*cm, 4.5*cm))
+ax_hist2d = fig_hist2d.add_subplot()
+# im = ax_hist2d.imshow(counts, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
+im = ax_hist2d.imshow(counts_log1p, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
+ax_hist2d.set_xticks(np.linspace(0, num_bins, 5)-0.5, ticks)
+ax_hist2d.set_yticks(np.linspace(0, num_bins, 5)-0.5, ticks)
+cbar = fig_hist2d.colorbar(im, fraction=0.046, pad=0.04, orientation='horizontal', location='top')
 cbar.set_ticks(np.linspace(0, vmax, 3))
-ax.set_xlabel('$S_{col0}$')
-ax.set_ylabel('$S_{vir1}$')
-fig.savefig(os.path.join(img_out, f'hist2d_col0_vir1.{FMT}'), **fig_kwargs)
+cbar.set_label('$log_{10}(1+count)$')
+ax_hist2d.set_xlabel('$S_{col0}$')
+ax_hist2d.set_ylabel('$S_{vir1}$')
+fig_hist2d.savefig(os.path.join(img_out, f'hist2d_col0_vir1.{FMT}'), **fig_kwargs)
+
+### 1D Histogram ###
+df_merged_mod = df_merged[df_merged['modRatio_col0']>=50]
+# df_merged_mod = df_merged
+
+fig_hist1d = plt.figure(figsize=(4*cm, 4*cm))
+ax_hist1d = fig_hist1d.add_subplot()
+ax_hist1d.hist(df_merged_mod['modRatio_col0'], bins=num_bins, range=[0, 100], alpha=0.5, label='col0')
+ax_hist1d.hist(df_merged_mod['modRatio_vir1'], bins=num_bins, range=[0, 100], alpha=0.5, label='vir1')
+# ax_hist1d.hist(df_merged_mod['modRatio_col0'], bins=40, range=[0, 100], alpha=0.5, label='col0', log=True)
+# ax_hist1d.hist(df_merged_mod['modRatio_vir1'], bins=40, range=[0, 100], alpha=0.5, label='vir1', log=True)
+ax_hist1d.set_xlim([-1, 101])
+ax_hist1d.legend(loc='upper right', handlelength=1)
+ax_hist1d.set_xlabel('S')
+ax_hist1d.set_ylabel('Num. Sites')
+ax_hist1d.set_title('$S_{col0}{\geq}$50')
+fig_hist1d.savefig(os.path.join(img_out, f'hist1d_col0_vir1.{FMT}'), **fig_kwargs)
 
 ########################################################################################################################
 ### compare to miclip ##################################################################################################
 ########################################################################################################################
+df_miclip = pd.read_csv(miclip_file, sep='\t',
+                        usecols=[0, 1, 2, 5, 6],
+                        names=['chrom', 'chromStart', 'chromEnd', 'strand', 'score'],
+                        dtype={'chrom': str, 'chromStart': int, 'chromEnd': int})
+
 # from matplotlib_venn import venn2
 # import pysam
 # from Bio import SeqIO
@@ -177,25 +206,22 @@ fig.savefig(os.path.join(img_out, f'hist2d_col0_vir1.{FMT}'), **fig_kwargs)
 ########################################################################################################################
 ### plot miclip peaks ##################################################################################################
 ########################################################################################################################
-miclip_start = 3122256
-miclip_end = 3122304
-
-df_miclip = pd.read_csv(miclip_file, sep='\t',
-                        usecols=[0, 1, 2, 5, 6],
-                        names=['chrom', 'chromStart', 'chromEnd', 'strand', 'score'],
-                        dtype={'chrom': str})
-df_miclip_chrom = df_miclip[df_miclip['chrom']==sel_chr]
-sub_df_miclip = df_miclip_chrom[(df_miclip_chrom['chromStart']>=miclip_start) * (df_miclip_chrom['chromEnd']<=miclip_end)]
-
-vec_x = np.arange(miclip_start, miclip_end+1)
-vec_y = np.zeros_like(vec_x, dtype=np.float32)
-vec_y[sub_df_miclip['chromStart'].values - miclip_start] = sub_df_miclip['score'].values
-
-plt.figure(figsize=(6*cm, 1*cm))
-plt.bar(vec_x, vec_y)
-plt.xlim([miclip_start-1, miclip_end+1])
-plt.ylim([0, 2])
-plt.savefig(os.path.join(img_out, f'miclip_peaks_{sel_chr}_{miclip_start}_{miclip_end}.{FMT}'), **fig_kwargs)
+# miclip_chr = '1'
+# miclip_start = 3122256
+# miclip_end = 3122304
+#
+# df_miclip_chrom = df_miclip[df_miclip['chrom']==miclip_chr]
+# sub_df_miclip = df_miclip_chrom[(df_miclip_chrom['chromStart']>=miclip_start) * (df_miclip_chrom['chromEnd']<=miclip_end)]
+#
+# vec_x = np.arange(miclip_start, miclip_end+1)
+# vec_y = np.zeros_like(vec_x, dtype=np.float32)
+# vec_y[sub_df_miclip['chromStart'].values - miclip_start] = sub_df_miclip['score'].values
+#
+# plt.figure(figsize=(6*cm, 1*cm))
+# plt.bar(vec_x, vec_y)
+# plt.xlim([miclip_start-1, miclip_end+1])
+# plt.ylim([0, 2])
+# plt.savefig(os.path.join(img_out, f'miclip_peaks_{miclip_chr}_{miclip_start}_{miclip_end}.{FMT}'), **fig_kwargs)
 
 ########################################################################################################################
 ### count overlap with miclip ##########################################################################################
@@ -208,6 +234,7 @@ overlap_miclip = 0
 
 miclip_sites = []
 for _, row in df_col0_mod.iterrows():
+    df_miclip_chrom = df_miclip[df_miclip['chrom']==row['chrom']]
     if np.abs(row['chromStart'] - df_miclip_chrom['chromStart'].values).min() <= 5:
         overlap_miclip += 1
         row_miclip = df_miclip_chrom.iloc[np.argmin(np.abs(row['chromStart'] - df_miclip_chrom['chromStart'].values))]

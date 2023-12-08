@@ -99,8 +99,8 @@ dict_roman_numerals = {
     'chr16': 'XVI',
 }
 
-# all_chrs = ['I', 'II', 'III', 'IV']
-all_chrs = ['III']
+all_chrs = ['I', 'II', 'III', 'IV']
+# all_chrs = ['III']
 # this_chr = 'III'
 all_df_wts = []
 all_df_kos = []
@@ -114,25 +114,26 @@ df_wt = pd.concat(all_df_wts)
 df_ko = pd.concat(all_df_kos)
 
 ### bam ###
-wt_bam_file = os.path.join(source_data_dir, f'WT/chr{this_chr}/mAFiA.reads.bam')
-ko_bam_file = os.path.join(source_data_dir, f'IME4_KO/chr{this_chr}/mAFiA.reads.bam')
+# wt_bam_file = os.path.join(source_data_dir, f'WT/chr{this_chr}/mAFiA.reads.bam')
+# ko_bam_file = os.path.join(source_data_dir, f'IME4_KO/chr{this_chr}/mAFiA.reads.bam')
 
-wt_mod_ratio_corr, wt_coverage_corr = correct_mod_ratio(wt_bam_file, df_wt)
-df_wt['modRatio_corr'] = wt_mod_ratio_corr
-df_wt['coverage_corr'] = wt_coverage_corr
-ko_mod_ratio_corr, ko_coverage_corr = correct_mod_ratio(ko_bam_file, df_ko)
-df_ko['modRatio_corr'] = ko_mod_ratio_corr
-df_ko['coverage_corr'] = ko_coverage_corr
+# wt_mod_ratio_corr, wt_coverage_corr = correct_mod_ratio(wt_bam_file, df_wt)
+# df_wt['modRatio_corr'] = wt_mod_ratio_corr
+# df_wt['coverage_corr'] = wt_coverage_corr
+# ko_mod_ratio_corr, ko_coverage_corr = correct_mod_ratio(ko_bam_file, df_ko)
+# df_ko['modRatio_corr'] = ko_mod_ratio_corr
+# df_ko['coverage_corr'] = ko_coverage_corr
 
 df_merged = pd.merge(df_wt, df_ko, on=['chrom', 'chromStart', 'chromEnd', 'name', 'score', 'strand', 'ref5mer'], suffixes=['_wt', '_ko'])
-df_merged = df_merged[(df_merged['coverage_corr_wt']>=50) * (df_merged['coverage_corr_ko']>=50)]
+# df_merged = df_merged[(df_merged['coverage_corr_wt']>=50) * (df_merged['coverage_corr_ko']>=50)]
 
 ### 2d density plot, WT vs KO ###
 num_bins = 40
-vmax = 5
+vmax = 20
 ticks = np.int32(np.linspace(0, num_bins, 5) * 100 / num_bins)
 counts, bin_x, bin_y = np.histogram2d(
-    df_merged['modRatio_corr_ko'], df_merged['modRatio_corr_wt'],
+    # df_merged['modRatio_corr_ko'], df_merged['modRatio_corr_wt'],
+    df_merged['modRatio_ko'], df_merged['modRatio_wt'],
     bins=[num_bins, num_bins], range=[[0, 100], [0, 100]],
 )
 
