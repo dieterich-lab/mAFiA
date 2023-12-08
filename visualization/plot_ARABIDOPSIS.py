@@ -72,8 +72,8 @@ mpl.rcParams['ytick.labelsize'] = 5
 mpl.rcParams['xtick.major.size'] = 2
 mpl.rcParams['ytick.major.size'] = 2
 mpl.rcParams['font.family'] = 'Arial'
-FMT = 'pdf'
-# FMT = 'png'
+# FMT = 'pdf'
+FMT = 'png'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
