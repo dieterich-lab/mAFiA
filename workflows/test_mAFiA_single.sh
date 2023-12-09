@@ -5,13 +5,13 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=160GB
 #SBATCH --verbose
-#SBATCH --job-name=DRACH_v1_WT_chr1
-#SBATCH --output=/home/achan/slurm/DRACH_v1_WT_chr1.out
+#SBATCH --job-name=DRACH_v1_HEK293_WT_chr6
+#SBATCH --output=/home/achan/slurm/DRACH_v1_HEK293_WT_chr6.out
 
 #ds=Mettl3-KO
 ds=100_WT_0_IVT
 #ds=0_WT_100_IVT
-chr=1
+chr=6
 
 #ds=col0
 #ds=vir1
@@ -38,8 +38,11 @@ mod=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/site_annotations/DRACH.GRCh3
 #ref=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/Saccharomyces_cerevisiae/reference/R64-1-1_96.fa
 #mod=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/Saccharomyces_cerevisiae/reference/6motifs.chr${chr}.bed
 
-backbone=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
-classifiers=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/MAFIA_classifiers/DRACH_v1
+backbone=${HOME}/git/mAFiA/models/RODAN_HEK293_IVT.torch
+classifiers=${HOME}/git/mAFiA/models/DRACH_v1
+
+#backbone=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
+#classifiers=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/MAFIA_classifiers/DRACH_v1
 #output=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/DRACH/${ds}/chr${chr}
 #output=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/6motifs/Arabidopsis_thaliana/${ds}/chr${chr}
 #output=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/6motifs/Saccharomyces_cerevisiae/${ds}/chr${chr}
@@ -47,12 +50,12 @@ output=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/DRACH_v1/${ds}/chr${chr}
 
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
 
-python3 ${HOME}/git/mAFiA_dev/mAFiA/test_mAFiA.py \
+test_mAFiA.py \
 --bam_file ${bam} \
 --fast5_dir ${fast5_dir} \
 --ref_file ${ref} \
 --mod_file ${mod} \
---min_coverage 50 \
+--min_coverage 10 \
 --max_num_reads 2500 \
 --backbone_model_path ${backbone} \
 --classifier_model_dir ${classifiers} \
