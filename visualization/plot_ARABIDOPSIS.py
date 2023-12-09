@@ -72,15 +72,13 @@ mpl.rcParams['ytick.labelsize'] = 5
 mpl.rcParams['xtick.major.size'] = 2
 mpl.rcParams['ytick.major.size'] = 2
 mpl.rcParams['font.family'] = 'Arial'
-# FMT = 'pdf'
-FMT = 'png'
+FMT = 'pdf'
+# FMT = 'png'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
-# source_data_dir = '/home/adrian/NCOMMS_revision/source_data/ARABIDOPSIS/'
-source_data_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/DRACH_v1/Arabidopsis_thaliana'
-
-miclip_file = os.path.join('/home/adrian/NCOMMS_revision/source_data/ARABIDOPSIS/parker_miclip_sites.tds')
+source_data_dir = '/home/adrian/NCOMMS_revision/source_data/ARABIDOPSIS/'
+miclip_file = os.path.join(source_data_dir, 'parker_miclip_sites.tds')
 
 img_out = '/home/adrian/NCOMMS_revision/images/ARABIDOPSIS'
 os.makedirs(img_out, exist_ok=True)
@@ -142,15 +140,15 @@ counts_log1p = np.log10(counts + 1)
 # fig_scatter = plt.figure(figsize=(3*cm, 3*cm))
 # plt.scatter(df_merged['modRatio_col0'], df_merged['modRatio_vir1'], s=0.5, alpha=0.5)
 
-fig_hist2d = plt.figure(figsize=(4*cm, 4.5*cm))
+fig_hist2d = plt.figure(figsize=(4.5*cm, 4*cm))
 ax_hist2d = fig_hist2d.add_subplot()
 # im = ax_hist2d.imshow(counts, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
 im = ax_hist2d.imshow(counts_log1p, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
 ax_hist2d.set_xticks(np.linspace(0, num_bins, 5)-0.5, ticks)
 ax_hist2d.set_yticks(np.linspace(0, num_bins, 5)-0.5, ticks)
-cbar = fig_hist2d.colorbar(im, fraction=0.046, pad=0.04, orientation='horizontal', location='top')
+cbar = fig_hist2d.colorbar(im, fraction=0.046, pad=0.04, orientation='vertical', location='right')
 cbar.set_ticks(np.linspace(0, vmax, 3))
-cbar.set_label('$log_{10}(1+count)$')
+cbar.set_label('$log_{10}(1+count)$', rotation=-90, labelpad=10)
 ax_hist2d.set_xlabel('$S_{col0}$')
 ax_hist2d.set_ylabel('$S_{vir1}$')
 fig_hist2d.savefig(os.path.join(img_out, f'hist2d_col0_vir1.{FMT}'), **fig_kwargs)
@@ -159,7 +157,7 @@ fig_hist2d.savefig(os.path.join(img_out, f'hist2d_col0_vir1.{FMT}'), **fig_kwarg
 df_merged_mod = df_merged[df_merged['modRatio_col0']>=50]
 # df_merged_mod = df_merged
 
-fig_hist1d = plt.figure(figsize=(4*cm, 4*cm))
+fig_hist1d = plt.figure(figsize=(4.5*cm, 4.5*cm))
 ax_hist1d = fig_hist1d.add_subplot()
 ax_hist1d.hist(df_merged_mod['modRatio_col0'], bins=num_bins, range=[0, 100], alpha=0.5, label='col0')
 ax_hist1d.hist(df_merged_mod['modRatio_vir1'], bins=num_bins, range=[0, 100], alpha=0.5, label='vir1')
@@ -226,7 +224,7 @@ df_miclip = pd.read_csv(miclip_file, sep='\t',
 ########################################################################################################################
 ### count overlap with miclip ##########################################################################################
 ########################################################################################################################
-df_col0_mod = df_col0[df_col0['modRatio']>=50]
+df_col0_mod = df_col0[df_col0['modRatio']>=80]
 df_col0_mod.reset_index(inplace=True, drop=True)
 
 total_pred = len(df_col0_mod)

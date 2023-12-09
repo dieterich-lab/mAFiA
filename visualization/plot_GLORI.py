@@ -27,7 +27,7 @@ source_data_dir = '/home/adrian/NCOMMS_revision/source_data/HEK293/DRACH_replace
 # chrs = [str(i) for i in range(2, 11)] + ['13', '14', '18', '20']
 # source_data_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/DRACH_replaced/100_WT_0_IVT'
 chrs = list(range(1, 23)) + ['X']
-img_out = '/home/adrian/NCOMMS_revision/images/GLORI'
+img_out = '/home/adrian/NCOMMS_revision/images/GLORI_all_pval'
 os.makedirs(img_out, exist_ok=True)
 
 glori_path = '/home/adrian/Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.ref5mers.csv'
@@ -76,7 +76,7 @@ def import_miclip(thresh_source_counts=3):
     return df_miclip_thresh
 
 df_mAFiA = import_mAFiA()
-df_glori = import_glori()
+df_glori = import_glori(thresh_pval=1)
 df_miclip = import_miclip()
 
 
@@ -239,7 +239,11 @@ motifs = [pair[0] for pair in motif_counts]
 total_num_sites = df_merged_sel.shape[0]
 total_corr = np.corrcoef(df_merged_sel['modRatio_glori'], df_merged_sel['modRatio_mafia'])[0, 1]
 
-# ordered_motifs = ['GGACT', 'GGACA', 'GAACT', 'AGACT', 'GGACC', 'TGACT']
+ordered_motifs = ['GGACT', 'GGACA', 'GAACT', 'AGACT', 'GGACC', 'TGACT']
+
+df_merged_6motifs = df_merged_sel[df_merged_sel['ref5mer'].isin(ordered_motifs)]
+num_sites_6motifs = df_merged_6motifs.shape[0]
+corr_6motifs = np.corrcoef(df_merged_6motifs['modRatio_glori'], df_merged_6motifs['modRatio_mafia'])
 
 # num_motifs = 6
 # num_rows = 2
