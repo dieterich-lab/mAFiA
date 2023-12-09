@@ -9,7 +9,7 @@
 #SBATCH --output=/home/achan/slurm/DRACH_v1_HEK293_WT_chr1.out
 
 #ds=Mettl3-KO
-#ds=100_WT_0_IVT
+ds=100_WT_0_IVT
 #ds=0_WT_100_IVT
 chr=1
 
