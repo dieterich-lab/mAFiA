@@ -5,13 +5,13 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=160GB
 #SBATCH --verbose
-#SBATCH --job-name=DRACH_v1_HEK293_WT_chr6
-#SBATCH --output=/home/achan/slurm/DRACH_v1_HEK293_WT_chr6.out
+#SBATCH --job-name=DRACH_v1_HEK293_WT_chr1
+#SBATCH --output=/home/achan/slurm/DRACH_v1_HEK293_WT_chr1.out
 
 #ds=Mettl3-KO
-ds=100_WT_0_IVT
+#ds=100_WT_0_IVT
 #ds=0_WT_100_IVT
-chr=6
+chr=1
 
 #ds=col0
 #ds=vir1
@@ -50,7 +50,7 @@ output=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/DRACH_v1/${ds}/chr${chr}
 
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
 
-test_mAFiA.py \
+test_mAFiA \
 --bam_file ${bam} \
 --fast5_dir ${fast5_dir} \
 --ref_file ${ref} \
