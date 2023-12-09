@@ -71,7 +71,7 @@ def main():
             )
 
         this_site_coverage = len(test_container.nucleotides.get(this_mRNA_site.ind, []))
-        if this_site_coverage > args.min_coverage:
+        if this_site_coverage >= args.min_coverage:
             print('=========================================================')
             this_mRNA_site.print()
             this_site_mod_ratio = motif_classifiers[this_mRNA_site.ref_5mer].test(
