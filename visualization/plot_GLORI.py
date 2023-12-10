@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-# from matplotlib_venn import venn3
+from matplotlib_venn import venn3
 from collections import Counter
 import pysam
 
@@ -23,10 +23,10 @@ FMT = 'pdf'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
-source_data_dir = '/home/adrian/NCOMMS_revision/source_data/HEK293/DRACH_replaced/100_WT_0_IVT'
+source_data_dir = '/home/adrian/NCOMMS_revision/source_data/HEK293/100_WT_0_IVT'
 # chrs = [str(i) for i in range(2, 11)] + ['13', '14', '18', '20']
-# source_data_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/DRACH_replaced/100_WT_0_IVT'
-chrs = list(range(1, 23)) + ['X']
+# chrs = list(range(1, 23)) + ['X']
+chrs = [str(i) for i in range(2, 8)]
 img_out = '/home/adrian/NCOMMS_revision/images/GLORI_all_pval'
 os.makedirs(img_out, exist_ok=True)
 
@@ -83,100 +83,100 @@ df_miclip = import_miclip()
 ########################################################################################################################
 ### histogram stoichiometry vs. coverage ###############################################################################
 ########################################################################################################################
-# coverage = df_mAFiA['coverage'].values
-# stoichio = df_mAFiA['modRatio'].values
-#
-# num_bins = 20
-# coverage_range = [0, 500]
-# stoichio_range = [0, 100]
-#
-# fig_cov_stoichio = plt.figure(figsize=(6, 6))
-# gs = fig_cov_stoichio.add_gridspec(2, 2,  width_ratios=(4, 1), height_ratios=(1, 4),
-#                       left=0.1, right=0.9, bottom=0.1, top=0.9,
-#                       wspace=0.05, hspace=0.05)
-# ax = fig_cov_stoichio.add_subplot(gs[1, 0])
-# ax_histx = fig_cov_stoichio.add_subplot(gs[0, 0], sharex=ax)
-# ax_histy = fig_cov_stoichio.add_subplot(gs[1, 1], sharey=ax)
-# ax_histx.tick_params(axis="x", labelbottom=False)
-# ax_histy.tick_params(axis="y", labelleft=False)
-#
-# bin_counts, bin_x, bin_y = np.histogram2d(coverage, stoichio, bins=num_bins, range=[coverage_range, stoichio_range])
-# ax.imshow(np.log10(bin_counts+1), origin='lower')
-# ax.set_xticks(np.arange(len(bin_x))[::2]-0.5, np.int32(bin_x)[::2])
-# ax.set_yticks(np.arange(len(bin_y))[::2]-0.5, np.int32(bin_y)[::2])
-# ax.set_xlabel('Coverage')
-# ax.set_ylabel('Stoichiometry')
-#
-# x_bin_counts, _ = np.histogram(coverage, bins=bin_x)
-# ax_histx.bar(np.arange(len(x_bin_counts)), x_bin_counts)
-# ax_histx.set_xticks(np.arange(len(bin_x))[::2]-0.5, np.int32(bin_x)[::2])
-# ax_histx.set_ylabel('Num. Sites')
-#
-# y_bin_counts, _ = np.histogram(stoichio, bins=bin_y)
-# ax_histy.barh(np.arange(len(y_bin_counts)), y_bin_counts)
-# ax_histy.set_yticks(np.arange(len(bin_y))[::2]-0.5, np.int32(bin_y)[::2])
-# ax_histy.set_xlabel('Num. Sites')
-#
-# fig_cov_stoichio.savefig(os.path.join(img_out, f'coverage_stoichiometry.{FMT}'), **fig_kwargs)
+coverage = df_mAFiA['coverage'].values
+stoichio = df_mAFiA['modRatio'].values
 
-# fig_hist_stoichio, ax = plt.subplots(nrows=1, ncols=1, figsize=(5*cm, 5*cm))
-# ax.hist(df_mAFiA['modRatio'].values, range=[0, 100], bins=100)
-# ax.set_xlim(0, 100)
-# ax.set_xlabel('Stoichiometry')
-# ax.set_ylabel('Counts')
-# fig_hist_stoichio.savefig(os.path.join(img_out, f'hist_stoichio.{FMT}'), **fig_kwargs)
+num_bins = 20
+coverage_range = [0, 500]
+stoichio_range = [0, 100]
+
+fig_cov_stoichio = plt.figure(figsize=(6, 6))
+gs = fig_cov_stoichio.add_gridspec(2, 2,  width_ratios=(4, 1), height_ratios=(1, 4),
+                      left=0.1, right=0.9, bottom=0.1, top=0.9,
+                      wspace=0.05, hspace=0.05)
+ax = fig_cov_stoichio.add_subplot(gs[1, 0])
+ax_histx = fig_cov_stoichio.add_subplot(gs[0, 0], sharex=ax)
+ax_histy = fig_cov_stoichio.add_subplot(gs[1, 1], sharey=ax)
+ax_histx.tick_params(axis="x", labelbottom=False)
+ax_histy.tick_params(axis="y", labelleft=False)
+
+bin_counts, bin_x, bin_y = np.histogram2d(coverage, stoichio, bins=num_bins, range=[coverage_range, stoichio_range])
+ax.imshow(np.log10(bin_counts+1), origin='lower')
+ax.set_xticks(np.arange(len(bin_x))[::2]-0.5, np.int32(bin_x)[::2])
+ax.set_yticks(np.arange(len(bin_y))[::2]-0.5, np.int32(bin_y)[::2])
+ax.set_xlabel('Coverage')
+ax.set_ylabel('Stoichiometry')
+
+x_bin_counts, _ = np.histogram(coverage, bins=bin_x)
+ax_histx.bar(np.arange(len(x_bin_counts)), x_bin_counts)
+ax_histx.set_xticks(np.arange(len(bin_x))[::2]-0.5, np.int32(bin_x)[::2])
+ax_histx.set_ylabel('Num. Sites')
+
+y_bin_counts, _ = np.histogram(stoichio, bins=bin_y)
+ax_histy.barh(np.arange(len(y_bin_counts)), y_bin_counts)
+ax_histy.set_yticks(np.arange(len(bin_y))[::2]-0.5, np.int32(bin_y)[::2])
+ax_histy.set_xlabel('Num. Sites')
+
+fig_cov_stoichio.savefig(os.path.join(img_out, f'coverage_stoichiometry.{FMT}'), **fig_kwargs)
+
+fig_hist_stoichio, ax = plt.subplots(nrows=1, ncols=1, figsize=(5*cm, 5*cm))
+ax.hist(df_mAFiA['modRatio'].values, range=[0, 100], bins=100)
+ax.set_xlim(0, 100)
+ax.set_xlabel('Stoichiometry')
+ax.set_ylabel('Counts')
+fig_hist_stoichio.savefig(os.path.join(img_out, f'hist_stoichio.{FMT}'), **fig_kwargs)
 
 
 ########################################################################################################################
 ### correlation vs. coverage ###########################################################################################
 ########################################################################################################################
-# coverage_corr = []
-# for this_thresh_cov in range(10, 100):
-#     this_df_mAFiA_thresh = df_mAFiA[df_mAFiA['coverage'] >= this_thresh_cov]
-#     this_df_merged = pd.merge(this_df_mAFiA_thresh, df_glori, on=['chrom', 'chromStart'], suffixes=('_mafia', '_glori'))
-#     this_corr = np.corrcoef(this_df_merged[['modRatio_mafia', 'modRatio_glori']].values.T)[0, 1]
-#     coverage_corr.append((this_thresh_cov, this_corr))
-# coverage_corr = np.vstack(coverage_corr).T
-#
-# fig_cov_corr, ax = plt.subplots(nrows=1, ncols=1, figsize=(5*cm, 5*cm))
-# ax.plot(coverage_corr[0], coverage_corr[1])
-# ax.set_xlabel('Min. Coverage')
-# ax.set_ylabel('Corr. with GLORI')
-# fig_cov_corr.savefig(os.path.join(img_out, f'cov_corr.{FMT}'), **fig_kwargs)
+coverage_corr = []
+for this_thresh_cov in range(10, 100):
+    this_df_mAFiA_thresh = df_mAFiA[df_mAFiA['coverage'] >= this_thresh_cov]
+    this_df_merged = pd.merge(this_df_mAFiA_thresh, df_glori, on=['chrom', 'chromStart'], suffixes=('_mafia', '_glori'))
+    this_corr = np.corrcoef(this_df_merged[['modRatio_mafia', 'modRatio_glori']].values.T)[0, 1]
+    coverage_corr.append((this_thresh_cov, this_corr))
+coverage_corr = np.vstack(coverage_corr).T
+
+fig_cov_corr, ax = plt.subplots(nrows=1, ncols=1, figsize=(5*cm, 5*cm))
+ax.plot(coverage_corr[0], coverage_corr[1])
+ax.set_xlabel('Min. Coverage')
+ax.set_ylabel('Corr. with GLORI')
+fig_cov_corr.savefig(os.path.join(img_out, f'cov_corr.{FMT}'), **fig_kwargs)
 
 ########################################################################################################################
 ### correlation vs. stoichiometry ######################################################################################
 ########################################################################################################################
-# thresh_coverage = 50
-# df_mAFiA_thresh = df_mAFiA[df_mAFiA['coverage'] >= thresh_coverage]
-# df_merged = pd.merge(df_mAFiA_thresh, df_glori, on=['chrom', 'chromStart'], suffixes=('_mafia', '_glori'))
-#
-# bin_width = 10
-# stoichio_lbins = np.arange(10, 100, bin_width)
-# bin_centers = (stoichio_lbins + stoichio_lbins + bin_width) / 2
-#
-# stoichio_rms = []
-# for this_lbin in stoichio_lbins:
-#     sub_df_merged = df_merged[(df_merged['modRatio_glori']>=this_lbin) * (df_merged['modRatio_glori']<(this_lbin+bin_width))]
-#     # mafia_normed = np.float64(sub_df_merged['modRatio_mafia'].values)
-#     # mafia_normed -= mafia_normed.mean()
-#     # mafia_normed /= mafia_normed.std()
-#     # glori_normed = np.float64(sub_df_merged['modRatio_glori'].values)
-#     # glori_normed -= glori_normed.mean()
-#     # glori_normed /= glori_normed.std()
-#     # stoichio_corr.append(np.corrcoef(mafia_normed, glori_normed)[0, 1])
-#     stoichio_rms.append(np.sqrt(((sub_df_merged['modRatio_mafia'] - sub_df_merged['modRatio_glori'])**2).mean()))
-#
-# xticks = list(stoichio_lbins)
-# xticks.append(stoichio_lbins[-1]+bin_width)
-#
-# fig_stoichio_rms, ax = plt.subplots(nrows=1, ncols=1, figsize=(5*cm, 5*cm))
-# ax.plot(bin_centers, stoichio_rms)
-# ax.set_xticks(xticks)
-# ax.set_xlim([10, 100])
-# ax.set_xlabel('Stoichiometry Range')
-# ax.set_ylabel('RMS mAFiA-GLORI')
-# fig_stoichio_rms.savefig(os.path.join(img_out, f'stoichio_RMS.{FMT}'), **fig_kwargs)
+thresh_coverage = 50
+df_mAFiA_thresh = df_mAFiA[df_mAFiA['coverage'] >= thresh_coverage]
+df_merged = pd.merge(df_mAFiA_thresh, df_glori, on=['chrom', 'chromStart'], suffixes=('_mafia', '_glori'))
+
+bin_width = 10
+stoichio_lbins = np.arange(10, 100, bin_width)
+bin_centers = (stoichio_lbins + stoichio_lbins + bin_width) / 2
+
+stoichio_rms = []
+for this_lbin in stoichio_lbins:
+    sub_df_merged = df_merged[(df_merged['modRatio_glori']>=this_lbin) * (df_merged['modRatio_glori']<(this_lbin+bin_width))]
+    # mafia_normed = np.float64(sub_df_merged['modRatio_mafia'].values)
+    # mafia_normed -= mafia_normed.mean()
+    # mafia_normed /= mafia_normed.std()
+    # glori_normed = np.float64(sub_df_merged['modRatio_glori'].values)
+    # glori_normed -= glori_normed.mean()
+    # glori_normed /= glori_normed.std()
+    # stoichio_corr.append(np.corrcoef(mafia_normed, glori_normed)[0, 1])
+    stoichio_rms.append(np.sqrt(((sub_df_merged['modRatio_mafia'] - sub_df_merged['modRatio_glori'])**2).mean()))
+
+xticks = list(stoichio_lbins)
+xticks.append(stoichio_lbins[-1]+bin_width)
+
+fig_stoichio_rms, ax = plt.subplots(nrows=1, ncols=1, figsize=(5*cm, 5*cm))
+ax.plot(bin_centers, stoichio_rms)
+ax.set_xticks(xticks)
+ax.set_xlim([10, 100])
+ax.set_xlabel('Stoichiometry Range')
+ax.set_ylabel('RMS mAFiA-GLORI')
+fig_stoichio_rms.savefig(os.path.join(img_out, f'stoichio_RMS.{FMT}'), **fig_kwargs)
 
 
 ########################################################################################################################
@@ -186,7 +186,7 @@ df_miclip = import_miclip()
 #
 # thresh_stoichio = 50
 #
-# def thresh_df_with_coverage(df_in, thresh_coverage=50):
+# def thresh_df_with_coverage(df_in, thresh_coverage=10):
 #     with pysam.AlignmentFile(bam_file, "rb" ) as bam:
 #         coverage = []
 #         for _, row in df_in.iterrows():
@@ -243,8 +243,10 @@ ordered_motifs = ['GGACT', 'GGACA', 'GAACT', 'AGACT', 'GGACC', 'TGACT']
 
 df_merged_6motifs = df_merged_sel[df_merged_sel['ref5mer'].isin(ordered_motifs)]
 num_sites_6motifs = df_merged_6motifs.shape[0]
-corr_6motifs = np.corrcoef(df_merged_6motifs['modRatio_glori'], df_merged_6motifs['modRatio_mafia'])
+corr_6motifs = np.corrcoef(df_merged_6motifs['modRatio_glori'], df_merged_6motifs['modRatio_mafia'])[0, 1]
 
+
+print(f'{num_sites_6motifs} sites, corr. {corr_6motifs:.2f}')
 # num_motifs = 6
 # num_rows = 2
 # num_cols = 3
@@ -289,4 +291,4 @@ def scatter_plot_mafia_vs_glori(num_motifs, num_rows, num_cols, plot_name, figsi
 
 scatter_plot_mafia_vs_glori(num_motifs=6, num_rows=2, num_cols=3, plot_name=f'corr_mAFiA_GLORI_DRACH_6motifs.{FMT}', figsize=(7.5*cm, 5*cm))
 # scatter_plot_mafia_vs_glori(num_motifs=12, num_rows=3, num_cols=4, plot_name=f'corr_mAFiA_GLORI_DRACH_12motifs.{FMT}', figsize=(10*cm, 8*cm))
-scatter_plot_mafia_vs_glori(num_motifs=18, num_rows=3, num_cols=6, plot_name=f'corr_mAFiA_GLORI_DRACH_18motifs.{FMT}', figsize=(15*cm, 8*cm))
+# scatter_plot_mafia_vs_glori(num_motifs=18, num_rows=3, num_cols=6, plot_name=f'corr_mAFiA_GLORI_DRACH_18motifs.{FMT}', figsize=(15*cm, 8*cm))
