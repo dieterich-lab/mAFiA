@@ -129,7 +129,8 @@ for ind, motif in enumerate(sel_motifs):
 
 df_merged_sel = df_merged[df_merged['ref5mer'].isin(sel_motifs)]
 num_bins = 20
-vmax = 2
+# vmax = 2
+vmax = 50
 ticks = np.int32(np.linspace(0, num_bins, 5) * 100 / num_bins)
 counts, bin_x, bin_y = np.histogram2d(
     df_merged_sel['modRatio_vir1'], df_merged_sel['modRatio_col0'],
@@ -142,13 +143,14 @@ counts_log1p = np.log10(counts + 1)
 
 fig_hist2d = plt.figure(figsize=(4.5*cm, 4*cm))
 ax_hist2d = fig_hist2d.add_subplot()
-# im = ax_hist2d.imshow(counts, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
-im = ax_hist2d.imshow(counts_log1p, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
+im = ax_hist2d.imshow(counts, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
+# im = ax_hist2d.imshow(counts_log1p, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
+ax_hist2d.axhline(y=np.where(bin_y==50)[0][0]-0.5, c='r', linestyle='--')
 ax_hist2d.set_xticks(np.linspace(0, num_bins, 5)-0.5, ticks)
 ax_hist2d.set_yticks(np.linspace(0, num_bins, 5)-0.5, ticks)
-cbar = fig_hist2d.colorbar(im, fraction=0.046, pad=0.04, orientation='vertical', location='right')
+cbar = fig_hist2d.colorbar(im, fraction=0.046, pad=0.04, orientation='horizontal', location='top')
 cbar.set_ticks(np.linspace(0, vmax, 3))
-cbar.set_label('$log_{10}(1+count)$', rotation=-90, labelpad=10)
+# cbar.set_label('$log_{10}(1+count)$', rotation=-90, labelpad=10)
 ax_hist2d.set_xlabel('$S_{col0}$')
 ax_hist2d.set_ylabel('$S_{vir1}$')
 fig_hist2d.savefig(os.path.join(img_out, f'hist2d_col0_vir1.{FMT}'), **fig_kwargs)
@@ -157,7 +159,7 @@ fig_hist2d.savefig(os.path.join(img_out, f'hist2d_col0_vir1.{FMT}'), **fig_kwarg
 df_merged_mod = df_merged[df_merged['modRatio_col0']>=50]
 # df_merged_mod = df_merged
 
-fig_hist1d = plt.figure(figsize=(4.5*cm, 4.5*cm))
+fig_hist1d = plt.figure(figsize=(4*cm, 4*cm))
 ax_hist1d = fig_hist1d.add_subplot()
 ax_hist1d.hist(df_merged_mod['modRatio_col0'], bins=num_bins, range=[0, 100], alpha=0.5, label='col0')
 ax_hist1d.hist(df_merged_mod['modRatio_vir1'], bins=num_bins, range=[0, 100], alpha=0.5, label='vir1')
@@ -167,7 +169,7 @@ ax_hist1d.set_xlim([-1, 101])
 ax_hist1d.legend(loc='upper right', handlelength=1)
 ax_hist1d.set_xlabel('S')
 ax_hist1d.set_ylabel('Num. Sites')
-ax_hist1d.set_title('$S_{col0}{\geq}$50')
+# ax_hist1d.set_title(f'{len(df_merged_mod)} sites' + ' with $S_{col0}{\geq}$50')
 fig_hist1d.savefig(os.path.join(img_out, f'hist1d_col0_vir1.{FMT}'), **fig_kwargs)
 
 ########################################################################################################################
@@ -224,7 +226,7 @@ df_miclip = pd.read_csv(miclip_file, sep='\t',
 ########################################################################################################################
 ### count overlap with miclip ##########################################################################################
 ########################################################################################################################
-df_col0_mod = df_col0[df_col0['modRatio']>=80]
+df_col0_mod = df_col0[df_col0['modRatio']>=50]
 df_col0_mod.reset_index(inplace=True, drop=True)
 
 total_pred = len(df_col0_mod)

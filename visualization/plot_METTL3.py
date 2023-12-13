@@ -35,50 +35,50 @@ def load_genome_reference(ref_file, chrs):
 source_data_dir = '/home/adrian/NCOMMS_revision/source_data/HEK293'
 
 ref_file = '/home/adrian/Data/GRCh38_102/GRCh38_102.fa'
-WT_bed_file = os.path.join(source_data_dir, '100_WT_0_IVT/chr6/mAFiA.sites.bed')
-KO_bed_file = os.path.join(source_data_dir, 'Mettl3-KO/chr6/mAFiA.sites.bed')
+WT_bed_file = os.path.join(source_data_dir, '100_WT_0_IVT/merged.mAFiA.sites.bed')
+KO_bed_file = os.path.join(source_data_dir, 'Mettl3-KO/merged.mAFiA.sites.bed')
 img_out = '/home/adrian/NCOMMS_revision/images/METTL3'
 
 os.makedirs(img_out, exist_ok=True)
 
-sel_chrom = '6'
-thresh_cov = 10
-ref = load_genome_reference(ref_file, [sel_chrom])
-
 ########################################################################################################################
 ### scatter plot #######################################################################################################
 ########################################################################################################################
+thresh_cov = 50
+
 WT_bed = pd.read_csv(WT_bed_file, sep='\t', dtype={'chrom': str})
-WT_bed_chrom = WT_bed[
-    (WT_bed['chrom'] == sel_chrom)
-    * (WT_bed['coverage'] >= thresh_cov)
-    # * (df_bed['chromStart']>=sel_chromStart)
-    # * (df_bed['chromEnd']<sel_chromEnd)
-    ]
+# WT_bed_chrom = WT_bed[
+#     (WT_bed['chrom'] == sel_chrom)
+#     * (WT_bed['coverage'] >= thresh_cov)
+#     # * (df_bed['chromStart']>=sel_chromStart)
+#     # * (df_bed['chromEnd']<sel_chromEnd)
+#     ]
 
 KO_bed = pd.read_csv(KO_bed_file, sep='\t', dtype={'chrom': str})
-KO_bed_chrom = KO_bed[
-    (KO_bed['chrom'] == sel_chrom)
-    * (KO_bed['coverage'] >= thresh_cov)
-    # * (df_bed['chromStart']>=sel_chromStart)
-    # * (df_bed['chromEnd']<sel_chromEnd)
-    ]
+# KO_bed_chrom = KO_bed[
+#     (KO_bed['chrom'] == sel_chrom)
+#     * (KO_bed['coverage'] >= thresh_cov)
+#     # * (df_bed['chromStart']>=sel_chromStart)
+#     # * (df_bed['chromEnd']<sel_chromEnd)
+#     ]
 
 whitelist = ['GGACT', 'GGACA', 'GAACT', 'AGACT', 'GGACC', 'TGACT']
 # blacklist = ['AGACC', 'AAACA', 'TAACA', 'TAACT', 'GAACA', 'TGACC']
 blacklist = []
 
-merged_bed = pd.merge(WT_bed_chrom, KO_bed_chrom, how='inner', on=['chrom', 'chromStart', 'chromEnd', 'name', 'score', 'strand', 'ref5mer'], suffixes=['_WT', '_KO'])
+merged_bed = pd.merge(WT_bed, KO_bed, how='inner', on=['chrom', 'chromStart', 'chromEnd', 'name', 'score', 'strand', 'ref5mer'], suffixes=['_WT', '_KO'])
 merged_bed_sel = merged_bed[
     ~merged_bed['ref5mer'].isin(blacklist)
     * merged_bed['ref5mer'].isin(whitelist)
+    * (merged_bed['coverage_WT']>=thresh_cov)
+    * (merged_bed['coverage_KO']>=thresh_cov)
 ]
 
 num_bins = 20
 ticks = np.int32(np.linspace(0, num_bins, 5) * 100 / num_bins)
 
-# vmax = 30
-vmax = 2
+vmax = 60
+# vmax = 3
 
 fig = plt.figure(figsize=(3.5*cm, 4*cm))
 # plt.scatter(merged_bed['modRatio_WT'], merged_bed['modRatio_KO'], s=0.2, alpha=0.5)
@@ -90,8 +90,8 @@ counts, bin_x, bin_y = np.histogram2d(
 )
 counts_log1p = np.log10(1+counts)
 ax = fig.add_subplot()
-# im = ax.imshow(counts, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
-im = ax.imshow(counts_log1p, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
+im = ax.imshow(counts, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
+# im = ax.imshow(counts_log1p, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
 ax.axhline(y=np.where(bin_y==50)[0][0]-0.5, c='r', linestyle='--')
 ax.set_xticks(np.linspace(0, num_bins, 5)-0.5, ticks)
 ax.set_yticks(np.linspace(0, num_bins, 5)-0.5, ticks)
@@ -103,6 +103,11 @@ fig.savefig(os.path.join(img_out, f'hist2d_WT_vs_KO.{FMT}'), **fig_kwargs)
 ########################################################################################################################
 ### whole-chromosome profile ###########################################################################################
 ########################################################################################################################
+sel_chrom = '6'
+ref = load_genome_reference(ref_file, [sel_chrom])
+
+merged_bed_chrom = merged_bed[merged_bed['chrom']==sel_chrom]
+
 N_BINS = 10000
 ref_len = len(ref[sel_chrom])
 
@@ -142,8 +147,8 @@ def plot_chromosome_profile(pos, mod_ratios, plot_name, xticks=False):
     # plt.ylabel('Median S')
     plt.savefig(os.path.join(img_out, plot_name), **fig_kwargs)
 
-plot_chromosome_profile(merged_bed_sel['chromStart'].values, merged_bed_sel['modRatio_WT'].values, plot_name=f'avg_profile_WT_chr{sel_chrom}.{FMT}', xticks=False)
-plot_chromosome_profile(merged_bed_sel['chromStart'].values, merged_bed_sel['modRatio_KO'].values, plot_name=f'avg_profile_METTL3_KO_chr{sel_chrom}.{FMT}', xticks=True)
+plot_chromosome_profile(merged_bed_chrom['chromStart'].values, merged_bed_chrom['modRatio_WT'].values, plot_name=f'avg_profile_WT_chr{sel_chrom}.{FMT}', xticks=False)
+plot_chromosome_profile(merged_bed_chrom['chromStart'].values, merged_bed_chrom['modRatio_KO'].values, plot_name=f'avg_profile_METTL3_KO_chr{sel_chrom}.{FMT}', xticks=True)
 
 ########################################################################################################################
 ### S profile along transcript #########################################################################################

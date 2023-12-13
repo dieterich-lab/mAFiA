@@ -3,16 +3,14 @@ import pandas as pd
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib_venn import venn3
 from collections import Counter
-import pysam
 
 #######################################################################
 cm = 1/2.54  # centimeters in inches
 gr = 1.618
 # mpl.rcParams['figure.dpi'] = 600
 # mpl.rcParams['savefig.dpi'] = 600
-mpl.rcParams['font.size'] = 5
+mpl.rcParams['font.size'] = 7
 mpl.rcParams['legend.fontsize'] = 5
 mpl.rcParams['xtick.labelsize'] = 5
 mpl.rcParams['ytick.labelsize'] = 5
@@ -33,28 +31,21 @@ os.makedirs(img_out, exist_ok=True)
 glori_path = '/home/adrian/Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.ref5mers.csv'
 miclip_path = '/home/adrian/Data/DRACH/miCLIP_union_flat_exclude_Y_chromosome.ref5mers.bed'
 
-# sel_motifs = [
-#     'GGACT',
-#     'GAACT',
-#     'GGACA',
-#     'AGACT',
-#     'GGACC',
-#     'TGACT'
-# ]
-
 # blacklist_motifs = ['AGACC', 'AAACA', 'TAACA', 'TAACT', 'GAACA', 'TGACC']
 blacklist_motifs = []
 
 def import_mAFiA(thresh_coverage=10):
-    dfs = []
-    for this_chr in chrs:
-        dfs.append(pd.read_csv(os.path.join(source_data_dir, f'chr{this_chr}', 'mAFiA.sites.bed'), dtype={'chrom': str}, sep='\t'))
-    df_mAFiA = pd.concat(dfs, ignore_index=True)
+    # dfs = []
+    # for this_chr in chrs:
+    #     dfs.append(pd.read_csv(os.path.join(source_data_dir, f'chr{this_chr}', 'mAFiA.sites.bed'), dtype={'chrom': str}, sep='\t'))
+    # df_mAFiA = pd.concat(dfs, ignore_index=True)
+    df_mAFiA = pd.read_csv(os.path.join(source_data_dir, 'merged.mAFiA.sites.bed'), dtype={'chrom': str}, sep='\t')
     df_mAFiA_thresh = df_mAFiA[df_mAFiA['coverage']>=thresh_coverage]
     df_mAFiA_thresh = df_mAFiA_thresh[~df_mAFiA_thresh['ref5mer'].isin(blacklist_motifs)]
     return df_mAFiA_thresh
 
-def import_glori(thresh_pval=1E-3):
+
+def import_glori(thresh_pval=1.0):
     df_glori = pd.read_csv(glori_path, dtype={'Chr': str})
     df_glori['chrom'] = [chr.lstrip('chr') for chr in df_glori['Chr']]
     df_glori['chromStart'] = df_glori['Sites'] - 1
@@ -64,22 +55,42 @@ def import_glori(thresh_pval=1E-3):
 
     return df_glori_thresh
 
-def import_miclip(thresh_source_counts=3):
-    df_miclip = pd.read_csv(miclip_path,
-                            # names=['chrom', 'chromStart', 'chromEnd', 'source', 'score', 'strand'],
-                            dtype={'chrom': str})
-    df_miclip['modRatio'] = 100
-    df_miclip['source_counts'] = [len(this_source.split(',')) for this_source in df_miclip['source'].values]
-    df_miclip_thresh = df_miclip[df_miclip['source_counts']>=thresh_source_counts]
-    df_miclip_thresh = df_miclip_thresh[~df_miclip_thresh['ref5mer'].isin(blacklist_motifs)]
-
-    return df_miclip_thresh
 
 df_mAFiA = import_mAFiA()
-df_glori = import_glori(thresh_pval=1)
-df_miclip = import_miclip()
+df_glori = import_glori()
 
+########################################################################################################################
+### GLORI p-val versus stoichiometry ###################################################################################
+########################################################################################################################
+# num_bins = 100
+# range_Pvalue = [0, 0.002]
+# range_Ratio = [0, 100]
+# bin_counts, bin_x, bin_y = np.histogram2d(np.log10(df_glori['Pvalue']+1), df_glori['Ratio'], bins=num_bins, range=[range_Pvalue, range_Ratio])
+# fig_glori_pval_ratio = plt.figure(figsize=(5, 5))
+# plt.imshow(bin_counts, origin='lower')
 
+thresh_p = 0.001
+num_bins = 50
+bin_range = [0, 1]
+df_glori_low_pval = df_glori[df_glori['Pvalue']<thresh_p]
+df_glori_high_pval = df_glori[df_glori['Pvalue']>=thresh_p]
+
+plt.figure(figsize=(5*cm, 5*cm))
+plt.subplot(2, 1, 1)
+plt.hist(df_glori_low_pval['Ratio'], range=bin_range, bins=num_bins, label=f'Pvalue<{thresh_p}\n{len(df_glori_low_pval)} sites')
+plt.xticks(np.arange(0, 1.01, 0.25))
+plt.ylabel('Site Counts')
+plt.legend(loc='upper right')
+plt.subplot(2, 1, 2)
+plt.hist(df_glori_high_pval['Ratio'], range=bin_range, bins=num_bins, label=f'Pvalue$\geq${thresh_p}\n{len(df_glori_high_pval)} sites')
+plt.xticks(np.arange(0, 1.01, 0.25))
+plt.xlabel('$S_{GLORI}$')
+plt.ylabel('Site Count')
+plt.legend(loc='upper right')
+
+plt.savefig(os.path.join(img_out, f'hist_GLORI_Pvalue_S.{FMT}'), **fig_kwargs)
+
+print(len(df_glori_high_pval) / len(df_glori))
 ########################################################################################################################
 ### histogram stoichiometry vs. coverage ###############################################################################
 ########################################################################################################################
@@ -120,10 +131,10 @@ ax_histy.set_xlabel('Num. Sites')
 fig_cov_stoichio.savefig(os.path.join(img_out, f'coverage_stoichiometry.{FMT}'), **fig_kwargs)
 
 fig_hist_stoichio, ax = plt.subplots(nrows=1, ncols=1, figsize=(5*cm, 5*cm))
-ax.hist(df_mAFiA['modRatio'].values, range=[0, 100], bins=100)
+ax.hist(df_mAFiA['modRatio'].values, range=[0, 100], bins=20)
 ax.set_xlim(0, 100)
-ax.set_xlabel('Stoichiometry')
-ax.set_ylabel('Counts')
+ax.set_xlabel('$S_{mAFiA}$')
+ax.set_ylabel('Num. Sites')
 fig_hist_stoichio.savefig(os.path.join(img_out, f'hist_stoichio.{FMT}'), **fig_kwargs)
 
 
@@ -141,7 +152,7 @@ coverage_corr = np.vstack(coverage_corr).T
 fig_cov_corr, ax = plt.subplots(nrows=1, ncols=1, figsize=(5*cm, 5*cm))
 ax.plot(coverage_corr[0], coverage_corr[1])
 ax.set_xlabel('Min. Coverage')
-ax.set_ylabel('Corr. with GLORI')
+ax.set_ylabel('$C_{(GLORI,mAFiA)}$')
 fig_cov_corr.savefig(os.path.join(img_out, f'cov_corr.{FMT}'), **fig_kwargs)
 
 ########################################################################################################################
@@ -167,62 +178,18 @@ for this_lbin in stoichio_lbins:
     # stoichio_corr.append(np.corrcoef(mafia_normed, glori_normed)[0, 1])
     stoichio_rms.append(np.sqrt(((sub_df_merged['modRatio_mafia'] - sub_df_merged['modRatio_glori'])**2).mean()))
 
+stoichio_rms_norm = np.array(stoichio_rms) / stoichio_lbins
+
 xticks = list(stoichio_lbins)
 xticks.append(stoichio_lbins[-1]+bin_width)
 
 fig_stoichio_rms, ax = plt.subplots(nrows=1, ncols=1, figsize=(5*cm, 5*cm))
-ax.plot(bin_centers, stoichio_rms)
+ax.plot(bin_centers, stoichio_rms_norm)
 ax.set_xticks(xticks)
 ax.set_xlim([10, 100])
-ax.set_xlabel('Stoichiometry Range')
-ax.set_ylabel('RMS mAFiA-GLORI')
+ax.set_xlabel('$S_{GLORI}$')
+ax.set_ylabel('${\Delta}S_{(GLORI,mAFiA)}$ / $S_{GLORI}$')
 fig_stoichio_rms.savefig(os.path.join(img_out, f'stoichio_RMS.{FMT}'), **fig_kwargs)
-
-
-########################################################################################################################
-### venn diagram #######################################################################################################
-########################################################################################################################
-# bam_file = '/home/adrian/NCOMMS_revision/source_data/GENE_PROFILE/100WT/merged.mAFiA.reads.bam'
-#
-# thresh_stoichio = 50
-#
-# def thresh_df_with_coverage(df_in, thresh_coverage=10):
-#     with pysam.AlignmentFile(bam_file, "rb" ) as bam:
-#         coverage = []
-#         for _, row in df_in.iterrows():
-#             this_row_coverage = 0
-#             for pileupcolumn in bam.pileup(row['chrom'], row['chromStart'], row['chromStart']+1, truncate=True):
-#                 if pileupcolumn.pos==row['chromStart']:
-#                     this_row_coverage = pileupcolumn.n
-#                     break
-#             coverage.append(this_row_coverage)
-#     coverage = np.array(coverage)
-#     return df_in[coverage>=thresh_coverage]
-#
-# def draw_venn_diagram(dict_dfs, thresh_stoichiometry=80):
-#     name_sites = {}
-#     for name, df in dict_dfs.items():
-#         df_sel = df[(df['modRatio']>=thresh_stoichiometry)*(df['chrom'].isin(chrs))]
-#         name_sites[name] = set([tuple(val) for val in df_sel[['chrom', 'chromStart']].values])
-#
-#         # num_intersection = len(set(df1_sites).intersection(set(df2_sites)))
-#         # print(len(df1_sites), len(df2_sites), num_intersection)
-#
-#     return venn3(name_sites.values(), name_sites.keys())
-#
-# df_mAFiA_thresh = df_mAFiA[df_mAFiA['coverage']>=thresh_coverage]
-# df_miclip_thresh = thresh_df_with_coverage(df_miclip)
-# df_glori_thresh = thresh_df_with_coverage(df_glori)
-#
-# venn_dict = {
-#     'mAFiA': df_mAFiA_thresh,
-#     'miClip': df_miclip_thresh,
-#     'GLORI': df_glori_thresh
-# }
-#
-# fig_venn, ax = plt.subplots(nrows=1, ncols=1, figsize=(10*cm, 10*cm))
-# v = draw_venn_diagram(venn_dict, thresh_stoichiometry=thresh_stoichio)
-# fig_venn.savefig(os.path.join(img_out, f'venn_diagram.{FMT}'), **fig_kwargs)
 
 
 ########################################################################################################################
@@ -245,6 +212,8 @@ df_merged_6motifs = df_merged_sel[df_merged_sel['ref5mer'].isin(ordered_motifs)]
 num_sites_6motifs = df_merged_6motifs.shape[0]
 corr_6motifs = np.corrcoef(df_merged_6motifs['modRatio_glori'], df_merged_6motifs['modRatio_mafia'])[0, 1]
 
+with open(os.path.join(img_out, 'sites_correlation_6motifs.txt'), 'w') as f_corr:
+    f_corr.writelines(f'{num_sites_6motifs} sites, corr. {corr_6motifs:.2f}')
 
 print(f'{num_sites_6motifs} sites, corr. {corr_6motifs:.2f}')
 # num_motifs = 6
@@ -257,10 +226,10 @@ def scatter_plot_mafia_vs_glori(num_motifs, num_rows, num_cols, plot_name, figsi
     for ind, motif in enumerate(ordered_motifs):
         ax = axs[ind // num_cols, ind % num_cols]
         sub_df = df_merged_sel[df_merged_sel['ref5mer'] == motif]
-        # corr = np.corrcoef(sub_df['modRatio_glori'], sub_df['modRatio_mafia'])[0, 1]
+        motif_corr = np.corrcoef(sub_df['modRatio_glori'], sub_df['modRatio_mafia'])[0, 1]
         # plt.subplot(num_rows, num_cols, ind + 1)
         # label = f"{motif.replace('T', 'U')}\n{corr:.2f}"
-        label = f"{motif.replace('T', 'U')}"
+        label = f"{motif.replace('T', 'U')}\n({motif_corr:.2f})"
         if len(sub_df):
             ax.scatter(sub_df['modRatio_glori'], sub_df['modRatio_mafia'], s=0.1)
         # ax.set_title(f'{motif}, {corr:.2f}', x=0.26, y=1.0, pad=-15, backgroundcolor='black', color='white')
@@ -268,7 +237,7 @@ def scatter_plot_mafia_vs_glori(num_motifs, num_rows, num_cols, plot_name, figsi
         ax.set_xlim([-5, 105])
         ax.set_ylim([-5, 105])
         # ax.legend(loc='upper left', handlelength=0.1)
-        ax.text(0, 85, label)
+        ax.text(0, 80, label, fontsize=5)
 
         ax.set_xticks(range(0, 101, 25))
         ax.set_yticks(range(0, 101, 25))
