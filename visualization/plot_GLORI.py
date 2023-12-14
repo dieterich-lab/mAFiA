@@ -17,7 +17,8 @@ mpl.rcParams['ytick.labelsize'] = 5
 mpl.rcParams['xtick.major.size'] = 1
 mpl.rcParams['ytick.major.size'] = 1
 mpl.rcParams['font.family'] = 'Arial'
-FMT = 'pdf'
+# FMT = 'pdf'
+FMT = 'png'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
@@ -90,7 +91,7 @@ plt.legend(loc='upper right')
 
 plt.savefig(os.path.join(img_out, f'hist_GLORI_Pvalue_S.{FMT}'), **fig_kwargs)
 
-print(len(df_glori_high_pval) / len(df_glori))
+# print(len(df_glori_high_pval) / len(df_glori))
 ########################################################################################################################
 ### histogram stoichiometry vs. coverage ###############################################################################
 ########################################################################################################################
