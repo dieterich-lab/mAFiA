@@ -56,6 +56,8 @@ all_ds = [
     '100WT'
 ]
 
+f_wt = {this_ds: int(this_ds.rstrip('WT'))/100.0 for this_ds in all_ds}
+
 df_glori = import_glori()
 
 ########################################################################################################################
@@ -82,8 +84,8 @@ def hist2d_mafia_vs_glori(df_ref, df_pred, n_bins, drop_margin):
     # popt, pcov = curve_fit(fit_func, df_merged_fit['modRatio_glori'], df_merged_fit['modRatio_mafia'])
     # return counts, bin_x, bin_y, popt, pcov
 
-# vmax = 100
-vmax = 2
+vmax = 50
+# vmax = 2
 num_bins = 20
 margin = 1
 ticks = np.linspace(0, num_bins, 5)
@@ -97,8 +99,15 @@ for ind, this_ds in enumerate(all_ds):
     df_mafia = import_mAFiA(this_ds)
     this_counts, this_log_counts, this_bin_x, this_bin_y, this_slope, this_stderr = hist2d_mafia_vs_glori(df_glori, df_mafia, num_bins, margin)
     ds_fits[this_ds] = (this_slope, this_stderr)
-    # im = axs[ind].imshow(this_counts, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
-    im = axs[ind].imshow(this_log_counts, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
+    im = axs[ind].imshow(this_counts, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
+    # im = axs[ind].imshow(this_log_counts, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
+
+    x_vec = np.array([0, np.where(this_bin_x==100)[0][0]])
+    y_vec = np.array([0, np.where(this_bin_y==f_wt[this_ds]*100)[0][0]])
+    if this_ds=='0WT':
+        axs[ind].plot(x_vec-0.5, y_vec, c='r', linestyle='--', alpha=0.5)
+    else:
+        axs[ind].plot(x_vec-0.5, y_vec-0.5, c='r', linestyle='--', alpha=0.5)
 
     axs[ind].set_xticks(ticks-0.5, ticklabels)
     axs[ind].set_yticks(ticks-0.5, ticklabels)

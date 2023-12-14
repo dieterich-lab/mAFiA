@@ -77,7 +77,7 @@ merged_bed_sel = merged_bed[
 num_bins = 20
 ticks = np.int32(np.linspace(0, num_bins, 5) * 100 / num_bins)
 
-vmax = 60
+vmax = 50
 # vmax = 3
 
 fig = plt.figure(figsize=(3.5*cm, 4*cm))
