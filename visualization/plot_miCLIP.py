@@ -151,7 +151,7 @@ venn_dict = {
     'miClip': df_miclip_thresh,
 }
 
-thresh_stoichio = 10
+thresh_stoichio = 25
 fig_venn, ax = plt.subplots(nrows=1, ncols=1, figsize=(4*cm, 4*cm))
 v = draw_venn_diagram(venn_dict, thresh_stoichiometry=thresh_stoichio)
 fig_venn.savefig(os.path.join(img_out, f'venn_diagram_cov{thresh_coverage}_stoichio{thresh_stoichio}.{FMT}'), **fig_kwargs)
