@@ -263,6 +263,27 @@ CHEUI_even_odd_probs = get_ds_even_odd_probs(CHEUI_filtered_refPos_modProbs['WUE
 with open(os.path.join(img_out, 'num_samples_ABBA.tsv'), 'w') as h:
     h.write(f'GGACU\t{num_samples}\n')
 
+
+########################################################################################################################
+### site-level prob ####################################################################################################
+########################################################################################################################
+mAFiA_site_level_file = '/home/adrian/NCOMMS_revision/source_data/TEST2/mAFiA/mAFiA.sites.bed'
+df_mAFiA_site_level = pd.read_csv(mAFiA_site_level_file, sep='\t')
+
+x_start = 82
+x_end = 151
+x_ticks = np.arange(84, x_end, 13)
+
+fig_site_level, ax = plt.subplots(nrows=1, ncols=1, figsize=(8*cm, 1*cm))
+ax.bar(df_mAFiA_site_level['chromStart'], df_mAFiA_site_level['modRatio'])
+ax.axhline(y=50, linestyle='--', c='r', alpha=0.1)
+ax.set_xlim([x_start, x_end])
+ax.set_ylim([0, 100])
+ax.set_xticks(x_ticks)
+ax.set_xlabel('Position (nts)')
+ax.set_ylabel('Mod. Ratio')
+fig_site_level.savefig(os.path.join(img_out, f'site_level_mAFiA.{FMT}'), **fig_kwargs)
+
 ########################################################################################################################
 ### vlnplot ############################################################################################################
 ########################################################################################################################
