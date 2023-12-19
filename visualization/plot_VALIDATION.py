@@ -26,8 +26,8 @@ fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 
 
 def get_histogram(mod_probs):
-    # num_bins = 100
-    num_bins = 20
+    num_bins = 100
+    # num_bins = 20
     bin_edges = np.linspace(0, 1, num_bins + 1)
     bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
     bin_counts, _ = np.histogram(mod_probs, bins=bin_edges)
@@ -68,11 +68,11 @@ def get_sample_sizes(nts, in_labels):
 
 source_data_dir = '/home/adrian/NCOMMS_revision/source_data/VALIDATION'
 
-# train = 'WUE'
-# validate = 'ISA'
-
-train = 'ISA_retrain_GAACT_TGACT'
+train = 'ISA'
 validate = 'WUE'
+
+# train = 'ISA_retrain_GAACT_TGACT'
+# validate = 'WUE'
 
 read_ids_A_path = os.path.join(source_data_dir, 'read_ids_ISA-WUE_A.txt')
 read_ids_m6A_path = os.path.join(source_data_dir, 'read_ids_ISA-WUE_m6A.txt')
@@ -178,15 +178,36 @@ def calculate_confusion_matrix(mod_probs, thresh_prob=THRESH_PROB):
     mat11 = np.sum(mod_probs['MOD'] >= thresh_prob)
     return pd.DataFrame([[mat00, mat01], [mat10, mat11]], index=['UNM', 'MOD'], columns=['UNM', 'MOD'])
 
-fig_confusion = plt.figure(figsize=(9*cm, 6*cm))
-axes_confusion = fig_confusion.subplots(num_rows, num_cols).flatten()
+margin = 0.25
+xx = np.array([0, 0, 1, 1]) + margin
+yy = np.array([0, 1, 0, 1]) + margin
+zz = np.zeros(4)
+dx = np.ones(4) - margin
+dy = np.ones(4) - margin
+
+fig_confusion = plt.figure(figsize=(18*cm, 12*cm))
+# axes_confusion = fig_confusion.subplots(num_rows, num_cols, projection='3d').flatten()
 for subplot_ind, this_motif in enumerate(ordered_motifs):
     this_motif_confusion_mat = calculate_confusion_matrix(motif_mod_probs[this_motif])
+    dz = this_motif_confusion_mat.values.flatten()
+    this_ax = fig_confusion.add_subplot(num_rows, num_cols, subplot_ind+1, projection='3d')
+    this_ax.bar3d(xx, yy, zz, dx, dy, dz)
+    this_ax.set_xticks([0.5, 1.5], ['UNM', 'MOD'])
+    this_ax.xaxis.set_rotate_label(False)
+    this_ax.set_xlabel('GT', labelpad=0)
+    this_ax.set_yticks([0.5, 1.5], ['UNM', 'MOD'])
+    this_ax.yaxis.set_rotate_label(False)
+    this_ax.set_ylabel('PRED', labelpad=0)
+
+    for (this_x, this_y, this_z) in zip(xx+0.3, yy+0.15, dz):
+        this_ax.text(this_x, this_y, this_z, this_z, c='w')
+
     # axes_confusion[subplot_ind].matshow(this_motif_confusion_mat)
-    sn.heatmap(ax=axes_confusion[subplot_ind], data=this_motif_confusion_mat, annot=True, fmt='d', cbar=False)
-    axes_confusion[subplot_ind].set_title('{}'.format(this_motif.replace('T', 'U')))
+    # sn.heatmap(ax=axes_confusion[subplot_ind], data=this_motif_confusion_mat, annot=True, fmt='d', cbar=False)
+    this_ax.set_title('{}'.format(this_motif.replace('T', 'U')))
 
 fig_confusion.savefig(os.path.join(img_out, f'confusion_matrix_thresh{THRESH_PROB}.{FMT}'), **fig_kwargs)
+plt.close('all')
 ########################################################################################################################
 ### precision-recall curve #############################################################################################
 ########################################################################################################################

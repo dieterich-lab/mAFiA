@@ -17,8 +17,8 @@ mpl.rcParams['ytick.labelsize'] = 5
 mpl.rcParams['xtick.major.size'] = 1
 mpl.rcParams['ytick.major.size'] = 1
 mpl.rcParams['font.family'] = 'Arial'
-# FMT = 'pdf'
-FMT = 'png'
+FMT = 'pdf'
+# FMT = 'png'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
@@ -92,6 +92,27 @@ plt.legend(loc='upper right')
 plt.savefig(os.path.join(img_out, f'hist_GLORI_Pvalue_S.{FMT}'), **fig_kwargs)
 
 # print(len(df_glori_high_pval) / len(df_glori))
+
+########################################################################################################################
+### scatter plot with GLORI high p-val #################################################################################
+########################################################################################################################
+df_merged = pd.merge(df_glori_high_pval, df_mAFiA, on=['chrom', 'chromStart', 'ref5mer'], suffixes=['_glori', '_mafia'])
+df_merged_thresh = df_merged[df_merged['coverage']>=50]
+
+# num_bins = 20
+# counts, bins_x, bins_y = np.histogram2d(df_merged_thresh['modRatio_mafia'], df_merged_thresh['modRatio_glori'], bins=num_bins, range=[[0, 100], [0, 100]])
+
+plt.figure(figsize=(4*cm, 4*cm))
+plt.scatter(df_merged_thresh['modRatio_glori'], df_merged_thresh['modRatio_mafia'], s=1)
+# plt.imshow(counts, origin='lower')
+plt.xlim([0, 100])
+plt.ylim([0, 100])
+plt.xlabel('$S_{GLORI}$')
+plt.ylabel('$S_{mAFiA}$')
+plt.title(f'GLORI Pvalue $\geq$ {thresh_p}')
+
+plt.savefig(os.path.join(img_out, f'scatter_mAFiA_GLORI_high_Pvalue.{FMT}'), **fig_kwargs)
+
 ########################################################################################################################
 ### histogram stoichiometry vs. coverage ###############################################################################
 ########################################################################################################################
@@ -199,6 +220,24 @@ fig_stoichio_rms.savefig(os.path.join(img_out, f'stoichio_RMS.{FMT}'), **fig_kwa
 thresh_coverage = 50
 df_mAFiA_thresh = df_mAFiA[df_mAFiA['coverage'] >= thresh_coverage]
 df_merged = pd.merge(df_mAFiA_thresh, df_glori, on=['chrom', 'chromStart', 'ref5mer'], suffixes=('_mafia', '_glori'))
+
+df_merged = df_merged[[
+    'chrom',
+    'chromStart',
+    'chromEnd',
+    'name',
+    'score',
+    'strand',
+    'ref5mer',
+    'coverage',
+    'modRatio_mafia',
+    'modRatio_glori',
+    'Gene',
+    'Transcript',
+    'P_adjust'
+]]
+df_merged.to_csv(os.path.join(img_out, 'df_merged_mAFiA_GLORI.tsv'), sep='\t', index=False)
+
 # df_merged_sel = df_merged[df_merged['P_adjust'] < 1E-10]
 df_merged_sel = df_merged
 motif_counts = Counter(df_merged_sel['ref5mer']).most_common()
