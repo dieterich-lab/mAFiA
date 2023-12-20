@@ -117,20 +117,20 @@ sel_motifs = [
     'TGACT'
 ]
 
-plt.figure(figsize=(10, 6))
-for ind, motif in enumerate(sel_motifs):
-    sub_df = df_merged[df_merged['ref5mer']==motif]
-    plt.subplot(2, 3, ind+1)
-    plt.scatter(sub_df['modRatio_col0'], sub_df['modRatio_vir1'], c='b', s=1, alpha=0.5)
-    # plt.scatter(sub_df['modRatio_corr_col0'], sub_df['modRatio_corr_vir1'], s=1.5, c='r', alpha=0.5)
-    plt.xlim([-1, 101])
-    plt.ylim([-1, 101])
-    plt.title(motif)
+# plt.figure(figsize=(10, 6))
+# for ind, motif in enumerate(sel_motifs):
+#     sub_df = df_merged[df_merged['ref5mer']==motif]
+#     plt.subplot(2, 3, ind+1)
+#     plt.scatter(sub_df['modRatio_col0'], sub_df['modRatio_vir1'], c='b', s=1, alpha=0.5)
+#     # plt.scatter(sub_df['modRatio_corr_col0'], sub_df['modRatio_corr_vir1'], s=1.5, c='r', alpha=0.5)
+#     plt.xlim([-1, 101])
+#     plt.ylim([-1, 101])
+#     plt.title(motif)
 
 df_merged_sel = df_merged[df_merged['ref5mer'].isin(sel_motifs)]
 num_bins = 20
 # vmax = 2
-vmax = 50
+vmax = 20
 ticks = np.int32(np.linspace(0, num_bins, 5) * 100 / num_bins)
 counts, bin_x, bin_y = np.histogram2d(
     df_merged_sel['modRatio_vir1'], df_merged_sel['modRatio_col0'],
@@ -145,7 +145,8 @@ fig_hist2d = plt.figure(figsize=(4.5*cm, 4*cm))
 ax_hist2d = fig_hist2d.add_subplot()
 im = ax_hist2d.imshow(counts, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
 # im = ax_hist2d.imshow(counts_log1p, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
-ax_hist2d.axhline(y=np.where(bin_y==50)[0][0]-0.5, c='r', linestyle='--')
+# ax_hist2d.axhline(y=np.where(bin_y==50)[0][0]-0.5, c='r', linestyle='--')
+ax_hist2d.plot([0, num_bins-1], [0, num_bins-1], c='r', linestyle='--', alpha=0.5)
 ax_hist2d.set_xticks(np.linspace(0, num_bins, 5)-0.5, ticks)
 ax_hist2d.set_yticks(np.linspace(0, num_bins, 5)-0.5, ticks)
 cbar = fig_hist2d.colorbar(im, fraction=0.046, pad=0.04, orientation='horizontal', location='top')

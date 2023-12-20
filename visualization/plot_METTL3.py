@@ -80,7 +80,7 @@ ticks = np.int32(np.linspace(0, num_bins, 5) * 100 / num_bins)
 vmax = 50
 # vmax = 3
 
-fig = plt.figure(figsize=(3.5*cm, 4*cm))
+fig = plt.figure(figsize=(4.5*cm, 4*cm))
 # plt.scatter(merged_bed['modRatio_WT'], merged_bed['modRatio_KO'], s=0.2, alpha=0.5)
 # plt.scatter(merged_bed_sel['modRatio_WT'], merged_bed_sel['modRatio_KO'], s=0.2, alpha=0.5)
 # plt.plot(np.arange(0, 100), np.arange(0, 100), c='r', linewidth=0.2, alpha=0.5)
@@ -92,10 +92,12 @@ counts_log1p = np.log10(1+counts)
 ax = fig.add_subplot()
 im = ax.imshow(counts, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
 # im = ax.imshow(counts_log1p, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
-ax.axhline(y=np.where(bin_y==50)[0][0]-0.5, c='r', linestyle='--')
+# ax.axhline(y=np.where(bin_y==50)[0][0]-0.5, c='r', linestyle='--')
+ax.plot([0, num_bins-1], [0, num_bins-1], c='r', linestyle='--', alpha=0.5)
 ax.set_xticks(np.linspace(0, num_bins, 5)-0.5, ticks)
 ax.set_yticks(np.linspace(0, num_bins, 5)-0.5, ticks)
-cbar = fig.colorbar(im, orientation='horizontal', location='top', fraction=0.046, pad=0.04)
+# cbar = fig.colorbar(im, orientation='horizontal', location='top', fraction=0.046, pad=0.04)
+cbar = fig.colorbar(im, orientation='vertical', location='right', fraction=0.046, pad=0.1)
 cbar.set_ticks(np.linspace(0, vmax, 3))
 fig.savefig(os.path.join(img_out, f'hist2d_WT_vs_KO.{FMT}'), **fig_kwargs)
 
@@ -134,7 +136,7 @@ def calc_avg_profile(in_bin_stoichios, num_bins=N_BINS):
 def plot_chromosome_profile(pos, mod_ratios, plot_name, xticks=False):
     avg_profile = calc_avg_profile(calc_profile(pos, mod_ratios, 0, ref_len))
 
-    plt.figure(figsize=(3*cm, 1.5*cm))
+    plt.figure(figsize=(5*cm, 1.5*cm))
     plt.plot(avg_profile, linewidth=0.2)
     plt.axhline(y=50, c='r', linestyle='--', linewidth=0.2, alpha=0.5)
     plt.xlim([0, N_BINS])
