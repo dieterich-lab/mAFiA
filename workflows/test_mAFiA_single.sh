@@ -5,8 +5,8 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=180GB
 #SBATCH --verbose
-#SBATCH --job-name=JK_HEK293_STM2457_merged
-#SBATCH --output=/home/achan/slurm/JK_HEK293_STM2457_merged.out
+#SBATCH --job-name=mESC_Mettl3_KO_merged
+#SBATCH --output=/home/achan/slurm/mESC_Mettl3_KO_merged.out
 
 #ds=Mettl3-KO
 #ds=100_WT_0_IVT
@@ -17,7 +17,11 @@
 #chr=X
 
 #ds=JK_HEK293_DMSO_merged
-ds=JK_HEK293_STM2457_merged
+#ds=JK_HEK293_STM2457_merged
+
+ds=mESC_Mettl3_KO_merged
+#ds=mESC_WT_DMSO_merged
+#ds=mESC_WT_STM_merged
 
 #ds=col0
 #ds=vir1
@@ -37,8 +41,11 @@ bam=${workspace}/genome_filtered_q50.bam
 #fast5_dir=${workspace}/chr${chr}/fast5
 fast5_dir=${workspace}/fast5
 
-ref=/beegfs/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa
-mod=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/site_annotations/DRACH.GRCh38_102.chrALL.bed
+#ref=/beegfs/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa
+#mod=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/site_annotations/DRACH.GRCh38_102.chrALL.bed
+
+ref=/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa
+mod=/beegfs/homes/achan/Data/site_annotations/mus_musculus/GRCm38_102/DRACH.GRCm38_102.chrALL.bed
 
 #mod=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/site_annotations/GLORI_all_ref5mer.bed
 
