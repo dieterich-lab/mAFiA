@@ -6,8 +6,10 @@
 #SBATCH --job-name=minimap_mESC_Mettl3_KO_merged
 #SBATCH --output=/home/achan/slurm/minimap_mESC_Mettl3_KO_merged.out
 
+#DATASET=mESC_WT_DMSO_merged
 DATASET=mESC_Mettl3_KO_merged
 #DATASET=mESC_WT_STM_merged
+
 
 WORKSPACE=/prj/TRR319_RMaP/Project_B01/Adrian/${DATASET}
 REF_GENOME=/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa
