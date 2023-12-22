@@ -16,12 +16,22 @@ REF_GENOME=/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa
 SAM_GENOME=${WORKSPACE}/genome_mapped.sam
 BAM_GENOME=${WORKSPACE}/genome_filtered_q50.bam
 
+
+if test -f ${WORKSPACE}/basecall_merged.fasta
+then
+  cat ${WORKSPACE}/part*/rodan.fasta >> ${WORKSPACE}/basecall_merged.fasta
+else
+  cat ${WORKSPACE}/part*/rodan.fasta > ${WORKSPACE}/basecall_merged.fasta
+fi
+
 module purge
 module load minimap2
 minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF_GENOME} ${WORKSPACE}/basecall_merged.fasta > ${SAM_GENOME}
 
 samtools view -bST ${REF_GENOME} -q50 ${SAM_GENOME} | samtools sort - > ${BAM_GENOME}
 samtools index ${BAM_GENOME}
+
+echo "minimap finsihed. Now performing QC..."
 
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
 samtools flagstats ${SAM_GENOME} > genome_qc.txt
