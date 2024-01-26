@@ -5,7 +5,8 @@ import re
 import numpy as np
 
 input_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/Gm/Nm-Mut-seq_Supp_Tables.xlsx'
-df_in = pd.read_excel(input_file, sheet_name='S1_HeLa_known sites_rRNA_WT', skiprows=[0, 1])
+# df_in = pd.read_excel(input_file, sheet_name='S1_HeLa_known sites_rRNA_WT', skiprows=[0, 1])
+df_in = pd.read_excel(input_file, sheet_name='S2_HeLa_full set rRNA_WT', skiprows=[0, 1])
 
 ref_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/Gm/reference/rRNA_18S_28S.fasta'
 ref = {}
@@ -13,7 +14,7 @@ with open(ref_file, 'r') as h_ref:
     for record in SeqIO.parse(h_ref, 'fasta'):
         ref[record.id] = str(record.seq)
 
-out_bed_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/Gm/reference/HeLa_rRNA_Gm_sites.bed'
+out_bed_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/Gm/reference/HeLa_rRNA_Gm_sites_full.bed'
 
 # ref['28S'] = ref['28S']
 
