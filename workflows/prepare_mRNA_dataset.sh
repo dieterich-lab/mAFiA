@@ -30,7 +30,7 @@ mkdir -p ${FAST5_DIR}
 #  mv basecall_merged.fasta.backup filtered_q50.bam filtered_q50.bam.bai mapped.sam _old
 #fi
 
-source ${HOME}/git/renata/virtualenv/bin/activate
+source ${HOME}/git/mAFiA/mafia-venv/bin/activate
 
 ########################################################################################################################
 ### basecall large number of reads #####################################################################################
