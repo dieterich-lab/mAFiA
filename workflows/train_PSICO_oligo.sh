@@ -14,7 +14,7 @@ set -e -f
 cd ${HOME}/git/mAFiA_dev
 
 PRJ_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/psU
-DATA_DIR=${PRJ_DIR}/oligo
+DATA_DIR=${PRJ_DIR}/oligo/RNA002
 
 ############################################################################################
 ### Training data ##########################################################################
