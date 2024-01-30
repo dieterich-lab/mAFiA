@@ -13,6 +13,6 @@ DB=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/psU/oligo/RNA002/db_PSU_mixes10-1
   while read -r o r m h l
   do
     echo "ORIG=$o, RUN=$r, MOD=$m, HOMOPOLYMER=$h, LOC=$l"
-    bash ${HOME}/git/mAFiA_dev/workflows/prepare_single_oligo_dataset.sh -o "$o" -r "$r" -m "$m" -h "$h" -l "$l" &
+    bash ${HOME}/git/mAFiA_dev/workflows/prepare_single_oligo_dataset_psU.sh -o "$o" -r "$r" -m "$m" -h "$h" -l "$l" &
   done
 } < $DB
