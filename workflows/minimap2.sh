@@ -3,12 +3,12 @@
 #SBATCH --cpus-per-task=40
 #SBATCH --mem=250GB
 #SBATCH --verbose
-#SBATCH --job-name=minimap_mESC_Mettl3_KO_merged
-#SBATCH --output=/home/achan/slurm/minimap_mESC_Mettl3_KO_merged.out
+#SBATCH --job-name=minimap_mESC_WT_STM_merged
+#SBATCH --output=/home/achan/slurm/minimap_mESC_WT_STM_merged.out
 
 #DATASET=mESC_WT_DMSO_merged
-DATASET=mESC_Mettl3_KO_merged
-#DATASET=mESC_WT_STM_merged
+#DATASET=mESC_Mettl3_KO_merged
+DATASET=mESC_WT_STM_merged
 
 
 WORKSPACE=/prj/TRR319_RMaP/Project_B01/Adrian/${DATASET}
@@ -31,10 +31,10 @@ minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF_GENOME} ${WORKSPACE
 samtools view -bST ${REF_GENOME} -q50 ${SAM_GENOME} | samtools sort - > ${BAM_GENOME}
 samtools index ${BAM_GENOME}
 
-echo "minimap finsihed. Now performing QC..."
+echo "Mapping finished. Now performing QC..."
 
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
-samtools flagstats ${SAM_GENOME} > genome_qc.txt
+samtools flagstats ${SAM_GENOME} > ${WORKSPACE}/genome_qc.txt
 ${HOME}/git/renata/accuracy.py ${SAM_GENOME} ${REF_GENOME} >> ${WORKSPACE}/genome_qc.txt
 
 less ${WORKSPACE}/genome_qc.txt
