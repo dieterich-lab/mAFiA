@@ -115,14 +115,25 @@ minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF_GENOME} ${WORKSPACE
 samtools view -bST ${REF_GENOME} -q50 ${SAM_GENOME} | samtools sort - > ${BAM_GENOME}
 samtools index ${BAM_GENOME}
 
-### split bam file ###
-#for chr in {1..22}
+### split by chromosome ###
+module load ont-fast5-api
 #for chr in {1..5}
 #for chr in I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI Mito
+#for chr in {1..22} X
+
+#for chr in {1..19} X
 #do
 #  mkdir chr${chr}
-#  samtools view -h genome_filtered_q50.bam $chr | samtools sort - > chr${chr}/sorted.chr${chr}.bam
+#  samtools view -h genome_filtered_q50.bam ${chr} | samtools sort - > chr${chr}/sorted.chr${chr}.bam
 #  samtools index chr${chr}/sorted.chr${chr}.bam
+#done
+#
+#for chr in {1..19} X
+#do
+#  samtools view chr${chr}/sorted.chr${chr}.bam | cut -f1 > chr${chr}/read_ids.txt
+#  mkdir chr${chr}/fast5
+#  srun -c 8 --mem 64GB -o ${HOME}/slurm/fast5_subset_chr${chr}.out -e ${HOME}/slurm/fast5_subset_chr${chr}.err \
+#  fast5_subset -i fast5 -s chr${chr}/fast5 -l chr${chr}/read_ids.txt &
 #done
 
 ########################################################################################################################
@@ -149,3 +160,26 @@ samtools index ${BAM_GENOME}
 ########################################################################################################################
 #rm -rf ${WORKSPACE}/part*
 #rm ${WORKSPACE}/fast5_paths_all
+
+########################################################################################################################
+### filter and merge bam ###############################################################################################
+########################################################################################################################
+
+### filter ###
+#for chr in {1..19} X
+#do
+#  mv chr${chr}/mAFiA.reads.bam chr${chr}/_mAFiA.reads.bam
+#  samtools index chr${chr}/_mAFiA.reads.bam
+#  samtools view -h chr${chr}/_mAFiA.reads.bam ${chr} | samtools sort - > chr${chr}/mAFiA.reads.bam
+#done
+
+### merge bam ###
+samtools merge -o chrALL.mAFiA.reads.bam chr*/mAFiA.reads.bam
+samtools index chrALL.mAFiA.reads.bam
+
+### merge bed ###
+cp chr1/mAFiA.sites.bed chrALL.mAFiA.sites.bed
+for chr in {2..19} X
+do
+  tail -n+2 chr${chr}/mAFiA.sites.bed >> chrALL.mAFiA.sites.bed
+done
