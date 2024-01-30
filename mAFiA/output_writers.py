@@ -79,7 +79,7 @@ class BAMWriter:
         ml_tag = rescaled_mod_probs
         return mm_tag, ml_tag
 
-    def write_bam_with_mm_ml_tags(self, container):
+    def write_bam_with_mm_ml_tags(self, container, mod_base, mod_code):
         self.build_dict_read_mod(container.nucleotides)
         with pysam.Samfile(self.in_bam_path, "rb") as fi:
             with pysam.Samfile(self.out_bam_path, "wb", template=fi) as fo:
@@ -87,7 +87,7 @@ class BAMWriter:
                     this_read_mods = self.dict_read_mod.get(this_read.query_name)
                     if this_read_mods:
                         this_read_mods.sort(key=lambda x: x[0])
-                        mm, ml = self.generate_mm_ml_tags(this_read_mods)
+                        mm, ml = self.generate_mm_ml_tags(this_read_mods, mod_base, mod_code)
                         this_read.set_tag('MM', mm)
                         this_read.set_tag('ML', ml)
                     fo.write(this_read)
