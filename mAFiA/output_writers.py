@@ -42,7 +42,7 @@ class SiteWriter(DataframeWriter):
 
     def update_site_df(self, in_row, cov, ratio, ref_5mer, train_5mer=None):
         in_row['coverage'] = cov
-        in_row['modRatio'] = round(ratio*100.0)
+        in_row['modRatio'] = round(ratio*100.0, 1)
         in_row['ref5mer'] = ref_5mer
         if train_5mer:
             in_row['train5mer'] = train_5mer
