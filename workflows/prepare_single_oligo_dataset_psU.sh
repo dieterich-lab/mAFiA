@@ -26,12 +26,12 @@ LIGATION_REF=${WORKSPACE}/ligation_ref.fasta
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
 
 ### softlink fast5 files ###
-mkdir -p ${READS} && cd "$_"
-echo "Creating softlinks from ${LOC}"
-for f in "${LOC}"/**/*.fast5
-do
-  ln -s $f
-done
+#mkdir -p ${READS} && cd "$_"
+#echo "Creating softlinks from ${LOC}"
+#for f in "${LOC}"/**/*.fast5
+#do
+#  ln -s $f
+#done
 cd ${WORKSPACE}
 
 ### check links ###
@@ -57,13 +57,13 @@ cd ${WORKSPACE}
 #for f in ${LOC}/**/*.pod5; do pod5 convert to_fast5 $f --output ${READS}; done
 
 #### basecall with Rodan IVT ###
-echo "Basecalling ${READS}"
-srun --partition=gpu --gres=gpu:turing:1 --cpus-per-task=8 --mem-per-cpu=8GB \
-python3 -u ${HOME}/git/mAFiA/RODAN/basecall.py \
---fast5dir ${READS} \
---model ${MODEL} \
---batchsize 4096 \
---outdir ${WORKSPACE}
+#echo "Basecalling ${READS}"
+#srun --partition=gpu --gres=gpu:turing:1 --cpus-per-task=8 --mem-per-cpu=8GB \
+#python3 -u ${HOME}/git/mAFiA/RODAN/basecall.py \
+#--fast5dir ${READS} \
+#--model ${MODEL} \
+#--batchsize 4096 \
+#--outdir ${WORKSPACE}
 
 ### align with spomelette ###
 echo "Basecalling finished. Now aligning ${FASTA} to ${REF}"
@@ -100,7 +100,7 @@ samtools index ${BAM}
 echo "${DATASET} finished"
 
 #### merge ligation ref ###
-#for RUN in ISA_mix1 ISA_mix2 ISA_mix3 ISA_mix4
+#for RUN in mix10_mix14 mix11_mix15 mix23_mix24
 #do
 #  MERGE_REF_INPUTS=""
 #  for MOD in unm mod
@@ -108,6 +108,6 @@ echo "${DATASET} finished"
 #    MERGE_REF_INPUTS+="${PRJ_DIR}/oligo/RNA002/${ORIG}_${RUN}_${MOD}/ligation_ref.fasta "
 #  done
 #  mkdir ${PRJ_DIR}/oligo/RNA002/ligation_ref
-#  MERGE_REF_OUTPUT="${PRJ_DIR}/oligo/RNA002/ligation_ref/ligation_ref_${RUN}_mod_unm.fasta"
+#  MERGE_REF_OUTPUT="${PRJ_DIR}/oligo/RNA002/ligation_ref/ligation_ref_${RUN}.fasta"
 #  awk '/^>/{p=seen[$0]++}!p' ${MERGE_REF_INPUTS} > ${MERGE_REF_OUTPUT}
 #done
