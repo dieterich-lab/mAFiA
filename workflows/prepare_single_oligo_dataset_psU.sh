@@ -1,26 +1,16 @@
 #!/usr/bin/env bash
 shopt -s globstar
 
-#while getopts o:r:m:h:l: flag
-#do
-#  case "${flag}" in
-#    o) ORIG=${OPTARG};;
-#    r) RUN=${OPTARG};;
-#    m) MOD=${OPTARG};;
-#    h) HOMOPOLYMER=${OPTARG};;
-#    l) LOC=${OPTARG};;
-#  esac
-#done
-
-ORIG="PSU"
-RUN="mix09_mix13"
-HOMOPOLYMER="1"
-
-MOD="unm"
-LOC="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20231109_RL_U_Mix_9_11_10_RNA002/Mix9_U_RTA"
-
-#MOD="mod"
-#LOC="/prj/TRR319_RMaP/Project_BaseCalling/Isabel/20231113_RL_U_Mix_13_14_15_RNA002/Mix13_psU_RTA"
+while getopts o:r:m:h:l: flag
+do
+  case "${flag}" in
+    o) ORIG=${OPTARG};;
+    r) RUN=${OPTARG};;
+    m) MOD=${OPTARG};;
+    h) HOMOPOLYMER=${OPTARG};;
+    l) LOC=${OPTARG};;
+  esac
+done
 
 PRJ_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/psU
 MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
@@ -112,12 +102,12 @@ echo "${DATASET} finished"
 #### merge ligation ref ###
 #for RUN in ISA_mix1 ISA_mix2 ISA_mix3 ISA_mix4
 #do
-  MERGE_REF_INPUTS=""
-  for MOD in unm mod
-  do
-    MERGE_REF_INPUTS+="${PRJ_DIR}/oligo/RNA002/${ORIG}_${RUN}_${MOD}/ligation_ref.fasta "
-  done
-  mkdir ${PRJ_DIR}/oligo/RNA002/ligation_ref
-  MERGE_REF_OUTPUT="${PRJ_DIR}/oligo/RNA002/ligation_ref/ligation_ref_${RUN}_mod_unm.fasta"
-  awk '/^>/{p=seen[$0]++}!p' ${MERGE_REF_INPUTS} > ${MERGE_REF_OUTPUT}
+#  MERGE_REF_INPUTS=""
+#  for MOD in unm mod
+#  do
+#    MERGE_REF_INPUTS+="${PRJ_DIR}/oligo/RNA002/${ORIG}_${RUN}_${MOD}/ligation_ref.fasta "
+#  done
+#  mkdir ${PRJ_DIR}/oligo/RNA002/ligation_ref
+#  MERGE_REF_OUTPUT="${PRJ_DIR}/oligo/RNA002/ligation_ref/ligation_ref_${RUN}_mod_unm.fasta"
+#  awk '/^>/{p=seen[$0]++}!p' ${MERGE_REF_INPUTS} > ${MERGE_REF_OUTPUT}
 #done
