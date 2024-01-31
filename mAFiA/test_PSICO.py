@@ -82,7 +82,7 @@ def main():
             site_writer.write_df()
     print(f'Total {site_writer.site_counts} mod. sites written to {site_writer.out_path}')
 
-    bam_writer.write_bam_with_mm_ml_tags(test_container, mod_base='u', mod_code=17802)
+    bam_writer.write_bam_with_mm_ml_tags(test_container, mod_base='u', mod_code='17802')
     print(f'Total {bam_writer.read_counts} mod. reads written to {bam_writer.out_bam_path}')
     toc = time.time()
     print('Finished in {:.1f} mins'.format((toc - tic) / 60), flush=True)

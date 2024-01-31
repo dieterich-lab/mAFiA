@@ -64,7 +64,7 @@ class BAMWriter:
                     self.dict_read_mod[this_nt.read_id] = []
                 self.dict_read_mod[this_nt.read_id].append((this_nt.read_pos, this_nt.strand, this_nt.mod_prob, this_nt.pred_5mer, this_nt.ref_5mer))
 
-    def generate_mm_ml_tags(self, read_mods, mod_base='N', mod_code='21891'):
+    def generate_mm_ml_tags(self, read_mods, mod_base='a', mod_code='21891'):
         dists = [read_mods[0][0]] + list(np.diff([mod[0] for mod in read_mods])-1)
         unique_strands = np.unique([mod[1] for mod in read_mods])
         mod_probs = [mod[2] for mod in read_mods]
@@ -87,7 +87,7 @@ class BAMWriter:
                     this_read_mods = self.dict_read_mod.get(this_read.query_name)
                     if this_read_mods:
                         this_read_mods.sort(key=lambda x: x[0])
-                        mm, ml = self.generate_mm_ml_tags(this_read_mods, mod_base, mod_code)
+                        mm, ml = self.generate_mm_ml_tags(this_read_mods, mod_base, str(mod_code))
                         this_read.set_tag('MM', mm)
                         this_read.set_tag('ML', ml)
                     fo.write(this_read)
