@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #SBATCH --partition=gpu
-#SBATCH --exclude=gpu-g4-1
+#SBATCH --exclude=gpu-g4-1,gpu-g2-1
 #SBATCH --gres=gpu:turing:1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=180GB
