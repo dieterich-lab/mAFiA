@@ -6,7 +6,7 @@
 #SBATCH --mem=180GB
 #SBATCH --verbose
 #SBATCH --job-name=PSICO_HEK293
-#SBATCH --output=/home/achan/slurm/PSICO_HEK293.out
+#SBATCH --output=/home/achan/slurm/PSICO_HEK293_%A.out
 
 #ds=Mettl3-KO
 ds="100_WT_0_IVT"
@@ -29,7 +29,7 @@ mod="/prj/TRR319_RMaP/Project_BaseCalling/Adrian/psU/site_annotations/BID_seq.be
 backbone="${HOME}/git/mAFiA/models/RODAN_HEK293_IVT.torch"
 classifiers="/prj/TRR319_RMaP/Project_BaseCalling/Adrian/psU/PSICO_classifiers/chosen8"
 
-output="/prj/TRR319_RMaP/Project_BaseCalling/Adrian/psU/PSICO_chosen8/HEK293/${ds}"
+output="/prj/TRR319_RMaP/Project_BaseCalling/Adrian/psU/PSICO_inference/HEK293/${ds}/chosen8"
 
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
 
