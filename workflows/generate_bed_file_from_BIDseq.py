@@ -13,7 +13,7 @@ bed_fields = [
     'ref5mer'
 ]
 
-ref_file = '/home/adrian/Data/GRCh38_102//GRCh38_102.fa'
+ref_file = '/home/adrian/Data/GRCh38_102/GRCh38_102.fa'
 ref = {}
 for record in SeqIO.parse(ref_file, 'fasta'):
     if (record.id.isnumeric()) or (record.id in ['X', 'Y', 'MT']):
@@ -41,15 +41,15 @@ for _, row in df_in.iterrows():
         ref9mer = str(Seq(ref9mer).reverse_complement())
 
     span = re.search(row['Motif_1'], ref9mer).span()
-
     if span[0]!=2:
-        shift = span[0] - 2
-        if strand=='+':
-            chromStart += shift
-            chromEnd += shift
-        else:
-            chromStart -= shift
-            chromEnd -= shift
+        continue
+        # shift = span[0] - 2
+        # if strand=='+':
+        #     chromStart += shift
+        #     chromEnd += shift
+        # else:
+        #     chromStart -= shift
+        #     chromEnd -= shift
     ref5mer = ref[chrom][chromStart - 2:chromStart + 3]
     if strand == '-':
         ref5mer = str(Seq(ref5mer).reverse_complement())
