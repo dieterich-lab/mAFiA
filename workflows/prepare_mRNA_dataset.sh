@@ -15,8 +15,12 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 #DATASET=JK_HEK293_DMSO_3_4_RTA
 #DATASET=JK_HEK293_STM2457_5_6_RTA
 #DATASET=JK_HEK293_STM2457_7_8_RTA
-DATASET=JK_HEK293_DMSO_merged
-WORKSPACE=/prj/TRR319_RMaP/Project_B01/Adrian/${DATASET}
+#DATASET=JK_HEK293_DMSO_merged
+#WORKSPACE=/prj/TRR319_RMaP/Project_B01/Adrian/${DATASET}
+
+DATASET=rep1
+WORKSPACE=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/HepG2/${DATASET}
+
 mkdir -p ${WORKSPACE}
 cd ${WORKSPACE}
 
@@ -48,9 +52,9 @@ sbatch --array=${NUM_ARRAYS} --export=ALL,WORKSPACE=${WORKSPACE},FILENAME_PREFIX
 
 if test -f basecall_merged.fasta
 then
-  cat ${WORKSPACE}/part*.fasta >> ${WORKSPACE}/basecall_merged.fasta
+  cat ${WORKSPACE}/part*/rodan.fasta >> ${WORKSPACE}/basecall_merged.fasta
 else
-  cat ${WORKSPACE}/part*.fasta > ${WORKSPACE}/basecall_merged.fasta
+  cat ${WORKSPACE}/part*/rodan.fasta > ${WORKSPACE}/basecall_merged.fasta
 fi
 
 ########################################################################################################################
@@ -94,5 +98,5 @@ samtools index ${BAM_TRANSCRIPTOME}
 ########################################################################################################################
 ### clean up ###########################################################################################################
 ########################################################################################################################
-rm ${WORKSPACE}/part*.fasta
+rm -rf ${WORKSPACE}/part*
 rm ${WORKSPACE}/fast5_paths_all

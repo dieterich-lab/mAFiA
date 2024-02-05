@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import os
 from Bio import SeqIO
 from Bio.Seq import Seq
+import numpy as np
+from natsort import index_natsorted
 
 ref_file = '/home/adrian/Data/GRCh38_102/GRCh38_102.fa'
 ref = {}
@@ -15,7 +17,8 @@ with open(ref_file, 'r') as h_ref:
             ref[record.id] = str(record.seq)
 
 input_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/Gm/Nm-Mut-seq_Supp_Tables.xlsx'
-output_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/Gm/reference/Gm_sites_mRNA_HeLa_HepG2_merged.bed'
+hela_output_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/Gm/reference/Gm_sites_mRNA_HeLa.bed'
+merged_output_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/Gm/reference/Gm_sites_mRNA_HeLa_HepG2_merged.bed'
 img_out = '/home/adrian/img_out/Gmorah'
 
 bed_fields = [
@@ -37,13 +40,15 @@ def import_data_sheet(sheet_name):
     df_gm['chrom'] = [this_chr.lstrip('chr') for this_chr in df_gm['chrom']]
     df_gm['chromStart'] = df_gm['chromEnd'] - 1
     df_gm['score'] = '.'
+    df_gm['modRatio'] = df_gm['modRatio'].round(1)
+    df_gm.sort_values(by=['chrom', 'chromStart'], key=lambda x: np.argsort(index_natsorted(df_gm['chrom'])), inplace=True)
     return df_gm[bed_fields]
 
 df_hela = import_data_sheet(sheet_name='S5_HeLa_mRNA_WT')
+df_hela.to_csv(hela_output_file, sep='\t', index=False)
 df_hepg2 = import_data_sheet(sheet_name='S6_HepG2_mRNA_WT')
 df_merge = pd.merge(df_hela, df_hepg2, on=bed_fields[:-1], suffixes=['_HeLa', '_HepG2'])
-df_merge.sort_values(by=['chrom', 'chromStart'], inplace=True)
-df_merge.to_csv(output_file, sep='\t', index=False)
+df_merge.to_csv(merged_output_file, sep='\t', index=False)
 
 plt.figure(figsize=(5, 5))
 plt.plot(df_merge['modRatio_HeLa'], df_merge['modRatio_HepG2'], 'o')
