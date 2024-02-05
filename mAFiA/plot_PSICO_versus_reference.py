@@ -7,10 +7,11 @@ import os
 
 img_out = '/home/adrian/img_out/PSICO'
 
+# ds = '0_WT_100_IVT'
 # ds = '100_WT_0_IVT'
 ds = 'P2_WT'
-# ref = 'BID-Seq'
-ref = 'PRAISE'
+ref = 'BID-Seq'
+# ref = 'PRAISE'
 res_file = f'/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/psU/PSICO_inference/HEK293/{ds}/chosen8_{ref}/psUco.sites.bed'
 
 df_res = pd.read_csv(res_file, sep='\t')
@@ -18,18 +19,18 @@ df_res = pd.read_csv(res_file, sep='\t')
 # df_exact = pd.read_csv('/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/psU/site_annotations/BID-Seq_PRAISE_merged.bed', sep='\t')
 # df_res_exact = pd.merge(df_res, df_exact, on=['chrom', 'chromStart', 'chromEnd', 'name', 'strand', 'ref5mer'])
 
-# motif_counts = Counter(df_res['ref5mer']).most_common()
+motifs = [k for (k, v) in Counter(df_res['ref5mer']).most_common()]
 
-motifs = [
-    'GGTGG',
-    'GTTCA',
-    'GTTCC',
-    'TGTGG',
-    'TGTAG',
-    'AGTGG',
-    'GTTCG',
-    'GGTCC'
-]
+# motifs = [
+#     'GGTGG',
+#     'GTTCA',
+#     'GTTCC',
+#     'TGTGG',
+#     'TGTAG',
+#     'AGTGG',
+#     'GTTCG',
+#     'GGTCC'
+# ]
 
 num_motifs = 8
 num_rows = 2
