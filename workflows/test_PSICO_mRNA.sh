@@ -25,13 +25,13 @@ bam="${workspace}/genome_filtered_q50.bam"
 fast5_dir="${workspace}/fast5"
 
 ref="/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa"
-#mod="/prj/TRR319_RMaP/Project_BaseCalling/Adrian/psU/site_annotations/BID_seq.bed"
-mod="/prj/TRR319_RMaP/Project_BaseCalling/Adrian/psU/site_annotations/PRAISE.bed"
+mod="/prj/TRR319_RMaP/Project_BaseCalling/Adrian/psU/site_annotations/BID_seq.bed"
+#mod="/prj/TRR319_RMaP/Project_BaseCalling/Adrian/psU/site_annotations/PRAISE.bed"
 
 backbone="${HOME}/git/mAFiA/models/RODAN_HEK293_IVT.torch"
 classifiers="/prj/TRR319_RMaP/Project_BaseCalling/Adrian/psU/PSICO_classifiers/chosen8"
 
-output="/prj/TRR319_RMaP/Project_BaseCalling/Adrian/psU/PSICO_inference/HEK293/${ds}/chosen8_PRAISE"
+output="/prj/TRR319_RMaP/Project_BaseCalling/Adrian/psU/PSICO_inference/HEK293/${ds}/chosen8_BID-Seq"
 
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
 
