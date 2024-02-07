@@ -203,6 +203,67 @@ class OligoDataContainer(DataContainer):
                         valid_counts += 1
         return all_nts
 
+
+class MultiReadContainer(DataContainer):
+    def __init__(self, name, in_bam_path, fast5_dir):
+        print('Starting with fast5')
+        super().__init__(name, in_bam_path)
+        self._index_fast5_files(fast5_dir, index_bam_queries_only=False)
+
+
+    def collect_nucleotides_on_single_read(self, read, read_features, df_sites):
+        all_nts = []
+        query_name = read.query_name
+        flag = read.flag
+        dict_ref_to_read_pos = {tup[1]: tup[0] for tup in read.get_aligned_pairs() if (tup[0] is not None) and (tup[1] is not None)}
+        sub_df_sites = df_sites[
+            (df_sites['chrom'] == read.reference_name)
+            * (df_sites['chromStart'] >= read.reference_start)
+            * (df_sites['chromEnd'] <= read.reference_end)
+            * df_sites['chromStart'].isin(dict_ref_to_read_pos.keys())
+            ]
+
+        for _, row in sub_df_sites.iterrows():
+            chromStart = row['chromStart']
+            strand = row['strand']
+            ref5mer = row['ref5mer']
+
+            if not (
+                    ((strand == '+') and (flag == 0))
+                    or ((strand == '-') and (flag == 16))
+            ):
+                continue
+
+            query_pos = dict_ref_to_read_pos[chromStart]
+            query_5mer = read.get_forward_sequence()[query_pos-2:query_pos+3]
+            this_site_feature = read_features[query_pos]
+            all_nts.append(Nucleotide(
+                read_id=query_name,
+                read_pos=query_pos,
+                ref_pos=chromStart,
+                strand=strand,
+                pred_5mer=query_5mer,
+                ref_5mer=ref5mer,
+                feature=this_site_feature)
+            )
+
+        return all_nts
+
+    def process_reads(self, extractor, df_sites, motif_classifiers, sam_writer):
+        for this_read in tqdm(self.bam.fetch()):
+            this_read_signal = self._get_norm_signal_from_read_id(this_read.query_name, self.indexed_read_ids)
+            this_read_features, this_read_bases = extractor.get_features_from_signal(this_read_signal)
+            this_read_nts = self.collect_nucleotides_on_single_read(this_read, this_read_features, df_sites)
+
+            out_nts = []
+            for this_nt in this_read_nts:
+                if this_nt.ref_5mer in motif_classifiers.keys():
+                    this_nt.mod_prob = motif_classifiers[this_nt.ref_5mer].binary_model.predict_proba(this_nt.feature[np.newaxis, :])[0, 1]
+                    out_nts.append(this_nt)
+
+            sam_writer.write_read(this_read, out_nts)
+
+
 class mRNADataContainer(DataContainer):
     def __init__(self, name, bam_path, fast5_dir):
         print('Starting with fast5')
