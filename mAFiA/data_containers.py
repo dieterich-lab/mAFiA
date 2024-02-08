@@ -258,15 +258,32 @@ class MultiReadContainer(DataContainer):
 
     def process_reads(self, extractor, df_sites, motif_classifiers, sam_writer):
         for this_read in tqdm(self.bam.fetch()):
+            if this_read.flag not in [0, 16]:
+                continue
             this_read_signal = self._get_norm_signal_from_read_id(this_read.query_name, self.indexed_read_ids)
             this_read_features, this_read_bases = extractor.get_features_from_signal(this_read_signal)
             this_read_nts = self.collect_nucleotides_on_single_read(this_read, this_read_features, df_sites)
 
-            out_nts = []
+            motif_nts = {}
             for this_nt in this_read_nts:
-                if this_nt.ref_5mer in motif_classifiers.keys():
-                    this_nt.mod_prob = motif_classifiers[this_nt.ref_5mer].binary_model.predict_proba(this_nt.feature[np.newaxis, :])[0, 1]
+                if this_nt.ref_5mer not in motif_nts.keys():
+                    motif_nts[this_nt.ref_5mer] = [this_nt]
+                else:
+                    motif_nts[this_nt.ref_5mer].append(this_nt)
+
+            out_nts = []
+            for this_motif, nts in motif_nts.items():
+                nt_features = np.vstack([this_nt.feature for this_nt in nts])
+                mod_probs = motif_classifiers[this_motif].binary_model.predict_proba(nt_features)[:, 1]
+                for this_nt, this_mod_prob in zip(nts, mod_probs):
+                    this_nt.mod_prob = this_mod_prob
                     out_nts.append(this_nt)
+
+            # _out_nts = []
+            # for this_nt in this_read_nts.copy():
+            #     if this_nt.ref_5mer in motif_classifiers.keys():
+            #         this_nt.mod_prob = motif_classifiers[this_nt.ref_5mer].binary_model.predict_proba(this_nt.feature[np.newaxis, :])[0, 1]
+            #         _out_nts.append(this_nt)
 
             sam_writer.write_read(this_read, out_nts)
 

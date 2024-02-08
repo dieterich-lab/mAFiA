@@ -27,8 +27,9 @@ def main():
     motif_classifiers = load_motif_classifiers(args.classifier_model_dir)
     sam_writer = SAMWriter(in_bam_path=args.bam_file, out_sam_path=os.path.join(args.out_dir, 'mAFiA.reads.sam'))
     df_mod = pd.read_csv(args.mod_file, sep='\t', dtype={'chrom': str, 'chromStart': int, 'chromEnd': int})
+    df_mod_avail = df_mod[df_mod['ref5mer'].isin(motif_classifiers.keys())]
 
-    test_container.process_reads(ivt_backbone, df_mod, motif_classifiers, sam_writer)
+    test_container.process_reads(ivt_backbone, df_mod_avail, motif_classifiers, sam_writer)
 
     print(f'Total {sam_writer.read_counts} mod. reads written to {sam_writer.out_sam_path}')
     toc = time.time()

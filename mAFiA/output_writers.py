@@ -97,7 +97,7 @@ class BAMWriter:
 class SAMWriter:
     def __init__(self, in_bam_path, out_sam_path):
         self.in_bam_path = in_bam_path
-        self.out_bam_path = out_sam_path
+        self.out_sam_path = out_sam_path
         self.fi = pysam.Samfile(in_bam_path, "rb")
         self.fo = pysam.Samfile(out_sam_path, "w", template=self.fi)
         self.read_counts = 0
