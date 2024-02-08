@@ -6,7 +6,7 @@ class ArgsParser(argparse.ArgumentParser):
         super().__init__()
         self.add_argument('--ref_file')
         self.add_argument('--max_num_reads', type=int, default=-1)
-        self.add_argument('--min_coverage', type=int, default=0)
+        self.add_argument('--min_coverage', type=int, default=1)
         self.add_argument('--enforce_ref_5mer', action='store_true')
         self.add_argument('--backbone_model_path')
         self.add_argument('--extraction_layer', default='convlayers.conv21')
