@@ -64,7 +64,7 @@ class BAMWriter:
                     self.dict_read_mod[this_nt.read_id] = []
                 self.dict_read_mod[this_nt.read_id].append((this_nt.read_pos, this_nt.strand, this_nt.mod_prob, this_nt.pred_5mer, this_nt.ref_5mer))
 
-    def generate_mm_ml_tags(self, read_mods, mod_base='a', mod_code='21891'):
+    def generate_mm_ml_tags(self, read_mods, mod_base='N', mod_code='21891'):
         dists = [read_mods[0][0]] + list(np.diff([mod[0] for mod in read_mods])-1)
         unique_strands = np.unique([mod[1] for mod in read_mods])
         mod_probs = [mod[2] for mod in read_mods]
@@ -110,8 +110,9 @@ class SAMWriter:
                     self.dict_read_mod[this_nt.read_id] = []
                 self.dict_read_mod[this_nt.read_id].append((this_nt.read_pos, this_nt.strand, this_nt.mod_prob, this_nt.pred_5mer, this_nt.ref_5mer))
 
-    def generate_mm_ml_tags(self, read_mods, mod_base='a', mod_code='21891'):
+    def generate_mm_ml_tags(self, read_mods, mod_base='N', mod_code='21891'):
         dists = [read_mods[0][0]] + list(np.diff([mod[0] for mod in read_mods])-1)
+
         unique_strands = np.unique([mod[1] for mod in read_mods])
         mod_probs = [mod[2] for mod in read_mods]
         rescaled_mod_probs = [round(mp*255.0) for mp in mod_probs]
@@ -119,8 +120,6 @@ class SAMWriter:
             strand = unique_strands[0]
         else:
             print('Warning: mixed strands!!!')
-        # mm_tag = 'MM:Z:N' + strand + str(mod_code) + ',' + ','.join([str(d) for d in dists]) + ';'
-        # ml_tag = 'ML:B:C,' + ','.join([str(p) for p in rescaled_mod_probs])
         mm_tag = mod_base + strand + mod_code + ',' + ','.join([str(d) for d in dists]) + ';'
         ml_tag = rescaled_mod_probs
         return mm_tag, ml_tag
@@ -129,7 +128,7 @@ class SAMWriter:
         read_mods = [
             (this_nt.read_pos, this_nt.strand, this_nt.mod_prob, this_nt.pred_5mer, this_nt.ref_5mer)
             for this_nt in read_nts]
-        mod_base = 'a'
+        mod_base = 'N'
         mod_code = '21891'
         if read_mods:
             read_mods.sort(key=lambda x: x[0])
@@ -138,17 +137,3 @@ class SAMWriter:
             read.set_tag('ML', ml)
         self.fo.write(read)
         self.read_counts += 1
-
-    # def write_bam_with_mm_ml_tags(self, container, mod_base, mod_code):
-    #     self.build_dict_read_mod(container.nucleotides)
-    #     with pysam.Samfile(self.in_bam_path, "rb") as fi:
-    #         with pysam.Samfile(self.out_bam_path, "wb", template=fi) as fo:
-    #             for this_read in fi.fetch():
-    #                 this_read_mods = self.dict_read_mod.get(this_read.query_name)
-    #                 if this_read_mods:
-    #                     this_read_mods.sort(key=lambda x: x[0])
-    #                     mm, ml = self.generate_mm_ml_tags(this_read_mods, mod_base, str(mod_code))
-    #                     this_read.set_tag('MM', mm)
-    #                     this_read.set_tag('ML', ml)
-    #                 fo.write(this_read)
-    #                 self.read_counts += 1

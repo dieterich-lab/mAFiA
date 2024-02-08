@@ -215,7 +215,14 @@ class MultiReadContainer(DataContainer):
         all_nts = []
         query_name = read.query_name
         flag = read.flag
-        dict_ref_to_read_pos = {tup[1]: tup[0] for tup in read.get_aligned_pairs() if (tup[0] is not None) and (tup[1] is not None)}
+        read_len = len(read.seq)
+        if flag==0:
+            dict_ref_to_read_pos = {tup[1]: tup[0] for tup in read.get_aligned_pairs() if (tup[0] is not None) and (tup[1] is not None)}
+        elif flag==16:
+            dict_ref_to_read_pos = {tup[1]: (read_len-tup[0]-1) for tup in read.get_aligned_pairs() if (tup[0] is not None) and (tup[1] is not None)}
+        else:
+            return all_nts
+
         sub_df_sites = df_sites[
             (df_sites['chrom'] == read.reference_name)
             * (df_sites['chromStart'] >= read.reference_start)
