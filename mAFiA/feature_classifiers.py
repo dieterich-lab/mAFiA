@@ -104,3 +104,21 @@ def load_motif_classifiers(classifier_dir):
     print('Target motifs: ', ', '.join(classifier_motifs))
 
     return motif_classifiers
+
+
+def load_multimod_motif_classifiers(classifier_dir):
+    mod_types = [os.path.basename(subdir) for subdir in glob(os.path.join(classifier_dir, '*'))]
+    multimod_motif_classifiers = {}
+    for this_mod in mod_types:
+        print(f'Loading {this_mod} motif classifiers...')
+        classifier_paths = glob(os.path.join(classifier_dir, this_mod, '*.pkl'))
+        motif_classifiers = {}
+        for this_path in classifier_paths:
+            with open(this_path, 'rb') as h_in:
+                this_motif_classifier = pickle.load(h_in)
+            motif_classifiers[this_motif_classifier.motif] = this_motif_classifier
+        classifier_motifs = list(motif_classifiers.keys())
+        print('Target motifs: ', ', '.join(classifier_motifs))
+        multimod_motif_classifiers[this_mod] = motif_classifiers
+
+    return multimod_motif_classifiers

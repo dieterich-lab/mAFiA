@@ -94,6 +94,12 @@ class BAMWriter:
                     self.read_counts += 1
 
 
+dict_mod_code = {
+    'm6A': '21891',
+    'psi': '17802'
+}
+
+
 class SAMWriter:
     def __init__(self, in_bam_path, out_sam_path):
         self.in_bam_path = in_bam_path
@@ -110,7 +116,7 @@ class SAMWriter:
                     self.dict_read_mod[this_nt.read_id] = []
                 self.dict_read_mod[this_nt.read_id].append((this_nt.read_pos, this_nt.strand, this_nt.mod_prob, this_nt.pred_5mer, this_nt.ref_5mer))
 
-    def generate_mm_ml_tags(self, read_mods, mod_base='N', mod_code='21891'):
+    def generate_mm_ml_tags(self, read_mods, mod_base, mod_code):
         dists = [read_mods[0][0]] + list(np.diff([mod[0] for mod in read_mods])-1)
 
         unique_strands = np.unique([mod[1] for mod in read_mods])
@@ -124,16 +130,21 @@ class SAMWriter:
         ml_tag = rescaled_mod_probs
         return mm_tag, ml_tag
 
-    def write_read(self, read, read_nts):
-        read_mods = [
-            (this_nt.read_pos, this_nt.strand, this_nt.mod_prob, this_nt.pred_5mer, this_nt.ref_5mer)
-            for this_nt in read_nts]
-        mod_base = 'N'
-        mod_code = '21891'
-        if read_mods:
-            read_mods.sort(key=lambda x: x[0])
-            mm, ml = self.generate_mm_ml_tags(read_mods, mod_base, str(mod_code))
-            read.set_tag('MM', mm)
-            read.set_tag('ML', ml)
+    def write_read(self, read, read_nts, mod_base = 'N'):
+        full_mm = ''
+        full_ml = []
+        for this_mod, this_mod_nts in read_nts.items():
+            read_mods = [
+                (this_nt.read_pos, this_nt.strand, this_nt.mod_prob, this_nt.pred_5mer, this_nt.ref_5mer)
+                for this_nt in this_mod_nts]
+            this_mod_code = dict_mod_code[this_mod]
+            if read_mods:
+                read_mods.sort(key=lambda x: x[0])
+                this_mod_mm, this_mod_ml = self.generate_mm_ml_tags(read_mods, mod_base, str(this_mod_code))
+            full_mm += this_mod_mm
+            full_ml += this_mod_ml
+        if len(full_mm)>0:
+            read.set_tag('MM', full_mm)
+            read.set_tag('ML', full_ml)
         self.fo.write(read)
         self.read_counts += 1

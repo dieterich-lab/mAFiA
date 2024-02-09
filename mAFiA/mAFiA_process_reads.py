@@ -7,7 +7,7 @@ sys.path.append(os.path.join(HOME, 'git/mAFiA_dev'))
 from mAFiA.arg_parsers import mRNATestArgsParser
 from mAFiA.data_containers import MultiReadContainer
 from mAFiA.feature_extractors import BackboneNetwork
-from mAFiA.feature_classifiers import load_motif_classifiers
+from mAFiA.feature_classifiers import load_multimod_motif_classifiers
 from mAFiA.output_writers import SAMWriter
 
 
@@ -24,12 +24,14 @@ def main():
     test_container = MultiReadContainer('test', args.bam_file, args.fast5_dir)
     test_container.build_dict_read_ref()
     ivt_backbone = BackboneNetwork(args.backbone_model_path, args.extraction_layer, args.feature_width, args.batchsize)
-    motif_classifiers = load_motif_classifiers(args.classifier_model_dir)
+    multimod_motif_classifiers = load_multimod_motif_classifiers(args.classifier_model_dir)
     sam_writer = SAMWriter(in_bam_path=args.bam_file, out_sam_path=os.path.join(args.out_dir, 'mAFiA.reads.sam'))
     df_mod = pd.read_csv(args.mod_file, sep='\t', dtype={'chrom': str, 'chromStart': int, 'chromEnd': int})
-    df_mod_avail = df_mod[df_mod['ref5mer'].isin(motif_classifiers.keys())]
+    # df_mod_avail = df_mod[df_mod['ref5mer'].isin(motif_classifiers.keys())]
+    all_motifs = [motif for mod, motif_classifiers in multimod_motif_classifiers.items() for motif in motif_classifiers.keys()]
+    df_mod_avail = df_mod[df_mod['ref5mer'].isin(all_motifs)]
 
-    test_container.process_reads(ivt_backbone, df_mod_avail, motif_classifiers, sam_writer)
+    test_container.process_reads(ivt_backbone, df_mod_avail, multimod_motif_classifiers, sam_writer)
 
     print(f'Total {sam_writer.read_counts} mod. reads written to {sam_writer.out_sam_path}')
     toc = time.time()
