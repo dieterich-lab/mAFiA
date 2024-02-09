@@ -11,6 +11,12 @@ from mAFiA.arg_parsers import mRNATestArgsParser
 from mAFiA.output_writers import SiteWriter
 
 
+dict_mod_code = {
+    'm6A': '21891',
+    'psi': '17802'
+}
+
+
 def main():
     tic = time.time()
 
@@ -29,6 +35,8 @@ def main():
             chrom = row['chrom']
             chromStart = row['chromStart']
             strand = row['strand']
+            mod_type = row['name']
+            mod_code = int(dict_mod_code[mod_type])
             for pileupcolumn in sam.pileup(chrom, chromStart, chromStart + 1, truncate=True):
                 if pileupcolumn.reference_pos == chromStart:
                     this_site_coverage = pileupcolumn.get_num_aligned()
@@ -46,7 +54,7 @@ def main():
                                 continue
                             if flag == 16:
                                 query_position = pileupread.alignment.query_length - query_position - 1
-                            mod_key = ('N', 0, 21891) if flag==0 else ('N', 1, 21891)
+                            mod_key = ('N', 0, mod_code) if flag==0 else ('N', 1, mod_code)
                             sel_tup = [tup for tup in pileupread.alignment.modified_bases_forward.get(mod_key, []) if tup[0]==query_position]
                             if len(sel_tup)==1:
                                 mod_counts.append((sel_tup[0][1] / 255.0) >= args.mod_prob_thresh)
