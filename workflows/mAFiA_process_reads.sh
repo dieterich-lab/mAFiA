@@ -5,8 +5,8 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=180GB
 #SBATCH --verbose
-#SBATCH --job-name=mAFiA_v1.1_chrX
-#SBATCH --output=/home/achan/slurm/mAFiA_v1.1_chrX.out
+#SBATCH --job-name=mAFiA_multimod_chrX
+#SBATCH --output=/home/achan/slurm/mAFiA_multimod_chrX.out
 
 ds=100_WT_0_IVT
 chr=X
@@ -16,12 +16,12 @@ bam=${workspace}/chr${chr}/sorted.chr${chr}.bam
 fast5_dir=${workspace}/chr${chr}/fast5
 
 ref=/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa
-mod=/home/achan/Data/GLORI/bed_files/GLORI.chrX.ref5mer.tsv
+mod=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/site_annotations/homo_sapiens/GRCh38_102/BID_GLORI.chrX.tsv
 
 backbone=${HOME}/git/mAFiA/models/RODAN_HEK293_IVT.torch
-classifiers=${HOME}/git/mAFiA/models/DRACH_v1
+classifiers=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/psi-co-mAFiA
 
-output=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/results/mAFiA_v1.1_fixed2
+output=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/results/mAFiA_multimod
 
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
 
