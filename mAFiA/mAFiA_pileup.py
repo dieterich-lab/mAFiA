@@ -62,7 +62,7 @@ def main():
                             site_writer.update_site_df(row, cov=len(mod_counts), ratio=mean(mod_counts), ref_5mer=row['ref5mer'])
             if site_writer.site_counts%10000==0:
                 site_writer.write_df()
-    site_writer.write_df()
+    site_writer.write_df(empty=True)
     print(f'Total {site_writer.site_counts} mod. sites written to {site_writer.out_path}')
 
     toc = time.time()

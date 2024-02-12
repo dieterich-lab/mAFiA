@@ -15,8 +15,10 @@ class DataframeWriter:
     def update_df_out(self, new_df):
         self.df_out = pd.concat([self.df_out, new_df]).round(self.fmt_precision)
 
-    def write_df(self):
+    def write_df(self, empty=False):
         self.df_out.to_csv(self.out_path, sep='\t', index=False)
+        if empty:
+            self.df_out = pd.DataFrame()
 
 class SiteWriter(DataframeWriter):
     def __init__(self, out_path):
