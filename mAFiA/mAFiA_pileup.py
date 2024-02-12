@@ -57,7 +57,7 @@ def main():
                         if len(mod_counts)>=args.min_coverage:
                             row['score'] = '.'
                             site_writer.update_sites(row, cov=len(mod_counts), ratio=mean(mod_counts), ref_5mer=row['ref5mer'])
-            if site_writer.site_counts%10==0:
+            if site_writer.site_counts%args.chunk_size==0:
                 site_writer.write_df(empty=True)
     site_writer.write_df(empty=True)
     print(f'Total {site_writer.site_counts} mod. sites written to {site_writer.out_path}')

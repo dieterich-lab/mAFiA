@@ -47,3 +47,4 @@ class mRNATestArgsParser(TestArgsParser):
         self.add_argument('--mod_file')
         self.add_argument('--mod_prob_thresh', type=float, default=0.5)
         self.add_argument('--output_mod_probs', action='store_true')
+        self.add_argument('--chunk_size', type=int, default=10000)
