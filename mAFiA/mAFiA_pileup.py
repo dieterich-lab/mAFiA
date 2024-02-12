@@ -37,18 +37,14 @@ def main():
             strand = row['strand']
             mod_type = row['name']
             mod_code = int(dict_mod_code[mod_type])
-            for pileupcolumn in bam.pileup(chrom, chromStart, chromStart + 1, truncate=True):
+            flag_require = 0 if strand =='+' else 16
+            for pileupcolumn in bam.pileup(chrom, chromStart, chromStart + 1, truncate=True, flag_require=flag_require):
                 if pileupcolumn.reference_pos == chromStart:
                     this_site_coverage = pileupcolumn.get_num_aligned()
                     if this_site_coverage >= args.min_coverage:
                         mod_counts = []
                         for pileupread in pileupcolumn.pileups:
                             flag = pileupread.alignment.flag
-                            if not (
-                                    ((strand == '+') and (flag == 0))
-                                    or ((strand == '-') and (flag == 16))
-                            ):
-                                continue
                             query_position = pileupread.query_position
                             if query_position is None:
                                 continue
@@ -59,9 +55,10 @@ def main():
                             if len(sel_tup)==1:
                                 mod_counts.append((sel_tup[0][1] / 255.0) >= args.mod_prob_thresh)
                         if len(mod_counts)>=args.min_coverage:
-                            site_writer.update_site_df(row, cov=len(mod_counts), ratio=mean(mod_counts), ref_5mer=row['ref5mer'])
-            if site_writer.site_counts%10000==0:
-                site_writer.write_df()
+                            row['score'] = '.'
+                            site_writer.update_sites(row, cov=len(mod_counts), ratio=mean(mod_counts), ref_5mer=row['ref5mer'])
+            if site_writer.site_counts%10==0:
+                site_writer.write_df(empty=True)
     site_writer.write_df(empty=True)
     print(f'Total {site_writer.site_counts} mod. sites written to {site_writer.out_path}')
 

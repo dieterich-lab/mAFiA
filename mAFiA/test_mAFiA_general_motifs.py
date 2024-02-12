@@ -52,7 +52,7 @@ def main(args):
                 this_mRNA_site.print()
                 print(f'Train motif {train_motif}')
                 this_site_mod_ratio = motif_classifiers[train_motif].test(test_container.nucleotides[this_mRNA_site.ind])
-                site_writer.update_site_df(row, this_site_coverage, this_site_mod_ratio, this_mRNA_site.ref_5mer, train_motif)
+                site_writer.update_sites(row, this_site_coverage, this_site_mod_ratio, this_mRNA_site.ref_5mer, train_motif)
                 site_writer.write_df()
                 print('=========================================================\n')
     print(f'Total {site_writer.site_counts} mod. sites written to {site_writer.out_path}')

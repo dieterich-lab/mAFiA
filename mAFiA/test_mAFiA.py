@@ -78,7 +78,7 @@ def main():
 				test_container.nucleotides[this_mRNA_site.ind]
 			)
             print('=========================================================\n')
-            site_writer.update_site_df(row, this_site_coverage, this_site_mod_ratio, this_mRNA_site.ref_5mer)
+            site_writer.update_sites(row, this_site_coverage, this_site_mod_ratio, this_mRNA_site.ref_5mer)
             site_writer.write_df()
     print(f'Total {site_writer.site_counts} mod. sites written to {site_writer.out_path}')
 
