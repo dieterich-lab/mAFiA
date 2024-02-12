@@ -22,16 +22,17 @@ class SiteWriter(DataframeWriter):
     def __init__(self, out_path):
         super().__init__(out_path)
 
-        # if os.path.exists(out_path):
-        #     self.df_out = pd.read_csv(out_path, sep='\t')
-        #     self.site_counts = len(self.df_out['index'].unique())
-        #     if self.site_counts > 0:
-        #         self.last_ind = self.df_out.tail(1)['index'].values[0]
-        #         print(f'Restarting from {out_path}, index {self.last_ind}, {self.site_counts} sites')
-        #         return
-        self.df_out = pd.DataFrame()
-        self.site_counts = 0
-        # self.last_ind = -1
+        if os.path.exists(out_path):
+            self.df_out = pd.read_csv(out_path, sep='\t')
+            self.site_counts = len(self.df_out['index'].unique())
+            if self.site_counts > 0:
+                self.last_ind = self.df_out.tail(1)['index'].values[0]
+                print(f'Restarting from {out_path}, index {self.last_ind}, {self.site_counts} sites')
+                return
+        else:
+            self.df_out = pd.DataFrame()
+            self.site_counts = 0
+            # self.last_ind = -1
 
     def update_df_out(self, glori, nts, pred_ratio):
         df_glori = pd.concat([glori.to_frame().T] * len(nts), ignore_index=True)

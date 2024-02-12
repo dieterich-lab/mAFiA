@@ -5,7 +5,7 @@ shopt -s globstar
 MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 
 ### new HEK293 #########################################################################################################
-#DATASET=0_WT_100_IVT
+DATASET=0_WT_100_IVT
 #DATASET=25_WT_75_IVT
 #DATASET=50_WT_50_IVT
 #DATASET=75_WT_25_IVT
@@ -13,7 +13,7 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 #DATASET=P2_WT
 #DATASET=Mettl3-KO
 
-#WORKSPACE=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/HEK293/${DATASET}
+WORKSPACE=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/HEK293/${DATASET}
 
 ########################################################################################################################
 
@@ -24,10 +24,10 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 #DATASET=JK_HEK293_DMSO_merged
 
 #DATASET=mESC_WT_DMSO_merged
-DATASET=mESC_Mettl3_KO_merged
+#DATASET=mESC_Mettl3_KO_merged
 #DATASET=mESC_WT_STM_merged
 
-WORKSPACE=/prj/TRR319_RMaP/Project_B01/Adrian/${DATASET}
+#WORKSPACE=/prj/TRR319_RMaP/Project_B01/Adrian/${DATASET}
 
 ########################################################################################################################
 #DATASET=40-26
@@ -121,20 +121,20 @@ module load ont-fast5-api
 #for chr in I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI Mito
 #for chr in {1..22} X
 
-#for chr in {1..19} X
-#do
-#  mkdir chr${chr}
-#  samtools view -h genome_filtered_q50.bam ${chr} | samtools sort - > chr${chr}/sorted.chr${chr}.bam
-#  samtools index chr${chr}/sorted.chr${chr}.bam
-#done
-#
-#for chr in {1..19} X
-#do
-#  samtools view chr${chr}/sorted.chr${chr}.bam | cut -f1 > chr${chr}/read_ids.txt
-#  mkdir chr${chr}/fast5
-#  srun -c 8 --mem 64GB -o ${HOME}/slurm/fast5_subset_chr${chr}.out -e ${HOME}/slurm/fast5_subset_chr${chr}.err \
-#  fast5_subset -i fast5 -s chr${chr}/fast5 -l chr${chr}/read_ids.txt &
-#done
+for chr in {1..22} X
+do
+  mkdir chr${chr}
+  samtools view -h genome_filtered_q50.bam ${chr} | samtools sort - > chr${chr}/sorted.chr${chr}.bam
+  samtools index chr${chr}/sorted.chr${chr}.bam
+done
+
+for chr in {1..22} X
+do
+  samtools view chr${chr}/sorted.chr${chr}.bam | cut -f1 > chr${chr}/read_ids.txt
+  mkdir chr${chr}/fast5
+  srun -c 8 --mem 64GB -o ${HOME}/slurm/fast5_subset_chr${chr}.out -e ${HOME}/slurm/fast5_subset_chr${chr}.err \
+  fast5_subset -i fast5 -s chr${chr}/fast5 -l chr${chr}/read_ids.txt &
+done
 
 ########################################################################################################################
 #### align to transcriptome ############################################################################################
