@@ -6,6 +6,7 @@ from statistics import mean
 HOME = os.path.expanduser('~')
 import sys
 sys.path.append(os.path.join(HOME, 'git/mAFiA_dev'))
+# from tqdm import tqdm
 from mAFiA.arg_parsers import mRNATestArgsParser
 from mAFiA.output_writers import SiteWriter
 from joblib import Parallel, delayed
@@ -76,7 +77,8 @@ def main():
             if this_site:
                 site_writer.update_sites(**this_site)
         site_writer.write_df(empty=True)
-        print(f'{site_writer.site_counts} sites written')
+        # print(f'{site_writer.site_counts} sites written')
+        print(f'{chunk.index[-1]+1} rows processed')
 
     print(f'Total {site_writer.site_counts} mod. sites written to {site_writer.out_path}')
     toc = time.time()
