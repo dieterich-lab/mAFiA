@@ -3,13 +3,11 @@ import time
 import pandas as pd
 import pysam
 from statistics import mean
-from tqdm import tqdm
 HOME = os.path.expanduser('~')
 import sys
 sys.path.append(os.path.join(HOME, 'git/mAFiA_dev'))
 from mAFiA.arg_parsers import mRNATestArgsParser
 from mAFiA.output_writers import SiteWriter
-import multiprocessing
 from joblib import Parallel, delayed
 
 dict_mod_code = {
@@ -50,7 +48,6 @@ def calc_single_site(in_row, args):
     #                 in_site_writer.update_sites(in_row, cov=len(mod_counts), ratio=mean(mod_counts), ref_5mer=in_row['ref5mer'])
     # return in_site_writer
 
-NUM_JOBS = 12
 
 def main():
     tic = time.time()
@@ -63,7 +60,7 @@ def main():
         os.makedirs(args.out_dir, exist_ok=True)
 
     site_writer = SiteWriter(out_path=os.path.join(args.out_dir, 'mAFiA.sites.bed'))
-    df_mod = pd.read_csv(args.mod_file, sep='\t', dtype={'chrom': str, 'chromStart': int, 'chromEnd': int})
+    df_mod = pd.read_csv(args.mod_file, sep='\t', dtype={'chrom': str, 'chromStart': int, 'chromEnd': int}, iterator=True, chunksize=args.chunk_size)
 
     # with pysam.Samfile(args.bam_file, 'r') as bam:
         # for _, row in tqdm(list(df_mod.iterrows())):
@@ -73,11 +70,13 @@ def main():
         #     if site_writer.site_counts%args.chunk_size==0:
         #         site_writer.write_df(empty=True)
 
-    sites = Parallel(n_jobs=NUM_JOBS)(delayed(calc_single_site)(df_mod.loc[i], args) for i in range(len(df_mod)))
-    for this_site in sites:
-        if this_site:
-            site_writer.update_sites(**this_site)
-    site_writer.write_df(empty=True)
+    for chunk in df_mod:
+        sites = Parallel(n_jobs=args.num_jobs)(delayed(calc_single_site)(chunk.iloc[i], args) for i in range(len(chunk)))
+        for this_site in sites:
+            if this_site:
+                site_writer.update_sites(**this_site)
+        site_writer.write_df(empty=True)
+        print(f'{site_writer.site_counts} sites written')
 
     print(f'Total {site_writer.site_counts} mod. sites written to {site_writer.out_path}')
     toc = time.time()
