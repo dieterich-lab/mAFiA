@@ -13,14 +13,16 @@ chrom = '1'
 # train_ds = 'DRACH_v1'
 # train_ds = 'ISA_retrain_GAACT_TGACT'
 
+THRESH_CONF = 80
+
 data_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/psico-mAFiA/HEK293'
 
 df_wt = pd.read_csv(
-    f'{data_dir}/100_WT_0_IVT/chr{chrom}/mAFiA.sites.bed',
+    f'{data_dir}/100_WT_0_IVT/chr{chrom}_confidence/mAFiA.sites.bed',
     sep='\t',
     dtype={'chrom': str})
 df_ivt = pd.read_csv(
-    f'{data_dir}/0_WT_100_IVT/chr{chrom}/mAFiA.sites.bed',
+    f'{data_dir}/0_WT_100_IVT/chr{chrom}_confidence/mAFiA.sites.bed',
     sep='\t',
     dtype={'chrom': str})
 
@@ -48,7 +50,10 @@ os.makedirs(img_out, exist_ok=True)
 blacklist = []
 df_merged = pd.merge(df_wt, df_ivt, on=['chrom', 'chromStart', 'chromEnd', 'score', 'strand', 'ref5mer'], suffixes=['_wt', '_ivt'])
 # df_merged_sel = df_merged[~df_merged['ref5mer'].isin(blacklist)]
-# df_merged_sel = df_merged
+df_merged_sel = df_merged[
+    (df_merged['confidence_ivt']>=THRESH_CONF)
+    * (df_merged['confidence_wt']>=THRESH_CONF)
+    ]
 #
 # ### recalculate mod ratio by filtering out dubious pred5mers ###
 #
@@ -125,16 +130,18 @@ df_merged = pd.merge(df_wt, df_ivt, on=['chrom', 'chromStart', 'chromEnd', 'scor
 # plt.hist(flank_match_ratio, bins=50, range=[0, 1])
 
 def scatter_plot_by_motif(mod_type, ordered_motifs, num_row, num_col, thresh_err=25):
-    motif_counts = Counter(df_merged['ref5mer'])
+    motif_counts = Counter(df_merged_sel['ref5mer'])
     motif_err_rate = {
-        motif: (df_merged[df_merged['ref5mer'] == motif]['modRatio_ivt'] >= thresh_err).sum() / motif_counts[motif] for
+        motif: (df_merged_sel[df_merged_sel['ref5mer'] == motif]['modRatio_ivt'] >= thresh_err).sum() / motif_counts[motif] for
         motif in motif_counts.keys()}
 
     plt.figure(figsize=(12, 6))
     for ind, motif in enumerate(ordered_motifs):
-        df_merged_sel = df_merged[df_merged['ref5mer'] == motif]
+        if motif not in df_merged_sel['ref5mer'].values:
+            continue
+        sub_df = df_merged_sel[df_merged_sel['ref5mer'] == motif]
         plt.subplot(num_row, num_col, ind + 1)
-        plt.scatter(df_merged_sel['modRatio_wt'], df_merged_sel['modRatio_ivt'], s=2, alpha=0.5)
+        plt.scatter(sub_df['modRatio_wt'], sub_df['modRatio_ivt'], s=2, alpha=0.5)
         plt.text(1, 90, f"{motif.replace('T', 'U')} ({motif_err_rate[motif]:.2f})", fontsize=10)
         plt.axhline(y=thresh_err, linestyle='--', c='r')
         plt.xlim([-1, 101])
@@ -145,8 +152,8 @@ def scatter_plot_by_motif(mod_type, ordered_motifs, num_row, num_col, thresh_err
             plt.xlabel('$S_{WT}$', fontsize=10)
         if ind % num_col == 0:
             plt.ylabel('$S_{IVT}$', fontsize=10)
-    plt.suptitle(f'chr{chrom}', fontsize=12)
-    plt.savefig(os.path.join(img_out, f'{mod_type}_WT_vs_IVT.png'), bbox_inches='tight')
+    plt.suptitle(f'chr{chrom} {mod_type}\nconf$\geq${THRESH_CONF}%', fontsize=12)
+    plt.savefig(os.path.join(img_out, f'{mod_type}_WT_vs_IVT_conf{THRESH_CONF}.png'), bbox_inches='tight')
 
 psi_motifs = [
     'AGTGG',

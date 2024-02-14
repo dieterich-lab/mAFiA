@@ -81,9 +81,9 @@ def main():
                 site_writer.update_sites(**this_site)
         site_writer.write_df(empty=True)
         # print(f'{site_writer.site_counts} sites written')
-        print(f'{chunk.index[-1]+1} rows processed')
+        print(f'{chunk.index[-1]+1} rows processed', flush=True)
 
-    print(f'Total {site_writer.site_counts} mod. sites written to {site_writer.out_path}')
+    print(f'Total {site_writer.site_counts} mod. sites written to {site_writer.out_path}', flush=True)
     toc = time.time()
     print('Finished in {:.1f} mins'.format((toc - tic) / 60), flush=True)
 
