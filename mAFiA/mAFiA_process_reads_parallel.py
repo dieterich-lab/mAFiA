@@ -37,15 +37,14 @@ def split_bam_file(in_bam_file, out_dir, num_jobs):
     chunk_size = total_num_alignments // num_jobs
     chunk = 0
     reads_in_this_chunk = 0
-    old_name = None
 
     bam_files = []
     with pysam.AlignmentFile(in_bam_file, 'rb') as in_bam:
         bam_path = out_bam_pattern.format(chunk)
         outfile = pysam.AlignmentFile(bam_path, 'wb', template=in_bam)
         bam_files.append(bam_path)
-        for read in in_bam.fetch():
-            if old_name != read.query_name and reads_in_this_chunk > chunk_size:
+        for read in in_bam.fetch(until_eof=True):
+            if reads_in_this_chunk > chunk_size:
                 reads_in_this_chunk = 0
                 chunk += 1
                 outfile.close()
@@ -54,7 +53,6 @@ def split_bam_file(in_bam_file, out_dir, num_jobs):
                 bam_files.append(bam_path)
 
             outfile.write(read)
-            old_name = read.query_name
             reads_in_this_chunk += 1
 
     for this_bam_file in bam_files:
