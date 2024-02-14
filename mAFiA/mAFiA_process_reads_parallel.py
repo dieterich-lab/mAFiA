@@ -43,7 +43,7 @@ def split_bam_file(in_bam_file, out_dir, num_jobs):
         bam_path = out_bam_pattern.format(chunk)
         outfile = pysam.AlignmentFile(bam_path, 'wb', template=in_bam)
         bam_files.append(bam_path)
-        for read in in_bam.fetch():
+        for read in in_bam.fetch(until_eof=True):
             if reads_in_this_chunk > chunk_size:
                 reads_in_this_chunk = 0
                 chunk += 1
@@ -54,9 +54,10 @@ def split_bam_file(in_bam_file, out_dir, num_jobs):
 
             outfile.write(read)
             reads_in_this_chunk += 1
-
+    outfile.close()
+    
     for this_bam_file in bam_files:
-        pysam.index(this_bam_file.rstrip('\n'))
+        pysam.index(this_bam_file)
 
     return bam_files
 
