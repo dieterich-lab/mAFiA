@@ -29,7 +29,7 @@ def process_bam(in_bam_file, out_sam_file, args):
 
 
 def split_bam_file(in_bam_file, out_dir, num_jobs):
-    out_bam_pattern = os.path.join(out_dir, 'temp%d.bam')
+    out_bam_pattern = os.path.join(out_dir, 'temp{}.bam')
 
     # total_num_alignments = int(pysam.idxstats(in_bam_file).rstrip('\n').split('\t')[2])
     total_num_alignments = sum([int(l.split('\t')[2]) for l in pysam.idxstats(in_bam_file).split('\n') if len(l)])
@@ -41,15 +41,17 @@ def split_bam_file(in_bam_file, out_dir, num_jobs):
 
     bam_files = []
     with pysam.AlignmentFile(in_bam_file, 'rb') as in_bam:
-        outfile = pysam.AlignmentFile(out_bam_pattern % chunk, 'wb', template=in_bam)
-        bam_files.append(out_bam_pattern % chunk)
+        bam_path = out_bam_pattern.format(chunk)
+        outfile = pysam.AlignmentFile(bam_path, 'wb', template=in_bam)
+        bam_files.append(bam_path)
         for read in in_bam.fetch(until_eof=True):
             if old_name != read.query_name and reads_in_this_chunk > chunk_size:
                 reads_in_this_chunk = 0
                 chunk += 1
                 outfile.close()
-                outfile = pysam.AlignmentFile(out_bam_pattern % chunk, 'wb', template=in_bam)
-                bam_files.append(out_bam_pattern % chunk)
+                bam_path = out_bam_pattern.format(chunk)
+                outfile = pysam.AlignmentFile(bam_path, 'wb', template=in_bam)
+                bam_files.append(bam_path)
 
             outfile.write(read)
             old_name = read.query_name
