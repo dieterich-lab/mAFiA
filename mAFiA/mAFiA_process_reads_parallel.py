@@ -11,6 +11,7 @@ from mAFiA.feature_classifiers import load_multimod_motif_classifiers
 from mAFiA.output_writers import SAMWriter
 import pysam
 from joblib import Parallel, delayed
+from glob import glob
 
 def process_bam(in_bam_file, out_sam_file, args):
     test_container = MultiReadContainer('test', in_bam_file, args.fast5_dir)
@@ -55,7 +56,7 @@ def split_bam_file(in_bam_file, out_dir, num_jobs):
             outfile.write(read)
             reads_in_this_chunk += 1
     outfile.close()
-    
+
     for this_bam_file in bam_files:
         pysam.index(this_bam_file)
 
@@ -73,7 +74,7 @@ def main():
         os.makedirs(args.out_dir, exist_ok=True)
 
     split_bam_files = split_bam_file(args.bam_file, args.out_dir, args.num_jobs)
-    out_sam_files = [in_bam_file.replace('.bam', 'mAFiA.reads.sam') for in_bam_file in split_bam_files]
+    out_sam_files = [in_bam_file.replace('.bam', '.mAFiA.reads.sam') for in_bam_file in split_bam_files]
 
     sam_writers = Parallel(n_jobs=args.num_jobs)(delayed(process_bam)(split_bam_files[i], out_sam_files[i], args) for i in range(len(split_bam_files)))
     total_num_reads_written = sum([this_writer.read_counts for this_writer in sam_writers])
@@ -81,6 +82,9 @@ def main():
 
     pysam.merge('-f', '-o', os.path.join(args.out_dir, 'mAFiA.reads.bam'), *out_sam_files)
     pysam.index(os.path.join(args.out_dir, 'mAFiA.reads.bam'))
+
+    for f in glob(os.path.join(args.out_dir, 'temp*')):
+        os.remove(f)
 
     toc = time.time()
     print('Finished in {:.1f} mins'.format((toc - tic) / 60), flush=True)
