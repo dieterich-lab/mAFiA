@@ -12,7 +12,8 @@ bed_fields = [
     'strand',
     'ref5mer',
     'coverage',
-    'modRatio'
+    'modRatio',
+    'confidence'
 ]
 
 class DataframeWriter:
@@ -67,9 +68,10 @@ class SiteWriter(DataframeWriter):
     #     self.site_counts += 1
     #     self.df_out = pd.concat([self.df_out, df_glori_nts])
 
-    def update_sites(self, in_row, cov, ratio, ref_5mer, train_5mer=None):
+    def update_sites(self, in_row, cov, ratio, conf, ref_5mer, train_5mer=None):
         in_row['coverage'] = cov
         in_row['modRatio'] = round(ratio*100.0, 1)
+        in_row['confidence'] = round(conf*100.0, 1)
         in_row['ref5mer'] = ref_5mer
         if train_5mer:
             in_row['train5mer'] = train_5mer

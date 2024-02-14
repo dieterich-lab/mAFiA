@@ -10,6 +10,7 @@ sys.path.append(os.path.join(HOME, 'git/mAFiA_dev'))
 from mAFiA.arg_parsers import mRNATestArgsParser
 from mAFiA.output_writers import SiteWriter
 from joblib import Parallel, delayed
+import numpy as np
 
 dict_mod_code = {
     'm6A': '21891',
@@ -29,7 +30,7 @@ def calc_single_site(in_row, args):
             if pileupcolumn.reference_pos == chromStart:
                 this_site_coverage = pileupcolumn.get_num_aligned()
                 if this_site_coverage >= args.min_coverage:
-                    mod_counts = []
+                    mod_probs = []
                     for pileupread in pileupcolumn.pileups:
                         flag = pileupread.alignment.flag
                         query_position = pileupread.query_position
@@ -41,13 +42,15 @@ def calc_single_site(in_row, args):
                         sel_tup = [tup for tup in pileupread.alignment.modified_bases_forward.get(mod_key, []) if
                                    tup[0] == query_position]
                         if len(sel_tup) == 1:
-                            mod_counts.append((sel_tup[0][1] / 255.0) >= args.mod_prob_thresh)
-                    if len(mod_counts) >= args.min_coverage:
+                            # mod_probs.append((sel_tup[0][1] / 255.0) >= args.mod_prob_thresh)
+                            mod_probs.append(sel_tup[0][1])
+                    if len(mod_probs) >= args.min_coverage:
+                        mod_probs = np.array(mod_probs) / 255.0
+                        ratio = np.mean(mod_probs>=args.mod_prob_thresh)
+                        conf = ((mod_probs<0.25).sum() + (mod_probs>=0.75).sum()) / len(mod_probs)
                         in_row['score'] = '.'
-                        return {'in_row': in_row, 'cov': len(mod_counts), 'ratio': mean(mod_counts), 'ref_5mer': in_row['ref5mer']}
+                        return {'in_row': in_row, 'cov': len(mod_probs), 'ratio': ratio, 'conf': conf, 'ref_5mer': in_row['ref5mer']}
         return {}
-    #                 in_site_writer.update_sites(in_row, cov=len(mod_counts), ratio=mean(mod_counts), ref_5mer=in_row['ref5mer'])
-    # return in_site_writer
 
 
 def main():
