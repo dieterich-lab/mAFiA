@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import numpy as np
 
 glori_file = '/home/adrian/Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv'
 out_dir = '/home/adrian/Data/GLORI/bed_files'
@@ -34,7 +35,7 @@ for this_chr in unique_chr:
     df_bed[bed_fields[1]] = ends - 1
     df_bed[bed_fields[2]] = ends
     df_bed[bed_fields[3]] = 'm6A'
-    df_bed[bed_fields[4]] = 0
+    df_bed[bed_fields[4]] = np.round(df_chr['NormeRatio'].values * 100.0, 1)
     df_bed[bed_fields[5]] = df_chr['Strand'].values
 
-    df_bed.to_csv(os.path.join(out_dir, f'GLORI_{this_chr}.tsv'), sep='\t', index=False)
+    df_bed.to_csv(os.path.join(out_dir, f'GLORI.{this_chr}.tsv'), sep='\t', index=False)

@@ -10,6 +10,7 @@ random.seed(0)
 from random import sample
 from tqdm import tqdm
 import h5py
+from joblib import Parallel, delayed
 
 class Nucleotide:
     def __init__(self, read_id='', read_pos=-1, ref_pos=-1, pred_5mer='NNNNN', ref_5mer='NNNNN', feature=None, strand='.', mod_type='N', mod_prob=-1):
@@ -219,8 +220,10 @@ class MultiReadContainer(DataContainer):
         read_len = len(read.seq)
         if flag==0:
             dict_ref_to_read_pos = {tup[1]: tup[0] for tup in read.get_aligned_pairs() if (tup[0] is not None) and (tup[1] is not None)}
+            matching_strand = '+'
         elif flag==16:
             dict_ref_to_read_pos = {tup[1]: (read_len-tup[0]-1) for tup in read.get_aligned_pairs() if (tup[0] is not None) and (tup[1] is not None)}
+            matching_strand = '-'
         else:
             return all_nts
 
@@ -229,6 +232,7 @@ class MultiReadContainer(DataContainer):
             * (df_sites['chromStart'] >= read.reference_start)
             * (df_sites['chromEnd'] <= read.reference_end)
             * df_sites['chromStart'].isin(dict_ref_to_read_pos.keys())
+            * df_sites['strand'] == matching_strand
             ]
 
         for _, row in sub_df_sites.iterrows():
@@ -236,12 +240,6 @@ class MultiReadContainer(DataContainer):
             strand = row['strand']
             ref5mer = row['ref5mer']
             mod_type = row['name']
-
-            if not (
-                    ((strand == '+') and (flag == 0))
-                    or ((strand == '-') and (flag == 16))
-            ):
-                continue
 
             query_pos = dict_ref_to_read_pos[chromStart]
             query_5mer = read.get_forward_sequence()[query_pos-2:query_pos+3]
@@ -259,6 +257,53 @@ class MultiReadContainer(DataContainer):
 
         return all_nts
 
+    def _get_matching_nucleotide_from_row(self, in_row, in_read, in_dict, in_read_features):
+        chromStart = in_row['chromStart']
+        strand = in_row['strand']
+        ref5mer = in_row['ref5mer']
+        mod_type = in_row['name']
+
+        query_pos = in_dict[chromStart]
+        query_5mer = in_read.get_forward_sequence()[query_pos - 2:query_pos + 3]
+        this_site_feature = in_read_features[query_pos]
+
+        return Nucleotide(
+            read_id=in_read.query_name,
+            read_pos=query_pos,
+            ref_pos=chromStart,
+            strand=strand,
+            pred_5mer=query_5mer,
+            ref_5mer=ref5mer,
+            feature=this_site_feature,
+            mod_type=mod_type
+        )
+
+    def parallel_collect_nucleotides_on_single_read(self, read, read_features, df_sites, num_jobs=16):
+        all_nts = []
+        query_name = read.query_name
+        flag = read.flag
+        read_len = len(read.seq)
+        if flag==0:
+            dict_ref_to_read_pos = {tup[1]: tup[0] for tup in read.get_aligned_pairs() if (tup[0] is not None) and (tup[1] is not None)}
+            matching_strand = '+'
+        elif flag==16:
+            dict_ref_to_read_pos = {tup[1]: (read_len-tup[0]-1) for tup in read.get_aligned_pairs() if (tup[0] is not None) and (tup[1] is not None)}
+            matching_strand = '-'
+        else:
+            return all_nts
+
+        sub_df_sites = df_sites[
+            (df_sites['chrom'] == read.reference_name)
+            * (df_sites['chromStart'] >= read.reference_start)
+            * (df_sites['chromEnd'] <= read.reference_end)
+            * df_sites['chromStart'].isin(dict_ref_to_read_pos.keys())
+            * df_sites['strand']==matching_strand
+            ]
+
+        all_nts = Parallel(n_jobs=num_jobs)(delayed(self._get_matching_nucleotide_from_row)(sub_df_sites.iloc[i], read, dict_ref_to_read_pos, read_features) for i in range(len(sub_df_sites)))
+
+        return all_nts
+
     def process_reads(self, extractor, df_sites, multimod_motif_classifiers, sam_writer):
         for this_read in tqdm(self.bam.fetch()):
             if this_read.flag not in [0, 16]:
@@ -266,6 +311,7 @@ class MultiReadContainer(DataContainer):
             this_read_signal = self._get_norm_signal_from_read_id(this_read.query_name, self.indexed_read_ids)
             this_read_features, this_read_bases = extractor.get_features_from_signal(this_read_signal)
             this_read_nts = self.collect_nucleotides_on_single_read(this_read, this_read_features, df_sites)
+            # parallel_this_read_nts = self.parallel_collect_nucleotides_on_single_read(this_read, this_read_features, df_sites)
 
             mod_motif_nts = {}
             for this_nt in this_read_nts:
@@ -287,11 +333,31 @@ class MultiReadContainer(DataContainer):
                         this_mod_nts.append(this_nt)
                 out_mod_nts[this_mod] = this_mod_nts
 
-            # _out_nts = []
-            # for this_nt in this_read_nts.copy():
-            #     if this_nt.ref_5mer in motif_classifiers.keys():
-            #         this_nt.mod_prob = motif_classifiers[this_nt.ref_5mer].binary_model.predict_proba(this_nt.feature[np.newaxis, :])[0, 1]
-            #         _out_nts.append(this_nt)
+            sam_writer.write_read(this_read, out_mod_nts)
+
+
+    def _get_mod_prob_nt(self, this_nt, multimod_motif_classifiers):
+        this_nt.mod_prob = multimod_motif_classifiers[this_nt.mod_type][this_nt.ref_5mer].binary_model.predict_proba(this_nt.feature)[0,
+                    1]
+        return this_nt
+
+    def process_reads_parallel(self, extractor, df_sites, multimod_motif_classifiers, sam_writer, num_jobs=16):
+        for this_read in tqdm(self.bam.fetch()):
+            if this_read.flag not in [0, 16]:
+                continue
+            this_read_signal = self._get_norm_signal_from_read_id(this_read.query_name, self.indexed_read_ids)
+            this_read_features, this_read_bases = extractor.get_features_from_signal(this_read_signal)
+            this_read_nts = self.collect_nucleotides_on_single_read(this_read, this_read_features, df_sites)
+
+            mod_prob_nts = Parallel(n_jobs=num_jobs)(delayed(self._get_mod_prob_nt)(this_read_nts[i], multimod_motif_classifiers) for i in range(len(this_read_nts)))
+            out_mod_nts = {}
+            for this_nt in mod_prob_nts:
+                if this_nt.mod_type not in out_mod_nts.keys():
+                    out_mod_nts[this_nt.mod_type] = {}
+                if this_nt.ref_5mer not in out_mod_nts[this_nt.mod_type].keys():
+                    out_mod_nts[this_nt.mod_type][this_nt.ref_5mer] = [this_nt]
+                else:
+                    out_mod_nts[this_nt.mod_type][this_nt.ref_5mer].append(this_nt)
 
             sam_writer.write_read(this_read, out_mod_nts)
 
