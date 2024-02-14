@@ -31,7 +31,8 @@ def process_bam(in_bam_file, out_sam_file, args):
 def split_bam_file(in_bam_file, out_dir, num_jobs):
     out_bam_pattern = os.path.join(out_dir, 'temp%d.bam')
 
-    total_num_alignments = int(pysam.idxstats(in_bam_file).rstrip('\n').split('\t')[2])
+    # total_num_alignments = int(pysam.idxstats(in_bam_file).rstrip('\n').split('\t')[2])
+    total_num_alignments = sum([int(l.split('\t')[2]) for l in pysam.idxstats(in_bam_file).split('\n') if len(l)])
     print(f'Splitting {total_num_alignments} reads into {num_jobs} chunks...', flush=True)
     chunk_size = total_num_alignments // num_jobs
     chunk = 0
