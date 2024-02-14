@@ -26,7 +26,7 @@ def process_bam(in_bam_file, out_sam_file, args):
 
     # print(f'Total {sam_writer.read_counts} mod. reads written to {sam_writer.out_sam_path}')
 
-    return sam_writer
+    return sam_writer.read_counts
 
 
 def split_bam_file(in_bam_file, out_dir, num_jobs):
@@ -76,8 +76,8 @@ def main():
     split_bam_files = split_bam_file(args.bam_file, args.out_dir, args.num_jobs)
     out_sam_files = [in_bam_file.replace('.bam', '.mAFiA.reads.sam') for in_bam_file in split_bam_files]
 
-    sam_writers = Parallel(n_jobs=args.num_jobs)(delayed(process_bam)(split_bam_files[i], out_sam_files[i], args) for i in range(len(split_bam_files)))
-    total_num_reads_written = sum([this_writer.read_counts for this_writer in sam_writers])
+    read_counts = Parallel(n_jobs=args.num_jobs)(delayed(process_bam)(split_bam_files[i], out_sam_files[i], args) for i in range(len(split_bam_files)))
+    total_num_reads_written = sum(read_counts)
     print(f'Total {total_num_reads_written} mod. reads written')
 
     pysam.merge('-f', '-o', os.path.join(args.out_dir, 'mAFiA.reads.bam'), *out_sam_files)

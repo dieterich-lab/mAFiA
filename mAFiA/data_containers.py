@@ -334,6 +334,7 @@ class MultiReadContainer(DataContainer):
                 out_mod_nts[this_mod] = this_mod_nts
 
             sam_writer.write_read(this_read, out_mod_nts)
+        sam_writer.fo.close()
 
 
     def _get_mod_prob_nt(self, this_nt, multimod_motif_classifiers):
