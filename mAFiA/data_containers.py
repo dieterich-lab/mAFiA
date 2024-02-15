@@ -280,7 +280,6 @@ class MultiReadContainer(DataContainer):
 
     def parallel_collect_nucleotides_on_single_read(self, read, read_features, df_sites, num_jobs=16):
         all_nts = []
-        query_name = read.query_name
         flag = read.flag
         read_len = len(read.seq)
         if flag==0:
@@ -304,14 +303,15 @@ class MultiReadContainer(DataContainer):
 
         return all_nts
 
-    def process_reads(self, extractor, df_sites, multimod_motif_classifiers, sam_writer):
+    def process_reads(self, extractor, df_sites, multimod_motif_classifiers, sam_writer, write_chunk_size=1000):
+        reads_mod_nts = []
         for this_read in tqdm(self.bam.fetch()):
             if this_read.flag not in [0, 16]:
                 continue
             this_read_signal = self._get_norm_signal_from_read_id(this_read.query_name, self.indexed_read_ids)
             this_read_features, this_read_bases = extractor.get_features_from_signal(this_read_signal)
-            this_read_nts = self.collect_nucleotides_on_single_read(this_read, this_read_features, df_sites)
-            # parallel_this_read_nts = self.parallel_collect_nucleotides_on_single_read(this_read, this_read_features, df_sites)
+            # this_read_nts = self.collect_nucleotides_on_single_read(this_read, this_read_features, df_sites)
+            this_read_nts = self.parallel_collect_nucleotides_on_single_read(this_read, this_read_features, df_sites)
 
             mod_motif_nts = {}
             for this_nt in this_read_nts:
@@ -332,14 +332,16 @@ class MultiReadContainer(DataContainer):
                         this_nt.mod_prob = this_mod_prob
                         this_mod_nts.append(this_nt)
                 out_mod_nts[this_mod] = this_mod_nts
-
-            sam_writer.write_read(this_read, out_mod_nts)
+            reads_mod_nts.append((this_read, out_mod_nts))
+            if len(reads_mod_nts)==write_chunk_size:
+                sam_writer.write_reads(reads_mod_nts)
+                reads_mod_nts = []
+        sam_writer.write_reads(reads_mod_nts)
         sam_writer.fo.close()
 
 
     def _get_mod_prob_nt(self, this_nt, multimod_motif_classifiers):
-        this_nt.mod_prob = multimod_motif_classifiers[this_nt.mod_type][this_nt.ref_5mer].binary_model.predict_proba(this_nt.feature)[0,
-                    1]
+        this_nt.mod_prob = multimod_motif_classifiers[this_nt.mod_type][this_nt.ref_5mer].binary_model.predict_proba(this_nt.feature)[0, 1]
         return this_nt
 
     def process_reads_parallel(self, extractor, df_sites, multimod_motif_classifiers, sam_writer, num_jobs=16):
