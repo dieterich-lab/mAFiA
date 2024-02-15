@@ -179,3 +179,7 @@ class SAMWriter:
             read.set_tag('ML', full_ml)
         self.fo.write(read)
         self.read_counts += 1
+
+    def write_reads(self, in_reads_mod_nts):
+        for write_read, write_mod_nts in in_reads_mod_nts:
+            self.write_read(write_read, write_mod_nts)
