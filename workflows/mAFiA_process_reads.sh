@@ -5,24 +5,25 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=90GB
 #SBATCH --verbose
-#SBATCH --job-name=psico-mAFiA_HEK293_WT_chrX
-#SBATCH --output=/home/achan/slurm/psico-mAFiA_HEK293_WT_chrX.out
+#SBATCH --job-name=psico-mAFiA_HEK293_WT
+#SBATCH --output=/home/achan/slurm/psico-mAFiA_HEK293_WT_chr%a.out
 
 ds=100_WT_0_IVT
 #ds=0_WT_100_IVT
-chr=X
+#chr=X
+chr=${SLURM_ARRAY_TASK_ID}
 
 workspace=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/HEK293/${ds}
 bam=${workspace}/chr${chr}/sorted.chr${chr}.bam
 fast5_dir=${workspace}/chr${chr}/fast5
 
-#mod=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/site_annotations/homo_sapiens/GRCh38_102/m6A.psi.GRCh38_102.chr1.bed
-mod=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/site_annotations/homo_sapiens/GRCh38_102/BID_GLORI.chrX.tsv
+mod=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/site_annotations/homo_sapiens/GRCh38_102/m6A.psi.GRCh38_102.chr${chr}.bed
+#mod=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/site_annotations/homo_sapiens/GRCh38_102/BID_GLORI.chrX.tsv
 
 backbone=${HOME}/git/mAFiA/models/RODAN_HEK293_IVT.torch
-classifiers=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/psi-co-mAFiA
+classifiers=${HOME}/git/mAFiA/models/psi-co-mAFiA
 
-output=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/results/psico-mAFiA/HEK293/${ds}/chr${chr}_parallel
+output=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/results/psico-mAFiA/HEK293/${ds}/chr${chr}
 
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
 
