@@ -293,8 +293,8 @@ class MultiReadContainer(DataContainer):
 
         sub_df_sites = df_sites[
             (df_sites['chrom'] == read.reference_name)
-            * (df_sites['chromStart'] >= read.reference_start)
-            * (df_sites['chromEnd'] <= read.reference_end)
+            * (df_sites['chromStart'] >= (read.reference_start+2))
+            * (df_sites['chromEnd'] < (read.reference_end-2))
             * df_sites['chromStart'].isin(dict_ref_to_read_pos.keys())
             * df_sites['strand']==matching_strand
             ]
