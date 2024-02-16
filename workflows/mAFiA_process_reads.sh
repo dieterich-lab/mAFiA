@@ -5,13 +5,18 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=90GB
 #SBATCH --verbose
-#SBATCH --job-name=psico-mAFiA_HEK293_WT
-#SBATCH --output=/home/achan/slurm/psico-mAFiA_HEK293_WT_chr%a.out
+#SBATCH --job-name=psico-mAFiA_HEK293_IVT
+#SBATCH --output=/home/achan/slurm/psico-mAFiA_HEK293_IVT_chr%a.out
 
-ds=100_WT_0_IVT
-#ds=0_WT_100_IVT
+#ds=100_WT_0_IVT
+ds=0_WT_100_IVT
 #chr=X
+if [[ ${SLURM_ARRAY_TASK_ID} -eq 23 ]]
+then
+chr="X"
+else
 chr=${SLURM_ARRAY_TASK_ID}
+fi
 
 workspace=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/HEK293/${ds}
 bam=${workspace}/chr${chr}/sorted.chr${chr}.bam
