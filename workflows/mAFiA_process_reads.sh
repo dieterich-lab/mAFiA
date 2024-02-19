@@ -5,11 +5,11 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=90GB
 #SBATCH --verbose
-#SBATCH --job-name=psico-mAFiA_HEK293_IVT
-#SBATCH --output=/home/achan/slurm/psico-mAFiA_HEK293_IVT_chr%a.out
+#SBATCH --job-name=psico-mAFiA_HEK293_WT
+#SBATCH --output=/home/achan/slurm/psico-mAFiA_HEK293_WT_%A_chr%a.out
 
-#ds=100_WT_0_IVT
-ds=0_WT_100_IVT
+ds=100_WT_0_IVT
+#ds=0_WT_100_IVT
 #chr=X
 if [[ ${SLURM_ARRAY_TASK_ID} -eq 23 ]]
 then
@@ -39,4 +39,5 @@ python3 ${HOME}/git/mAFiA_dev/mAFiA/mAFiA_process_reads_parallel.py \
 --backbone_model_path ${backbone} \
 --classifier_model_dir ${classifiers} \
 --num_jobs 4 \
+--batchsize 1024 \
 --out_dir ${output}

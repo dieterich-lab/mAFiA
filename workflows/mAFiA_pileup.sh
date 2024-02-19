@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-#SBATCH --partition=long
+#SBATCH --partition=general
 #SBATCH --cpus-per-task=40
 #SBATCH --mem=90GB
 #SBATCH --verbose
-#SBATCH --job-name=pileup_HEK293_WT
-#SBATCH --output=/home/achan/slurm/pileup_HEK293_WT_chr%a.out
+#SBATCH --job-name=pileup_HEK293_IVT
+#SBATCH --output=/home/achan/slurm/pileup_HEK293_IVT_%A_chr%a.out
 
-ds=100_WT_0_IVT
-#ds=0_WT_100_IVT
+#ds=100_WT_0_IVT
+ds=0_WT_100_IVT
 #chr=X
 if [[ ${SLURM_ARRAY_TASK_ID} -eq 23 ]]
 then
