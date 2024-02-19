@@ -9,7 +9,8 @@ from tqdm import tqdm
 import os
 from Bio.Seq import Seq
 
-chrom = '1'
+# chrom = '1'
+chrom = 'ALL'
 # train_ds = 'DRACH_v1'
 # train_ds = 'ISA_retrain_GAACT_TGACT'
 
@@ -18,7 +19,8 @@ THRESH_CONF = 80
 data_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/psico-mAFiA/HEK293'
 
 df_wt = pd.read_csv(
-    f'{data_dir}/100_WT_0_IVT/chr{chrom}_confidence/mAFiA.sites.bed',
+    # f'{data_dir}/100_WT_0_IVT/chr{chrom}_confidence/mAFiA.sites.bed',
+    f'{data_dir}/100_WT_0_IVT/merged.mAFiA.sites.bed',
     sep='\t',
     dtype={'chrom': str}
 )
@@ -144,6 +146,18 @@ df_merged_sel = df_merged[
 
 # plt.hist(flank_match_ratio, bins=50, range=[0, 1])
 
+def scatter_plot(df_in, key_x, key_y, mod_type, fig_name):
+    plt.figure(figsize=(5, 5))
+    plt.plot(df_in[key_x], df_in[key_y], 'o', alpha=0.5)
+    plt.xlim([-1, 101])
+    plt.ylim([-1, 101])
+    plt.xticks(np.linspace(0, 100, 5))
+    plt.yticks(np.linspace(0, 100, 5))
+    plt.xlabel("$S_{{{}}}$".format((key_x.split('_')[1]).upper()), fontsize=10)
+    plt.ylabel("$S_{{{}}}$".format((key_y.split('_')[1]).upper()), fontsize=10)
+    plt.suptitle(f'chr{chrom}, {len(df_in)} {mod_type} sites\nconf$\geq${THRESH_CONF}%', fontsize=12)
+    plt.savefig(os.path.join(img_out, fig_name), bbox_inches='tight')
+
 def scatter_plot_by_motif(df_in, key_x, key_y, mod_type, ordered_motifs, num_row, num_col, fig_name, thresh_err=25, calc_error=False):
     motif_counts = Counter(df_in['ref5mer'])
     if calc_error:
@@ -171,7 +185,7 @@ def scatter_plot_by_motif(df_in, key_x, key_y, mod_type, ordered_motifs, num_row
             plt.xlabel("$S_{{{}}}$".format((key_x.split('_')[1]).upper()), fontsize=10)
         if ind % num_col == 0:
             plt.ylabel("$S_{{{}}}$".format((key_y.split('_')[1]).upper()), fontsize=10)
-    plt.suptitle(f'chr{chrom} {mod_type}\nconf$\geq${THRESH_CONF}%', fontsize=12)
+    plt.suptitle(f'chr{chrom}, {len(df_in)} {mod_type} sites\nconf$\geq${THRESH_CONF}%', fontsize=12)
     plt.savefig(os.path.join(img_out, fig_name), bbox_inches='tight')
 
 psi_motifs = [
@@ -200,6 +214,7 @@ df_glori_wt_sel = df_glori_wt[
     (df_glori_wt['confidence']>=THRESH_CONF)
 ]
 scatter_plot_by_motif(df_glori_wt_sel, 'modRatio_glori', 'modRatio_wt', 'm6A', m6A_motifs, 3, 6, f'm6A_WT_vs_GLORI_conf{THRESH_CONF}.png')
+scatter_plot(df_glori_wt_sel, 'modRatio_glori', 'modRatio_wt', 'm6A', f'm6A_WT_vs_GLORI_combined_conf{THRESH_CONF}.png')
 
 ### compare to Bid-Seq ###
 df_bid_wt = pd.merge(df_bid, df_wt, on=['chrom', 'chromStart', 'chromEnd', 'strand', 'ref5mer'], suffixes=['_bid', '_wt'])
@@ -207,3 +222,4 @@ df_bid_wt_sel = df_bid_wt[
     (df_bid_wt['confidence']>=THRESH_CONF)
 ]
 scatter_plot_by_motif(df_bid_wt_sel, 'modRatio_bid', 'modRatio_wt', 'psi', psi_motifs, 2, 4, f'psi_WT_vs_BID_conf{THRESH_CONF}.png')
+scatter_plot(df_bid_wt_sel, 'modRatio_bid', 'modRatio_wt', 'psi', f'psi_WT_vs_BID_combined_conf{THRESH_CONF}.png')
