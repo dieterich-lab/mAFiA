@@ -283,13 +283,15 @@ class MultiReadContainer(DataContainer):
         flag = read.flag
         read_len = len(read.seq)
         if flag==0:
-            dict_ref_to_read_pos = {tup[1]: tup[0] for tup in read.get_aligned_pairs() if (tup[0] is not None) and (tup[1] is not None)}
+            dict_ref_to_read_pos = {tup[1]: tup[0] for tup in read.get_aligned_pairs() if ((tup[0] is not None) and (tup[1] is not None))}
             matching_strand = '+'
         elif flag==16:
-            dict_ref_to_read_pos = {tup[1]: (read_len-tup[0]-1) for tup in read.get_aligned_pairs() if (tup[0] is not None) and (tup[1] is not None)}
+            dict_ref_to_read_pos = {tup[1]: (read_len-tup[0]-1) for tup in read.get_aligned_pairs() if ((tup[0] is not None) and (tup[1] is not None))}
             matching_strand = '-'
         else:
             return all_nts
+
+        dict_ref_to_read_pos = {k: v for k, v in dict_ref_to_read_pos.items() if v < read_len}
 
         sub_df_sites = df_sites[
             (df_sites['chrom'] == read.reference_name)
