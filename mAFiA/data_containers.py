@@ -300,14 +300,18 @@ class MultiReadContainer(DataContainer):
             * df_sites['chromStart'].isin(dict_ref_to_read_pos.keys())
             * df_sites['strand']==matching_strand
             ]
-
+        num_jobs = min(len(sub_df_sites), num_jobs)
         all_nts = Parallel(n_jobs=num_jobs)(delayed(self._get_matching_nucleotide_from_row)(sub_df_sites.iloc[i], read, dict_ref_to_read_pos, read_features) for i in range(len(sub_df_sites)))
 
         return all_nts
 
     def process_reads(self, extractor, df_sites, multimod_motif_classifiers, sam_writer, write_chunk_size=1000):
         reads_mod_nts = []
+        processed_reads = sam_writer.get_processed_read_ids()
+        print(f'Skipping {len(processed_reads)} reads')
         for this_read in tqdm(self.bam.fetch()):
+            if this_read.query_name in processed_reads:
+                continue
             if this_read.flag not in [0, 16]:
                 continue
             this_read_signal = self._get_norm_signal_from_read_id(this_read.query_name, self.indexed_read_ids)
@@ -339,7 +343,6 @@ class MultiReadContainer(DataContainer):
                 sam_writer.write_reads(reads_mod_nts)
                 reads_mod_nts = []
         sam_writer.write_reads(reads_mod_nts)
-        sam_writer.fo.close()
 
 
     def _get_mod_prob_nt(self, this_nt, multimod_motif_classifiers):

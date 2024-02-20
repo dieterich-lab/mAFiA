@@ -42,20 +42,19 @@ def split_bam_file(in_bam_file, out_dir, num_jobs):
     bam_files = []
     with pysam.AlignmentFile(in_bam_file, 'rb') as in_bam:
         bam_path = out_bam_pattern.format(chunk)
-        outfile = pysam.AlignmentFile(bam_path, 'wb', template=in_bam)
-        bam_files.append(bam_path)
-        for read in in_bam.fetch(until_eof=True):
-            if reads_in_this_chunk > chunk_size:
-                reads_in_this_chunk = 0
-                chunk += 1
-                outfile.close()
-                bam_path = out_bam_pattern.format(chunk)
-                outfile = pysam.AlignmentFile(bam_path, 'wb', template=in_bam)
-                bam_files.append(bam_path)
+        with pysam.AlignmentFile(bam_path, 'wb', template=in_bam) as outfile:
+            bam_files.append(bam_path)
+            for read in in_bam.fetch(until_eof=True):
+                if reads_in_this_chunk > chunk_size:
+                    reads_in_this_chunk = 0
+                    chunk += 1
+                    outfile.close()
+                    bam_path = out_bam_pattern.format(chunk)
+                    outfile = pysam.AlignmentFile(bam_path, 'wb', template=in_bam)
+                    bam_files.append(bam_path)
 
-            outfile.write(read)
-            reads_in_this_chunk += 1
-    outfile.close()
+                outfile.write(read)
+                reads_in_this_chunk += 1
 
     for this_bam_file in bam_files:
         pysam.index(this_bam_file)
@@ -73,8 +72,12 @@ def main():
     if not os.path.exists(args.out_dir):
         os.makedirs(args.out_dir, exist_ok=True)
 
-    split_bam_files = split_bam_file(args.bam_file, args.out_dir, args.num_jobs)
-    out_sam_files = [in_bam_file.replace('.bam', '.mAFiA.reads.sam') for in_bam_file in split_bam_files]
+    if args.num_jobs>1:
+        split_bam_files = split_bam_file(args.bam_file, args.out_dir, args.num_jobs)
+        out_sam_files = [in_bam_file.replace('.bam', '.mAFiA.reads.sam') for in_bam_file in split_bam_files]
+    else:
+        split_bam_files = [args.bam_file]
+        out_sam_files = [args.bam_file.replace('.bam', '.mAFiA.reads.sam')]
 
     read_counts = Parallel(n_jobs=args.num_jobs)(delayed(process_bam)(split_bam_files[i], out_sam_files[i], args) for i in range(len(split_bam_files)))
     total_num_reads_written = sum(read_counts)

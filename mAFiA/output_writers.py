@@ -135,9 +135,19 @@ class SAMWriter:
     def __init__(self, in_bam_path, out_sam_path):
         self.in_bam_path = in_bam_path
         self.out_sam_path = out_sam_path
-        self.fi = pysam.Samfile(in_bam_path, "rb")
-        self.fo = pysam.Samfile(out_sam_path, "w", template=self.fi)
+        # self.fi = pysam.Samfile(in_bam_path, "rb")
+        # self.fo = pysam.Samfile(out_sam_path, "w", template=self.fi)
         self.read_counts = 0
+
+    def get_processed_read_ids(self):
+        processed_read_ids = []
+        with pysam.Samfile(self.out_sam_path, "r") as out_sam:
+            for read in out_sam.fetch():
+                processed_read_ids.append(read.query_name)
+        if len(processed_read_ids)>0:
+            self.read_counts = len(processed_read_ids) - 1
+            os.system('sed -i "$ d" {0}'.format(self.out_sam_path))
+        return processed_read_ids[:-1]
 
     def build_dict_read_mod(self, read_nts):
         all_nts = [nt for k, v in read_nts.items() for nt in v]
@@ -181,5 +191,7 @@ class SAMWriter:
         self.read_counts += 1
 
     def write_reads(self, in_reads_mod_nts):
-        for write_read, write_mod_nts in in_reads_mod_nts:
-            self.write_read(write_read, write_mod_nts)
+        with pysam.Samfile(self.in_bam_path, "rb") as fi:
+            with pysam.Samfile(self.out_sam_path, "w", template=fi) as fo:
+                for write_read, write_mod_nts in in_reads_mod_nts:
+                    self.write_read(write_read, write_mod_nts)
