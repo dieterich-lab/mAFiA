@@ -149,7 +149,7 @@ class SAMWriter:
                     processed_reads.append(read)
             except:
                 pass
-        return processed_reads
+        return processed_reads[::-1]
 
     def get_processed_read_ids(self):
         processed_read_ids = []
