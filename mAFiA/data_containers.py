@@ -309,7 +309,7 @@ class MultiReadContainer(DataContainer):
 
         return all_nts
 
-    def process_reads(self, extractor, df_sites, multimod_motif_classifiers, sam_writer, write_chunk_size=1000):
+    def process_reads(self, extractor, df_sites, multimod_motif_classifiers, sam_writer, write_chunk_size=100):
         reads_mod_nts = []
         processed_reads = sam_writer.get_processed_read_ids()
         print(f'Skipping {len(processed_reads)} reads')
@@ -345,7 +345,7 @@ class MultiReadContainer(DataContainer):
                         this_mod_nts.append(this_nt)
                 out_mod_nts[this_mod] = this_mod_nts
             reads_mod_nts.append((this_read, out_mod_nts))
-            if len(reads_mod_nts)==write_chunk_size:
+            if len(reads_mod_nts)>=write_chunk_size:
                 sam_writer.write_reads(reads_mod_nts)
                 reads_mod_nts = []
         sam_writer.write_reads(reads_mod_nts)
