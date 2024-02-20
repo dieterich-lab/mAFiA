@@ -142,8 +142,11 @@ class SAMWriter:
     def get_processed_read_ids(self):
         processed_read_ids = []
         with pysam.Samfile(self.out_sam_path, "r") as out_sam:
-            for read in out_sam.fetch():
-                processed_read_ids.append(read.query_name)
+            try:
+                for read in out_sam.fetch():
+                    processed_read_ids.append(read.query_name)
+            except:
+                pass
         if len(processed_read_ids)>0:
             self.read_counts = len(processed_read_ids) - 1
             os.system('sed -i "$ d" {0}'.format(self.out_sam_path))

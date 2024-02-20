@@ -229,8 +229,8 @@ class MultiReadContainer(DataContainer):
 
         sub_df_sites = df_sites[
             (df_sites['chrom'] == read.reference_name)
-            * (df_sites['chromStart'] >= read.reference_start)
-            * (df_sites['chromEnd'] <= read.reference_end)
+            * (df_sites['chromStart'] >= (read.reference_start+2))
+            * (df_sites['chromEnd'] < (read.reference_end-2))
             * df_sites['chromStart'].isin(dict_ref_to_read_pos.keys())
             * df_sites['strand'] == matching_strand
             ]
@@ -316,8 +316,8 @@ class MultiReadContainer(DataContainer):
                 continue
             this_read_signal = self._get_norm_signal_from_read_id(this_read.query_name, self.indexed_read_ids)
             this_read_features, this_read_bases = extractor.get_features_from_signal(this_read_signal)
-            # this_read_nts = self.collect_nucleotides_on_single_read(this_read, this_read_features, df_sites)
-            this_read_nts = self.parallel_collect_nucleotides_on_single_read(this_read, this_read_features, df_sites)
+            this_read_nts = self.collect_nucleotides_on_single_read(this_read, this_read_features, df_sites)
+            # this_read_nts = self.parallel_collect_nucleotides_on_single_read(this_read, this_read_features, df_sites)
 
             mod_motif_nts = {}
             for this_nt in this_read_nts:
