@@ -311,10 +311,15 @@ class MultiReadContainer(DataContainer):
 
     def process_reads(self, extractor, df_sites, multimod_motif_classifiers, sam_writer, write_chunk_size=100):
         reads_mod_nts = []
-        processed_reads = sam_writer.get_processed_read_ids()
-        print(f'Skipping {len(processed_reads)} reads')
+        processed_reads = sam_writer.get_processed_reads()
+        processed_read_ids = []
+        if len(processed_reads)>0:
+            for this_read in processed_reads:
+                sam_writer.fo.write(this_read)
+                processed_read_ids.append(this_read.query_name)
+        print(f'Skipping {len(processed_read_ids)} reads')
         for this_read in tqdm(self.bam.fetch()):
-            if this_read.query_name in processed_reads:
+            if this_read.query_name in processed_read_ids:
                 continue
             if this_read.flag not in [0, 16]:
                 continue
@@ -349,6 +354,7 @@ class MultiReadContainer(DataContainer):
                 sam_writer.write_reads(reads_mod_nts)
                 reads_mod_nts = []
         sam_writer.write_reads(reads_mod_nts)
+        sam_writer.close()
 
 
     def _get_mod_prob_nt(self, this_nt, multimod_motif_classifiers):

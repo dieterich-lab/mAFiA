@@ -135,9 +135,19 @@ class SAMWriter:
     def __init__(self, in_bam_path, out_sam_path):
         self.in_bam_path = in_bam_path
         self.out_sam_path = out_sam_path
-        # self.fi = pysam.Samfile(in_bam_path, "rb")
-        # self.fo = pysam.Samfile(out_sam_path, "w", template=self.fi)
+        self.fi = pysam.Samfile(in_bam_path, "rb")
+        self.fo = pysam.Samfile(out_sam_path, "w", template=self.fi)
         self.read_counts = 0
+
+    def get_processed_reads(self):
+        processed_reads = []
+        with pysam.Samfile(self.out_sam_path, "r") as out_sam:
+            try:
+                for read in out_sam.fetch():
+                    processed_reads.append(read)
+            except:
+                pass
+        return processed_reads
 
     def get_processed_read_ids(self):
         processed_read_ids = []
@@ -174,7 +184,7 @@ class SAMWriter:
         ml_tag = rescaled_mod_probs
         return mm_tag, ml_tag
 
-    def write_read(self, fo, read, read_nts, mod_base = 'N'):
+    def write_read(self, read, read_nts, mod_base = 'N'):
         full_mm = ''
         full_ml = []
         for this_mod, this_mod_nts in read_nts.items():
@@ -190,11 +200,13 @@ class SAMWriter:
         if len(full_mm)>0:
             read.set_tag('MM', full_mm)
             read.set_tag('ML', full_ml)
-        fo.write(read)
+        self.fo.write(read)
         self.read_counts += 1
 
     def write_reads(self, in_reads_mod_nts):
-        with pysam.Samfile(self.in_bam_path, "rb") as fi:
-            with pysam.Samfile(self.out_sam_path, "w", template=fi) as fo:
-                for write_read, write_mod_nts in in_reads_mod_nts:
-                    self.write_read(fo, write_read, write_mod_nts)
+        for write_read, write_mod_nts in in_reads_mod_nts:
+            self.write_read(write_read, write_mod_nts)
+
+    def close(self):
+        self.fi.close()
+        self.fo.close()
