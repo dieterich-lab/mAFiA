@@ -14,18 +14,19 @@ chrom = 'ALL'
 # train_ds = 'DRACH_v1'
 # train_ds = 'ISA_retrain_GAACT_TGACT'
 
-THRESH_CONF = 80
+THRESH_CONF = 90
 
 data_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/psico-mAFiA/HEK293'
 
 df_wt = pd.read_csv(
     # f'{data_dir}/100_WT_0_IVT/chr{chrom}_confidence/mAFiA.sites.bed',
-    f'{data_dir}/100_WT_0_IVT/merged.mAFiA.sites.bed',
+    f'{data_dir}/100_WT_0_IVT/chr{chrom}.mAFiA.sites.bed',
     sep='\t',
     dtype={'chrom': str}
 )
 df_ivt = pd.read_csv(
-    f'{data_dir}/0_WT_100_IVT/chr{chrom}_confidence/mAFiA.sites.bed',
+    # f'{data_dir}/0_WT_100_IVT/chr{chrom}_confidence/mAFiA.sites.bed',
+    f'{data_dir}/0_WT_100_IVT/chr{chrom}.mAFiA.sites.bed',
     sep='\t',
     dtype={'chrom': str}
 )
