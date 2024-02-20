@@ -311,13 +311,18 @@ class MultiReadContainer(DataContainer):
 
     def process_reads(self, extractor, df_sites, multimod_motif_classifiers, sam_writer, write_chunk_size=100):
         reads_mod_nts = []
-        processed_reads = sam_writer.get_processed_reads()
+        if os.path.exists(sam_writer.out_sam_path):
+            processed_reads = sam_writer.get_processed_reads()
+        else:
+            processed_reads = []
         processed_read_ids = []
+        sam_writer.open()
         if len(processed_reads)>0:
             for this_read in processed_reads:
                 sam_writer.fo.write(this_read)
                 processed_read_ids.append(this_read.query_name)
         print(f'Skipping {len(processed_read_ids)} reads')
+
         for this_read in tqdm(self.bam.fetch()):
             if this_read.query_name in processed_read_ids:
                 continue

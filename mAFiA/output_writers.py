@@ -136,8 +136,10 @@ class SAMWriter:
         self.in_bam_path = in_bam_path
         self.out_sam_path = out_sam_path
         self.fi = pysam.Samfile(in_bam_path, "rb")
-        self.fo = pysam.Samfile(out_sam_path, "w", template=self.fi)
         self.read_counts = 0
+
+    def open(self):
+        self.fo = pysam.Samfile(self.out_sam_path, "w", template=self.fi)
 
     def get_processed_reads(self):
         processed_reads = []
