@@ -235,25 +235,29 @@ class MultiReadContainer(DataContainer):
             * df_sites['strand'] == matching_strand
             ]
 
-        for _, row in sub_df_sites.iterrows():
-            chromStart = row['chromStart']
-            strand = row['strand']
-            ref5mer = row['ref5mer']
-            mod_type = row['name']
+        try:
+            for _, row in sub_df_sites.iterrows():
+                chromStart = row['chromStart']
+                strand = row['strand']
+                ref5mer = row['ref5mer']
+                mod_type = row['name']
 
-            query_pos = dict_ref_to_read_pos[chromStart]
-            query_5mer = read.get_forward_sequence()[query_pos-2:query_pos+3]
-            this_site_feature = read_features[query_pos]
-            all_nts.append(Nucleotide(
-                read_id=query_name,
-                read_pos=query_pos,
-                ref_pos=chromStart,
-                strand=strand,
-                pred_5mer=query_5mer,
-                ref_5mer=ref5mer,
-                feature=this_site_feature,
-                mod_type=mod_type
-            ))
+                query_pos = dict_ref_to_read_pos[chromStart]
+                query_5mer = read.get_forward_sequence()[query_pos-2:query_pos+3]
+                this_site_feature = read_features[query_pos]
+                all_nts.append(Nucleotide(
+                    read_id=query_name,
+                    read_pos=query_pos,
+                    ref_pos=chromStart,
+                    strand=strand,
+                    pred_5mer=query_5mer,
+                    ref_5mer=ref5mer,
+                    feature=this_site_feature,
+                    mod_type=mod_type
+                ))
+        except:
+            print(f'Error in {read.query_name}', flush=True)
+            pass
 
         return all_nts
 

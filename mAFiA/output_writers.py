@@ -174,7 +174,7 @@ class SAMWriter:
         ml_tag = rescaled_mod_probs
         return mm_tag, ml_tag
 
-    def write_read(self, read, read_nts, mod_base = 'N'):
+    def write_read(self, fo, read, read_nts, mod_base = 'N'):
         full_mm = ''
         full_ml = []
         for this_mod, this_mod_nts in read_nts.items():
@@ -185,16 +185,16 @@ class SAMWriter:
             if read_mods:
                 read_mods.sort(key=lambda x: x[0])
                 this_mod_mm, this_mod_ml = self.generate_mm_ml_tags(read_mods, mod_base, str(this_mod_code))
-            full_mm += this_mod_mm
-            full_ml += this_mod_ml
+                full_mm += this_mod_mm
+                full_ml += this_mod_ml
         if len(full_mm)>0:
             read.set_tag('MM', full_mm)
             read.set_tag('ML', full_ml)
-        self.fo.write(read)
+        fo.write(read)
         self.read_counts += 1
 
     def write_reads(self, in_reads_mod_nts):
         with pysam.Samfile(self.in_bam_path, "rb") as fi:
             with pysam.Samfile(self.out_sam_path, "w", template=fi) as fo:
                 for write_read, write_mod_nts in in_reads_mod_nts:
-                    self.write_read(write_read, write_mod_nts)
+                    self.write_read(fo, write_read, write_mod_nts)
