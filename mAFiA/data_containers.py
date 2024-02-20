@@ -320,6 +320,8 @@ class MultiReadContainer(DataContainer):
                 continue
             this_read_signal = self._get_norm_signal_from_read_id(this_read.query_name, self.indexed_read_ids)
             this_read_features, this_read_bases = extractor.get_features_from_signal(this_read_signal)
+            if len(this_read_bases)!=len(this_read.seq):
+                continue
             this_read_nts = self.collect_nucleotides_on_single_read(this_read, this_read_features, df_sites)
             # this_read_nts = self.parallel_collect_nucleotides_on_single_read(this_read, this_read_features, df_sites)
 
