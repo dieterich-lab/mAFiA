@@ -320,7 +320,7 @@ class MultiReadContainer(DataContainer):
             for this_read in processed_reads:
                 sam_writer.fo.write(this_read)
                 processed_read_ids.append(this_read.query_name)
-        print(f'Skipping {len(processed_read_ids)} reads')
+            print(f'Skipping {len(processed_read_ids)} reads')
 
         reads_mod_nts = []
         for this_read in tqdm(self.bam.fetch()):

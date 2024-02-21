@@ -6,15 +6,16 @@ from tqdm import tqdm
 import pandas as pd
 
 # ref_file = '/home/adrian/Data/GRCh38_102/GRCh38_102.fa'
-ref_file = '/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa'
-# ref_file = '/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa'
+# ref_file = '/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa'
+ref_file = '/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa'
 # ref_file = '/home/adrian/Data/genomes/Arabidopsis/TAIR10_chr_all.fasta'
 # ref_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/Saccharomyces_cerevisiae/reference/R64-1-1_96.fa'
 
 # out_dir = '/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/site_annotations'
 # out_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/Saccharomyces_cerevisiae/reference'
 # out_dir = '/beegfs/homes/achan/Data/site_annotations/mus_musculus/GRCm38_102'
-out_dir = '/prj/TRR319_RMaP/Project_BaseCalling/Adrian/site_annotations/homo_sapiens/GRCh38_102'
+# out_dir = '/prj/TRR319_RMaP/Project_BaseCalling/Adrian/site_annotations/homo_sapiens/GRCh38_102'
+out_dir = '/prj/TRR319_RMaP/Project_BaseCalling/Adrian/site_annotations/mus_musculus/GRCm38_102'
 
 os.makedirs(out_dir, exist_ok=True)
 
@@ -123,6 +124,7 @@ for this_chrom in all_chroms:
     this_chrom_df = this_chrom_df[fields]
 
     print(f'Writing out {len(this_chrom_df)} sites')
-    this_chrom_df.to_csv(os.path.join(out_dir, f'm6A.psi.GRCh38_102.chr{this_chrom}.bed'), sep='\t', index=False, header=True)
+    this_chrom_df.to_csv(os.path.join(out_dir, f'm6A.psi.GRCm38_102.chr{this_chrom}.bed'), sep='\t', index=False, header=True)
+    # this_chrom_df.to_csv(os.path.join(out_dir, f'm6A.psi.GRCh38_102.chr{this_chrom}.bed'), sep='\t', index=False, header=True)
     # this_chrom_df.to_csv(os.path.join(out_dir, f'DRACH.GRCm38_102.chr{this_chrom}.bed'), sep='\t', index=False, header=True)
     # this_chrom_df.to_csv(os.path.join(out_dir, f'6motifs.chr{this_chrom}.bed'), sep='\t', index=False, header=True)

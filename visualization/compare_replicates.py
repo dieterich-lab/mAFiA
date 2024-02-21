@@ -14,7 +14,7 @@ chrom = 'ALL'
 # train_ds = 'DRACH_v1'
 # train_ds = 'ISA_retrain_GAACT_TGACT'
 
-THRESH_CONF = 90
+THRESH_CONF = 80
 
 data_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/psico-mAFiA/HEK293'
 
@@ -44,6 +44,13 @@ df_bid = pd.read_csv(
 )
 df_bid.rename(columns={'score': 'modRatio'}, inplace=True)
 
+df_bid_praise = pd.read_csv(
+    f'/home/adrian/Data/BID_seq/BID-Seq_PRAISE_merged.bed',
+    sep='\t',
+    dtype={'chrom': str}
+)
+df_bid_praise.rename(columns={'score_bid': 'modRatio_bid', 'score_praise': 'modRatio_praise'}, inplace=True)
+
 img_out = '/home/adrian/img_out/psico_mAFiA'
 os.makedirs(img_out, exist_ok=True)
 
@@ -66,11 +73,11 @@ os.makedirs(img_out, exist_ok=True)
 # ]
 
 blacklist = []
-df_merged = pd.merge(df_wt, df_ivt, on=['chrom', 'chromStart', 'chromEnd', 'score', 'strand', 'ref5mer'], suffixes=['_wt', '_ivt'])
-# df_merged_sel = df_merged[~df_merged['ref5mer'].isin(blacklist)]
-df_merged_sel = df_merged[
-    (df_merged['confidence_ivt']>=THRESH_CONF)
-    * (df_merged['confidence_wt']>=THRESH_CONF)
+df_wt_ivt = pd.merge(df_wt, df_ivt, on=['chrom', 'chromStart', 'chromEnd', 'name', 'score', 'strand', 'ref5mer'], suffixes=['_wt', '_ivt'])
+# df_wt_ivt_sel = df_wt_ivt[~df_wt_ivt['ref5mer'].isin(blacklist)]
+df_wt_ivt_sel = df_wt_ivt[
+    (df_wt_ivt['confidence_ivt']>=THRESH_CONF)
+    * (df_wt_ivt['confidence_wt']>=THRESH_CONF)
     ]
 #
 # ### recalculate mod ratio by filtering out dubious pred5mers ###
@@ -79,7 +86,7 @@ df_merged_sel = df_merged[
 # corr_mod_ratio = []
 # corr_coverage = []
 # with pysam.AlignmentFile(bam_file, 'rb') as bam:
-#     for _, row in tqdm(df_merged.iterrows()):
+#     for _, row in tqdm(df_wt_ivt.iterrows()):
 #         pred5mers = []
 #         for this_col in bam.pileup(row['chrom'], row['chromStart'], row['chromEnd'], truncate=True):
 #             if this_col.reference_pos==row['chromStart']:
@@ -142,8 +149,8 @@ df_merged_sel = df_merged[
 #                 #
 #                 # print(row['ref5mer'], this_col.n)
 #                 # print(num_all, num_matched, f'{(num_matched/num_all):.2f}')
-# df_merged['modRatio_ivt_corr'] = corr_mod_ratio
-# df_merged['coverage_ivt_corr'] = corr_coverage
+# df_wt_ivt['modRatio_ivt_corr'] = corr_mod_ratio
+# df_wt_ivt['coverage_ivt_corr'] = corr_coverage
 
 # plt.hist(flank_match_ratio, bins=50, range=[0, 1])
 
@@ -172,7 +179,8 @@ def scatter_plot_by_motif(df_in, key_x, key_y, mod_type, ordered_motifs, num_row
             continue
         sub_df = df_in[df_in['ref5mer'] == motif]
         plt.subplot(num_row, num_col, ind + 1)
-        plt.scatter(sub_df[key_x], sub_df[key_y], s=2, alpha=0.5)
+        # plt.scatter(sub_df[key_x], sub_df[key_y], s=2, alpha=0.5)
+        plt.plot(sub_df[key_x], sub_df[key_y], '.', alpha=0.5)
         if calc_error:
             plt.text(1, 90, f"{motif.replace('T', 'U')} ({motif_err_rate[motif]:.2f})", fontsize=10)
             plt.axhline(y=thresh_err, linestyle='--', c='r')
@@ -206,11 +214,11 @@ m6A_motifs = [
      'TAACT', 'AAACA', 'TGACC', 'TAACA', 'AAACC', 'TAACC'
 ]
 
-scatter_plot_by_motif(df_merged_sel, 'modRatio_wt', 'modRatio_ivt', 'm6A', m6A_motifs, 3, 6, f'm6A_WT_vs_IVT_conf{THRESH_CONF}.png')
-scatter_plot_by_motif(df_merged_sel, 'modRatio_wt', 'modRatio_ivt', 'psi', psi_motifs, 2, 4, f'psi_WT_vs_IVT_conf{THRESH_CONF}.png')
+scatter_plot_by_motif(df_wt_ivt_sel[df_wt_ivt_sel['name']=='m6A'], 'modRatio_wt', 'modRatio_ivt', 'm6A', m6A_motifs, 3, 6, f'm6A_WT_vs_IVT_conf{THRESH_CONF}.png')
+scatter_plot_by_motif(df_wt_ivt_sel[df_wt_ivt_sel['name']=='psi'], 'modRatio_wt', 'modRatio_ivt', 'psi', psi_motifs, 2, 4, f'psi_WT_vs_IVT_conf{THRESH_CONF}.png')
 
 ### compare to GLORI ###
-df_glori_wt = pd.merge(df_glori, df_wt, on=['chrom', 'chromStart', 'chromEnd', 'strand'], suffixes=['_glori', '_wt'])
+df_glori_wt = pd.merge(df_glori, df_wt, on=['chrom', 'chromStart', 'chromEnd', 'name', 'strand'], suffixes=['_glori', '_wt'])
 df_glori_wt_sel = df_glori_wt[
     (df_glori_wt['confidence']>=THRESH_CONF)
 ]
@@ -218,9 +226,18 @@ scatter_plot_by_motif(df_glori_wt_sel, 'modRatio_glori', 'modRatio_wt', 'm6A', m
 scatter_plot(df_glori_wt_sel, 'modRatio_glori', 'modRatio_wt', 'm6A', f'm6A_WT_vs_GLORI_combined_conf{THRESH_CONF}.png')
 
 ### compare to Bid-Seq ###
-df_bid_wt = pd.merge(df_bid, df_wt, on=['chrom', 'chromStart', 'chromEnd', 'strand', 'ref5mer'], suffixes=['_bid', '_wt'])
+df_bid_wt = pd.merge(df_bid, df_wt, on=['chrom', 'chromStart', 'chromEnd', 'name', 'strand', 'ref5mer'], suffixes=['_bid', '_wt'])
 df_bid_wt_sel = df_bid_wt[
     (df_bid_wt['confidence']>=THRESH_CONF)
 ]
 scatter_plot_by_motif(df_bid_wt_sel, 'modRatio_bid', 'modRatio_wt', 'psi', psi_motifs, 2, 4, f'psi_WT_vs_BID_conf{THRESH_CONF}.png')
 scatter_plot(df_bid_wt_sel, 'modRatio_bid', 'modRatio_wt', 'psi', f'psi_WT_vs_BID_combined_conf{THRESH_CONF}.png')
+
+### BID-PRAISE ###
+df_bid_praise_wt = pd.merge(df_bid_praise, df_wt, on=['chrom', 'chromStart', 'chromEnd', 'name', 'strand', 'ref5mer'], suffixes=['_bid_praise', '_wt'])
+df_bid_praise_wt.rename(columns={'modRatio': 'modRatio_wt'}, inplace=True)
+df_bid_praise_wt_sel = df_bid_praise_wt[
+    (df_bid_praise_wt['confidence']>=THRESH_CONF)
+]
+scatter_plot_by_motif(df_bid_praise_wt_sel, 'modRatio_praise', 'modRatio_wt', 'psi', psi_motifs, 2, 4, f'psi_WT_vs_PRAISE_conf{THRESH_CONF}.png')
+scatter_plot(df_bid_praise_wt_sel, 'modRatio_praise', 'modRatio_wt', 'psi', f'psi_WT_vs_PRAISE_combined_conf{THRESH_CONF}.png')
