@@ -85,8 +85,8 @@ def main():
     total_num_reads_written = sum(read_counts)
     print(f'Total {total_num_reads_written} mod. reads written')
 
-    pysam.merge('-f', '-o', os.path.join(args.out_dir, '_mAFiA.reads.bam'), *out_sam_files)
-    pysam.sort('-o', os.path.join(args.out_dir, 'mAFiA.reads.bam'), os.path.join(args.out_dir, '_mAFiA.reads.bam'))
+    pysam.merge('-f', '-o', os.path.join(args.out_dir, 'temp.merged.bam'), *out_sam_files)
+    pysam.sort('-o', os.path.join(args.out_dir, 'mAFiA.reads.bam'), os.path.join(args.out_dir, 'temp.merged.bam'))
     pysam.index(os.path.join(args.out_dir, 'mAFiA.reads.bam'))
 
     for f in glob(os.path.join(args.out_dir, 'temp*')):
