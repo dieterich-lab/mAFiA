@@ -39,11 +39,14 @@ def calc_single_site(in_row, args):
                         if flag == 16:
                             query_position = pileupread.alignment.query_length - query_position - 1
                         mod_key = ('N', 0, mod_code) if flag == 0 else ('N', 1, mod_code)
-                        sel_tup = [tup for tup in pileupread.alignment.modified_bases_forward.get(mod_key, []) if
-                                   tup[0] == query_position]
-                        if len(sel_tup) == 1:
-                            # mod_probs.append((sel_tup[0][1] / 255.0) >= args.mod_prob_thresh)
-                            mod_probs.append(sel_tup[0][1])
+                        try:
+                            sel_tup = [tup for tup in pileupread.alignment.modified_bases_forward.get(mod_key, []) if
+                                       tup[0] == query_position]
+                            if len(sel_tup) == 1:
+                                # mod_probs.append((sel_tup[0][1] / 255.0) >= args.mod_prob_thresh)
+                                mod_probs.append(sel_tup[0][1])
+                        except:
+                            continue
                     if len(mod_probs) >= args.min_coverage:
                         mod_probs = np.array(mod_probs) / 255.0
                         ratio = np.mean(mod_probs>=args.mod_prob_thresh)
