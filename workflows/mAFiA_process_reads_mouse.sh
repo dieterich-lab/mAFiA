@@ -8,7 +8,7 @@
 #SBATCH --job-name=psico-mAFiA_mouse
 #SBATCH --output=/home/achan/slurm/psico-mAFiA_mouse_%A_chr%a.out
 
-ds=40-26
+#ds=40-26
 if [[ ${SLURM_ARRAY_TASK_ID} -eq 23 ]]
 then
 chr="X"
