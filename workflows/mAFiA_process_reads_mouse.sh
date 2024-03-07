@@ -36,5 +36,5 @@ python3 ${HOME}/git/mAFiA_dev/mAFiA/mAFiA_process_reads_parallel.py \
 --backbone_model_path ${backbone} \
 --classifier_model_dir ${classifiers} \
 --num_jobs 4 \
---batchsize 512 \
+--batchsize 256 \
 --out_dir ${output}
