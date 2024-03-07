@@ -5,7 +5,7 @@ import re
 from tqdm import tqdm
 import pandas as pd
 
-# ref_file = '/home/adrian/Data/GRCh38_102/GRCh38_102.fa'
+# ref_file = '/home/adrian/Data/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa'
 # ref_file = '/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa'
 ref_file = '/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa'
 # ref_file = '/home/adrian/Data/genomes/Arabidopsis/TAIR10_chr_all.fasta'
