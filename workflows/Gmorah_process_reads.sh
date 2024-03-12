@@ -5,8 +5,8 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=90GB
 #SBATCH --verbose
-#SBATCH --job-name=Gmorah_HEK293_WT
-#SBATCH --output=/home/achan/slurm/Gmorah_HEK293_WT_%A_chr%a.out
+#SBATCH --job-name=Gmorah_HepG2
+#SBATCH --output=/home/achan/slurm/Gmorah_HepG2_%A_chr%a.out
 
 ds=rep1
 
