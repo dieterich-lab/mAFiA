@@ -115,7 +115,9 @@ minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF_GENOME} ${WORKSPACE
 samtools view -bST ${REF_GENOME} -q50 ${SAM_GENOME} | samtools sort - > ${BAM_GENOME}
 samtools index ${BAM_GENOME}
 
-### split by chromosome ###
+########################################################################################################################
+### split by chromosome ################################################################################################
+########################################################################################################################
 module load ont-fast5-api
 #for chr in {1..5}
 #for chr in I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI Mito
