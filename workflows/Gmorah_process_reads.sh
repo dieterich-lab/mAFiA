@@ -8,9 +8,8 @@
 #SBATCH --job-name=Gmorah_HEK293_WT
 #SBATCH --output=/home/achan/slurm/Gmorah_HEK293_WT_%A_chr%a.out
 
-ds=100_WT_0_IVT
-#ds=0_WT_100_IVT
-#chr=X
+ds=rep1
+
 if [[ ${SLURM_ARRAY_TASK_ID} -eq 23 ]]
 then
 chr="X"
@@ -18,17 +17,16 @@ else
 chr=${SLURM_ARRAY_TASK_ID}
 fi
 
-workspace=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/HEK293/${ds}
+workspace=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/HepG2/${ds}
 bam=${workspace}/chr${chr}/sorted.chr${chr}.bam
 fast5_dir=${workspace}/chr${chr}/fast5
 
-mod=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/site_annotations/homo_sapiens/GRCh38_102/m6A.psi.GRCh38_102.chr${chr}.bed
-#mod=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/site_annotations/homo_sapiens/GRCh38_102/BID_GLORI.chrX.tsv
+mod=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/site_annotations/homo_sapiens/GRCh38_102/Gm.GRCh38_102.chr${chr}.bed
 
 backbone=${HOME}/git/mAFiA/models/RODAN_HEK293_IVT.torch
-classifiers=${HOME}/git/mAFiA/models/psi-co-mAFiA
+classifiers=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/Gmorah
 
-output=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/results/psico-mAFiA/HEK293/${ds}/chr${chr}
+output=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/results/Gmorah/HepG2/${ds}/chr${chr}
 
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
 
