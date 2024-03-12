@@ -9,8 +9,12 @@ from mAFiA.data_containers import Nucleotide
 # clf_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/MAFIA_classifiers/_WUE'
 # out_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/MAFIA_classifiers/WUE'
 
-clf_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/psU/PSICO_classifiers/chosen8'
-out_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/psi-co-mAFiA/psi'
+# clf_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/psU/PSICO_classifiers/chosen8'
+# out_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/psi-co-mAFiA/psi'
+
+clf_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/Gm/Gmorah_classifiers/combined/'
+out_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/Gmorah/Gm'
+
 os.makedirs(out_dir, exist_ok=True)
 
 for clf_path in glob(os.path.join(clf_dir, '*.pkl')):
