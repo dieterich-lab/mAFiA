@@ -141,4 +141,4 @@ for this_chrom in all_chroms:
     this_chrom_df = this_chrom_df[fields]
 
     print(f'Writing out {len(this_chrom_df)} sites')
-    this_chrom_df.to_csv(os.path.join(out_dir, f'Gm.GRCm38_102.chr{this_chrom}.bed'), sep='\t', index=False, header=True)
+    this_chrom_df.to_csv(os.path.join(out_dir, f'Gm.GRCh38_102.chr{this_chrom}.bed'), sep='\t', index=False, header=True)
