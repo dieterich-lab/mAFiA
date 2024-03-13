@@ -14,7 +14,8 @@ import numpy as np
 
 dict_mod_code = {
     'm6A': '21891',
-    'psi': '17802'
+    'psi': '17802',
+    'Gm': '19229'
 }
 
 
