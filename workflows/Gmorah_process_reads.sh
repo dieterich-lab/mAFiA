@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #SBATCH --partition=gpu
-#SBATCH --exclude=gpu-g4-1
+#SBATCH --exclude=gpu-g4-1,gpu-g2-1
 #SBATCH --gres=gpu:turing:1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=90GB
@@ -8,7 +8,7 @@
 #SBATCH --job-name=Gmorah_HepG2
 #SBATCH --output=/home/achan/slurm/Gmorah_HepG2_%A_chr%a.out
 
-ds=rep1
+ds=rep2
 
 if [[ ${SLURM_ARRAY_TASK_ID} -eq 23 ]]
 then
@@ -36,6 +36,6 @@ python3 ${HOME}/git/mAFiA_dev/mAFiA/mAFiA_process_reads_parallel.py \
 --mod_file ${mod} \
 --backbone_model_path ${backbone} \
 --classifier_model_dir ${classifiers} \
---num_jobs 4 \
+--num_jobs 2 \
 --batchsize 1024 \
 --out_dir ${output}
