@@ -32,7 +32,7 @@ def load_genome_reference(ref_file, chrs):
 
 source_data_dir = '/home/adrian/NCOMMS_revision/source_data/GENE_PROFILE'
 
-ref_file = '/home/adrian/Data/GRCh38_102/GRCh38_102.fa'
+ref_file = '/home/adrian/Data/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa'
 bam_file = os.path.join(source_data_dir, 'chr6_31815543_31817946.mAFiA.reads.6motifs.bam')
 img_out = '/home/adrian/NCOMMS_revision/images/GENE_PROFILE'
 
@@ -68,17 +68,29 @@ with pysam.AlignmentFile(bam_file, 'rb') as bam:
 ## plot histogram ###
 thresh_mod = 0.5
 sel_pos = [31816312, 31816450, 31817452]
+pos_hist = {}
 for ref_pos, mod_probs in ref_pos_mod_probs.items():
     # if len(mod_probs)>=400:
     if ref_pos in sel_pos:
         mod_ratio = int(np.mean(np.array(mod_probs)>=thresh_mod) * 100)
         plt.figure(figsize=(3*cm, 2*cm))
-        plt.hist(mod_probs, bins=100, range=[0, 1])
+        counts, bins, _ = plt.hist(mod_probs, bins=100, range=[0, 1])
+        pos_hist[ref_pos] = {}
+        pos_hist[ref_pos]['counts'] = np.int32(counts)
+        pos_hist[ref_pos]['P(m6A)'] = bins[:-1]
         plt.xlim([-0.01, 1.01])
         plt.axvline(x=0.5, c='r', linestyle='--', alpha=0.5, linewidth=0.5)
         plt.title(f'chr{sel_chrom}: {ref_pos}\nS={mod_ratio}%')
         plt.savefig(os.path.join(img_out, f'hist_mod_probs_chr{sel_chrom}_{ref_pos}.{FMT}'), **fig_kwargs)
 plt.close('all')
+
+with open(os.path.join(source_data_dir, 'source_data_Figure_2b.tsv'), 'w') as fout:
+    fout.write('Figure 2b\n')
+    for this_pos in sel_pos:
+        fout.write('\n\t' + f'chr6: {this_pos}' + '\n')
+        for this_label in ['P(m6A)', 'counts']:
+            fout.write('\t' + this_label + '\t')
+            fout.write('\t'.join([str(x) for x in pos_hist[this_pos][this_label]]) + '\n')
 
 ########################################################################################################################
 ### filter bam #########################################################################################################

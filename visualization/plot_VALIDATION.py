@@ -147,11 +147,14 @@ label_colors = {
 
 ordered_motifs = ['GGACT', 'GGACA', 'GAACT', 'AGACT', 'GGACC', 'TGACT']
 
+motif_real_counts = {}
 fig_hist = plt.figure(figsize=(fig_width, fig_height))
 axes_hist = fig_hist.subplots(num_rows, num_cols).flatten()
 for subplot_ind, this_motif in enumerate(ordered_motifs):
+    motif_real_counts[this_motif] = {}
     for label in ['UNM', 'MOD']:
         this_real_count, this_norm_count, this_bin_centers = get_histogram(motif_mod_probs[this_motif][label])
+        motif_real_counts[this_motif][label] = this_real_count
         this_num_samples = len(motif_mod_probs[this_motif][label])
         axes_hist[subplot_ind].step(this_bin_centers, this_real_count, color=label_colors[label], label=f'{label} ({this_num_samples})')
 
@@ -166,6 +169,13 @@ for subplot_ind, this_motif in enumerate(ordered_motifs):
 fig_hist.tight_layout(pad=0.5)
 fig_hist.savefig(os.path.join(img_out, f'hist_oligo_modProbs.{FMT}'), **fig_kwargs)
 
+with open(os.path.join(source_data_dir, 'source_data_Figure_1c.tsv'), 'w') as fout:
+    fout.write('Figure 1c\n')
+    for this_motif in ordered_motifs:
+        fout.write('\n\t' + this_motif.replace('T', 'U') + '\n')
+        for this_label in ['UNM', 'MOD']:
+            fout.write('\t' + this_label + '\t')
+            fout.write('\t'.join([str(x) for x in motif_real_counts[this_motif][this_label]]) + '\n')
 
 ########################################################################################################################
 ### confusion matrix ###################################################################################################
@@ -211,12 +221,17 @@ plt.close('all')
 ########################################################################################################################
 ### precision-recall curve #############################################################################################
 ########################################################################################################################
+motif_precision_recall = {}
 motif_auprcs = {}
 
 fig_prc = plt.figure(figsize=(fig_width, fig_height))
 axes_prc = fig_prc.subplots(num_rows, num_cols).flatten()
 for subplot_ind, this_motif in enumerate(ordered_motifs):
     precisions, recalls, auprc = calc_prc(motif_mod_probs[this_motif])
+    motif_precision_recall[this_motif] = {}
+    motif_precision_recall[this_motif]['precision'] = precisions
+    motif_precision_recall[this_motif]['recall'] = recalls
+
     axes_prc[subplot_ind].plot(recalls, precisions, label='AUC {:.2f}'.format(auprc))
     axes_prc[subplot_ind].set_title('{}'.format(this_motif.replace('T', 'U')), pad=-10)
     axes_prc[subplot_ind].set_xlim([-0.01, 1.01])
@@ -242,3 +257,11 @@ with open(os.path.join(img_out, 'motif_aucs.tsv'), 'w') as h:
     for this_motif in ordered_motifs:
         h.write(f'{this_motif}\t{np.round(motif_auprcs[this_motif], 3)}\n')
     h.write(f"avg\t{np.round(motif_auprcs['avg'], 3)}\n")
+
+with open(os.path.join(source_data_dir, 'source_data_Figure_1d.tsv'), 'w') as fout:
+    fout.write('Figure 1d\n')
+    for this_motif in ordered_motifs:
+        fout.write('\n\t' + this_motif.replace('T', 'U') + '\n')
+        for this_label in ['recall', 'precision']:
+            fout.write('\t' + this_label + '\t')
+            fout.write('\t'.join([str(x) for x in motif_precision_recall[this_motif][this_label][::-1]]) + '\n')

@@ -139,6 +139,22 @@ for row_ind, test_ds in enumerate(test_datasets):
     ax.set_ylim([-0.05, 1.05])
 fig_vlnplot.savefig(os.path.join(img_out, f'vlnplot.{FMT}'), **fig_kwargs)
 
+dict_ds = {
+    'ISA_run4_M4M5star': 'TEST 1a',
+    'ISA_run4_M4starM5': 'TEST 1b'
+}
+
+with open(os.path.join(source_data_dir, 'source_data_Figure_1f.tsv'), 'w') as fout:
+    fout.write('Figure 1f\n')
+    for this_ds in test_datasets:
+        fout.write('\n\t' + dict_ds[this_ds] + '\n')
+        fout.write('\t' + 'P(m6A)' + '\t')
+        fout.write('\t'.join([str(x * 0.01) for x in range(100)]) + '\n')
+        for this_motif in contig_motifs.values():
+            out_data = np.histogram(ds_pattern_modProbs[this_ds][this_motif], bins=100)[0]
+            fout.write('\t' + this_motif.replace('T', 'U') + '\t')
+            fout.write('\t'.join([str(x) for x in out_data]) + '\n')
+
 ########################################################################################################################
 ### parse CHEUI output #################################################################################################
 ########################################################################################################################
@@ -214,6 +230,24 @@ ax.legend(loc='lower left')
 
 fig_prc.savefig(os.path.join(img_out, f'prc_cf_CHEUI_m6Anet.{FMT}'), **fig_kwargs)
 
+method_recall_precision = {}
+method_recall_precision['mAFiA'] = {}
+method_recall_precision['mAFiA']['recall'] = recalls
+method_recall_precision['mAFiA']['precision'] = precisions
+method_recall_precision['CHEUI'] = {}
+method_recall_precision['CHEUI']['recall'] = CHEUI_recalls
+method_recall_precision['CHEUI']['precision'] = CHEUI_precisions
+method_recall_precision['m6Anet'] = {}
+method_recall_precision['m6Anet']['recall'] = m6Anet_recalls
+method_recall_precision['m6Anet']['precision'] = m6Anet_precisions
+
+with open(os.path.join(source_data_dir, 'source_data_Figure_1g.tsv'), 'w') as fout:
+    fout.write('Figure 1g\n')
+    for this_method in ['mAFiA', 'CHEUI', 'm6Anet']:
+        fout.write('\n\t' + this_method + '\n')
+        for this_label in ['recall', 'precision']:
+            fout.write('\t' + this_label + '\t')
+            fout.write('\t'.join([str(x) for x in method_recall_precision[this_method][this_label][::-1]]) + '\n')
 
 ########################################################################################################################
 ### collect mod probs based on contig pattern ###

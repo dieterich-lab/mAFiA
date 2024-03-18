@@ -94,10 +94,15 @@ ticklabels = np.int32(np.linspace(0, num_bins, 5) * 100 / num_bins)
 # vec_x = np.arange(0, num_bins)
 
 ds_fits = {}
+ds_bins_counts = {}
 fig_hist2d, axs = plt.subplots(nrows=1, ncols=5, figsize=(20*cm, 4*cm))
 for ind, this_ds in enumerate(all_ds):
     df_mafia = import_mAFiA(this_ds)
     this_counts, this_log_counts, this_bin_x, this_bin_y, this_slope, this_stderr = hist2d_mafia_vs_glori(df_glori, df_mafia, num_bins, margin)
+    ds_bins_counts[this_ds] = {}
+    ds_bins_counts[this_ds]['S_mAFiA'] = this_bin_y[:-1]
+    ds_bins_counts[this_ds]['S_GLORI'] = this_bin_x[:-1]
+    ds_bins_counts[this_ds]['counts'] = this_counts
     ds_fits[this_ds] = (this_slope, this_stderr)
     im = axs[ind].imshow(this_counts, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
     # im = axs[ind].imshow(this_log_counts, origin='lower', cmap=mpl.cm.plasma, vmin=0, vmax=vmax)
@@ -122,6 +127,22 @@ cbar = fig_hist2d.colorbar(im,  ax=axs, orientation='vertical', location='right'
 cbar.set_ticks(np.linspace(0, vmax, 3))
 fig_hist2d.savefig(os.path.join(img_out, f'hist2d_mixing_mAFiA_vs_GLORI.{FMT}'), **fig_kwargs)
 
+with open(os.path.join(source_data_dir, 'source_data_Figure_2e.tsv'), 'w') as fout:
+    fout.write('Figure 2e\n')
+    for this_ds in all_ds:
+        fout.write('\n\t' + this_ds + '\n')
+        fout.write('\t' + 'S_mAFiA \ S_GLORI' + '\t' + '\t'.join([str(int(x)) for x in ds_bins_counts[this_ds]['S_GLORI']]) + '\n')
+        for row, this_bin_y in enumerate(ds_bins_counts[this_ds]['S_mAFiA']):
+            fout.write('\t' + str(int(this_bin_y)))
+            fout.write('\t' + '\t'.join([str(int(x)) for x in ds_bins_counts[this_ds]['counts'][row]]) + '\n')
+
+total_counts = {this_ds: int(ds_bins_counts[this_ds]['counts'].sum()) for this_ds in all_ds}
+with open(os.path.join(source_data_dir, 'source_data_Figure_2f.tsv'), 'w') as fout:
+    fout.write('Figure 2f\n\n')
+    fout.write('\t' + 'f_WT' + '\t' + '\t'.join([str(x) for x in ds_fits.keys()]) + '\n')
+    fout.write('\t' + 'fitted_slope' + '\t' + '\t'.join([str(x[0]) for x in ds_fits.values()]) + '\n')
+    fout.write('\t' + 'std_err' + '\t' + '\t'.join([str(x[1]) for x in ds_fits.values()]) + '\n')
+    fout.write('\t' + 'sample_size' + '\t' + '\t'.join([str(x) for x in total_counts.values()]) + '\n')
 
 ########################################################################################################################
 ### Slope versus concentration #########################################################################################

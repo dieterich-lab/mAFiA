@@ -156,22 +156,29 @@ ax_hist2d.set_xlabel('$S_{col0}$')
 ax_hist2d.set_ylabel('$S_{vir1}$')
 fig_hist2d.savefig(os.path.join(img_out, f'hist2d_col0_vir1.{FMT}'), **fig_kwargs)
 
-### 1D Histogram ###
-df_merged_mod = df_merged[df_merged['modRatio_col0']>=50]
-# df_merged_mod = df_merged
+with open(os.path.join(source_data_dir, 'source_data_Figure_2h.tsv'), 'w') as fout:
+    fout.write('Figure 2h\n\n')
+    fout.write('\t' + 'S_vir1 \ S_col0' + '\t' + '\t'.join([str(int(x)) for x in bin_x[:-1]]) + '\n')
+    for row, this_bin_y in enumerate(bin_y[:-1]):
+        fout.write('\t' + str(int(this_bin_y)))
+        fout.write('\t' + '\t'.join([str(int(x)) for x in counts[row]]) + '\n')
 
-fig_hist1d = plt.figure(figsize=(4*cm, 4*cm))
-ax_hist1d = fig_hist1d.add_subplot()
-ax_hist1d.hist(df_merged_mod['modRatio_col0'], bins=num_bins, range=[0, 100], alpha=0.5, label='col0')
-ax_hist1d.hist(df_merged_mod['modRatio_vir1'], bins=num_bins, range=[0, 100], alpha=0.5, label='vir1')
-# ax_hist1d.hist(df_merged_mod['modRatio_col0'], bins=40, range=[0, 100], alpha=0.5, label='col0', log=True)
-# ax_hist1d.hist(df_merged_mod['modRatio_vir1'], bins=40, range=[0, 100], alpha=0.5, label='vir1', log=True)
-ax_hist1d.set_xlim([-1, 101])
-ax_hist1d.legend(loc='upper right', handlelength=1)
-ax_hist1d.set_xlabel('S')
-ax_hist1d.set_ylabel('Num. Sites')
-# ax_hist1d.set_title(f'{len(df_merged_mod)} sites' + ' with $S_{col0}{\geq}$50')
-fig_hist1d.savefig(os.path.join(img_out, f'hist1d_col0_vir1.{FMT}'), **fig_kwargs)
+### 1D Histogram ###
+# df_merged_mod = df_merged[df_merged['modRatio_col0']>=50]
+# # df_merged_mod = df_merged
+#
+# fig_hist1d = plt.figure(figsize=(4*cm, 4*cm))
+# ax_hist1d = fig_hist1d.add_subplot()
+# ax_hist1d.hist(df_merged_mod['modRatio_col0'], bins=num_bins, range=[0, 100], alpha=0.5, label='col0')
+# ax_hist1d.hist(df_merged_mod['modRatio_vir1'], bins=num_bins, range=[0, 100], alpha=0.5, label='vir1')
+# # ax_hist1d.hist(df_merged_mod['modRatio_col0'], bins=40, range=[0, 100], alpha=0.5, label='col0', log=True)
+# # ax_hist1d.hist(df_merged_mod['modRatio_vir1'], bins=40, range=[0, 100], alpha=0.5, label='vir1', log=True)
+# ax_hist1d.set_xlim([-1, 101])
+# ax_hist1d.legend(loc='upper right', handlelength=1)
+# ax_hist1d.set_xlabel('S')
+# ax_hist1d.set_ylabel('Num. Sites')
+# # ax_hist1d.set_title(f'{len(df_merged_mod)} sites' + ' with $S_{col0}{\geq}$50')
+# fig_hist1d.savefig(os.path.join(img_out, f'hist1d_col0_vir1.{FMT}'), **fig_kwargs)
 
 ########################################################################################################################
 ### compare to miclip ##################################################################################################
@@ -207,22 +214,29 @@ df_miclip = pd.read_csv(miclip_file, sep='\t',
 ########################################################################################################################
 ### plot miclip peaks ##################################################################################################
 ########################################################################################################################
-# miclip_chr = '1'
-# miclip_start = 3122256
-# miclip_end = 3122304
-#
-# df_miclip_chrom = df_miclip[df_miclip['chrom']==miclip_chr]
-# sub_df_miclip = df_miclip_chrom[(df_miclip_chrom['chromStart']>=miclip_start) * (df_miclip_chrom['chromEnd']<=miclip_end)]
-#
-# vec_x = np.arange(miclip_start, miclip_end+1)
-# vec_y = np.zeros_like(vec_x, dtype=np.float32)
-# vec_y[sub_df_miclip['chromStart'].values - miclip_start] = sub_df_miclip['score'].values
-#
-# plt.figure(figsize=(6*cm, 1*cm))
-# plt.bar(vec_x, vec_y)
-# plt.xlim([miclip_start-1, miclip_end+1])
-# plt.ylim([0, 2])
-# plt.savefig(os.path.join(img_out, f'miclip_peaks_{miclip_chr}_{miclip_start}_{miclip_end}.{FMT}'), **fig_kwargs)
+miclip_chr = '1'
+miclip_start = 3122256
+miclip_end = 3122304
+
+df_miclip_chrom = df_miclip[df_miclip['chrom']==miclip_chr]
+sub_df_miclip = df_miclip_chrom[(df_miclip_chrom['chromStart']>=miclip_start) * (df_miclip_chrom['chromEnd']<=miclip_end)]
+
+vec_x = np.arange(miclip_start, miclip_end+1)
+vec_y = np.zeros_like(vec_x, dtype=np.float32)
+vec_y[sub_df_miclip['chromStart'].values - miclip_start] = sub_df_miclip['score'].values
+
+with open(os.path.join(source_data_dir, 'source_data_Figure_2g.tsv'), 'w') as fout:
+    fout.write('Figure 2g\n\n')
+    fout.write('\t' + 'chr1 pos' + '\t' + '\t'.join([str(int(x)) for x in vec_x]) + '\n')
+    fout.write('\t' + 'miCLiP log2FC' + '\t' + '\t'.join([str(x) for x in vec_y]) + '\n')
+
+
+
+plt.figure(figsize=(6*cm, 1*cm))
+plt.bar(vec_x, vec_y)
+plt.xlim([miclip_start-1, miclip_end+1])
+plt.ylim([0, 2])
+plt.savefig(os.path.join(img_out, f'miclip_peaks_{miclip_chr}_{miclip_start}_{miclip_end}.{FMT}'), **fig_kwargs)
 
 ########################################################################################################################
 ### count overlap with miclip ##########################################################################################

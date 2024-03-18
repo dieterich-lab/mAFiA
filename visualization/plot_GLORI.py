@@ -236,7 +236,9 @@ df_merged = df_merged[[
     'Transcript',
     'P_adjust'
 ]]
-df_merged.to_csv(os.path.join(img_out, 'df_merged_mAFiA_GLORI.tsv'), sep='\t', index=False)
+# df_merged.to_csv(os.path.join(img_out, 'df_merged_mAFiA_GLORI.tsv'), sep='\t', index=False)
+df_merged.to_csv(os.path.join('/home/adrian/NCOMMS_revision/source_data/HEK293', 'source_data_Figure_2d.tsv'), sep='\t', index=False)
+
 
 # df_merged_sel = df_merged[df_merged['P_adjust'] < 1E-10]
 df_merged_sel = df_merged

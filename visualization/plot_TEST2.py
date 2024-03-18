@@ -284,6 +284,14 @@ ax.set_xlabel('Position (nts)')
 ax.set_ylabel('Mod. Ratio')
 fig_site_level.savefig(os.path.join(img_out, f'site_level_mAFiA.{FMT}'), **fig_kwargs)
 
+with open(os.path.join(source_data_dir, 'source_data_Figure_1h.tsv'), 'w') as fout:
+    fout.write('Figure 1h\n')
+    fout.write('\n\t' + 'Position' + '\t')
+    fout.write('\t'.join([str(x) for x in df_mAFiA_site_level['chromStart']]) + '\n')
+
+    fout.write('\t' + 'Mod Ratio' + '\t')
+    fout.write('\t'.join([str(x) for x in df_mAFiA_site_level['modRatio']]) + '\n')
+
 ########################################################################################################################
 ### vlnplot ############################################################################################################
 ########################################################################################################################
@@ -312,6 +320,15 @@ for pc, color in zip(parts['bodies'], colors):
     ax.set_xlim([0.5, 2.5])
     ax.set_ylim([-0.05, 1.05])
 fig_vlnplot.savefig(os.path.join(img_out, f'vlnplot_mAFiA.{FMT}'), **fig_kwargs)
+
+with open(os.path.join(source_data_dir, 'source_data_Figure_1i.tsv'), 'w') as fout:
+    fout.write('Figure 1i\n\n')
+    fout.write('\t' + 'P(m6A)' + '\t')
+    fout.write('\t'.join([str(x * 0.01) for x in range(100)]) + '\n')
+    for ind, this_cycle in enumerate(cycles):
+        fout.write('\t' + this_cycle + '\t')
+        out_data = np.histogram(mod_probs[ind], bins=100)[0]
+        fout.write('\t'.join([str(x) for x in out_data]) + '\n')
 
 ########################################################################################################################
 ### precision-recall curve #############################################################################################
@@ -351,7 +368,23 @@ ax.legend(loc='lower left')
 
 fig_prc.savefig(os.path.join(img_out, f'prc_cf_CHEUI_m6Anet.{FMT}'), **fig_kwargs)
 
-
+method_recall_precision = {}
+method_recall_precision['mAFiA'] = {}
+method_recall_precision['mAFiA']['recall'] = mAFiA_recalls
+method_recall_precision['mAFiA']['precision'] = mAFiA_precisions
+method_recall_precision['CHEUI'] = {}
+method_recall_precision['CHEUI']['recall'] = CHEUI_recalls
+method_recall_precision['CHEUI']['precision'] = CHEUI_precisions
+method_recall_precision['m6Anet'] = {}
+method_recall_precision['m6Anet']['recall'] = m6Anet_recalls
+method_recall_precision['m6Anet']['precision'] = m6Anet_precisions
+with open(os.path.join(source_data_dir, 'source_data_Figure_1j.tsv'), 'w') as fout:
+    fout.write('Figure 1j\n')
+    for this_method in ['mAFiA', 'CHEUI', 'm6Anet']:
+        fout.write('\n\t' + this_method + '\n')
+        for this_label in ['recall', 'precision']:
+            fout.write('\t' + this_label + '\t')
+            fout.write('\t'.join([str(x) for x in method_recall_precision[this_method][this_label][::-1]]) + '\n')
 
 ########################################################################################################################
 ### construct probality mat ############################################################################################

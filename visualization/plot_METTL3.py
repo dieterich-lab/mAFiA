@@ -34,7 +34,7 @@ def load_genome_reference(ref_file, chrs):
 
 source_data_dir = '/home/adrian/NCOMMS_revision/source_data/HEK293'
 
-ref_file = '/home/adrian/Data/GRCh38_102/GRCh38_102.fa'
+ref_file = '/home/adrian/Data/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa'
 WT_bed_file = os.path.join(source_data_dir, '100_WT_0_IVT/merged.mAFiA.sites.bed')
 KO_bed_file = os.path.join(source_data_dir, 'Mettl3-KO/merged.mAFiA.sites.bed')
 img_out = '/home/adrian/NCOMMS_revision/images/METTL3'
@@ -101,6 +101,12 @@ cbar = fig.colorbar(im, orientation='vertical', location='right', fraction=0.046
 cbar.set_ticks(np.linspace(0, vmax, 3))
 fig.savefig(os.path.join(img_out, f'hist2d_WT_vs_KO.{FMT}'), **fig_kwargs)
 
+with open(os.path.join(source_data_dir, 'source_data_Figure_2c.tsv'), 'w') as fout:
+    fout.write('Figure 2c\n\n')
+    fout.write('\t' + 'S_METTL3-KO \ S_WT' + '\t' + '\t'.join([str(int(x)) for x in bin_x[:-1]]) + '\n')
+    for row, this_bin_y in enumerate(bin_y[:-1]):
+        fout.write('\t' + str(int(this_bin_y)))
+        fout.write('\t' + '\t'.join([str(int(x)) for x in counts[row]]) + '\n')
 
 ########################################################################################################################
 ### whole-chromosome profile ###########################################################################################
