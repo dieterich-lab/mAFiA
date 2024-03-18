@@ -181,7 +181,7 @@ samtools index chrALL.mAFiA.reads.bam
 
 ### merge bed ###
 cp chr1/mAFiA.sites.bed chrALL.mAFiA.sites.bed
-for chr in {2..19} X
+for chr in {2..22} X
 do
   tail -n+2 chr${chr}/mAFiA.sites.bed >> chrALL.mAFiA.sites.bed
 done
