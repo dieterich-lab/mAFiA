@@ -158,6 +158,16 @@ def plot_chromosome_profile(pos, mod_ratios, plot_name, xticks=False):
 plot_chromosome_profile(merged_bed_chrom['chromStart'].values, merged_bed_chrom['modRatio_WT'].values, plot_name=f'avg_profile_WT_chr{sel_chrom}.{FMT}', xticks=False)
 plot_chromosome_profile(merged_bed_chrom['chromStart'].values, merged_bed_chrom['modRatio_KO'].values, plot_name=f'avg_profile_METTL3_KO_chr{sel_chrom}.{FMT}', xticks=True)
 
+### output source data ###
+wt_profile = calc_avg_profile(calc_profile(merged_bed_chrom['chromStart'].values, merged_bed_chrom['modRatio_WT'].values, 0, ref_len))
+ko_profile = calc_avg_profile(calc_profile(merged_bed_chrom['chromStart'].values, merged_bed_chrom['modRatio_KO'].values, 0, ref_len))
+profile_bins = np.linspace(1, ref_len, N_BINS)
+with open(os.path.join(source_data_dir, 'source_data_Figure_S4h.tsv'), 'w') as fout:
+    fout.write('Figure S4h\n\n')
+    fout.write('\t' + f'chr{sel_chrom} pos' + '\t' + '\t'.join([str(int(x)) for x in profile_bins]) + '\n')
+    fout.write('\t' + f'WT Median S' + '\t' + '\t'.join([str(int(x)) for x in wt_profile]) + '\n')
+    fout.write('\t' + f'KO Median S' + '\t' + '\t'.join([str(int(x)) for x in ko_profile]) + '\n')
+
 ########################################################################################################################
 ### S profile along transcript #########################################################################################
 ########################################################################################################################

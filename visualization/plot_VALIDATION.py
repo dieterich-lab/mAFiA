@@ -24,9 +24,9 @@ FMT = 'pdf'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
+num_bins = 100
 
 def get_histogram(mod_probs):
-    num_bins = 100
     # num_bins = 20
     bin_edges = np.linspace(0, 1, num_bins + 1)
     bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
@@ -173,6 +173,8 @@ with open(os.path.join(source_data_dir, 'source_data_Figure_1c.tsv'), 'w') as fo
     fout.write('Figure 1c\n')
     for this_motif in ordered_motifs:
         fout.write('\n\t' + this_motif.replace('T', 'U') + '\n')
+        fout.write('\t' + 'P(m6A)' + '\t')
+        fout.write('\t'.join([str(round(x, 2)) for x in np.linspace(0, 1, num_bins + 1)[:-1]]) + '\n')
         for this_label in ['UNM', 'MOD']:
             fout.write('\t' + this_label + '\t')
             fout.write('\t'.join([str(x) for x in motif_real_counts[this_motif][this_label]]) + '\n')
@@ -195,10 +197,14 @@ zz = np.zeros(4)
 dx = np.ones(4) - margin
 dy = np.ones(4) - margin
 
+source_data_confusion_mat = {}
+
 fig_confusion = plt.figure(figsize=(18*cm, 12*cm))
 # axes_confusion = fig_confusion.subplots(num_rows, num_cols, projection='3d').flatten()
 for subplot_ind, this_motif in enumerate(ordered_motifs):
     this_motif_confusion_mat = calculate_confusion_matrix(motif_mod_probs[this_motif])
+    source_data_confusion_mat[this_motif] = 'GT\PRED' + this_motif_confusion_mat.to_csv(sep='\t')
+
     dz = this_motif_confusion_mat.values.flatten()
     this_ax = fig_confusion.add_subplot(num_rows, num_cols, subplot_ind+1, projection='3d')
     this_ax.bar3d(xx, yy, zz, dx, dy, dz)
@@ -218,6 +224,13 @@ for subplot_ind, this_motif in enumerate(ordered_motifs):
 
 fig_confusion.savefig(os.path.join(img_out, f'confusion_matrix_thresh{THRESH_PROB}.{FMT}'), **fig_kwargs)
 plt.close('all')
+
+with open(os.path.join(source_data_dir, 'source_data_Figure_S3a.tsv'), 'w') as fout:
+    fout.write('Figure S3a\n')
+    for this_motif in ordered_motifs:
+        fout.write('\n\t' + this_motif.replace('T', 'U') + '\n')
+        fout.write('\t' + source_data_confusion_mat[this_motif].replace('\n', '\n\t'))
+
 ########################################################################################################################
 ### precision-recall curve #############################################################################################
 ########################################################################################################################
@@ -264,4 +277,4 @@ with open(os.path.join(source_data_dir, 'source_data_Figure_1d.tsv'), 'w') as fo
         fout.write('\n\t' + this_motif.replace('T', 'U') + '\n')
         for this_label in ['recall', 'precision']:
             fout.write('\t' + this_label + '\t')
-            fout.write('\t'.join([str(x) for x in motif_precision_recall[this_motif][this_label][::-1]]) + '\n')
+            fout.write('\t'.join([str(round(x, 3)) for x in motif_precision_recall[this_motif][this_label][::-1]]) + '\n')

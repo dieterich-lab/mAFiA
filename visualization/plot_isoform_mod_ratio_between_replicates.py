@@ -22,7 +22,7 @@ fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 rep1 = '100_WT_0_IVT'
 rep2 = 'P2_WT'
 
-res_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results'
+res_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/results'
 df_rep1 = pd.read_csv(os.path.join(res_dir, f'isoform_modRatio_{rep1}.tsv'), sep='\t')
 df_rep2 = pd.read_csv(os.path.join(res_dir, f'isoform_modRatio_{rep2}.tsv'), sep='\t')
 
@@ -34,6 +34,9 @@ cov = 100
 
 df_merge = pd.merge(df_rep1, df_rep2, on=['Chr', 'Pos', 'Gene', 'Transcript ID'], suffixes=('_rep1', '_rep2'))
 df_filtered = df_merge[df_merge['Num. Reads_rep2']>=cov]
+
+source_data_path = '/home/adrian/NCOMMS_revision/source_data/HEK293/source_data_Figure_S5c.tsv'
+df_filtered.to_csv(source_data_path, sep='\t', index=False, float_format='%.3f')
 
 corr = np.corrcoef(df_filtered['Mod. Ratio_rep1'], df_filtered['Mod. Ratio_rep2'])[0, 1]
 

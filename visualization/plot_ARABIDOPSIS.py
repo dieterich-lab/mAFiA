@@ -164,7 +164,19 @@ with open(os.path.join(source_data_dir, 'source_data_Figure_2h.tsv'), 'w') as fo
         fout.write('\t' + '\t'.join([str(int(x)) for x in counts[row]]) + '\n')
 
 ### 1D Histogram ###
-# df_merged_mod = df_merged[df_merged['modRatio_col0']>=50]
+df_merged_mod = df_merged[df_merged['modRatio_col0']>=50]
+counts_col0, bins_col0 = np.histogram(df_merged_mod['modRatio_col0'], bins=num_bins, range=[0, 100])
+counts_vir1, bins_vir1 = np.histogram(df_merged_mod['modRatio_vir1'], bins=num_bins, range=[0, 100])
+
+with open(os.path.join(source_data_dir, 'source_data_Figure_S6.tsv'), 'w') as fout:
+    fout.write('Figure S6\n')
+    fout.write('\n\tcol0\n')
+    fout.write('\t' + 'S_col0\t' + '\t'.join([str(int(x)) for x in bins_col0[:-1]]) + '\n')
+    fout.write('\t' + 'Num. sites\t' + '\t'.join([str(int(x)) for x in counts_col0]) + '\n')
+    fout.write('\n\tvir1\n')
+    fout.write('\t' + 'S_vir1\t' + '\t'.join([str(int(x)) for x in bins_vir1[:-1]]) + '\n')
+    fout.write('\t' + 'Num. sites\t' + '\t'.join([str(int(x)) for x in counts_vir1]) + '\n')
+
 # # df_merged_mod = df_merged
 #
 # fig_hist1d = plt.figure(figsize=(4*cm, 4*cm))

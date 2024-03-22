@@ -23,9 +23,16 @@ FMT = 'pdf'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
+def set_row_xs(num_dots, x_spacing=0.08):
+    if num_dots % 2 == 0:
+        half_width = (num_dots / 2 - 0.5) * x_spacing
+    else:
+        half_width = (num_dots // 2) * x_spacing
+    return np.linspace(-half_width, half_width, num_dots)
+
 # dataset = 'P2_WT'
 dataset = '100_WT_0_IVT'
-annotated_res = f'/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/results/res_train_ISA-WUE_test_{dataset}.tsv.merged.annotated'
+annotated_res = f'/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/results/res_train_ISA-WUE_test_{dataset}.tsv.merged.annotated'
 img_out = f'/home/adrian/img_out/MAFIA/{dataset}_isoforms_{FMT}'
 os.makedirs(img_out, exist_ok=True)
 
@@ -78,12 +85,6 @@ for this_index in tqdm(df_annotated['index'].unique()):
         # plt.savefig(os.path.join(img_out, f"hist_site{sub_df['index'].values[0]}.{FMT}"), **fig_kwargs)
 
         ### dot plot ###
-        def set_row_xs(num_dots, x_spacing=0.08):
-            if num_dots % 2 == 0:
-                half_width = (num_dots / 2 - 0.5) * x_spacing
-            else:
-                half_width = (num_dots // 2) * x_spacing
-            return np.linspace(-half_width, half_width, num_dots)
 
         # xrange = [-1, 1]
         # row_max = 50
@@ -136,12 +137,32 @@ for this_index in tqdm(df_annotated['index'].unique()):
         # plt.savefig(os.path.join(img_out, f"dot_site{sub_df['index'].values[0]}.{FMT}"), **fig_kwargs)
         # plt.close('all')
 
+### output source data ###
+index = 5900
+this_isoform_mod_ratios = isoform_mod_ratios[index]
+this_isoform_mod_ratios.sort(key=lambda x: x[2], reverse=True)
+source_data_path = os.path.join('/home/adrian/NCOMMS_revision/source_data/HEK293', 'source_data_Figure_S5a.tsv')
+with open(source_data_path, 'w') as fout:
+    fout.write('Figure S5a\n\n')
+    fout.write('\tisoform\tmod_ratio\tnum_reads\n')
+    for isoform, mod_ratio, num_reads in this_isoform_mod_ratios:
+        fout.write(f'\t{isoform}\t{round(mod_ratio, 3)}\t{int(num_reads)}\n')
+
+
 ### histogram of splitting amount ###
 splitting_amount = []
 for k, v in isoform_mod_ratios.items():
     if len(v)>1:
         mod_ratios = [tup[1] for tup in v]
         splitting_amount.append(np.max(mod_ratios) - np.min(mod_ratios))
+
+site_count, splitting = np.histogram(splitting_amount, range=[0, 1], bins=50)
+source_data_path = os.path.join('/home/adrian/NCOMMS_revision/source_data/HEK293', 'source_data_Figure_S5b.tsv')
+with open(source_data_path, 'w') as fout:
+    fout.write('Figure S5b\n\n')
+    fout.write('\t' + 'Max. splitting' + '\t' + '\t'.join([str(round(x, 2)) for x in splitting[:-1]]) + '\n')
+    fout.write('\t' + 'Site count' + '\t' + '\t'.join([str(x) for x in site_count]) + '\n')
+
 
 # plt.figure(figsize=(5*cm, 5*cm))
 # plt.hist(splitting_amount, range=[0, 1], bins=50)

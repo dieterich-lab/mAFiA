@@ -31,6 +31,8 @@ os.makedirs(img_out, exist_ok=True)
 
 glori_path = '/home/adrian/Data/GLORI/GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.ref5mers.csv'
 miclip_path = '/home/adrian/Data/DRACH/miCLIP_union_flat_exclude_Y_chromosome.ref5mers.bed'
+m6Anet_path = os.path.join('/home/adrian/NCOMMS_revision/source_data/MICLIP', 'data.site_proba.csv.genome.6motifs.combined')
+CHEUI_path = os.path.join('/home/adrian/NCOMMS_revision/source_data/MICLIP', 'site_level_m6A_predictions.txt.genome.6motifs.combined')
 
 # blacklist_motifs = ['AGACC', 'AAACA', 'TAACA', 'TAACT', 'GAACA', 'TGACC']
 blacklist_motifs = []
@@ -56,9 +58,19 @@ def import_glori(thresh_pval=1.0):
 
     return df_glori_thresh
 
+def import_results(filepath, thresh_coverage=10):
+    df = pd.read_csv(filepath, dtype={'chrom': str}, sep='\t')
+    df_thresh = df[
+        (df['coverage']>=thresh_coverage)
+        * (df['chrom'].isin([str(x) for x in range(1, 23)] + ['X']))
+        ]
+    return df_thresh
+
 
 df_mAFiA = import_mAFiA()
 df_glori = import_glori()
+df_m6Anet = import_results(m6Anet_path)
+df_CHEUI = import_results(CHEUI_path)
 
 ########################################################################################################################
 ### GLORI p-val versus stoichiometry ###################################################################################
@@ -159,6 +171,11 @@ ax.set_xlabel('$S_{mAFiA}$')
 ax.set_ylabel('Num. Sites')
 fig_hist_stoichio.savefig(os.path.join(img_out, f'hist_stoichio.{FMT}'), **fig_kwargs)
 
+with open(os.path.join('/home/adrian/NCOMMS_revision/source_data/HEK293', 'source_data_Figure_S4a.tsv'), 'w') as fout:
+    fout.write('Figure S4a\n\n')
+    fout.write('\tS_mAFiA\t' + '\t'.join([str(int(x)) for x in bin_y[:-1]]) + '\n')
+    fout.write('\tNum. Sites\t' + '\t'.join([str(int(x)) for x in y_bin_counts]) + '\n')
+
 
 ########################################################################################################################
 ### correlation vs. coverage ###########################################################################################
@@ -176,6 +193,11 @@ ax.plot(coverage_corr[0], coverage_corr[1])
 ax.set_xlabel('Min. Coverage')
 ax.set_ylabel('$C_{(GLORI,mAFiA)}$')
 fig_cov_corr.savefig(os.path.join(img_out, f'cov_corr.{FMT}'), **fig_kwargs)
+
+with open(os.path.join('/home/adrian/NCOMMS_revision/source_data/HEK293', 'source_data_Figure_S4b.tsv'), 'w') as fout:
+    fout.write('Figure S4b\n\n')
+    fout.write('\tMin. Coverage\t' + '\t'.join([str(int(x)) for x in coverage_corr[0]]) + '\n')
+    fout.write('\tC_(GLORI, mAFiA)\t' + '\t'.join([str(round(x, 3)) for x in coverage_corr[1]]) + '\n')
 
 ########################################################################################################################
 ### correlation vs. stoichiometry ######################################################################################
@@ -212,6 +234,11 @@ ax.set_xlim([10, 100])
 ax.set_xlabel('$S_{GLORI}$')
 ax.set_ylabel('${\Delta}S_{(GLORI,mAFiA)}$ / $S_{GLORI}$')
 fig_stoichio_rms.savefig(os.path.join(img_out, f'stoichio_RMS.{FMT}'), **fig_kwargs)
+
+with open(os.path.join('/home/adrian/NCOMMS_revision/source_data/HEK293', 'source_data_Figure_S4c.tsv'), 'w') as fout:
+    fout.write('Figure S4c\n\n')
+    fout.write('\tS_GLORI\t' + '\t'.join([str(int(x)) for x in stoichio_lbins]) + '\n')
+    fout.write('\tNorm. RMS GLORI-mAFiA\t' + '\t'.join([str(round(x, 3)) for x in stoichio_rms_norm]) + '\n')
 
 
 ########################################################################################################################
@@ -303,3 +330,14 @@ def scatter_plot_mafia_vs_glori(num_motifs, num_rows, num_cols, plot_name, figsi
 scatter_plot_mafia_vs_glori(num_motifs=6, num_rows=2, num_cols=3, plot_name=f'corr_mAFiA_GLORI_DRACH_6motifs.{FMT}', figsize=(7.5*cm, 5*cm))
 # scatter_plot_mafia_vs_glori(num_motifs=12, num_rows=3, num_cols=4, plot_name=f'corr_mAFiA_GLORI_DRACH_12motifs.{FMT}', figsize=(10*cm, 8*cm))
 # scatter_plot_mafia_vs_glori(num_motifs=18, num_rows=3, num_cols=6, plot_name=f'corr_mAFiA_GLORI_DRACH_18motifs.{FMT}', figsize=(15*cm, 8*cm))
+
+########################################################################################################################
+### CHEUI and m6Anet ###################################################################################################
+########################################################################################################################
+df_CHEUI_thresh = df_CHEUI[df_CHEUI['coverage'] >= thresh_coverage]
+df_CHEUI_merged = pd.merge(df_CHEUI_thresh, df_glori, on=['chrom', 'chromStart', 'ref5mer'], suffixes=('_CHEUI', '_glori'))
+df_CHEUI_merged.to_csv(os.path.join('/home/adrian/NCOMMS_revision/source_data/HEK293', 'source_data_Figure_S4e.tsv'), sep='\t', index=False)
+
+df_m6Anet_thresh = df_m6Anet[df_m6Anet['coverage'] >= thresh_coverage]
+df_m6Anet_merged = pd.merge(df_m6Anet_thresh, df_glori, on=['chrom', 'chromStart', 'ref5mer'], suffixes=('_m6Anet', '_glori'))
+df_m6Anet_merged.to_csv(os.path.join('/home/adrian/NCOMMS_revision/source_data/HEK293', 'source_data_Figure_S4f.tsv'), sep='\t', index=False)

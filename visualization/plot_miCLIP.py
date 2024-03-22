@@ -183,6 +183,26 @@ thresh_mAFiA, prec_mAFiA, recall_mAFiA, auc_mAFiA = calc_precision_recall_curve(
 thresh_m6Anet, prec_m6Anet, recall_m6Anet, auc_m6Anet = calc_precision_recall_curve(df_miclip_thresh, df_m6Anet_thresh)
 thresh_CHEUI, prec_CHEUI, recall_CHEUI, auc_CHEUI = calc_precision_recall_curve(df_miclip_thresh, df_CHEUI_thresh)
 
+method_recall_precision = {}
+method_recall_precision['mAFiA'] = {}
+method_recall_precision['mAFiA']['recall'] = recall_mAFiA
+method_recall_precision['mAFiA']['precision'] = prec_mAFiA
+method_recall_precision['m6Anet'] = {}
+method_recall_precision['m6Anet']['recall'] = recall_m6Anet
+method_recall_precision['m6Anet']['precision'] = prec_m6Anet
+method_recall_precision['CHEUI'] = {}
+method_recall_precision['CHEUI']['recall'] = recall_CHEUI
+method_recall_precision['CHEUI']['precision'] = prec_CHEUI
+
+with open(os.path.join(source_data_dir, 'source_data_Figure_S4d.tsv'), 'w') as fout:
+    fout.write('Figure S4d\n')
+    for this_method in ['mAFiA', 'm6Anet', 'CHEUI']:
+        fout.write('\n\t' + this_method + '\n')
+        for this_label in ['recall', 'precision']:
+            fout.write('\t' + this_label + '\t')
+            fout.write('\t'.join([str(round(x, 3)) for x in method_recall_precision[this_method][this_label][::-1]]) + '\n')
+
+
 fig_miclip = plt.figure(figsize=(5*cm, 4*cm))
 plt.plot(recall_mAFiA, prec_mAFiA, label=f'mAFiA ({auc_mAFiA:.2f})')
 plt.plot(recall_m6Anet, prec_m6Anet, label=f'm6Anet ({auc_m6Anet:.2f})')

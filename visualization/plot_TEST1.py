@@ -247,7 +247,7 @@ with open(os.path.join(source_data_dir, 'source_data_Figure_1g.tsv'), 'w') as fo
         fout.write('\n\t' + this_method + '\n')
         for this_label in ['recall', 'precision']:
             fout.write('\t' + this_label + '\t')
-            fout.write('\t'.join([str(x) for x in method_recall_precision[this_method][this_label][::-1]]) + '\n')
+            fout.write('\t'.join([str(round(x, 3)) for x in method_recall_precision[this_method][this_label][::-1]]) + '\n')
 
 ########################################################################################################################
 ### collect mod probs based on contig pattern ###

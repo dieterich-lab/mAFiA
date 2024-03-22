@@ -140,9 +140,9 @@ total_counts = {this_ds: int(ds_bins_counts[this_ds]['counts'].sum()) for this_d
 with open(os.path.join(source_data_dir, 'source_data_Figure_2f.tsv'), 'w') as fout:
     fout.write('Figure 2f\n\n')
     fout.write('\t' + 'f_WT' + '\t' + '\t'.join([str(x) for x in ds_fits.keys()]) + '\n')
-    fout.write('\t' + 'fitted_slope' + '\t' + '\t'.join([str(x[0]) for x in ds_fits.values()]) + '\n')
-    fout.write('\t' + 'std_err' + '\t' + '\t'.join([str(x[1]) for x in ds_fits.values()]) + '\n')
-    fout.write('\t' + 'sample_size' + '\t' + '\t'.join([str(x) for x in total_counts.values()]) + '\n')
+    fout.write('\t' + 'fitted_slope' + '\t' + '\t'.join([str(round(x[0], 3)) for x in ds_fits.values()]) + '\n')
+    fout.write('\t' + 'std_err' + '\t' + '\t'.join([str(round(x[1], 3)) for x in ds_fits.values()]) + '\n')
+    fout.write('\t' + 'sample_size' + '\t' + '\t'.join([str(int(x)) for x in total_counts.values()]) + '\n')
 
 ########################################################################################################################
 ### Slope versus concentration #########################################################################################

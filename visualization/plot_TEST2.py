@@ -324,7 +324,7 @@ fig_vlnplot.savefig(os.path.join(img_out, f'vlnplot_mAFiA.{FMT}'), **fig_kwargs)
 with open(os.path.join(source_data_dir, 'source_data_Figure_1i.tsv'), 'w') as fout:
     fout.write('Figure 1i\n\n')
     fout.write('\t' + 'P(m6A)' + '\t')
-    fout.write('\t'.join([str(x * 0.01) for x in range(100)]) + '\n')
+    fout.write('\t'.join([str(round(x*0.01, 2)) for x in range(100)]) + '\n')
     for ind, this_cycle in enumerate(cycles):
         fout.write('\t' + this_cycle + '\t')
         out_data = np.histogram(mod_probs[ind], bins=100)[0]
@@ -384,7 +384,7 @@ with open(os.path.join(source_data_dir, 'source_data_Figure_1j.tsv'), 'w') as fo
         fout.write('\n\t' + this_method + '\n')
         for this_label in ['recall', 'precision']:
             fout.write('\t' + this_label + '\t')
-            fout.write('\t'.join([str(x) for x in method_recall_precision[this_method][this_label][::-1]]) + '\n')
+            fout.write('\t'.join([str(round(x, 3)) for x in method_recall_precision[this_method][this_label][::-1]]) + '\n')
 
 ########################################################################################################################
 ### construct probality mat ############################################################################################
