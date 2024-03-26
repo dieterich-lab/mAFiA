@@ -20,7 +20,7 @@ workspace=/prj/Dewenter_TAC_Backs_lab/achan/${ds}
 bam=${workspace}/chr${chr}/sorted.chr${chr}.bam
 fast5_dir=${workspace}/chr${chr}/fast5
 
-mod=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/site_annotations/mus_musculus/GRCm38_102/m6A.psi.GRCm38_102.chr${chr}.bed
+mod=/prj/TRR319_RMaP_BaseCalling/Adrian/site_annotations/mus_musculus/GRCm38_102/m6A.psi.GRCm38_102.chr${chr}.bed
 
 backbone=${HOME}/git/mAFiA/models/RODAN_HEK293_IVT.torch
 classifiers=${HOME}/git/mAFiA/models/psi-co-mAFiA

@@ -7,30 +7,49 @@ from mAFiA.feature_classifiers import MotifClassifier
 classifier_type = 'logistic_regression'
 scaler = 'MaxAbs'
 
-prj_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A'
+prj_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/psU'
 
 read_id_paths_unm = [
-    os.path.join(prj_dir, 'oligo/read_ids_ISA-WUE_A.txt'),
-    os.path.join(prj_dir, 'oligo/read_ids_ISA_mix1-4_A.txt'),
-    os.path.join(prj_dir, 'oligo/read_ids_ISA_mix17-19_A.txt')
+    os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix09_mix13_unm.txt'),
+    os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix51_mix54_unm.txt'),
 ]
 
 read_id_paths_mod = [
-    os.path.join(prj_dir, 'oligo/read_ids_ISA-WUE_m6A.txt'),
-    os.path.join(prj_dir, 'oligo/read_ids_ISA_mix1-4_m6A.txt'),
-    os.path.join(prj_dir, 'oligo/read_ids_ISA_mix20-22_m6A.txt')
+    os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix09_mix13_mod.txt'),
+    os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix51_mix54_mod.txt'),
 ]
 
 dict_paths = {
-    # 'GAACT': [
-    #     os.path.join(prj_dir, 'MAFIA_classifiers/ISA/GAACT.pkl'),
-    #     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix17_mix20/GAACT.pkl')
-    # ],
-    'TGACT': [
-        os.path.join(prj_dir, 'MAFIA_classifiers/ISA/TGACT.pkl'),
-        os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix19_mix22/TGACT.pkl')
+    'TGTAG': [
+        os.path.join(prj_dir, 'PSICO_classifiers/PSU_mix09_mix13/TGTAG.pkl'),
+        os.path.join(prj_dir, 'PSICO_classifiers/PSU_mix51_mix54/TGTAG.pkl')
     ],
 }
+
+# prj_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A'
+#
+# read_id_paths_unm = [
+#     os.path.join(prj_dir, 'oligo/read_ids_ISA-WUE_A.txt'),
+#     os.path.join(prj_dir, 'oligo/read_ids_ISA_mix1-4_A.txt'),
+#     os.path.join(prj_dir, 'oligo/read_ids_ISA_mix17-19_A.txt')
+# ]
+#
+# read_id_paths_mod = [
+#     os.path.join(prj_dir, 'oligo/read_ids_ISA-WUE_m6A.txt'),
+#     os.path.join(prj_dir, 'oligo/read_ids_ISA_mix1-4_m6A.txt'),
+#     os.path.join(prj_dir, 'oligo/read_ids_ISA_mix20-22_m6A.txt')
+# ]
+#
+# dict_paths = {
+#     # 'GAACT': [
+#     #     os.path.join(prj_dir, 'MAFIA_classifiers/ISA/GAACT.pkl'),
+#     #     os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix17_mix20/GAACT.pkl')
+#     # ],
+#     'TGACT': [
+#         os.path.join(prj_dir, 'MAFIA_classifiers/ISA/TGACT.pkl'),
+#         os.path.join(prj_dir, 'MAFIA_classifiers/ISA_mix19_mix22/TGACT.pkl')
+#     ],
+# }
 
 # dict_paths = {
 #     'AAACA': [
@@ -114,7 +133,7 @@ dict_paths = {
 # }
 ########################################################################################################################
 
-out_dir = os.path.join(prj_dir, 'MAFIA_classifiers/ISA_retrain')
+out_dir = os.path.join(prj_dir, 'PSICO_classifiers/TGTAG_retrain')
 os.makedirs(out_dir, exist_ok=True)
 
 read_ids_unm = []

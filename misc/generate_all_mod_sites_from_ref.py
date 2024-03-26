@@ -5,11 +5,13 @@ import re
 from tqdm import tqdm
 import pandas as pd
 
-ref_file = '/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa'
-# ref_file = '/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa'
+# ref_file = '/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa'
+ref_file = '/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa'
 
-out_dir = '/prj/TRR319_RMaP/Project_BaseCalling/Adrian/site_annotations/homo_sapiens/GRCh38_102'
-# out_dir = '/prj/TRR319_RMaP/Project_BaseCalling/Adrian/site_annotations/mus_musculus/GRCm38_102'
+# out_dir = '/prj/TRR319_RMaP/Project_BaseCalling/Adrian/site_annotations/homo_sapiens/GRCh38_102'
+out_dir = '/prj/TRR319_RMaP_BaseCalling/Adrian/site_annotations/mus_musculus/GRCm38_102'
+
+out_prefix = 'm6A.psi.GRCm38_102'
 
 os.makedirs(out_dir, exist_ok=True)
 
@@ -33,61 +35,68 @@ all_chroms = [str(x) for x in ref.keys()]
 #     'TGACT',
 # ]
 
-# mod_motifs = {
-#     'm6A': [
-#         'AAACA',
-#         'AAACC',
-#         'AAACT',
-#         'AGACA',
-#         'AGACC',
-#         'AGACT',
-#         'GAACA',
-#         'GAACC',
-#         'GAACT',
-#         'GGACA',
-#         'GGACC',
-#         'GGACT',
-#         'TAACA',
-#         'TAACC',
-#         'TAACT',
-#         'TGACA',
-#         'TGACC',
-#         'TGACT'
-#     ],
-#     'psi': [
-#         'AGTGG',
-#         'GGTCC',
-#         'GGTGG',
-#         'GTTCA',
-#         'GTTCC',
-#         'GTTCG',
-#         'TGTAG',
-#         'TGTGG'
-#     ]
-# }
-
 mod_motifs = {
-    'Gm': [
-        "ACGTC",
-        "ATGAC",
-        "ATGCT",
-        "ATGTC",
-        "ATGTG",
-        "ATGTT",
-        "CCGCC",
-        "CTGCC",
-        "CTGCG",
-        "CTGCT",
-        "CTGTA",
-        "CTGTC",
-        "CTGTG",
-        "GCGCC",
-        "GTGCA",
-        "GTGCC",
-        "GTGTC",
-        "TCGCC"
+    'm6A': [
+        'AAACA',
+        'AAACC',
+        'AAACT',
+        'AGACA',
+        'AGACC',
+        'AGACT',
+        'GAACA',
+        'GAACC',
+        'GAACT',
+        'GGACA',
+        'GGACC',
+        'GGACT',
+        'TAACA',
+        'TAACC',
+        'TAACT',
+        'TGACA',
+        'TGACC',
+        'TGACT'
     ],
+    'psi': [
+        'AGTGG',
+        'ATTTG',
+        'CATAA',
+        'CATCC',
+        'CCTCC',
+        'GATGC',
+        'GGTCC',
+        'GGTGG',
+        'GTTCA',
+        'GTTCC',
+        'GTTCG',
+        'GTTCT',
+        'TATAA',
+        'TGTAG',
+        'TGTGG'
+    ]
 }
+
+# mod_motifs = {
+#     'Gm': [
+#         "ACGTC",
+#         "ATGAC",
+#         "ATGCT",
+#         "ATGTC",
+#         "ATGTG",
+#         "ATGTT",
+#         "CCGCC",
+#         "CTGCC",
+#         "CTGCG",
+#         "CTGCT",
+#         "CTGTA",
+#         "CTGTC",
+#         "CTGTG",
+#         "GCGCC",
+#         "GTGCA",
+#         "GTGCC",
+#         "GTGTC",
+#         "TCGCC"
+#     ],
+# }
 
 # DRACH_motifs = [
 #     'AAACA',
@@ -141,4 +150,4 @@ for this_chrom in all_chroms:
     this_chrom_df = this_chrom_df[fields]
 
     print(f'Writing out {len(this_chrom_df)} sites')
-    this_chrom_df.to_csv(os.path.join(out_dir, f'Gm.GRCh38_102.chr{this_chrom}.bed'), sep='\t', index=False, header=True)
+    this_chrom_df.to_csv(os.path.join(out_dir, f'{out_prefix}.chr{this_chrom}.bed'), sep='\t', index=False, header=True)
