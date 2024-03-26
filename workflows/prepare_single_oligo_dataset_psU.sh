@@ -26,13 +26,13 @@ LIGATION_REF=${WORKSPACE}/ligation_ref.fasta
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
 
 ### softlink fast5 files ###
-mkdir -p ${READS} && cd "$_"
-echo "Creating softlinks from ${LOC}"
-for f in "${LOC}"/**/*.fast5
-do
-  ln -s $f
-done
-cd ${WORKSPACE}
+#mkdir -p ${READS} && cd "$_"
+#echo "Creating softlinks from ${LOC}"
+#for f in "${LOC}"/**/*.fast5
+#do
+#  ln -s $f
+#done
+#cd ${WORKSPACE}
 
 ### check links ###
 #for my_link in ${READS}/*.fast5
@@ -57,48 +57,48 @@ cd ${WORKSPACE}
 #for f in ${LOC}/**/*.pod5; do pod5 convert to_fast5 $f --output ${READS}; done
 
 #### basecall with Rodan IVT ###
-echo "Basecalling ${READS}"
-srun --partition=gpu --gres=gpu:turing:1 --cpus-per-task=8 --mem-per-cpu=8GB \
-python3 -u ${HOME}/git/mAFiA/RODAN/basecall.py \
---fast5dir ${READS} \
---model ${MODEL} \
---batchsize 4096 \
---outdir ${WORKSPACE}
+#echo "Basecalling ${READS}"
+#srun --partition=gpu --gres=gpu:turing:1 --cpus-per-task=8 --mem-per-cpu=8GB \
+#python3 -u ${HOME}/git/mAFiA/RODAN/basecall.py \
+#--fast5dir ${READS} \
+#--model ${MODEL} \
+#--batchsize 4096 \
+#--outdir ${WORKSPACE}
 
 ### align with spomelette ###
-#echo "Basecalling finished. Now aligning ${FASTA} to ${REF}"
-#python3 -u ${HOME}/git/mAFiA_dev/misc/spanish_omelette_alignment.py \
-#--ref_file ${REF} \
-#--query_file ${FASTA} \
-#--recon_ref_file ${LIGATION_REF} \
-#--sam_file ${SAM} \
-#--homopolymer ${HOMOPOLYMER} \
-#--write_cs
+echo "Basecalling finished. Now aligning ${FASTA} to ${REF}"
+python3 -u ${HOME}/git/mAFiA_dev/misc/spanish_omelette_alignment.py \
+--ref_file ${REF} \
+--query_file ${FASTA} \
+--recon_ref_file ${LIGATION_REF} \
+--sam_file ${SAM} \
+--homopolymer ${HOMOPOLYMER} \
+--write_cs
 
 ### filter by quality ###
-#echo "Filtering and converting ${SAM}"
-#FILTERED_SAM=${SAM/.sam/_q${FILTER_SCORE}.sam}
-#samtools view -h -q${FILTER_SCORE} ${SAM} > ${FILTERED_SAM}
+echo "Filtering and converting ${SAM}"
+FILTERED_SAM=${SAM/.sam/_q${FILTER_SCORE}.sam}
+samtools view -h -q${FILTER_SCORE} ${SAM} > ${FILTERED_SAM}
 
 ### check read num and accuracy ###
-#echo "Quality control"
-#samtools flagstats ${FILTERED_SAM} > ${WORKSPACE}/qc_q${FILTER_SCORE}.txt
-#${HOME}/git/renata/accuracy.py ${FILTERED_SAM} ${LIGATION_REF} >> ${WORKSPACE}/qc_q${FILTER_SCORE}.txt
+echo "Quality control"
+samtools flagstats ${FILTERED_SAM} > ${WORKSPACE}/qc_q${FILTER_SCORE}.txt
+${HOME}/git/renata/accuracy.py ${FILTERED_SAM} ${LIGATION_REF} >> ${WORKSPACE}/qc_q${FILTER_SCORE}.txt
 
 
 ### Convert to BAM ###
-#BAM=${FILTERED_SAM//.sam/.bam}
-#echo "Converting to ${BAM}"
-#samtools view -bST ${LIGATION_REF} ${FILTERED_SAM} | samtools sort - > ${BAM}
-#samtools index ${BAM}
+BAM=${FILTERED_SAM//.sam/.bam}
+echo "Converting to ${BAM}"
+samtools view -bST ${LIGATION_REF} ${FILTERED_SAM} | samtools sort - > ${BAM}
+samtools index ${BAM}
 
 ### align with minimap ###
 #echo "Aligning with minimap"
 #minimap2 -ax map-ont --secondary=no -t 8 ${LIGATION_REF} ${FASTA} | samtools view -F 2324 -b - | samtools sort -o renata.minimap.bam
 #samtools index renata.minimap.bam
 
-#echo "${DATASET} finished"
-#
+echo "${DATASET} finished"
+
 ##### merge ligation ref ###
 #for RUN in mix10_mix14 mix11_mix15 mix23_mix24
 #do
