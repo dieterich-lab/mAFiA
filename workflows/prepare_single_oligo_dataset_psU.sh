@@ -100,14 +100,16 @@ samtools index ${BAM}
 echo "${DATASET} finished"
 
 ##### merge ligation ref ###
-#for RUN in mix10_mix14 mix11_mix15 mix23_mix24
-#do
-#  MERGE_REF_INPUTS=""
-#  for MOD in unm mod
-#  do
-#    MERGE_REF_INPUTS+="${PRJ_DIR}/oligo/RNA002/${ORIG}_${RUN}_${MOD}/ligation_ref.fasta "
-#  done
-#  mkdir ${PRJ_DIR}/oligo/RNA002/ligation_ref
-#  MERGE_REF_OUTPUT="${PRJ_DIR}/oligo/RNA002/ligation_ref/ligation_ref_${RUN}.fasta"
-#  awk '/^>/{p=seen[$0]++}!p' ${MERGE_REF_INPUTS} > ${MERGE_REF_OUTPUT}
-#done
+PRJ_DIR="/prj/TRR319_RMaP_BaseCalling/Adrian/psU"
+ORIG="PSU"
+for RUN in mix51_mix54 mix52_mix55 mix53_mix56
+do
+  MERGE_REF_INPUTS=""
+  for MOD in unm mod
+  do
+    MERGE_REF_INPUTS+="${PRJ_DIR}/oligo/RNA002/${ORIG}_${RUN}_${MOD}/ligation_ref.fasta "
+  done
+  mkdir ${PRJ_DIR}/oligo/RNA002/ligation_ref
+  MERGE_REF_OUTPUT="${PRJ_DIR}/oligo/RNA002/ligation_ref/ligation_ref_${RUN}.fasta"
+  awk '/^>/{p=seen[$0]++}!p' ${MERGE_REF_INPUTS} > ${MERGE_REF_OUTPUT}
+done

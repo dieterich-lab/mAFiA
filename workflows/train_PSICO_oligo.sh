@@ -7,13 +7,15 @@
 #SBATCH --job-name=train_PSICO_oligo
 #SBATCH --output=/home/achan/slurm/train_PSICO_oligo_%A.out
 
-eval "$(conda shell.bash hook)"
+#eval "$(conda shell.bash hook)"
 #eval "$(/home/achan/miniconda3/condabin/conda shell.bash hook)"
-conda activate MAFIA
+#conda activate MAFIA
 set -e -f
 cd ${HOME}/git/mAFiA_dev
 
-PRJ_DIR=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/psU
+source ${HOME}/git/mAFiA/mafia-venv/bin/activate
+
+PRJ_DIR=/prj/TRR319_RMaP_BaseCalling/Adrian/psU
 DATA_DIR=${PRJ_DIR}/oligo/RNA002
 
 ############################################################################################
@@ -52,7 +54,7 @@ SCALER=MaxAbs
 #OUTDIR=${PRJ_DIR}/MAFIA_classifiers/${TRAIN_DATASET}
 
 orig=PSU
-run=mix09_mix13
+#run=mix09_mix13
 unm_ds=unm
 mod_ds=mod
 
