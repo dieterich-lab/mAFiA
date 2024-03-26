@@ -55,11 +55,11 @@ class MotifClassifier:
 
         print(f'AUC {self.auc:.2f}')
 
-        self.fixed_precision = fixed_prec
-        fixed_ind = np.where(self.precision >= self.fixed_precision)[0][0]
-        self.fixed_recall = self.recall[fixed_ind]
-        self.fixed_thresh = 1.0 / (1.0 + np.exp(-self.thresholds[fixed_ind]))
-        print(f'Fixed thresh: {self.fixed_thresh:.2f}, recall: {self.fixed_recall:.2f}')
+        # self.fixed_precision = fixed_prec
+        # fixed_ind = np.where(self.precision >= self.fixed_precision)[0][0]
+        # self.fixed_recall = self.recall[fixed_ind]
+        # self.fixed_thresh = 1.0 / (1.0 + np.exp(-self.thresholds[fixed_ind]))
+        # print(f'Fixed thresh: {self.fixed_thresh:.2f}, recall: {self.fixed_recall:.2f}')
 
     def test(self, test_nts, mod_thresh=0.5):
         # mod_thresh = max(self.fixed_thresh, mod_thresh)
@@ -81,13 +81,15 @@ class MotifClassifier:
             out_img_path = out_model_path.replace('.pkl', '.png')
             plt.figure(figsize=(5, 5))
             plt.plot(self.recall, self.precision, '-')
-            plt.plot([self.fixed_recall, self.fixed_recall], [0, self.fixed_precision], c='r', alpha=0.5)
-            plt.plot([0, self.fixed_recall], [self.fixed_precision, self.fixed_precision], c='r', alpha=0.5)
+            # plt.plot([self.fixed_recall, self.fixed_recall], [0, self.fixed_precision], c='r', alpha=0.5)
+            # plt.plot([0, self.fixed_recall], [self.fixed_precision, self.fixed_precision], c='r', alpha=0.5)
             plt.xlabel('Recall')
             plt.ylabel('Precision')
             plt.xlim([0, 1.05])
             plt.ylim([0, 1.05])
-            plt.title(f'{self.motif}\n{len(self.train_nts)} train NTs, {len(self.test_nts)} test NTs\n AUC = {self.auc:.2f}\n@p={self.fixed_thresh:.2f}: precision {self.fixed_precision:.2f}, recall {self.fixed_recall:.2f}')
+            # plt.title(f'{self.motif}\n{len(self.train_nts)} train NTs, {len(self.test_nts)} test NTs\n AUC = {self.auc:.2f}\n@p={self.fixed_thresh:.2f}: precision {self.fixed_precision:.2f}, recall {self.fixed_recall:.2f}')
+            plt.title(f'{self.motif}\n{len(self.train_nts)} train NTs, {len(self.test_nts)} test NTs\n AUC = {self.auc:.2f}')
+
             plt.savefig(out_img_path, bbox_inches='tight')
             plt.close('all')
 
