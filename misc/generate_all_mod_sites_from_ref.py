@@ -5,13 +5,13 @@ import re
 from tqdm import tqdm
 import pandas as pd
 
-# ref_file = '/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa'
-ref_file = '/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa'
+ref_file = '/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa'
+out_dir = '/prj/TRR319_RMaP_BaseCalling/Adrian/site_annotations/homo_sapiens/GRCh38_102'
+out_prefix = 'm6A.psi.GRCh38_102'
 
-# out_dir = '/prj/TRR319_RMaP/Project_BaseCalling/Adrian/site_annotations/homo_sapiens/GRCh38_102'
-out_dir = '/prj/TRR319_RMaP_BaseCalling/Adrian/site_annotations/mus_musculus/GRCm38_102'
-
-out_prefix = 'm6A.psi.GRCm38_102'
+# ref_file = '/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa'
+# out_dir = '/prj/TRR319_RMaP_BaseCalling/Adrian/site_annotations/mus_musculus/GRCm38_102'
+# out_prefix = 'm6A.psi.GRCm38_102'
 
 os.makedirs(out_dir, exist_ok=True)
 

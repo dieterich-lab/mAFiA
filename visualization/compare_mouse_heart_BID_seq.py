@@ -10,9 +10,9 @@ import os
 from Bio.Seq import Seq
 
 chrom = 'ALL'
-ds = '40-34'
+ds = '40-26'
 
-THRESH_CONF = 80
+THRESH_CONF = 50
 
 pred_file = f'/home/adrian/Data/Dewenter_TAC_Backs_lab/achan/psico-mAFiA_results/{ds}/chrALL.mAFiA.sites.bed'
 bid_file = '/home/adrian/Data/BID_seq/BID_seq_mouse_heart.bed'
@@ -79,25 +79,32 @@ def scatter_plot_by_motif(df_in, key_x, key_y, mod_type, ordered_motifs, num_row
 
 psi_motifs = [
     'AGTGG',
+    'ATTTG',
+    'CATAA',
+    'CATCC',
+    'CCTCC',
+    'GATGC',
     'GGTCC',
     'GGTGG',
     'GTTCA',
     'GTTCC',
     'GTTCG',
+    'GTTCT',
+    'TATAA',
     'TGTAG',
     'TGTGG'
 ]
 
-m6A_motifs = [
-    'GGACT', 'GGACA', 'GAACT', 'AGACT', 'GGACC', 'TGACT',
-    'AAACT', 'GAACA', 'AGACA', 'AGACC', 'GAACC', 'TGACA',
-     'TAACT', 'AAACA', 'TGACC', 'TAACA', 'AAACC', 'TAACC'
-]
+# m6A_motifs = [
+#     'GGACT', 'GGACA', 'GAACT', 'AGACT', 'GGACC', 'TGACT',
+#     'AAACT', 'GAACA', 'AGACA', 'AGACC', 'GAACC', 'TGACA',
+#      'TAACT', 'AAACA', 'TGACC', 'TAACA', 'AAACC', 'TAACC'
+# ]
 
 ### compare to Bid-Seq ###
 df_bid_pred = pd.merge(df_bid, df_pred, on=['chrom', 'chromStart', 'chromEnd', 'name', 'strand', 'ref5mer'], suffixes=['_bid', '_pred'])
 df_bid_pred_sel = df_bid_pred[
     (df_bid_pred['confidence']>=THRESH_CONF)
 ]
-scatter_plot_by_motif(df_bid_pred_sel, 'modRatio_bid', 'modRatio_pred', 'psi', psi_motifs, 2, 4, f'{ds}_psi_pred_vs_BID_conf{THRESH_CONF}.png')
+scatter_plot_by_motif(df_bid_pred_sel, 'modRatio_bid', 'modRatio_pred', 'psi', psi_motifs, 3, 5, f'{ds}_psi_pred_vs_BID_conf{THRESH_CONF}.png')
 scatter_plot(df_bid_pred_sel, 'modRatio_bid', 'modRatio_pred', 'psi', f'{ds}_psi_pred_vs_BID_combined_conf{THRESH_CONF}.png')
