@@ -18,7 +18,7 @@ fi
 
 workspace=/prj/Dewenter_TAC_Backs_lab/achan/psico-mAFiA_results/${ds}
 bam=${workspace}/chr${chr}/mAFiA.reads.bam
-mod=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/site_annotations/mus_musculus/GRCm38_102/m6A.psi.GRCm38_102.chr${chr}.bed
+mod=/prj/TRR319_RMaP_BaseCalling/Adrian/site_annotations/mus_musculus/GRCm38_102/m6A.psi.GRCm38_102.chr${chr}.bed
 output=${workspace}/chr${chr}
 
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
