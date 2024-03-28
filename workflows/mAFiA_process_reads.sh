@@ -18,17 +18,17 @@ else
 chr=${SLURM_ARRAY_TASK_ID}
 fi
 
-workspace=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/HEK293/${ds}
+workspace=/prj/TRR319_RMaP_BaseCalling/Adrian/HEK293/${ds}
 bam=${workspace}/chr${chr}/sorted.chr${chr}.bam
 fast5_dir=${workspace}/chr${chr}/fast5
 
-mod=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/site_annotations/homo_sapiens/GRCh38_102/m6A.psi.GRCh38_102.chr${chr}.bed
+mod=/prj/TRR319_RMaP_BaseCalling/Adrian/site_annotations/homo_sapiens/GRCh38_102/m6A.psi.GRCh38_102.chr${chr}.bed
 #mod=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/site_annotations/homo_sapiens/GRCh38_102/BID_GLORI.chrX.tsv
 
 backbone=${HOME}/git/mAFiA/models/RODAN_HEK293_IVT.torch
 classifiers=${HOME}/git/mAFiA/models/psi-co-mAFiA
 
-output=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/results/psico-mAFiA/HEK293/${ds}/chr${chr}
+output=/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/${ds}/chr${chr}
 
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
 
@@ -38,6 +38,6 @@ python3 ${HOME}/git/mAFiA_dev/mAFiA/mAFiA_process_reads_parallel.py \
 --mod_file ${mod} \
 --backbone_model_path ${backbone} \
 --classifier_model_dir ${classifiers} \
---num_jobs 4 \
---batchsize 1024 \
+--num_jobs 2 \
+--batchsize 256 \
 --out_dir ${output}
