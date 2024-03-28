@@ -134,8 +134,8 @@ for chr in {1..22} X
 do
   samtools view chr${chr}/sorted.chr${chr}.bam | cut -f1 > chr${chr}/read_ids.txt
   mkdir chr${chr}/fast5
-  srun -c 8 --mem 64GB -o ${HOME}/slurm/fast5_subset_chr${chr}.out -e ${HOME}/slurm/fast5_subset_chr${chr}.err \
-  fast5_subset -i fast5 -s chr${chr}/fast5 -l chr${chr}/read_ids.txt &
+  srun -c 40 --mem 64GB -o ${HOME}/slurm/fast5_subset_chr${chr}.out -e ${HOME}/slurm/fast5_subset_chr${chr}.err \
+  fast5_subset -t 36 -i fast5 -s chr${chr}/fast5 -l chr${chr}/read_ids.txt &
 done
 
 ########################################################################################################################
