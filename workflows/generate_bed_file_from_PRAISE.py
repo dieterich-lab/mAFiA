@@ -13,37 +13,62 @@ bed_fields = [
     'ref5mer'
 ]
 
-ref_file = '/home/adrian/Data/GRCh38_102/GRCh38_102.fa'
+ref_file = '/home/adrian/Data/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa'
 ref = {}
 for record in SeqIO.parse(ref_file, 'fasta'):
     if (record.id.isnumeric()) or (record.id in ['X', 'Y', 'MT']):
         ref[record.id] = str(record.seq)
 
-in_file = '/home/adrian/Data/BID_seq/41589_2023_1304_MOESM3_ESM.xlsx'
+in_file = '/home/adrian/Data/PRAISE/41589_2023_1304_MOESM3_ESM.xlsx'
 df_in = pd.read_excel(in_file, skiprows=range(2),
                       sheet_name='Supplementary Dataset 2',
                       usecols=[
                           'rep1_deletion_ratio',
                           'rep2_deletion_ratio',
                           'chr_site'])
-out_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/psU/site_annotations/PRAISE.bed'
+out_file = '/home/adrian/Data/PRAISE/PRAISE_HEK293T.bed'
 
-df_out = []
+bid_file = '/home/adrian/Data/BID_seq/BID_seq_HEK293T.bed'
+df_bid = pd.read_csv(bid_file, sep='\t', dtype={'chrom': str})
+
+df_match = []
+df_consensus = []
 for _, row in df_in.iterrows():
     if (row['chr_site']=='NONE') or (len(row['chr_site'].split('_'))>2):
         continue
     chr = row['chr_site'].split('_')[0]
     site = row['chr_site'].split('_')[-1]
     chrom = chr.lstrip('chr')
+
+    chromStart = -1
+    chromEnd = -1
+
+    ### ambiguous pos ###
     if '-' in site:
-        continue
-    chromEnd = int(site)
-    chromStart = chromEnd - 1
-    # strand = row['strand']
+        flag_consensus = True
+        ranges = [int(x) for x in site.split('-')]
+        range_start = min(ranges)
+        range_end = max(ranges)
+        consensus = df_bid[(df_bid['chrom'] == chrom) * (df_bid['chromStart']>=range_start) * (df_bid['chromEnd']<=range_end)]
+        if len(consensus)==1:
+            # print(row)
+            # print(consensus)
+            # print('\n')
+            chromStart = consensus['chromStart'].values[0]
+            chromEnd = consensus['chromEnd'].values[0]
+
+    else:
+        flag_consensus = False
+        chromEnd = int(site)
+        chromStart = chromEnd - 1
+        # strand = row['strand']
 
     # ref5mer = ref[chrom][chromStart-2:chromStart+3]
     # if strand=='-':
     #     ref5mer = str(Seq(ref5mer).reverse_complement())
+
+    if chromStart<0:
+        continue
 
     avg_deletion_ration = round((row['rep1_deletion_ratio'] + row['rep2_deletion_ratio']) * 0.5 * 100.0, 1)
     ref5mer = ref[chrom][chromStart-2:chromStart+3]
@@ -75,8 +100,15 @@ for _, row in df_in.iterrows():
 
     # print(ref5mer==row['Motif_1'])
 
-    df_out.append([chrom, chromStart, chromEnd, 'psU', avg_deletion_ration, strand, ref5mer])
-df_out = pd.DataFrame(df_out, columns=bed_fields)
+    if flag_consensus:
+        df_consensus.append([chrom, chromStart, chromEnd, 'psi', avg_deletion_ration, strand, ref5mer])
+    else:
+        df_match.append([chrom, chromStart, chromEnd, 'psi', avg_deletion_ration, strand, ref5mer])
+
+df_match = pd.DataFrame(df_match, columns=bed_fields)
+df_consensus = pd.DataFrame(df_consensus, columns=bed_fields)
+df_out = pd.concat([df_match, df_consensus])
+
 df_out = pd.concat([
     df_out[df_out['chrom'].str.isnumeric()].sort_values(by=['chrom', 'chromStart'], key=pd.to_numeric),
     df_out[~df_out['chrom'].str.isnumeric()].sort_values(by=['chrom', 'chromStart']),

@@ -10,23 +10,32 @@ bed_fields = [
     'name',
     'score',
     'strand',
-    'ref5mer'
+    'ref5mer',
+    'BID-Seq'
 ]
 
-# ref_file = '/home/adrian/Data/GRCh38_102/GRCh38_102.fa'
-ref_file = '/home/adrian/Data/GRCm38_102/GRCm38_102.fa'
+# in_file = '/home/adrian/Data/BID_seq/GSE179798_HEK293T_mRNA_WT_BID-seq.xlsx'
+in_file = '/home/adrian/Data/BID_seq/41587_2022_1505_MOESM3_ESM.xlsx'
+
+# ref_file = '/home/adrian/Data/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa'
+# sheet_name = 'Supplementary Table 15'
+# out_file = '/home/adrian/Data/BID_seq/BID_seq_mouse_heart.bed'
+
+ref_file = '/home/adrian/Data/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa'
+
+sheet_name = 'Supplementary Table 5'
+out_file = '/home/adrian/Data/BID_seq/BID_seq_HeLa.bed'
+
+# sheet_name = 'Supplementary Table 6'
+# out_file = '/home/adrian/Data/BID_seq/BID_seq_HEK293T.bed'
 
 ref = {}
 for record in SeqIO.parse(ref_file, 'fasta'):
     if (record.id.isnumeric()) or (record.id in ['X', 'Y', 'MT']):
         ref[record.id] = str(record.seq)
 
-# in_file = '/home/adrian/Data/BID_seq/GSE179798_HEK293T_mRNA_WT_BID-seq.xlsx'
-in_file = '/home/adrian/Data/BID_seq/41587_2022_1505_MOESM3_ESM.xlsx'
-sheet_name = 'Supplementary Table 15'
-out_file = '/home/adrian/Data/BID_seq/BID_seq_mouse_heart.bed'
 
-df_in = pd.read_excel(in_file, sheet_name=sheet_name, skiprows=range(3), usecols=['chr', 'pos', 'strand', 'Motif_1', 'Motif_2', 'Frac_Ave %'])
+df_in = pd.read_excel(in_file, sheet_name=sheet_name, skiprows=range(3), usecols=['chr', 'pos', 'strand', 'Motif_1', 'Motif_2', 'Deletion_Ave', 'Frac_Ave %'])
 df_in = df_in[df_in['Motif_2'].isna()]
 
 def expanded_search(this_row, this_ref, test_motif):
@@ -72,14 +81,16 @@ for _, row in df_in.iterrows():
         ref5mer = str(Seq(ref5mer).reverse_complement())
 
     if ref5mer==row['Motif_1']:
-        df_match.append([chrom, chromStart, chromEnd, 'psi', round(row['Frac_Ave %'], 1), strand, ref5mer])
+        df_match.append([chrom, chromStart, chromEnd, 'psi', round(row['Deletion_Ave']*100.0, 1), strand, ref5mer, round(row['Frac_Ave %'], 1)])
     else:
         chromStart, chromEnd, ref5mer = expanded_search(row, ref, row['Motif_1'])
         if (chromStart is None) or (ref5mer!=row['Motif_1']):
             df_dumped.append(row)
             continue
         else:
-            df_shifted.append([chrom, chromStart, chromEnd, 'psi', round(row['Frac_Ave %'], 1), strand, ref5mer])
+            # df_shifted.append([chrom, chromStart, chromEnd, 'psi', round(row['Frac_Ave %'], 1), strand, ref5mer])
+            df_shifted.append([chrom, chromStart, chromEnd, 'psi', round(row['Deletion_Ave']*100.0, 1), strand, ref5mer, round(row['Frac_Ave %'], 1)])
+
 
 df_match = pd.DataFrame(df_match, columns=bed_fields)
 df_shifted = pd.DataFrame(df_shifted, columns=bed_fields)
