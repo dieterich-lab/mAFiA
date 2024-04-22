@@ -29,7 +29,7 @@ do
 
   echo ${ids//.ids/ }
 
-  samtools -N ${ids} -o ${bam} ${workspace}/mAFiA.reads.bam
+  samtools view -@ 36 -N ${ids} -o ${bam} ${workspace}/mAFiA.reads.bam
 
   python3 ${HOME}/git/mAFiA_dev/mAFiA/mAFiA_pileup.py \
     --bam_file ${bam} \
