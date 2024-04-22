@@ -64,7 +64,7 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 #ds=HEK_siMETTL3_input_rep1
 #ds=HEK_siTRUB1_input_rep1
 
-ds=HEK_siCtrl_input_rep2
+#ds=HEK_siCtrl_input_rep2
 #ds=HEK_siMETTL3_input_rep2
 #ds=HEK_siTRUB1_input_rep2
 
@@ -111,74 +111,74 @@ fi
 ########################################################################################################################
 #### align to genome ###################################################################################################
 ########################################################################################################################
-REF_GENOME=/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa
-#REF_GENOME=/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa
-#REF_GENOME='/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/Arabidopsis_thaliana/reference/TAIR10_chr_all.fasta'
-#REF_GENOME='/biodb/genomes/saccharomyces_cerevisiae/R64-1-1_96/R64-1-1_96.fa'
-SAM_GENOME=${WORKSPACE}/genome_mapped.sam
-BAM_GENOME=${WORKSPACE}/genome_filtered_q50.bam
-
-module purge
-module load minimap2
-srun -c 40 --mem 120GB \
-minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF_GENOME} ${WORKSPACE}/basecall_merged.fasta > ${SAM_GENOME}
-
-### check stats and accuracy ###
-samtools flagstats ${SAM_GENOME} > genome_qc.txt
-echo >> genome_qc.txt
-${HOME}/git/renata/accuracy.py ${SAM_GENOME} ${REF_GENOME} >> genome_qc.txt
-
-#### Convert to BAM and index ###
-samtools view -bST ${REF_GENOME} -q50 ${SAM_GENOME} | samtools sort - > ${BAM_GENOME}
-samtools index ${BAM_GENOME}
-
-########################################################################################################################
-### split by chromosome ################################################################################################
-########################################################################################################################
-module load ont-fast5-api
-#for chr in {1..5}
-#for chr in I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI Mito
-#for chr in {1..22} X
-
-for chr in {1..22} X
-do
-  mkdir chr${chr}
-  samtools view -h genome_filtered_q50.bam ${chr} | samtools sort - > chr${chr}/sorted.chr${chr}.bam
-  samtools index chr${chr}/sorted.chr${chr}.bam
-done
-
-for chr in {1..22} X
-do
-  samtools view chr${chr}/sorted.chr${chr}.bam | cut -f1 > chr${chr}/read_ids.txt
-  mkdir chr${chr}/fast5
-  srun -c 40 --mem 64GB -o ${HOME}/slurm/fast5_subset_chr${chr}.out -e ${HOME}/slurm/fast5_subset_chr${chr}.err \
-  fast5_subset -t 36 -i fast5 -s chr${chr}/fast5 -l chr${chr}/read_ids.txt &
-done
-
-########################################################################################################################
-#### align to transcriptome ############################################################################################
-########################################################################################################################
-#REF_TRANSCRIPTOME=/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38.cdna.all.fa
-#SAM_TRANSCRIPTOME=${WORKSPACE}/transcriptome_mapped.sam
-#BAM_TRANSCRIPTOME=${WORKSPACE}/transcriptome_mapped.bam
+#REF_GENOME=/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa
+##REF_GENOME=/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa
+##REF_GENOME='/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/Arabidopsis_thaliana/reference/TAIR10_chr_all.fasta'
+##REF_GENOME='/biodb/genomes/saccharomyces_cerevisiae/R64-1-1_96/R64-1-1_96.fa'
+#SAM_GENOME=${WORKSPACE}/genome_mapped.sam
+#BAM_GENOME=${WORKSPACE}/genome_filtered_q50.bam
 #
 #module purge
 #module load minimap2
-##minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF_TRANSCRIPTOME} ${WORKSPACE}/basecall_merged.fasta > ${SAM_TRANSCRIPTOME}
-#minimap2 --secondary=no -ax map-ont -k14 -t 36 --cs ${REF_TRANSCRIPTOME} ${WORKSPACE}/basecall_merged.fasta > ${SAM_TRANSCRIPTOME}
+#srun -c 40 --mem 120GB \
+#minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF_GENOME} ${WORKSPACE}/basecall_merged.fasta > ${SAM_GENOME}
+#
 #### check stats and accuracy ###
-#samtools flagstats ${SAM_TRANSCRIPTOME} > transcriptome_qc.txt
-##${HOME}/git/renata/accuracy.py ${SAM_TRANSCRIPTOME} ${REF_TRANSCRIPTOME} >> transcriptome_qc.txt
+#samtools flagstats ${SAM_GENOME} > genome_qc.txt
+#echo >> genome_qc.txt
+#${HOME}/git/renata/accuracy.py ${SAM_GENOME} ${REF_GENOME} >> genome_qc.txt
 #
 ##### Convert to BAM and index ###
-#samtools view -bST ${REF_TRANSCRIPTOME} ${SAM_TRANSCRIPTOME} | samtools sort - > ${BAM_TRANSCRIPTOME}
-#samtools index ${BAM_TRANSCRIPTOME}
-
-########################################################################################################################
-### clean up ###########################################################################################################
-########################################################################################################################
-rm -rf ${WORKSPACE}/part*
-rm ${WORKSPACE}/fast5_paths_all
+#samtools view -bST ${REF_GENOME} -q50 ${SAM_GENOME} | samtools sort - > ${BAM_GENOME}
+#samtools index ${BAM_GENOME}
+#
+#########################################################################################################################
+#### split by chromosome ################################################################################################
+#########################################################################################################################
+#module load ont-fast5-api
+##for chr in {1..5}
+##for chr in I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI Mito
+##for chr in {1..22} X
+#
+#for chr in {1..22} X
+#do
+#  mkdir chr${chr}
+#  samtools view -h genome_filtered_q50.bam ${chr} | samtools sort - > chr${chr}/sorted.chr${chr}.bam
+#  samtools index chr${chr}/sorted.chr${chr}.bam
+#done
+#
+#for chr in {1..22} X
+#do
+#  samtools view chr${chr}/sorted.chr${chr}.bam | cut -f1 > chr${chr}/read_ids.txt
+#  mkdir chr${chr}/fast5
+#  srun -c 40 --mem 64GB -o ${HOME}/slurm/fast5_subset_chr${chr}.out -e ${HOME}/slurm/fast5_subset_chr${chr}.err \
+#  fast5_subset -t 36 -i fast5 -s chr${chr}/fast5 -l chr${chr}/read_ids.txt &
+#done
+#
+#########################################################################################################################
+##### align to transcriptome ############################################################################################
+#########################################################################################################################
+##REF_TRANSCRIPTOME=/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38.cdna.all.fa
+##SAM_TRANSCRIPTOME=${WORKSPACE}/transcriptome_mapped.sam
+##BAM_TRANSCRIPTOME=${WORKSPACE}/transcriptome_mapped.bam
+##
+##module purge
+##module load minimap2
+###minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF_TRANSCRIPTOME} ${WORKSPACE}/basecall_merged.fasta > ${SAM_TRANSCRIPTOME}
+##minimap2 --secondary=no -ax map-ont -k14 -t 36 --cs ${REF_TRANSCRIPTOME} ${WORKSPACE}/basecall_merged.fasta > ${SAM_TRANSCRIPTOME}
+##### check stats and accuracy ###
+##samtools flagstats ${SAM_TRANSCRIPTOME} > transcriptome_qc.txt
+###${HOME}/git/renata/accuracy.py ${SAM_TRANSCRIPTOME} ${REF_TRANSCRIPTOME} >> transcriptome_qc.txt
+##
+###### Convert to BAM and index ###
+##samtools view -bST ${REF_TRANSCRIPTOME} ${SAM_TRANSCRIPTOME} | samtools sort - > ${BAM_TRANSCRIPTOME}
+##samtools index ${BAM_TRANSCRIPTOME}
+#
+#########################################################################################################################
+#### clean up ###########################################################################################################
+#########################################################################################################################
+#rm -rf ${WORKSPACE}/part*
+#rm ${WORKSPACE}/fast5_paths_all
 
 ########################################################################################################################
 ### filter and merge bam ###############################################################################################
