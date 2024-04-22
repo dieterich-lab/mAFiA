@@ -3,10 +3,11 @@
 library(bambu)
 args = commandArgs(trailingOnly=TRUE)
 workspace <- args[1]
+out.dir <- args[2]
 # workspace <- "/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/100_WT_0_IVT/chrX"
+# out.dir <- file.path(workspace, "bambu")
 
 bam <- file.path(workspace, "mAFiA.reads.bam")
-out.dir <- file.path(workspace, "bambu")
 dir.create(out.dir)
 gtf <- "/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38.102.gtf"
 annot <- prepareAnnotations(gtf)

@@ -14,10 +14,10 @@ chr=${SLURM_ARRAY_TASK_ID}
 fi
 
 workspace="/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/100_WT_0_IVT/chr${chr}"
-out_dir=${workspace}/bambu
+out_dir=${workspace}/transcript
 
 echo "Running bambu..."
-Rscript /home/achan/git/mAFiA_dev/workflows/run_bambu_on_mAFiA_bam.R ${workspace}
+Rscript /home/achan/git/mAFiA_dev/workflows/run_bambu_on_mAFiA_bam.R ${workspace} ${out_dir}
 
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
 mod=/prj/TRR319_RMaP_BaseCalling/Adrian/site_annotations/homo_sapiens/GRCh38_102/m6A.psi.GRCh38_102.chr${chr}.bed
