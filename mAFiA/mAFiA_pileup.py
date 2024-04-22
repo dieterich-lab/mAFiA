@@ -66,8 +66,10 @@ def main():
 
     if not os.path.exists(args.out_dir):
         os.makedirs(args.out_dir, exist_ok=True)
-
-    site_writer = SiteWriter(out_path=os.path.join(args.out_dir, 'mAFiA.sites.bed'))
+    if args.out_filename is not None:
+        site_writer = SiteWriter(out_path=os.path.join(args.out_dir, args.out_filename))
+    else:
+        site_writer = SiteWriter(out_path=os.path.join(args.out_dir, 'mAFiA.sites.bed'))
     df_mod = pd.read_csv(args.mod_file, sep='\t', dtype={'chrom': str, 'chromStart': int, 'chromEnd': int}, iterator=True, chunksize=args.chunk_size)
 
     # with pysam.Samfile(args.bam_file, 'r') as bam:

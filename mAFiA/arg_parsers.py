@@ -29,6 +29,7 @@ class TestArgsParser(ArgsParser):
         self.add_argument('--bam_file')
         self.add_argument('--fast5_dir')
         self.add_argument('--out_dir')
+        self.add_argument('--out_filename', default=None)
         self.add_argument('--batchsize', type=int, default=1024)
 
 class TrainArgsParser(ArgsParser):
