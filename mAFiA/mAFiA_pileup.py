@@ -57,12 +57,24 @@ def calc_single_site(in_row, args):
         return {}
 
 
+def get_bam_ref_start_end(bam_file):
+    start_end = []
+    with pysam.Samfile(bam_file, 'r') as bam:
+        for read in bam.fetch():
+            start_end.append((read.reference_start, read.reference_end))
+    ref_min = min([x[0] for x in start_end])
+    ref_max = max([x[1] for x in start_end])
+    return (ref_min, ref_max)
+
+
 def main():
     tic = time.time()
 
     parser = mRNATestArgsParser()
     parser.parse_and_print()
     args = parser.args
+
+    bam_ref_min, bam_ref_max = get_bam_ref_start_end(args.bam_file)
 
     if not os.path.exists(args.out_dir):
         os.makedirs(args.out_dir, exist_ok=True)
@@ -81,11 +93,12 @@ def main():
         #         site_writer.write_df(empty=True)
 
     for chunk in df_mod:
-        sites = Parallel(n_jobs=args.num_jobs)(delayed(calc_single_site)(chunk.iloc[i], args) for i in range(len(chunk)))
-        for this_site in sites:
-            if this_site:
-                site_writer.update_sites(**this_site)
-        site_writer.write_df(empty=True)
+        if (chunk['chromStart'].values[0]<=bam_ref_max) and (chunk['chromEnd'].values[-1]>=bam_ref_min):
+            sites = Parallel(n_jobs=args.num_jobs)(delayed(calc_single_site)(chunk.iloc[i], args) for i in range(len(chunk)))
+            for this_site in sites:
+                if this_site:
+                    site_writer.update_sites(**this_site)
+            site_writer.write_df(empty=True)
         # print(f'{site_writer.site_counts} sites written')
         print(f'{chunk.index[-1]+1} rows processed', flush=True)
 
