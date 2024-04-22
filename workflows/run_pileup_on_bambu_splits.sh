@@ -27,7 +27,9 @@ do
   bam=${ids//.ids/.bam}
   output=${out_dir}
 
-  echo ${ids//.ids/ }
+  temp=$(basename $ids)
+  tx_name=${temp//.ids/}
+  echo ${tx_name}
 
   samtools view -@ 36 -N ${ids} -o ${bam} ${workspace}/mAFiA.reads.bam
   samtools index ${bam}
@@ -37,5 +39,6 @@ do
     --mod_file ${mod} \
     --min_coverage 10 \
     --out_dir ${output} \
+    --out_filename ${tx_name}.bed \
     --num_jobs 36
 done
