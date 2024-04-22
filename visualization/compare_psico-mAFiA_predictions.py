@@ -7,14 +7,16 @@ import numpy as np
 import os
 
 THRESH_CONF = 80
-pred_ds = '100_WT_0_IVT'
-comp_ds = 'GLORI'
-mod_type = 'm6A'
+pred_ds = 'Mettl3-KO'
+comp_ds = '100_WT_0_IVT'
+mod_type = 'psi'
 
 dict_pred = {
     '100_WT_0_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/100_WT_0_IVT/chrALL.mAFiA.sites.bed',
+    'Mettl3-KO': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/Mettl3-KO/chrALL.mAFiA.sites.bed',
     'siCtrl_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/NanoSPA/HEK_siCtrl_input_rep1/chrALL.mAFiA.sites.bed',
     'siMETTL3_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/NanoSPA/HEK_siMETTL3_input_rep1/chrALL.mAFiA.sites.bed',
+    'siTRUB1_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/NanoSPA/HEK_siTRUB1_input_rep1/chrALL.mAFiA.sites.bed',
     'HeLa_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HeLa/chrALL.mAFiA.sites.bed',
 }
 
@@ -146,5 +148,5 @@ corr, num_sites = calc_correlation(df_comp_pred_sel)
 with open(os.path.join(img_out, f'corr_{mod_type}_pred_vs_{comp_ds}_conf{THRESH_CONF}.txt'), 'w') as f_out:
     f_out.write('num_sites' + '\t' + 'correlation' + '\n')
     f_out.write(str(num_sites) + '\t' + str(corr) + '\t' + '\n')
-# scatter_plot_by_motif(df_comp_pred_sel, f'modRatio_{comp_ds}', f'modRatio_{pred_ds}', mod_type, motifs, num_rows, num_cols, f'{mod_type}_pred_vs_{comp_ds}_conf{THRESH_CONF}.png')
+scatter_plot_by_motif(df_comp_pred_sel, f'modRatio_{comp_ds}', f'modRatio_{pred_ds}', mod_type, motifs, num_rows, num_cols, f'{mod_type}_pred_vs_{comp_ds}_conf{THRESH_CONF}.png')
 scatter_plot(df_comp_pred_sel, f'modRatio_{comp_ds}', f'modRatio_{pred_ds}', mod_type, f'{mod_type}_pred_vs_{comp_ds}_combined_conf{THRESH_CONF}.png', corr=corr)

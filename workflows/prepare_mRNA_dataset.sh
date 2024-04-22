@@ -62,7 +62,11 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 ########################################################################################################################
 #ds=HEK_siCtrl_input_rep1
 #ds=HEK_siMETTL3_input_rep1
-ds=HEK_siTRUB1_input_rep1
+#ds=HEK_siTRUB1_input_rep1
+
+ds=HEK_siCtrl_input_rep2
+#ds=HEK_siMETTL3_input_rep2
+#ds=HEK_siTRUB1_input_rep2
 
 WORKSPACE=/prj/TRR319_RMaP_BaseCalling/Adrian/NanoSPA/${ds}
 ########################################################################################################################
