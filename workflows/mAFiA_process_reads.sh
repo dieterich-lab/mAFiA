@@ -5,8 +5,8 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=90GB
 #SBATCH --verbose
-#SBATCH --job-name=psico-mAFiA_HEK_siCtrl_input_rep2
-#SBATCH --output=/home/achan/slurm/psico-mAFiA_HEK_siCtrl_input_rep2_chr%a.out
+#SBATCH --job-name=psico-mAFiA_NanoSPA_polysome
+#SBATCH --output=/home/achan/slurm/psico-mAFiA_NanoSPA_polysome_%A_chr%a.out
 
 #ds=100_WT_0_IVT
 #ds=0_WT_100_IVT
@@ -21,7 +21,7 @@ fi
 #ds=HEK_siCtrl_input_rep1
 #ds=HEK_siMETTL3_input_rep1
 #ds=HEK_siTRUB1_input_rep1
-ds=HEK_siCtrl_input_rep2
+#ds=HEK_siCtrl_input_rep2
 #ds=HEK_siMETTL3_input_rep2
 #ds=HEK_siTRUB1_input_rep2
 #ds=Mettl3-KO
