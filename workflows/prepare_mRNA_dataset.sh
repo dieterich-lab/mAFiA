@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 shopt -s globstar
 
-#ARCH=${HOME}/git/renata/rnaarch
 MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch
 
 ### new HEK293 #########################################################################################################
@@ -101,20 +100,21 @@ FAST5_DIR=${WORKSPACE}/fast5
 
 #for f in ${WORKSPACE}/part*.fasta; do echo $f; grep '>' $f | wc -l; done
 
-if test -f basecall_merged.fasta
-then
-  cat ${WORKSPACE}/part*/rodan.fasta >> ${WORKSPACE}/basecall_merged.fasta
-else
-  cat ${WORKSPACE}/part*/rodan.fasta > ${WORKSPACE}/basecall_merged.fasta
-fi
+cat ${WORKSPACE}/part*/rodan.fasta > ${WORKSPACE}/basecall_merged.fasta
+
+#if test -f basecall_merged.fasta
+#then
+#  cat ${WORKSPACE}/part*/rodan.fasta >> ${WORKSPACE}/basecall_merged.fasta
+#else
+#  cat ${WORKSPACE}/part*/rodan.fasta > ${WORKSPACE}/basecall_merged.fasta
+#fi
 
 ########################################################################################################################
 #### align to genome ###################################################################################################
 ########################################################################################################################
 REF_GENOME=/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa
 #REF_GENOME=/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa
-#REF_GENOME='/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/Arabidopsis_thaliana/reference/TAIR10_chr_all.fasta'
-#REF_GENOME='/biodb/genomes/saccharomyces_cerevisiae/R64-1-1_96/R64-1-1_96.fa'
+
 SAM_GENOME=${WORKSPACE}/genome_mapped.sam
 BAM_GENOME=${WORKSPACE}/genome_filtered_q50.bam
 
@@ -177,8 +177,8 @@ done
 #########################################################################################################################
 #### clean up ###########################################################################################################
 #########################################################################################################################
-#rm -rf ${WORKSPACE}/part*
-#rm ${WORKSPACE}/fast5_paths_all
+rm -rf ${WORKSPACE}/part*
+rm ${WORKSPACE}/fast5_paths_all
 
 ########################################################################################################################
 ### filter and merge bam ###############################################################################################
