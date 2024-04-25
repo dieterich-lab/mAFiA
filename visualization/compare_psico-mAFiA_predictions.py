@@ -6,9 +6,9 @@ from collections import Counter
 import numpy as np
 import os
 
-THRESH_CONF = 80
-pred_ds = 'Mettl3-KO'
-comp_ds = '100_WT_0_IVT'
+THRESH_CONF = 75
+pred_ds = 'HeLa_WT'
+comp_ds = 'BACS'
 mod_type = 'psi'
 
 dict_pred = {
@@ -27,6 +27,7 @@ dict_comp = {
     'BID-Seq_observed': '/home/adrian/Data/BID_seq/BID_seq_HEK293T.bed',
     'BID-Seq_calibrated': '/home/adrian/Data/BID_seq/BID_seq_HEK293T.bed',
     'PRAISE': '/home/adrian/Data/PRAISE/PRAISE_HEK293T.bed',
+    'BACS': '/home/adrian/Data/BACS/BACS_HeLa_WT.bed'
 }
 
 # if comp_ds== 'GLORI':
@@ -53,7 +54,7 @@ if 'confidence' in df_comp.keys():
 
 if comp_ds=='BID-Seq_calibrated':
     df_comp.rename(columns={'BID-Seq': 'modRatio'}, inplace=True)
-elif comp_ds in ['GLORI', 'BID-Seq_observed', 'PRAISE']:
+elif comp_ds in ['GLORI', 'BID-Seq_observed', 'PRAISE', 'BACS']:
     df_comp.rename(columns={'score': 'modRatio'}, inplace=True)
 
 img_out = f'/home/adrian/img_out/psi-co-mAFiA/{pred_ds}'

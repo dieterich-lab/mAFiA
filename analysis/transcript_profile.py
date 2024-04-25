@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 ds_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/100_WT_0_IVT'
 gtf_file = '/home/adrian/Data/genomes/homo_sapiens/GRCh38_102/GRCh38.102.gtf'
 annot = gtf.parse_gtf(gtf_file)
-img_out = 'home/adrian/img_out/transcript_profile'
+img_out = '/home/adrian/img_out/transcript_profile'
 os.makedirs(img_out, exist_ok=True)
 thresh_conf = 80.0
 bin_splits = [10, 80, 10]
