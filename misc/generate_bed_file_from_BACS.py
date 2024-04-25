@@ -14,7 +14,7 @@ bed_fields = [
 ]
 
 in_file = '/home/adrian/Data/BACS/mRNA_psi_list.xlsx'
-out_file = '/home/adrian/Data/BACS/BACS_HeLa_WT.xlsx'
+out_file = '/home/adrian/Data/BACS/BACS_HeLa_WT.bed'
 ref_file = '/home/adrian/Data/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa'
 
 ref = {}
