@@ -4,7 +4,7 @@
 #SBATCH --mem=90GB
 #SBATCH --verbose
 #SBATCH --job-name=pileup_bambu
-#SBATCH --output=/home/achan/slurm/pileup_bambu_%A_chr%a.out
+#SBATCH --output=/home/achan/slurm/pileup_bambu_chr%a.out
 
 if [[ ${SLURM_ARRAY_TASK_ID} -eq 23 ]]
 then
@@ -19,7 +19,7 @@ workspace="/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/NanoSPA/${ds}
 out_dir=${workspace}/transcript
 
 echo "Running bambu..."
-module load R
+module load R/4.3.1_deb12
 Rscript /home/achan/git/mAFiA_dev/workflows/run_bambu_on_mAFiA_bam.R ${workspace} ${out_dir}
 
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
