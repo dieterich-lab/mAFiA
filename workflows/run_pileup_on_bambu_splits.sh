@@ -4,7 +4,7 @@
 #SBATCH --mem=90GB
 #SBATCH --verbose
 #SBATCH --job-name=pileup_bambu
-#SBATCH --output=/home/achan/slurm/pileup_bambu_chr%a.out
+#SBATCH --output=/home/achan/slurm/pileup_bambu_%A_chr%a.out
 
 if [[ ${SLURM_ARRAY_TASK_ID} -eq 23 ]]
 then
@@ -13,7 +13,9 @@ else
 chr=${SLURM_ARRAY_TASK_ID}
 fi
 
-workspace="/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/100_WT_0_IVT/chr${chr}"
+#workspace="/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/100_WT_0_IVT/chr${chr}"
+workspace="/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/NanoSPA/${ds}/chr${chr}"
+
 out_dir=${workspace}/transcript
 
 echo "Running bambu..."
