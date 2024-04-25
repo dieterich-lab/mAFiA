@@ -19,6 +19,7 @@ workspace="/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/NanoSPA/${ds}
 out_dir=${workspace}/transcript
 
 echo "Running bambu..."
+module load R
 Rscript /home/achan/git/mAFiA_dev/workflows/run_bambu_on_mAFiA_bam.R ${workspace} ${out_dir}
 
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
