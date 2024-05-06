@@ -10,21 +10,61 @@ scaler = 'MaxAbs'
 prj_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/psU'
 
 read_id_paths_unm = [
-    os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix09_mix13_unm.txt'),
-    os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix51_mix54_unm.txt'),
+    os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix52_mix55_unm.txt'),
+    os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix57_mix58_unm.txt'),
 ]
 
 read_id_paths_mod = [
-    os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix09_mix13_mod.txt'),
-    os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix51_mix54_mod.txt'),
+    os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix52_mix55_mod.txt'),
+    os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix57_mix58_mod.txt'),
 ]
 
 dict_paths = {
-    'TGTAG': [
-        os.path.join(prj_dir, 'PSICO_classifiers/PSU_mix09_mix13/TGTAG.pkl'),
-        os.path.join(prj_dir, 'PSICO_classifiers/PSU_mix51_mix54/TGTAG.pkl')
+    'CTTTA': [
+        os.path.join(prj_dir, 'PSICO_classifiers/PSU_mix52_mix55/CTTTA.pkl'),
+        os.path.join(prj_dir, 'PSICO_classifiers/PSU_mix57_mix58/CTTTA.pkl'),
     ],
 }
+
+# read_id_paths_unm = [
+#     os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix11_mix15_unm.txt'),
+#     os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix23_mix24_unm.txt'),
+#     os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix53_mix56_unm.txt'),
+#     os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix57_mix58_unm.txt'),
+# ]
+#
+# read_id_paths_mod = [
+#     os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix11_mix15_mod.txt'),
+#     os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix23_mix24_mod.txt'),
+#     os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix53_mix56_mod.txt'),
+#     os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix57_mix58_mod.txt'),
+# ]
+#
+# dict_paths = {
+#     'GTTCT': [
+#         os.path.join(prj_dir, 'PSICO_classifiers/PSU_mix11_mix15/GTTCT.pkl'),
+#         os.path.join(prj_dir, 'PSICO_classifiers/PSU_mix23_mix24/GTTCT.pkl'),
+#         os.path.join(prj_dir, 'PSICO_classifiers/PSU_mix53_mix56/GTTCT.pkl'),
+#         os.path.join(prj_dir, 'PSICO_classifiers/PSU_mix57_mix58/GTTCT.pkl'),
+#     ],
+# }
+
+# read_id_paths_unm = [
+#     os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix09_mix13_unm.txt'),
+#     os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix51_mix54_unm.txt'),
+# ]
+#
+# read_id_paths_mod = [
+#     os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix09_mix13_mod.txt'),
+#     os.path.join(prj_dir, 'oligo/RNA002/read_ids_PSU_mix51_mix54_mod.txt'),
+# ]
+#
+# dict_paths = {
+#     'TGTAG': [
+#         os.path.join(prj_dir, 'PSICO_classifiers/PSU_mix09_mix13/TGTAG.pkl'),
+#         os.path.join(prj_dir, 'PSICO_classifiers/PSU_mix51_mix54/TGTAG.pkl')
+#     ],
+# }
 
 # prj_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A'
 #
@@ -133,7 +173,7 @@ dict_paths = {
 # }
 ########################################################################################################################
 
-out_dir = os.path.join(prj_dir, 'PSICO_classifiers/TGTAG_retrain')
+out_dir = os.path.join(prj_dir, 'PSICO_classifiers/CTTTA_retrain')
 os.makedirs(out_dir, exist_ok=True)
 
 read_ids_unm = []

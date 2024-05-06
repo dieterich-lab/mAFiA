@@ -4,7 +4,7 @@ import pickle
 import numpy as np
 
 # old_dir = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/MAFIA_classifiers/DRACH5_retrain'
-old_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/psU/PSICO_classifiers/chosen15'
+old_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/psU/PSICO_classifiers/GTTCT_retrain'
 new_dir = old_dir + '_stripped'
 os.makedirs(new_dir, exist_ok=True)
 
