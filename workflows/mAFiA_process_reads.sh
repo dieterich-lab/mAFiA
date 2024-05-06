@@ -18,7 +18,7 @@ else
 chr=${SLURM_ARRAY_TASK_ID}
 fi
 
-#ds=HEK_siCtrl_input_rep1
+#ds=HEK_sicond_input_rep1
 #ds=HEK_siMETTL3_input_rep1
 #ds=HEK_siTRUB1_input_rep1
 #ds=HEK_siCtrl_input_rep2

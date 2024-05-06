@@ -26,13 +26,13 @@ LIGATION_REF=${WORKSPACE}/ligation_ref.fasta
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
 
 ### softlink fast5 files ###
-#mkdir -p ${READS} && cd "$_"
-#echo "Creating softlinks from ${LOC}"
-#for f in "${LOC}"/**/*.fast5
-#do
-#  ln -s $f
-#done
-#cd ${WORKSPACE}
+mkdir -p ${READS} && cd "$_"
+echo "Creating softlinks from ${LOC}"
+for f in "${LOC}"/**/*.fast5
+do
+  ln -s $f
+done
+cd ${WORKSPACE}
 
 ### check links ###
 #for my_link in ${READS}/*.fast5
@@ -57,13 +57,13 @@ source ${HOME}/git/mAFiA/mafia-venv/bin/activate
 #for f in ${LOC}/**/*.pod5; do pod5 convert to_fast5 $f --output ${READS}; done
 
 #### basecall with Rodan IVT ###
-#echo "Basecalling ${READS}"
-#srun --partition=gpu --gres=gpu:turing:1 --cpus-per-task=8 --mem-per-cpu=8GB \
-#python3 -u ${HOME}/git/mAFiA/RODAN/basecall.py \
-#--fast5dir ${READS} \
-#--model ${MODEL} \
-#--batchsize 4096 \
-#--outdir ${WORKSPACE}
+echo "Basecalling ${READS}"
+srun --partition=gpu --gres=gpu:turing:1 --cpus-per-task=8 --mem-per-cpu=8GB \
+python3 -u ${HOME}/git/mAFiA/RODAN/basecall.py \
+--fast5dir ${READS} \
+--model ${MODEL} \
+--batchsize 4096 \
+--outdir ${WORKSPACE}
 
 ### align with spomelette ###
 echo "Basecalling finished. Now aligning ${FASTA} to ${REF}"
@@ -100,16 +100,16 @@ samtools index ${BAM}
 echo "${DATASET} finished"
 
 ##### merge ligation ref ###
-PRJ_DIR="/prj/TRR319_RMaP_BaseCalling/Adrian/psU"
-ORIG="PSU"
-for RUN in mix51_mix54 mix52_mix55 mix53_mix56
-do
-  MERGE_REF_INPUTS=""
-  for MOD in unm mod
-  do
-    MERGE_REF_INPUTS+="${PRJ_DIR}/oligo/RNA002/${ORIG}_${RUN}_${MOD}/ligation_ref.fasta "
-  done
-  mkdir ${PRJ_DIR}/oligo/RNA002/ligation_ref
-  MERGE_REF_OUTPUT="${PRJ_DIR}/oligo/RNA002/ligation_ref/ligation_ref_${RUN}.fasta"
-  awk '/^>/{p=seen[$0]++}!p' ${MERGE_REF_INPUTS} > ${MERGE_REF_OUTPUT}
-done
+#PRJ_DIR="/prj/TRR319_RMaP_BaseCalling/Adrian/psU"
+#ORIG="PSU"
+#for RUN in mix51_mix54 mix52_mix55 mix53_mix56
+#do
+#  MERGE_REF_INPUTS=""
+#  for MOD in unm mod
+#  do
+#    MERGE_REF_INPUTS+="${PRJ_DIR}/oligo/RNA002/${ORIG}_${RUN}_${MOD}/ligation_ref.fasta "
+#  done
+#  mkdir ${PRJ_DIR}/oligo/RNA002/ligation_ref
+#  MERGE_REF_OUTPUT="${PRJ_DIR}/oligo/RNA002/ligation_ref/ligation_ref_${RUN}.fasta"
+#  awk '/^>/{p=seen[$0]++}!p' ${MERGE_REF_INPUTS} > ${MERGE_REF_OUTPUT}
+#done

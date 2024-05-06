@@ -48,15 +48,7 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 #DATA_DIR=/prj/Dewenter_TAC_Backs_lab/raw_data/Nanopore_dRNA/Cologne
 ########################################################################################################################
 
-#DATASET=col0
-#DATASET=vir1
-#WORKSPACE=/scratch/achan/Arabidopsis_thaliana/${DATASET}
-
-########################################################################################################################
-
-#DATASET=WT
-#DATASET=IME4_KO
-#WORKSPACE=/scratch/achan/Saccharomyces_cerevisiae/${DATASET}
+WORKSPACE=/prj/TRR319_RMaP_BaseCalling/Adrian/HeLa_SRR28796313
 
 ########################################################################################################################
 #ds=HEK_siCtrl_input_rep1
@@ -67,7 +59,7 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 #ds=HEK_siMETTL3_input_rep2
 #ds=HEK_siTRUB1_input_rep2
 
-WORKSPACE=/prj/TRR319_RMaP_BaseCalling/Adrian/NanoSPA/${ds}
+#WORKSPACE=/prj/TRR319_RMaP_BaseCalling/Adrian/NanoSPA/${ds}
 ########################################################################################################################
 
 mkdir -p ${WORKSPACE}
@@ -86,17 +78,16 @@ cd ${WORKSPACE}
 #source ${HOME}/git/renata/virtualenv/bin/activate
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
 
-#FAST5_DIR=${DATA_DIR}/${DATASET}/*/fast5_pass
 FAST5_DIR=${WORKSPACE}/fast5
 
-#FILENAME_PREFIX=fast5_paths_part
-#ls -1 ${FAST5_DIR}/*.fast5 > ${WORKSPACE}/fast5_paths_all
-#split -a3 -l10 -d ${WORKSPACE}/fast5_paths_all ${WORKSPACE}/${FILENAME_PREFIX}
-#
-#NUM_ARRAYS=""
-#for f in ${WORKSPACE}/fast5_paths_part*; do ff=${f##*part}; NUM_ARRAYS+="${ff},"; done
-#NUM_ARRAYS=${NUM_ARRAYS%,*}
-#sbatch --array=${NUM_ARRAYS} --export=ALL,WORKSPACE=${WORKSPACE},FILENAME_PREFIX=${FILENAME_PREFIX},ARCH=${ARCH},MODEL=${MODEL} ${HOME}/git/mAFiA_dev/workflows/array_basecaller.sh
+FILENAME_PREFIX=fast5_paths_part
+ls -1 ${FAST5_DIR}/*.fast5 > ${WORKSPACE}/fast5_paths_all
+split -a3 -l10 -d ${WORKSPACE}/fast5_paths_all ${WORKSPACE}/${FILENAME_PREFIX}
+
+NUM_ARRAYS=""
+for f in ${WORKSPACE}/fast5_paths_part*; do ff=${f##*part}; NUM_ARRAYS+="${ff},"; done
+NUM_ARRAYS=${NUM_ARRAYS%,*}
+sbatch --array=${NUM_ARRAYS} --export=ALL,WORKSPACE=${WORKSPACE},FILENAME_PREFIX=${FILENAME_PREFIX},ARCH=${ARCH},MODEL=${MODEL} ${HOME}/git/mAFiA_dev/workflows/array_basecaller.sh
 
 #for f in ${WORKSPACE}/part*.fasta; do echo $f; grep '>' $f | wc -l; done
 
@@ -135,14 +126,11 @@ samtools index ${BAM_GENOME}
 #########################################################################################################################
 #### split by chromosome ################################################################################################
 #########################################################################################################################
-module load ont-fast5-api
-#for chr in {1..5}
-#for chr in I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI Mito
-#for chr in {1..22} X
+module load ont-fast5-api/4.1.1_deb12
 
 for chr in {1..22} X
 do
-  mkdir chr${chr}
+  mkdir -p chr${chr}
   samtools view -h genome_filtered_q50.bam ${chr} | samtools sort - > chr${chr}/sorted.chr${chr}.bam
   samtools index chr${chr}/sorted.chr${chr}.bam
 done
@@ -150,7 +138,7 @@ done
 for chr in {1..22} X
 do
   samtools view chr${chr}/sorted.chr${chr}.bam | cut -f1 > chr${chr}/read_ids.txt
-  mkdir chr${chr}/fast5
+  mkdir -p chr${chr}/fast5
   srun -c 40 --mem 64GB -o ${HOME}/slurm/fast5_subset_chr${chr}.out -e ${HOME}/slurm/fast5_subset_chr${chr}.err \
   fast5_subset -t 36 -i fast5 -s chr${chr}/fast5 -l chr${chr}/read_ids.txt &
 done

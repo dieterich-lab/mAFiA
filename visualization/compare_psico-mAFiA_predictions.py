@@ -6,23 +6,20 @@ from collections import Counter
 import numpy as np
 import os
 
-THRESH_CONF = 75
-pred_ds = 'HeLa_WT'
-comp_ds = 'BACS'
+THRESH_CONF = 80
+pred_ds = '0_WT_100_IVT'
+comp_ds = '100_WT_0_IVT'
 mod_type = 'psi'
 
-dict_pred = {
+dict_ds = {
     '100_WT_0_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/100_WT_0_IVT/chrALL.mAFiA.sites.bed',
+    '0_WT_100_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/0_WT_100_IVT/chrALL.mAFiA.sites.bed',
     'Mettl3-KO': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/Mettl3-KO/chrALL.mAFiA.sites.bed',
     'siCtrl_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/NanoSPA/HEK_siCtrl_input_rep1/chrALL.mAFiA.sites.bed',
     'siMETTL3_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/NanoSPA/HEK_siMETTL3_input_rep1/chrALL.mAFiA.sites.bed',
     'siTRUB1_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/NanoSPA/HEK_siTRUB1_input_rep1/chrALL.mAFiA.sites.bed',
     'HeLa_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HeLa/chrALL.mAFiA.sites.bed',
-}
-
-dict_comp = {
-    '100_WT_0_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/100_WT_0_IVT/chrALL.mAFiA.sites.bed',
-    'siCtrl_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/NanoSPA/HEK_siCtrl_input_rep1/chrALL.mAFiA.sites.bed',
+    # 'HeLa_SRR28796313': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HeLa_SRR28796313/chrALL.mAFiA.sites.bed',
     'GLORI': '/home/adrian/Data/GLORI/bed_files/GLORI.chrALL.tsv',
     'BID-Seq_observed': '/home/adrian/Data/BID_seq/BID_seq_HEK293T.bed',
     'BID-Seq_calibrated': '/home/adrian/Data/BID_seq/BID_seq_HEK293T.bed',
@@ -30,14 +27,8 @@ dict_comp = {
     'BACS': '/home/adrian/Data/BACS/BACS_HeLa_WT.bed'
 }
 
-# if comp_ds== 'GLORI':
-#     mod_type = 'm6A'
-# else:
-#     mod_type = 'psi'
-
-
 df_pred = pd.read_csv(
-    dict_pred[pred_ds],
+    dict_ds[pred_ds],
     sep='\t',
     dtype={'chrom': str}
 )
@@ -45,7 +36,7 @@ if 'confidence' in df_pred.keys():
     df_pred = df_pred[df_pred['confidence']>=THRESH_CONF]
 
 df_comp = pd.read_csv(
-    dict_comp[comp_ds],
+    dict_ds[comp_ds],
     sep='\t',
     dtype={'chrom': str}
 )

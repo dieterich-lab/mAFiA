@@ -45,3 +45,5 @@ do
     --out_filename ${tx_name}.bed \
     --num_jobs 36
 done
+
+echo "Finished"
