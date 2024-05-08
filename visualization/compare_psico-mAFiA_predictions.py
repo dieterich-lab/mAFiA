@@ -7,12 +7,16 @@ import numpy as np
 import os
 
 THRESH_CONF = 80
-pred_ds = '0_WT_100_IVT'
-comp_ds = '100_WT_0_IVT'
+THRESH_COV = 20
+pred_ds = '100_WT_0_IVT'
+comp_ds = 'PRAISE'
 mod_type = 'psi'
 
 dict_ds = {
     '100_WT_0_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/100_WT_0_IVT/chrALL.mAFiA.sites.bed',
+    '75_WT_25_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/75_WT_25_IVT/chrALL.mAFiA.sites.bed',
+    '50_WT_50_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/50_WT_50_IVT/chrALL.mAFiA.sites.bed',
+    '25_WT_75_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/25_WT_75_IVT/chrALL.mAFiA.sites.bed',
     '0_WT_100_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/0_WT_100_IVT/chrALL.mAFiA.sites.bed',
     'Mettl3-KO': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/Mettl3-KO/chrALL.mAFiA.sites.bed',
     'siCtrl_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/NanoSPA/HEK_siCtrl_input_rep1/chrALL.mAFiA.sites.bed',
@@ -21,9 +25,9 @@ dict_ds = {
     'HeLa_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HeLa/chrALL.mAFiA.sites.bed',
     # 'HeLa_SRR28796313': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HeLa_SRR28796313/chrALL.mAFiA.sites.bed',
     'GLORI': '/home/adrian/Data/GLORI/bed_files/GLORI.chrALL.tsv',
-    'BID-Seq_observed': '/home/adrian/Data/BID_seq/BID_seq_HEK293T.bed',
+    'BID-Seq': '/home/adrian/Data/BID_seq/BID_seq_HEK293T.bed',
     'BID-Seq_calibrated': '/home/adrian/Data/BID_seq/BID_seq_HEK293T.bed',
-    'PRAISE': '/home/adrian/Data/PRAISE/PRAISE_HEK293T.bed',
+    'PRAISE': '/home/adrian/Data/PRAISE/PRAISE_HEK293T_span1-3.bed',
     'BACS': '/home/adrian/Data/BACS/BACS_HeLa_WT.bed'
 }
 
@@ -33,7 +37,10 @@ df_pred = pd.read_csv(
     dtype={'chrom': str}
 )
 if 'confidence' in df_pred.keys():
-    df_pred = df_pred[df_pred['confidence']>=THRESH_CONF]
+    df_pred = df_pred[
+        (df_pred['confidence']>=THRESH_CONF)
+        * (df_pred['coverage']>=THRESH_COV)
+    ]
 
 df_comp = pd.read_csv(
     dict_ds[comp_ds],
@@ -45,7 +52,7 @@ if 'confidence' in df_comp.keys():
 
 if comp_ds=='BID-Seq_calibrated':
     df_comp.rename(columns={'BID-Seq': 'modRatio'}, inplace=True)
-elif comp_ds in ['GLORI', 'BID-Seq_observed', 'PRAISE', 'BACS']:
+elif comp_ds in ['GLORI', 'BID-Seq', 'PRAISE', 'BACS']:
     df_comp.rename(columns={'score': 'modRatio'}, inplace=True)
 
 img_out = f'/home/adrian/img_out/psi-co-mAFiA/{pred_ds}'
@@ -116,9 +123,9 @@ if mod_type=='m6A':
     num_cols = 6
 elif mod_type=='psi':
     motifs = [
-        'AGTGG', 'ATTTG', 'CATAA', 'CATCC', 'CCTCC',
-        'GATGC', 'GGTCC', 'GGTGG', 'GTTCA', 'GTTCC',
-        'GTTCG', 'GTTCT', 'TATAA', 'TGTAG', 'TGTGG'
+        'TGTAG', 'GTTCA', 'GTTCC', 'GTTCG', 'GTTCT',
+        'AGTGG', 'GATGC', 'GGTCC', 'GGTGG',  'TGTGG',
+        'ATTTG', 'CATAA', 'CATCC', 'CCTCC', 'TATAA',
     ]
     num_rows = 3
     num_cols = 5
@@ -137,8 +144,8 @@ df_comp_pred_sel = df_comp_pred
 #     (df_comp_pred['confidence']>=THRESH_CONF)
 # ]
 corr, num_sites = calc_correlation(df_comp_pred_sel)
-with open(os.path.join(img_out, f'corr_{mod_type}_pred_vs_{comp_ds}_conf{THRESH_CONF}.txt'), 'w') as f_out:
+with open(os.path.join(img_out, f'corr_{mod_type}_pred_vs_{comp_ds}_conf{THRESH_CONF}_cov{THRESH_COV}.txt'), 'w') as f_out:
     f_out.write('num_sites' + '\t' + 'correlation' + '\n')
     f_out.write(str(num_sites) + '\t' + str(corr) + '\t' + '\n')
-scatter_plot_by_motif(df_comp_pred_sel, f'modRatio_{comp_ds}', f'modRatio_{pred_ds}', mod_type, motifs, num_rows, num_cols, f'{mod_type}_pred_vs_{comp_ds}_conf{THRESH_CONF}.png')
-scatter_plot(df_comp_pred_sel, f'modRatio_{comp_ds}', f'modRatio_{pred_ds}', mod_type, f'{mod_type}_pred_vs_{comp_ds}_combined_conf{THRESH_CONF}.png', corr=corr)
+scatter_plot_by_motif(df_comp_pred_sel, f'modRatio_{comp_ds}', f'modRatio_{pred_ds}', mod_type, motifs, num_rows, num_cols, f'{mod_type}_pred_vs_{comp_ds}_conf{THRESH_CONF}_cov{THRESH_COV}.png')
+scatter_plot(df_comp_pred_sel, f'modRatio_{comp_ds}', f'modRatio_{pred_ds}', mod_type, f'{mod_type}_pred_vs_{comp_ds}_combined_conf{THRESH_CONF}_cov{THRESH_COV}.png', corr=corr)
