@@ -7,9 +7,10 @@ import numpy as np
 import os
 
 THRESH_CONF = 80
-THRESH_COV = 20
-pred_ds = '100_WT_0_IVT'
-comp_ds = 'PRAISE'
+THRESH_COV = 50
+pred_ds = 'mouse_heart_ctrl'
+comp_ds = 'BID-Seq_mouse_heart'
+bid_seq_calibrated = False
 mod_type = 'psi'
 
 dict_ds = {
@@ -24,9 +25,10 @@ dict_ds = {
     'siTRUB1_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/NanoSPA/HEK_siTRUB1_input_rep1/chrALL.mAFiA.sites.bed',
     'HeLa_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HeLa/chrALL.mAFiA.sites.bed',
     # 'HeLa_SRR28796313': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HeLa_SRR28796313/chrALL.mAFiA.sites.bed',
+    'mouse_heart_ctrl': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/TAC/40-34/chrALL.mAFiA.sites.bed',
     'GLORI': '/home/adrian/Data/GLORI/bed_files/GLORI.chrALL.tsv',
     'BID-Seq': '/home/adrian/Data/BID_seq/BID_seq_HEK293T.bed',
-    'BID-Seq_calibrated': '/home/adrian/Data/BID_seq/BID_seq_HEK293T.bed',
+    'BID-Seq_mouse_heart': '/home/adrian/Data/BID_seq/BID_seq_mouse_heart.bed',
     'PRAISE': '/home/adrian/Data/PRAISE/PRAISE_HEK293T_span1-3.bed',
     'BACS': '/home/adrian/Data/BACS/BACS_HeLa_WT.bed'
 }
@@ -50,9 +52,9 @@ df_comp = pd.read_csv(
 if 'confidence' in df_comp.keys():
     df_comp = df_comp[df_comp['confidence']>=THRESH_CONF]
 
-if comp_ds=='BID-Seq_calibrated':
+if calibrated:
     df_comp.rename(columns={'BID-Seq': 'modRatio'}, inplace=True)
-elif comp_ds in ['GLORI', 'BID-Seq', 'PRAISE', 'BACS']:
+else:
     df_comp.rename(columns={'score': 'modRatio'}, inplace=True)
 
 img_out = f'/home/adrian/img_out/psi-co-mAFiA/{pred_ds}'
