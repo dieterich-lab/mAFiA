@@ -8,7 +8,8 @@
 #DB=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/m6A/oligo/db_ISA_mixes17-22.tsv
 #DB=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/psU/oligo/RNA002/db_PSU_mixes10-11_14-15_23-24.tsv
 #DB=/beegfs/prj/TRR319_RMaP/Project_BaseCalling/Adrian/Gm/oligo/db_NMG_mixes37-48.tsv
-DB=/beegfs/prj/TRR319_RMaP_BaseCalling/Adrian/psU/oligo/RNA002/db_PSU_mixes51-56.tsv
+#DB=/beegfs/prj/TRR319_RMaP_BaseCalling/Adrian/psU/oligo/RNA002/db_PSU_mixes51-56.tsv
+DB=/beegfs/prj/TRR319_RMaP_BaseCalling/Adrian/psU/oligo/RNA002/db_PSU_mixes59-62.tsv
 {
   read -r
   while read -r o r m h l
