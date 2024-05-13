@@ -102,7 +102,7 @@ echo "${DATASET} finished"
 ##### merge ligation ref ###
 PRJ_DIR="/prj/TRR319_RMaP_BaseCalling/Adrian/psU"
 ORIG="PSU"
-for RUN in mix51_mix54 mix52_mix55 mix53_mix56
+for RUN in mix59_mix61 mix60_mix62
 do
   MERGE_REF_INPUTS=""
   for MOD in unm mod
