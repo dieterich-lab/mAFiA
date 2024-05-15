@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 thresh_confidence = 50.0
 thresh_coverage = 20
-results_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/TAC'
+results_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/TAC'
 img_out = '/home/adrian/img_out/TAC'
 os.makedirs(img_out, exist_ok=True)
 
@@ -60,7 +60,7 @@ df_merged = reduce(lambda left, right:
                    pd.merge(left, right, on=['chrom', 'chromStart', 'chromEnd', 'name', 'score', 'strand', 'ref5mer'],
                             how='inner'), dfs)
 
-### select sites by ts trned ###
+### select sites by ts trend ###
 ts_mod_ratios = df_merged.loc[:, df_merged.columns.str.contains('modRatio')].values
 
 # mask_name = 'increasing'

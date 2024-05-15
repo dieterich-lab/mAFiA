@@ -7,25 +7,26 @@ import numpy as np
 import os
 
 THRESH_CONF = 80
-THRESH_COV = 50
-pred_ds = 'mouse_heart_ctrl'
-comp_ds = 'BID-Seq_mouse_heart'
+THRESH_COV = 20
+pred_ds = '100_WT_0_IVT'
+comp_ds = 'GLORI'
 bid_seq_calibrated = False
-mod_type = 'psi'
+mod_type = 'm6A'
 
 dict_ds = {
-    '100_WT_0_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/100_WT_0_IVT/chrALL.mAFiA.sites.bed',
-    '75_WT_25_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/75_WT_25_IVT/chrALL.mAFiA.sites.bed',
-    '50_WT_50_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/50_WT_50_IVT/chrALL.mAFiA.sites.bed',
-    '25_WT_75_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/25_WT_75_IVT/chrALL.mAFiA.sites.bed',
-    '0_WT_100_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/0_WT_100_IVT/chrALL.mAFiA.sites.bed',
-    'Mettl3-KO': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293/Mettl3-KO/chrALL.mAFiA.sites.bed',
-    'siCtrl_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/NanoSPA/HEK_siCtrl_input_rep1/chrALL.mAFiA.sites.bed',
-    'siMETTL3_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/NanoSPA/HEK_siMETTL3_input_rep1/chrALL.mAFiA.sites.bed',
-    'siTRUB1_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/NanoSPA/HEK_siTRUB1_input_rep1/chrALL.mAFiA.sites.bed',
-    'HeLa_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HeLa/chrALL.mAFiA.sites.bed',
+    '100_WT_0_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/100_WT_0_IVT/chrALL.mAFiA.sites.bed',
+    '75_WT_25_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/75_WT_25_IVT/chrALL.mAFiA.sites.bed',
+    '50_WT_50_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/50_WT_50_IVT/chrALL.mAFiA.sites.bed',
+    '25_WT_75_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/25_WT_75_IVT/chrALL.mAFiA.sites.bed',
+    '0_WT_100_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/0_WT_100_IVT/chrALL.mAFiA.sites.bed',
+    'Mettl3-KO': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/Mettl3-KO/chrALL.mAFiA.sites.bed',
+    'siCtrl_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siCtrl_input_rep1/chrALL.mAFiA.sites.bed',
+    'siMETTL3_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siMETTL3_input_rep1/chrALL.mAFiA.sites.bed',
+    'siTRUB1_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siTRUB1_input_rep1/chrALL.mAFiA.sites.bed',
+    'HeLa_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HeLa/chrALL.mAFiA.sites.bed',
     # 'HeLa_SRR28796313': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HeLa_SRR28796313/chrALL.mAFiA.sites.bed',
-    'mouse_heart_ctrl': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/TAC/40-34/chrALL.mAFiA.sites.bed',
+    'mouse_heart_ctrl': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/TAC/40-34/chrALL.mAFiA.sites.bed',
+    'mouse_heart_SHAM_day1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/TAC/40-31/chrALL.mAFiA.sites.bed',
     'GLORI': '/home/adrian/Data/GLORI/bed_files/GLORI.chrALL.tsv',
     'BID-Seq': '/home/adrian/Data/BID_seq/BID_seq_HEK293T.bed',
     'BID-Seq_mouse_heart': '/home/adrian/Data/BID_seq/BID_seq_mouse_heart.bed',
@@ -52,7 +53,7 @@ df_comp = pd.read_csv(
 if 'confidence' in df_comp.keys():
     df_comp = df_comp[df_comp['confidence']>=THRESH_CONF]
 
-if calibrated:
+if bid_seq_calibrated:
     df_comp.rename(columns={'BID-Seq': 'modRatio'}, inplace=True)
 else:
     df_comp.rename(columns={'score': 'modRatio'}, inplace=True)
@@ -84,7 +85,7 @@ def scatter_plot_by_motif(df_in, key_x, key_y, mod_type, ordered_motifs, num_row
             motif: (df_in[df_in['ref5mer'] == motif][key_y] >= thresh_err).sum() / motif_counts[motif] for
             motif in motif_counts.keys()}
 
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(num_col*3, num_row*3))
     for ind, motif in enumerate(ordered_motifs):
         # if motif not in df_in['ref5mer'].values:
         #     continue
@@ -125,12 +126,13 @@ if mod_type=='m6A':
     num_cols = 6
 elif mod_type=='psi':
     motifs = [
-        'TGTAG', 'GTTCA', 'GTTCC', 'GTTCG', 'GTTCT',
-        'AGTGG', 'GATGC', 'GGTCC', 'GGTGG',  'TGTGG',
-        'ATTTG', 'CATAA', 'CATCC', 'CCTCC', 'TATAA',
+        'GTTCA', 'GTTCC', 'GTTCG', 'GTTCT',
+        'TGTAG', 'TGTGG', 'AGTGG', 'GATGC',
+        'GGTCC', 'GGTGG', 'ATTTG', 'TATAA',
+        'CATAA', 'CTTTA', 'CATCC', 'CCTCC',
     ]
-    num_rows = 3
-    num_cols = 5
+    num_rows = 4
+    num_cols = 4
 
 def calc_correlation(in_df):
     in_array = in_df[[f'modRatio_{pred_ds}', f'modRatio_{comp_ds}']].values
