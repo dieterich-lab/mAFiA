@@ -28,7 +28,7 @@ classifiers=${HOME}/git/mAFiA/models/psi-co-mAFiA
 
 #output=/prj/Dewenter_TAC_Backs_lab/achan/psico-mAFiA_results/${ds}/chr${chr}
 #output=/prj/TRR319_RMaP_BaseCalling/Adrian/mouse_heart/psico-mAFiA_results/${ds}/chr${chr}
-output=/beegfs/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/TAC/${ds}/chr${chr}
+output=/beegfs/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/TAC/${ds}/chr${chr}
 
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
 
