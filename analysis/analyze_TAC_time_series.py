@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 thresh_confidence = 50.0
 thresh_coverage = 20
-results_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/TAC'
+results_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/TAC'
 img_out = '/home/adrian/img_out/TAC'
 os.makedirs(img_out, exist_ok=True)
 
@@ -31,11 +31,15 @@ def plot_matchstick(ax, in_df, mod_name, ylim=[-5, 105]):
     ax.set_ylabel(f'$S_{{{dict_mod_display[mod_name]}}}$', fontsize=12)
 
 dict_conditions = {
-    '40-34': 'control',
-    '40-29': 'day1',
-    '40-26': 'day7',
-    '40-33': 'day21',
-    '40-30': 'day56'
+    # '40-34': 'control',
+    '40-29': 'TAC_day1',
+    '40-26': 'TAC_day7',
+    '40-33': 'TAC_day21',
+    '40-30': 'TAC_day56',
+    '40-31': 'SHAM_day1',
+    '40-27': 'SHAM_day7',
+    '40-28': 'SHAM_day21',
+    '40-32': 'SHAM_day56',
 }
 conditions = list(dict_conditions.values())
 
