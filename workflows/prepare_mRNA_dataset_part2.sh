@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH --partition=general
+#SBATCH --partition=medium
 #SBATCH --cpus-per-task=40
 #SBATCH --mem=120GB
 #SBATCH --verbose
