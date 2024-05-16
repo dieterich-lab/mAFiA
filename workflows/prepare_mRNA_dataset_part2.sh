@@ -9,7 +9,9 @@
 shopt -s globstar
 
 cd ${WORKSPACE}
-cat ${WORKSPACE}/part*/rodan.fasta > ${WORKSPACE}/basecall_merged.fasta
+if [ ! -f "${WORKSPACE}"/basecall_merged.fasta ]; then
+  cat "${WORKSPACE}"/part*/rodan.fasta > "${WORKSPACE}"/basecall_merged.fasta
+fi
 
 ########################################################################################################################
 #### align to genome ###################################################################################################
