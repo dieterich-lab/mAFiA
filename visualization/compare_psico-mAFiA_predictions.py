@@ -9,9 +9,9 @@ import os
 THRESH_CONF = 80
 THRESH_COV = 20
 pred_ds = '100_WT_0_IVT'
-comp_ds = 'GLORI'
+comp_ds = 'PRAISE'
 bid_seq_calibrated = False
-mod_type = 'm6A'
+mod_type = 'psi'
 
 dict_ds = {
     '100_WT_0_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/100_WT_0_IVT/chrALL.mAFiA.sites.bed',
@@ -85,7 +85,7 @@ def scatter_plot_by_motif(df_in, key_x, key_y, mod_type, ordered_motifs, num_row
             motif: (df_in[df_in['ref5mer'] == motif][key_y] >= thresh_err).sum() / motif_counts[motif] for
             motif in motif_counts.keys()}
 
-    plt.figure(figsize=(num_col*3, num_row*3))
+    plt.figure(figsize=(num_col*2, num_row*2))
     for ind, motif in enumerate(ordered_motifs):
         # if motif not in df_in['ref5mer'].values:
         #     continue
@@ -126,13 +126,12 @@ if mod_type=='m6A':
     num_cols = 6
 elif mod_type=='psi':
     motifs = [
-        'GTTCA', 'GTTCC', 'GTTCG', 'GTTCT',
-        'TGTAG', 'TGTGG', 'AGTGG', 'GATGC',
-        'GGTCC', 'GGTGG', 'ATTTG', 'TATAA',
-        'CATAA', 'CTTTA', 'CATCC', 'CCTCC',
+        'GTTCA', 'GTTCG', 'GTTCC', 'GTTCT', 'TGTAG', 'TGTGG',
+        'GGTGG', 'ATTTG', 'GATGC', 'AGTGG', 'CATAA', 'CATCC',
+        'CCTCC', 'CTTTA', 'GGTCC', 'TATAA'
     ]
-    num_rows = 4
-    num_cols = 4
+    num_rows = 3
+    num_cols = 6
 
 def calc_correlation(in_df):
     in_array = in_df[[f'modRatio_{pred_ds}', f'modRatio_{comp_ds}']].values
