@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+#SBATCH --partition=general
+#SBATCH --cpus-per-task=40
+#SBATCH --mem=120GB
+#SBATCH --verbose
+#SBATCH --job-name=prepare_mRNA_dataset_part2
+#SBATCH --output=/home/achan/slurm/prepare_mRNA_dataset_part2_%A.out
+
 shopt -s globstar
 
 cd ${WORKSPACE}
@@ -14,7 +21,6 @@ echo "Mapping to ${REF_GENOME}..."
 
 module purge
 module load minimap2
-srun -c 40 --mem 120GB \
 minimap2 --secondary=no -ax splice -uf -k14 -t 36 --cs ${REF_GENOME} ${WORKSPACE}/basecall_merged.fasta > ${sam_genome}
 
 ### check stats and accuracy ###
