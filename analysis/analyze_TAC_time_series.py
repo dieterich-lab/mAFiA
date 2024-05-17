@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 thresh_confidence = 50.0
 thresh_coverage = 20
-results_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/TAC'
+results_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/TAC'
 img_out = '/home/adrian/img_out/TAC'
 os.makedirs(img_out, exist_ok=True)
 
@@ -18,20 +18,32 @@ dict_mod_display = {
     'psi': '\psi'
 }
 
-def plot_matchstick(ax, in_df, mod_name, ylim=[-5, 105]):
-    num_conditions = len(conditions)
-    diffs = in_df[in_df['name'] == mod_name][[f'modRatio_{this_cond}' for this_cond in conditions]].values
+def plot_scatter(mod, group, days):
+    sub_df = df_merged[df_merged['name'] == mod]
+    for this_day in days:
+        plt.plot(sub_df[f'modRatio_control'], sub_df[f'modRatio_{group}_day{this_day}'], '.', label=f'day{this_day}')
+    plt.plot([0, 100], [0, 100], 'r--', alpha=0.5)
+    plt.legend(loc='upper left')
+    plt.xlabel('control', fontsize=12)
+    plt.title(group, fontsize=12)
+    plt.xlim([-5, 105])
+    plt.ylim([-5, 105])
+
+def plot_matchstick(ax, in_df, mod_name, group, days, color='gray', ylim=[-5, 105]):
+    num_conditions = len(days)
+    diffs = in_df[in_df['name'] == mod_name][[f'modRatio_{group}_{this_day}' for this_day in days]].values
     for this_diff in diffs:
-        ax.plot(range(num_conditions), this_diff, c='gray', marker='o', alpha=0.5)
+        ax.plot(range(num_conditions), this_diff, c=color, marker='o', alpha=0.5, label=group)
         # ax.plot([1, num_conditions], this_diff, c='gray', linestyle='-', alpha=0.5)
-    ax.set_xticks(range(num_conditions), conditions)
+    ax.set_xticks(range(num_conditions), days)
     ax.set_xlim([-0.5, num_conditions-0.5])
-    ax.set_ylim(ylim)
+    if ylim:
+        ax.set_ylim(ylim)
     ax.set_xlabel('condition', fontsize=12)
     ax.set_ylabel(f'$S_{{{dict_mod_display[mod_name]}}}$', fontsize=12)
 
 dict_conditions = {
-    # '40-34': 'control',
+    '40-34': 'control',
     '40-29': 'TAC_day1',
     '40-26': 'TAC_day7',
     '40-33': 'TAC_day21',
@@ -61,25 +73,50 @@ df_merged = reduce(lambda left, right:
                             how='inner'), dfs)
 
 ### select sites by ts trend ###
-ts_mod_ratios = df_merged.loc[:, df_merged.columns.str.contains('modRatio')].values
+ts_mod_ratios_SHAM = df_merged.loc[:, df_merged.columns.str.contains('modRatio_SHAM')].values
+ts_mod_ratios_TAC = df_merged.loc[:, df_merged.columns.str.contains('modRatio_TAC')].values
+ts_mod_ratios_diff = ts_mod_ratios_TAC - ts_mod_ratios_SHAM
 
-# mask_name = 'increasing'
-# mask = (np.diff(ts_mod_ratios, axis=1)>0).all(axis=1)
-mask_name = 'decreasing'
-mask = (np.diff(ts_mod_ratios, axis=1)<0).all(axis=1)
+# plt.figure(figsize=(10, 10))
+# plt.subplot(2, 2, 1)
+# plot_scatter('m6A', 'SHAM', [1, 7, 21])
+# plt.subplot(2, 2, 2)
+# plot_scatter('m6A', 'TAC', [1, 7, 21])
+# plt.subplot(2, 2, 3)
+# plot_scatter('psi', 'SHAM', [1, 7, 21])
+# plt.subplot(2, 2, 4)
+# plot_scatter('psi', 'TAC', [1, 7, 21])
+
+mask_name = 'increasing'
+mask = (np.diff(ts_mod_ratios_TAC, axis=1)>0).all(axis=1) * (ts_mod_ratios_diff>=20).any(axis=1)
+# mask = (ts_mod_ratios_diff>0).all(axis=1) * (np.diff(ts_mod_ratios_TAC, axis=1)>0).all(axis=1)
+# mask_name = 'decreasing'
+# mask = (np.diff(ts_mod_ratios_TAC, axis=1)<0).all(axis=1) * (ts_mod_ratios_diff<-10).any(axis=1)
 # mask_name = 'large_std'
 # mask = np.std(ts_mod_ratios, axis=1)>=5.0
 # mask_name = 'large_delta'
 # mask = np.abs((df_merged['modRatio_day56'] - df_merged['modRatio_control']).values>=5.0)
 df_sel = df_merged[mask]
 
-plt.figure(figsize=(10, 5))
-ax_m6A = plt.subplot(1, 2, 1)
-plot_matchstick(ax_m6A, df_sel, 'm6A')
-ax_psi = plt.subplot(1, 2, 2)
-plot_matchstick(ax_psi, df_sel, 'psi')
-plt.savefig(os.path.join(img_out, f'S_m6A_psi_time_series_{mask_name}.png'), bbox_inches='tight')
+# plt.figure(figsize=(10, 5))
+# ax_m6A = plt.subplot(1, 2, 1)
+# plot_matchstick(ax_m6A, df_sel, 'm6A', ['TAC_day1', 'TAC_day7', 'TAC_day21'])
+# ax_psi = plt.subplot(1, 2, 2)
+# plot_matchstick(ax_psi, df_sel, 'psi', ['TAC_day1', 'TAC_day7', 'TAC_day21'])
+# plt.savefig(os.path.join(img_out, f'S_m6A_psi_time_series_{mask_name}.png'), bbox_inches='tight')
 # plt.close('all')
+
+# count = 0
+for _, this_row in df_sel.iterrows():
+    # count += 1
+    # if count>=20:
+    #     break
+    fig = plt.figure(figsize=(5, 5))
+    ax = fig.add_subplot()
+    plot_matchstick(ax, this_row.to_frame().T, this_row['name'], group='SHAM', days=['day1', 'day7', 'day21', 'day56'], color='blue')
+    plot_matchstick(ax, this_row.to_frame().T, this_row['name'], group='TAC', days=['day1', 'day7', 'day21', 'day56'], color='red')
+    ax.legend(loc='upper right')
+    ax.set_title(f"chr{this_row['chrom']}: {this_row['chromEnd']}, {this_row['ref5mer'].replace('T', 'U')}")
 
 # index = 1513
 # span = 5
