@@ -43,14 +43,14 @@ echo "Split by chromosome..."
 
 module load ont-fast5-api/4.1.1_deb12
 
-for chr in {1..22} X
+for chr in {1..19} X
 do
   mkdir -p chr${chr}
   samtools view -h genome_filtered_q50.bam ${chr} | samtools sort - > chr${chr}/sorted.chr${chr}.bam
   samtools index chr${chr}/sorted.chr${chr}.bam
 done
 
-for chr in {1..22} X
+for chr in {1..19} X
 do
   samtools view chr${chr}/sorted.chr${chr}.bam | cut -f1 > chr${chr}/read_ids.txt
   mkdir -p chr${chr}/fast5

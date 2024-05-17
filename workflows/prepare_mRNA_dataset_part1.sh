@@ -4,7 +4,8 @@ shopt -s globstar
 MODEL="${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch"
 #REF_GENOME="/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa"
 REF_GENOME="/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa"
-WORKSPACE="/prj/TRR319_RMaP_BaseCalling/Adrian/mouse_heart/Diet/B1_M3KO_CD"
+#WORKSPACE="/prj/TRR319_RMaP_BaseCalling/Adrian/mouse_heart/Diet/D2_M3KO_WD"
+WORKSPACE="/prj/TRR319_RMaP_BaseCalling/Adrian/mouse_heart/${ds}"
 
 ### new HEK293 #########################################################################################################
 #DATASET=0_WT_100_IVT

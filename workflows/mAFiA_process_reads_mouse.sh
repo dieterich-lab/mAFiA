@@ -16,8 +16,8 @@ else
 chr=${SLURM_ARRAY_TASK_ID}
 fi
 
-workspace=/prj/Dewenter_TAC_Backs_lab/achan/${ds}
-#workspace=/prj/TRR319_RMaP_BaseCalling/Adrian/mouse_heart/Federica_Accornero/${ds}
+#workspace=/prj/Dewenter_TAC_Backs_lab/achan/${ds}
+workspace=/prj/TRR319_RMaP_BaseCalling/Adrian/mouse_heart/${ds}
 bam=${workspace}/chr${chr}/sorted.chr${chr}.bam
 fast5_dir=${workspace}/chr${chr}/fast5
 
@@ -28,7 +28,7 @@ classifiers=${HOME}/git/mAFiA/models/psi-co-mAFiA
 
 #output=/prj/Dewenter_TAC_Backs_lab/achan/psico-mAFiA_results/${ds}/chr${chr}
 #output=/prj/TRR319_RMaP_BaseCalling/Adrian/mouse_heart/psico-mAFiA_results/${ds}/chr${chr}
-output=/beegfs/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/TAC/${ds}/chr${chr}
+output=/beegfs/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/${ds}/chr${chr}
 
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
 
