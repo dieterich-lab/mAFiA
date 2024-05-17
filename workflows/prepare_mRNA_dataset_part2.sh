@@ -43,14 +43,22 @@ echo "Split by chromosome..."
 
 module load ont-fast5-api/4.1.1_deb12
 
-for chr in {1..19} X
+# shellcheck disable=SC2203
+if [[ $(basename "${REF_GENOME}") == *"GRCm"* ]]
+then
+  chrs=$(echo {1..19} X)
+else
+  chrs=$(echo {1..22} X)
+fi
+
+for chr in ${chrs}
 do
   mkdir -p chr${chr}
   samtools view -h genome_filtered_q50.bam ${chr} | samtools sort - > chr${chr}/sorted.chr${chr}.bam
   samtools index chr${chr}/sorted.chr${chr}.bam
 done
 
-for chr in {1..19} X
+for chr in ${chrs}
 do
   samtools view chr${chr}/sorted.chr${chr}.bam | cut -f1 > chr${chr}/read_ids.txt
   mkdir -p chr${chr}/fast5
