@@ -16,7 +16,7 @@ else
 chr=${SLURM_ARRAY_TASK_ID}
 fi
 
-workspace=/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/${ds}
+workspace=/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/${ds}
 bam=${workspace}/chr${chr}/mAFiA.reads.bam
 mod=/prj/TRR319_RMaP_BaseCalling/Adrian/site_annotations/mus_musculus/GRCm38_102/m6A.psi.GRCm38_102.chr${chr}.bed
 output=${workspace}/chr${chr}

@@ -8,7 +8,6 @@
 #SBATCH --job-name=psico-mAFiA_mouse
 #SBATCH --output=/home/achan/slurm/psico-mAFiA_mouse_%A_chr%a.out
 
-#ds=40-26
 if [[ ${SLURM_ARRAY_TASK_ID} -eq 23 ]]
 then
 chr="X"
@@ -22,13 +21,12 @@ bam=${workspace}/chr${chr}/sorted.chr${chr}.bam
 fast5_dir=${workspace}/chr${chr}/fast5
 
 mod=/prj/TRR319_RMaP_BaseCalling/Adrian/site_annotations/mus_musculus/GRCm38_102/m6A.psi.GRCm38_102.chr${chr}.bed
-
 backbone=${HOME}/git/mAFiA/models/RODAN_HEK293_IVT.torch
 classifiers=${HOME}/git/mAFiA/models/psi-co-mAFiA
 
 #output=/prj/Dewenter_TAC_Backs_lab/achan/psico-mAFiA_results/${ds}/chr${chr}
 #output=/prj/TRR319_RMaP_BaseCalling/Adrian/mouse_heart/psico-mAFiA_results/${ds}/chr${chr}
-output=/beegfs/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/${ds}/chr${chr}
+output=/beegfs/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/${ds}/chr${chr}
 
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
 
