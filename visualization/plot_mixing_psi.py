@@ -23,12 +23,16 @@ FMT = 'png'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
+mod = 'm6A'
+thresh_confidence = 80
+thresh_coverage = 50
 
 def import_mAFiA(ds, thresh_conf=80.0, thresh_cov=50):
     df_mAFiA = pd.read_csv(os.path.join(source_data_dir, ds, 'chrALL.mAFiA.sites.bed'), dtype={'chrom': str}, sep='\t')
     df_mAFiA_thresh = df_mAFiA[
         (df_mAFiA['confidence']>=thresh_conf)
         * (df_mAFiA['coverage']>=thresh_cov)
+        * (df_mAFiA['name']==mod)
     ]
     return df_mAFiA_thresh
 
@@ -36,20 +40,13 @@ def import_mAFiA(ds, thresh_conf=80.0, thresh_cov=50):
 def import_ref(ref_path):
     df_ref = pd.read_csv(ref_path, dtype={'chrom': str}, sep='\t')
     df_ref.rename(columns={'score': 'modRatio'}, inplace=True)
-    # df_glori['chrom'] = [chr.lstrip('chr') for chr in df_glori['Chr']]
-    # df_glori['chromStart'] = df_glori['Sites'] - 1
-    # df_glori['chromEnd'] = df_glori['Sites']
-    # df_glori['strand'] = df_glori['Strand']
-    # df_glori['modRatio'] = np.int32(np.round(df_glori['NormeRatio'] * 100.0))
-    # df_glori_thresh = df_glori[df_glori['P_adjust']<thresh_pval]
-
     return df_ref
 
 ########################################################################################################################
 
 
-source_data_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HEK293'
-img_out = '/home/adrian/img_out/psi_mixing'
+source_data_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293'
+img_out = '/home/adrian/img_out/mixing'
 os.makedirs(img_out, exist_ok=True)
 
 all_ds = [
@@ -62,11 +59,15 @@ all_ds = [
 ds_names = {this_ds: f"{this_ds.split('_')[0]}% WT" for this_ds in all_ds}
 f_wt = {this_ds: int(this_ds.split('_')[0])/100.0 for this_ds in all_ds}
 
-# reference_path = '/home/adrian/Data/PRAISE/PRAISE_HEK293T.bed'
-reference_path = '/home/adrian/Data/PRAISE/PRAISE_HEK293T_span1-3.bed'
-ref_name = 'PRAISE'
-# reference_path = '/home/adrian/Data/BID_seq/BID_seq_HEK293T.bed'
-# ref_name = 'BID-Seq'
+# ref_name = '100% WT'
+# df_reference = import_mAFiA('100_WT_0_IVT', thresh_conf=thresh_confidence, thresh_cov=thresh_coverage)
+
+if mod == 'm6A':
+    reference_path = '/home/adrian/Data/GLORI/bed_files/GLORI.chrALL.tsv'
+    ref_name = 'GLORI'
+elif mod == 'psi':
+    reference_path = '/home/adrian/Data/PRAISE/PRAISE_HEK293T_span1-3.bed'
+    ref_name = 'PRAISE'
 df_reference = import_ref(reference_path)
 
 ########################################################################################################################
@@ -91,15 +92,13 @@ def scatter_mafia_vs_ref(df_ref, df_pred):
     return df_merged[f'modRatio_{ref_name}'].values, df_merged['modRatio_mafia'].values
 
 
-thresh_confidence = 80
-thresh_coverage = 100
 ticks = np.linspace(0, 100, 5)
 xylim = [-1, 101]
 fig_scatter, axs = plt.subplots(nrows=1, ncols=len(all_ds), figsize=(6*len(all_ds)*cm, 5*cm))
 for ind, this_ds in enumerate(all_ds):
     df_mafia = import_mAFiA(this_ds, thresh_conf=thresh_confidence, thresh_cov=thresh_coverage)
     scatter_x, scatter_y = scatter_mafia_vs_ref(df_reference, df_mafia)
-    axs[ind].plot(scatter_x, scatter_y, '.')
+    axs[ind].plot(scatter_x, scatter_y, '.', markersize=2)
     axs[ind].set_xlim(xylim)
     axs[ind].set_ylim(xylim)
     guideline_x = ticks
@@ -108,7 +107,9 @@ for ind, this_ds in enumerate(all_ds):
     axs[ind].set_xticks(ticks)
     axs[ind].set_yticks(ticks)
     axs[ind].set_xlabel(ref_name)
+    # axs[ind].set_ylabel(ds_names[this_ds])
     if ind==0:
         axs[ind].set_ylabel('$\psi$-co-mAFiA')
     axs[ind].set_title(ds_names[this_ds])
-fig_scatter.savefig(os.path.join(img_out, f'scatter_mixing_mAFiA_vs_{ref_name}_conf{thresh_confidence}_cov{thresh_coverage}.{FMT}'), **fig_kwargs)
+# fig_scatter.suptitle(mod, fontsize=15)
+fig_scatter.savefig(os.path.join(img_out, f'scatter_mixing_{mod}_conf{thresh_confidence}_cov{thresh_coverage}.{FMT}'), **fig_kwargs)

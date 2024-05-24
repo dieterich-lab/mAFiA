@@ -62,6 +62,7 @@ for chr in ${chrs}
 do
   samtools view chr${chr}/sorted.chr${chr}.bam | cut -f1 > chr${chr}/read_ids.txt
   mkdir -p chr${chr}/fast5
+#  sbatch -c 40 --mem 80GB \
   fast5_subset -t 36 -i fast5 -s chr${chr}/fast5 -l chr${chr}/read_ids.txt
 done
 

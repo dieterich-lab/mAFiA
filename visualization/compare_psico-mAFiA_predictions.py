@@ -7,9 +7,9 @@ import numpy as np
 import os
 
 THRESH_CONF = 80
-THRESH_COV = 20
-pred_ds = '100_WT_0_IVT'
-comp_ds = 'PRAISE'
+THRESH_COV = 50
+pred_ds = 'Mettl3-KO_rep1'
+comp_ds = '100_WT_0_IVT'
 bid_seq_calibrated = False
 mod_type = 'psi'
 
@@ -19,14 +19,25 @@ dict_ds = {
     '50_WT_50_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/50_WT_50_IVT/chrALL.mAFiA.sites.bed',
     '25_WT_75_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/25_WT_75_IVT/chrALL.mAFiA.sites.bed',
     '0_WT_100_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/0_WT_100_IVT/chrALL.mAFiA.sites.bed',
-    'Mettl3-KO': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/Mettl3-KO/chrALL.mAFiA.sites.bed',
+    'Mettl3-KO_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293T-Mettl3-KO/rep1//chrALL.mAFiA.sites.bed',
+
+    'HeLa_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HeLa/chrALL.mAFiA.sites.bed',
+    # 'HeLa_SRR28796313': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HeLa_SRR28796313/chrALL.mAFiA.sites.bed',
+
     'siCtrl_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siCtrl_input_rep1/chrALL.mAFiA.sites.bed',
     'siMETTL3_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siMETTL3_input_rep1/chrALL.mAFiA.sites.bed',
     'siTRUB1_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siTRUB1_input_rep1/chrALL.mAFiA.sites.bed',
-    'HeLa_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HeLa/chrALL.mAFiA.sites.bed',
-    # 'HeLa_SRR28796313': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HeLa_SRR28796313/chrALL.mAFiA.sites.bed',
-    'mouse_heart_ctrl': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/TAC/40-34/chrALL.mAFiA.sites.bed',
-    'mouse_heart_SHAM_day1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/TAC/40-31/chrALL.mAFiA.sites.bed',
+    'siCtrl_input_merged': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siCtrl_input_rep1/chrALL.mAFiA.sites.bed',
+    'siMETTL3_input_merged': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siMETTL3_input_rep1/chrALL.mAFiA.sites.bed',
+    'siTRUB1_input_merged': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siTRUB1_input_rep1/chrALL.mAFiA.sites.bed',
+
+    'TAC_ctrl': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/TAC/40-34/chrALL.mAFiA.sites.bed',
+    'SHAM_day1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/TAC/40-31/chrALL.mAFiA.sites.bed',
+    'A1_WT_CD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/Diet/A1_WT_CD/chrALL.mAFiA.sites.bed',
+    'B1_M3KO_CD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/Diet/B1_M3KO_CD/chrALL.mAFiA.sites.bed',
+    'C1_WT_WD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/Diet/C1_WT_WD/chrALL.mAFiA.sites.bed',
+    'D1_M3KO_WD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/Diet/D1_M3KO_WD/chrALL.mAFiA.sites.bed',
+
     'GLORI': '/home/adrian/Data/GLORI/bed_files/GLORI.chrALL.tsv',
     'BID-Seq': '/home/adrian/Data/BID_seq/BID_seq_HEK293T.bed',
     'BID-Seq_mouse_heart': '/home/adrian/Data/BID_seq/BID_seq_mouse_heart.bed',
@@ -55,7 +66,7 @@ if 'confidence' in df_comp.keys():
 
 if bid_seq_calibrated:
     df_comp.rename(columns={'BID-Seq': 'modRatio'}, inplace=True)
-else:
+elif comp_ds in ['GLORI', 'BID-Seq', 'BID-Seq_mouse_heart', 'PRAISE', 'BACS']:
     df_comp.rename(columns={'score': 'modRatio'}, inplace=True)
 
 img_out = f'/home/adrian/img_out/psi-co-mAFiA/{pred_ds}'
@@ -143,9 +154,6 @@ def calc_correlation(in_df):
 df_comp_pred = pd.merge(df_comp, df_pred, on=['chrom', 'chromStart', 'chromEnd', 'name', 'strand', 'ref5mer'], suffixes=[f'_{comp_ds}', f'_{pred_ds}'])
 df_comp_pred = df_comp_pred[df_comp_pred['name']==mod_type]
 df_comp_pred_sel = df_comp_pred
-# df_comp_pred_sel = df_comp_pred[
-#     (df_comp_pred['confidence']>=THRESH_CONF)
-# ]
 corr, num_sites = calc_correlation(df_comp_pred_sel)
 with open(os.path.join(img_out, f'corr_{mod_type}_pred_vs_{comp_ds}_conf{THRESH_CONF}_cov{THRESH_COV}.txt'), 'w') as f_out:
     f_out.write('num_sites' + '\t' + 'correlation' + '\n')
