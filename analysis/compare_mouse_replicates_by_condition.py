@@ -8,29 +8,49 @@ from collections import Counter
 import numpy as np
 import os
 
-dataset = 'Diet'
 THRESH_CONF = 80
-THRESH_COV = 50
+THRESH_COV = 20
+
+########################################################################################################################
+# dataset = 'Diet'
+# conditions = ['A', 'C']
+# replicates = ['1', '2']
+# dict_condition_names = {
+#     'A': 'WT_CD',
+#     'B': 'M3KO_CD',
+#     'C': 'WT_WD',
+#     'D': 'M3KO_WD'
+# }
+# fname = '{}{}_{}'
+# dict_condition_colors = {
+#     'A': 'b',
+#     'B': 'r',
+#     'C': 'g',
+#     'D': 'm'
+# }
+########################################################################################################################
+dataset = 'HFpEF'
+conditions = ['ctrl', 'HFpEF']
+replicates = ['rep1', 'rep2']
+dict_condition_names = {cond: cond for cond in conditions}
+fname = '{}_{}'
+dict_condition_colors = {
+    'ctrl': 'b',
+    'HFpEF': 'r',
+}
+########################################################################################################################
+# dataset = 'CM'
+# conditions = ['WT', 'M3KO']
+# replicates = ['rep1', 'rep2']
+# dict_condition_names = {cond: cond for cond in conditions}
+# fname = '{}_{}'
+# dict_condition_colors = {
+#     'WT': 'b',
+#     'M3KO': 'r',
+# }
+########################################################################################################################
 
 results_dir = f'/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/{dataset}'
-
-conditions = ['A', 'C']
-replicates = ['1', '2']
-
-dict_condition_names = {
-    'A': 'WT_CD',
-    'B': 'M3KO_CD',
-    'C': 'WT_WD',
-    'D': 'M3KO_WD'
-}
-
-dict_condition_colors = {
-    'A': 'b',
-    'B': 'r',
-    'C': 'g',
-    'D': 'm'
-}
-
 img_out = f'/home/adrian/img_out/mouse_heart/{dataset}'
 os.makedirs(img_out, exist_ok=True)
 
@@ -43,7 +63,8 @@ def import_df_results(ds_conditions, ds_replicates, thresh_confidence, thresh_co
     dfs = []
     for this_cond in ds_conditions:
         for this_rep in ds_replicates:
-            this_ds = f'{this_cond}{this_rep}_{dict_condition_names[this_cond]}'
+            # this_ds = f'{this_cond}{this_rep}_{dict_condition_names[this_cond]}'
+            this_ds = fname.format(this_cond, this_rep, dict_condition_names[this_cond])
             this_df = pd.read_csv(os.path.join(results_dir, this_ds, 'chrALL.mAFiA.sites.bed'), sep='\t', dtype={'chrom': str})
             this_df = this_df[
                 (this_df['confidence']>=thresh_confidence)
@@ -104,33 +125,24 @@ int_delta_max = np.vstack(group_div).T.max(axis=1)
 # ext_delta_min = np.array([np.abs([this_row[i]-this_row[j]]).min() for this_row in np.vstack(group_mean).T for i in range(len(this_row)-1) for j in range(i+1, len(this_row))])
 ext_delta = np.array([this_row[1]-this_row[0] for this_row in np.vstack(group_mean).T])
 
-
+########################################################################################################################
+### plot replicate differences #########################################################################################
+########################################################################################################################
 fig = plt.figure(figsize=(10, 10))
 
-mask_name = 'decreasing'
-mask = (int_delta_max < thresh_delta) * (ext_delta < -thresh_delta)
-df_sel = df_merged[mask]
+dict_mask = {
+    'increasing': (int_delta_max < thresh_delta) * (ext_delta >= thresh_delta),
+    'decreasing': (int_delta_max < thresh_delta) * (ext_delta < -thresh_delta)
+}
 
-ax = fig.add_subplot(2, 2, 1)
-mod = 'm6A'
-plot_condition_replicates(ax, df_sel[df_sel['name']==mod], mod, conditions, replicates)
-
-ax = fig.add_subplot(2, 2, 2)
-mod = 'psi'
-plot_condition_replicates(ax, df_sel[df_sel['name']==mod], mod, conditions, replicates)
-ax.legend(loc='upper right')
-
-mask_name = 'increasing'
-mask = (int_delta_max < thresh_delta) * (ext_delta >= thresh_delta)
-df_sel = df_merged[mask]
-
-ax = fig.add_subplot(2, 2, 3)
-mod = 'm6A'
-plot_condition_replicates(ax, df_sel[df_sel['name']==mod], mod, conditions, replicates)
-
-ax = fig.add_subplot(2, 2, 4)
-mod = 'psi'
-plot_condition_replicates(ax, df_sel[df_sel['name']==mod], mod, conditions, replicates)
-
-# fig.suptitle(dataset, fontsize=15)
-fig.savefig(os.path.join(img_out, f'{conditions[0]}_vs_{conditions[1]}.png'))
+for row_ind, mask_name in enumerate(['decreasing', 'increasing']):
+    df_sel = df_merged[dict_mask[mask_name]]
+    df_sel.to_csv(os.path.join(img_out, f'{conditions[0]}_vs_{conditions[1]}_sites_{mask_name}_minCov{THRESH_COV}_deltaS{thresh_delta}.tsv'), sep='\t', index=False)
+    for col_ind, mod in enumerate(['m6A', 'psi']):
+        subplot_ind = row_ind*2+col_ind+1
+        ax = fig.add_subplot(2, 2, subplot_ind)
+        plot_condition_replicates(ax, df_sel[df_sel['name']==mod], mod, conditions, replicates)
+        if subplot_ind==1:
+            ax.legend(loc='upper left')
+fig.suptitle(dataset, fontsize=15)
+fig.savefig(os.path.join(img_out, f'{conditions[0]}_vs_{conditions[1]}_minCov{THRESH_COV}.png'))
