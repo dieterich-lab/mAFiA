@@ -13,7 +13,7 @@ from collections import Counter
 thresh_confidence = 50.0
 thresh_coverage = 20
 results_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/TAC'
-img_out = '/home/adrian/img_out/TAC'
+img_out = '/home/adrian/img_out/mouse_heart/TAC'
 os.makedirs(img_out, exist_ok=True)
 
 gtf_file = '/home/adrian/Data/genomes/mus_musculus/GRCm38_102/GRCm38.102.gtf'
@@ -171,3 +171,74 @@ for subplot_ind, mod in enumerate(['psi', 'm6A']):
         plt.ylabel('Sites with increaseing / decreasing trend', fontsize=12)
     plt.ylim(ylim)
 plt.savefig(os.path.join(img_out, f'barchart_sites_with_increasing_decreasing_trend.png'), bbox_inches='tight')
+
+### phase diagram ###
+def hex_to_RGB(hex_str):
+    """ #FFFFFF -> [255,255,255]"""
+    #Pass 16 to the integer function for change of base
+    return [int(hex_str[i:i+2], 16) for i in range(1,6,2)]
+
+def get_color_gradient(c1, c2, n):
+    """
+    Given two hex colors, returns a color gradient
+    with n colors.
+    """
+    assert n > 1
+    c1_rgb = np.array(hex_to_RGB(c1))/255
+    c2_rgb = np.array(hex_to_RGB(c2))/255
+    mix_pcts = [x/(n-1) for x in range(n)]
+    rgb_colors = [((1-mix)*c1_rgb + (mix*c2_rgb)) for mix in mix_pcts]
+    return ["#" + "".join([format(int(round(val*255)), "02x") for val in item]) for item in rgb_colors]
+
+df_sites = []
+for mask_name in ['increasing', 'decreasing']:
+    dfs.append(pd.read_csv(os.path.join(img_out, f'sites_{mask_name}.tsv'), sep='\t'))
+df_sites = pd.concat(df_sites)
+
+days = ['day1', 'day7', 'day21', 'day56']
+colors = get_color_gradient("#d3d3d3", "#FF0000", len(days))
+dict_day_color = {
+    this_day: this_color for this_day, this_color in zip(days, colors)
+}
+
+for this_gene in df_sites['gene'].unique():
+    df_gene = df_sites[df_sites['gene']==this_gene]
+    if not df_gene['name'].str.contains('m6A').any() or not df_gene['name'].str.contains('psi').any():
+        continue
+    all_ts = []
+    plt.figure(figsize=(5, 5))
+    # for this_cond in ['SHAM', 'TAC']:
+    for this_cond in ['TAC']:
+        m6A_psi_phase = []
+        for this_day in days:
+            m6A_psi_phase.append(
+                (df_gene[df_gene['name'] == 'm6A'][f'modRatio_{this_cond}_{this_day}'].mean(),
+                 df_gene[df_gene['name'] == 'psi'][f'modRatio_{this_cond}_{this_day}'].mean())
+            )
+        ts = np.vstack(m6A_psi_phase).T
+        all_ts.append(ts)
+        for ind, this_day in enumerate(days):
+            x0 = ts[0, ind]
+            y0 = ts[1, ind]
+            plt.scatter(x0, y0, c=dict_day_color[this_day], label=this_day)
+            if ind < len(days)-1:
+                x1 = ts[0, ind+1]
+                y1 = ts[1, ind+1]
+                plt.quiver(x0, y0, (x1 - x0), (y1 - y0), angles='xy', scale_units='xy', scale=1, color=dict_day_color[this_day])
+            # plt.text(x0-0.6, y0+0.3, this_day)
+    all_ts = np.hstack(tuple(all_ts))
+    xmin = round(np.floor(all_ts[0].min()/5)*5)
+    xmax = round(np.ceil(all_ts[0].max()/5)*5)
+    plt.xlim([xmin-2, xmax+2])
+    plt.xticks(range(xmin, xmax+5, 5))
+    ymin = round(np.floor(all_ts[1].min()/5)*5)
+    ymax = round(np.ceil(all_ts[1].max()/5)*5)
+    plt.ylim([ymin-2, ymax+2])
+    plt.yticks(range(ymin, ymax+5, 5))
+    plt.legend()
+    plt.xlabel(r"$\langle S_{{{}}} \rangle$".format(dict_mod_display['m6A']), fontsize=12)
+    plt.ylabel(r"$\langle S_{{{}}} \rangle$".format(dict_mod_display['psi']), fontsize=12)
+    plt.title(this_gene, fontsize=15)
+
+    plt.savefig(os.path.join(img_out, f'trajectory_{this_gene}.png'), bbox_inches='tight')
+    plt.close('all')
