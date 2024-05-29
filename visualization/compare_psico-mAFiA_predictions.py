@@ -8,12 +8,15 @@ import os
 
 THRESH_CONF = 80
 THRESH_COV = 50
-pred_ds = 'Mettl3-KO_rep1'
-comp_ds = '100_WT_0_IVT'
+pred_ds = 'RNA004_HEK293_WT'
+comp_ds = 'PRAISE'
 bid_seq_calibrated = False
+restrict_motifs = True
 mod_type = 'psi'
 
 dict_ds = {
+    'RNA004_HEK293_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/RNA004/dorado/RNA004_HEK293_WT_RTA.mAFiA.bed',
+    
     '100_WT_0_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/100_WT_0_IVT/chrALL.mAFiA.sites.bed',
     '75_WT_25_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/75_WT_25_IVT/chrALL.mAFiA.sites.bed',
     '50_WT_50_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/50_WT_50_IVT/chrALL.mAFiA.sites.bed',
@@ -55,6 +58,8 @@ if 'confidence' in df_pred.keys():
         (df_pred['confidence']>=THRESH_CONF)
         * (df_pred['coverage']>=THRESH_COV)
     ]
+else:
+    df_pred = df_pred[df_pred['coverage']>=THRESH_COV]
 
 df_comp = pd.read_csv(
     dict_ds[comp_ds],
@@ -153,10 +158,17 @@ def calc_correlation(in_df):
 ### compare to Bid-Seq ###
 df_comp_pred = pd.merge(df_comp, df_pred, on=['chrom', 'chromStart', 'chromEnd', 'name', 'strand', 'ref5mer'], suffixes=[f'_{comp_ds}', f'_{pred_ds}'])
 df_comp_pred = df_comp_pred[df_comp_pred['name']==mod_type]
-df_comp_pred_sel = df_comp_pred
+if restrict_motifs:
+    df_comp_pred_sel = df_comp_pred[df_comp_pred['ref5mer'].isin(motifs)]
+else:
+    df_comp_pred_sel = df_comp_pred
 corr, num_sites = calc_correlation(df_comp_pred_sel)
 with open(os.path.join(img_out, f'corr_{mod_type}_pred_vs_{comp_ds}_conf{THRESH_CONF}_cov{THRESH_COV}.txt'), 'w') as f_out:
     f_out.write('num_sites' + '\t' + 'correlation' + '\n')
     f_out.write(str(num_sites) + '\t' + str(corr) + '\t' + '\n')
 scatter_plot_by_motif(df_comp_pred_sel, f'modRatio_{comp_ds}', f'modRatio_{pred_ds}', mod_type, motifs, num_rows, num_cols, f'{mod_type}_pred_vs_{comp_ds}_conf{THRESH_CONF}_cov{THRESH_COV}.png')
-scatter_plot(df_comp_pred_sel, f'modRatio_{comp_ds}', f'modRatio_{pred_ds}', mod_type, f'{mod_type}_pred_vs_{comp_ds}_combined_conf{THRESH_CONF}_cov{THRESH_COV}.png', corr=corr)
+if restrict_motifs:
+    out_filename = f'{mod_type}_pred_vs_{comp_ds}_combined_conf{THRESH_CONF}_cov{THRESH_COV}_restrict_motifs.png'
+else:
+    out_filename = f'{mod_type}_pred_vs_{comp_ds}_combined_conf{THRESH_CONF}_cov{THRESH_COV}.png'
+scatter_plot(df_comp_pred_sel, f'modRatio_{comp_ds}', f'modRatio_{pred_ds}', mod_type, out_filename, corr=corr)
