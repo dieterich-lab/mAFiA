@@ -196,9 +196,14 @@ for mask_name in ['increasing', 'decreasing']:
 df_sites = pd.concat(df_sites)
 
 days = ['day1', 'day7', 'day21', 'day56']
-colors = get_color_gradient("#d3d3d3", "#FF0000", len(days))
-dict_day_color = {
-    this_day: this_color for this_day, this_color in zip(days, colors)
+colors_TAC = get_color_gradient("#7d7f7c", "#FF0000", len(days))
+colors_SHAM = ["#d3d3d3"] * len(days)
+dict_day_color = {}
+dict_day_color['TAC'] = {
+    this_day: this_color for this_day, this_color in zip(days, colors_TAC)
+}
+dict_day_color['SHAM'] = {
+    this_day: this_color for this_day, this_color in zip(days, colors_SHAM)
 }
 
 for this_gene in df_sites['gene'].unique():
@@ -220,11 +225,14 @@ for this_gene in df_sites['gene'].unique():
         for ind, this_day in enumerate(days):
             x0 = ts[0, ind]
             y0 = ts[1, ind]
-            plt.scatter(x0, y0, c=dict_day_color[this_day], label=this_day)
+            if this_cond == 'TAC':
+                plt.scatter(x0, y0, c=dict_day_color[this_cond][this_day], label=this_day)
+            else:
+                plt.scatter(x0, y0, c=dict_day_color[this_cond][this_day])
             if ind < len(days)-1:
                 x1 = ts[0, ind+1]
                 y1 = ts[1, ind+1]
-                plt.quiver(x0, y0, (x1 - x0), (y1 - y0), angles='xy', scale_units='xy', scale=1, color=dict_day_color[this_day])
+                plt.quiver(x0, y0, (x1 - x0), (y1 - y0), angles='xy', scale_units='xy', scale=1, color=dict_day_color[this_cond][this_day])
             # plt.text(x0-0.6, y0+0.3, this_day)
     all_ts = np.hstack(tuple(all_ts))
     xmin = round(np.floor(all_ts[0].min()/5)*5)
