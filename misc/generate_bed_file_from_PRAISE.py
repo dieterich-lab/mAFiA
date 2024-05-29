@@ -147,4 +147,4 @@ df_out = pd.concat([
     df_out[df_out['chrom'].str.isnumeric()].sort_values(by=['chrom', 'chromStart'], key=pd.to_numeric),
     df_out[~df_out['chrom'].str.isnumeric()].sort_values(by=['chrom', 'chromStart']),
 ])
-df_out.to_csv(out_file, sep='\t', index=False)
+df_out.to_csv(out_file, sep='\t', index=False, float_format='%.1f')
