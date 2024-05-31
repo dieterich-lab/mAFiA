@@ -8,15 +8,19 @@ import os
 
 THRESH_CONF = 80
 THRESH_COV = 50
-pred_ds = 'RNA004_HEK293_WT'
-comp_ds = 'PRAISE'
+pred_ds = 'Mettl3-KO_rep1'
 bid_seq_calibrated = False
 restrict_motifs = True
-mod_type = 'psi'
+# comp_ds = 'BID-Seq'
+# mod_type = 'psi'
+comp_ds = 'WT_P2'
+mod_type = 'm6A'
 
 dict_ds = {
     'RNA004_HEK293_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/RNA004/dorado/RNA004_HEK293_WT_RTA.mAFiA.bed',
-    
+
+    'WT_P2': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/WT_P2/chrALL.mAFiA.sites.bed',
+
     '100_WT_0_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/100_WT_0_IVT/chrALL.mAFiA.sites.bed',
     '75_WT_25_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/75_WT_25_IVT/chrALL.mAFiA.sites.bed',
     '50_WT_50_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/50_WT_50_IVT/chrALL.mAFiA.sites.bed',

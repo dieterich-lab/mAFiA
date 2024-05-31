@@ -23,7 +23,7 @@ FMT = 'png'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
-mod = 'm6A'
+mod = 'psi'
 thresh_confidence = 80
 thresh_coverage = 50
 
@@ -54,7 +54,7 @@ all_ds = [
     '25_WT_75_IVT',
     '50_WT_50_IVT',
     '75_WT_25_IVT',
-    '100_WT_0_IVT'
+    # '100_WT_0_IVT'
 ]
 ds_names = {this_ds: f"{this_ds.split('_')[0]}% WT" for this_ds in all_ds}
 f_wt = {this_ds: int(this_ds.split('_')[0])/100.0 for this_ds in all_ds}
