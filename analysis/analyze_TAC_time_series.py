@@ -7,7 +7,7 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from pybedtools import BedTool
-from collections import Counter
+from analysis.plot_functions import plot_bar_chart_site_trend_by_region
 
 
 thresh_confidence = 50.0
@@ -148,29 +148,33 @@ for _, this_row in df_sel.iterrows():
 df_annot = pd.DataFrame(df_annot)[col_order]
 df_annot.to_csv(os.path.join(img_out, f'sites_{mask_name}.tsv'), sep='\t', index=False)
 
+
 ### plot sites with increasing / decreasing trend ###
-regions = ['five_prime_utr', 'CDS', 'three_prime_utr']
-ylim = [-60, 60]
-plt.figure(figsize=(10, 4))
-for subplot_ind, mod in enumerate(['psi', 'm6A']):
-    plt.subplot(1, 2, subplot_ind+1)
-    for mask_name in ['increasing', 'decreasing']:
-        this_df = pd.read_csv(os.path.join(img_out, f'sites_{mask_name}.tsv'), sep='\t')
-        all_counts = Counter(this_df[this_df['name']==mod]['region'])
-        region_site_counts = [all_counts[this_region] for this_region in regions]
-        if mask_name=='decreasing':
-            region_site_counts = [-this_count for this_count in region_site_counts]
-            color = 'r'
-        else:
-            color = 'b'
-        plt.bar(range(len(regions)), region_site_counts, width=0.5, color=color)
-        plt.xticks(range(len(regions)), regions)
-        plt.title(f'${dict_mod_display[mod]}$', fontsize=12)
-    plt.xlabel('Transcript region', fontsize=12)
-    if subplot_ind==0:
-        plt.ylabel('Sites with increaseing / decreasing trend', fontsize=12)
-    plt.ylim(ylim)
-plt.savefig(os.path.join(img_out, f'barchart_sites_with_increasing_decreasing_trend.png'), bbox_inches='tight')
+# regions = ['five_prime_utr', 'CDS', 'three_prime_utr']
+# ylim = [-60, 60]
+# plt.figure(figsize=(10, 4))
+# for subplot_ind, mod in enumerate(['psi', 'm6A']):
+#     plt.subplot(1, 2, subplot_ind+1)
+#     for mask_name in ['increasing', 'decreasing']:
+#         this_df = pd.read_csv(os.path.join(img_out, f'sites_{mask_name}.tsv'), sep='\t')
+#         all_counts = Counter(this_df[this_df['name']==mod]['region'])
+#         region_site_counts = [all_counts[this_region] for this_region in regions]
+#         if mask_name=='decreasing':
+#             region_site_counts = [-this_count for this_count in region_site_counts]
+#             color = 'r'
+#         else:
+#             color = 'b'
+#         plt.bar(range(len(regions)), region_site_counts, width=0.5, color=color)
+#         plt.xticks(range(len(regions)), regions)
+#         plt.title(f'${dict_mod_display[mod]}$', fontsize=12)
+#     plt.xlabel('Transcript region', fontsize=12)
+#     if subplot_ind==0:
+#         plt.ylabel('Sites with increaseing / decreasing trend', fontsize=12)
+#     plt.ylim(ylim)
+# plt.savefig(os.path.join(img_out, f'barchart_sites_with_increasing_decreasing_trend.png'), bbox_inches='tight')
+bar_chart = plot_bar_chart_site_trend_by_region(img_out, 'sites_{}.tsv', dict_mod_display)
+# bar_chart.suptitle('TAC', fontsize=15)
+bar_chart.savefig(os.path.join(img_out, f'TAC_site_trend_by_region.png'), bbox_inches='tight')
 
 ### phase diagram ###
 def hex_to_RGB(hex_str):
