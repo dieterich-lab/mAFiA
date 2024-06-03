@@ -65,9 +65,13 @@ f_wt = {this_ds: int(this_ds.split('_')[0])/100.0 for this_ds in all_ds}
 if mod == 'm6A':
     reference_path = '/home/adrian/Data/GLORI/bed_files/GLORI.chrALL.tsv'
     ref_name = 'GLORI'
+    markersize = 1
+    alpha = 0.5
 elif mod == 'psi':
     reference_path = '/home/adrian/Data/PRAISE/PRAISE_HEK293T_span1-3.bed'
     ref_name = 'PRAISE'
+    markersize = 3
+    alpha = 1.0
 df_reference = import_ref(reference_path)
 
 ########################################################################################################################
@@ -98,7 +102,7 @@ fig_scatter, axs = plt.subplots(nrows=1, ncols=len(all_ds), figsize=(6*len(all_d
 for ind, this_ds in enumerate(all_ds):
     df_mafia = import_mAFiA(this_ds, thresh_conf=thresh_confidence, thresh_cov=thresh_coverage)
     scatter_x, scatter_y = scatter_mafia_vs_ref(df_reference, df_mafia)
-    axs[ind].plot(scatter_x, scatter_y, '.', markersize=2)
+    axs[ind].plot(scatter_x, scatter_y, '.', markersize=markersize, alpha=0.5)
     axs[ind].set_xlim(xylim)
     axs[ind].set_ylim(xylim)
     guideline_x = ticks

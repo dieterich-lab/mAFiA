@@ -8,12 +8,12 @@ import os
 
 THRESH_CONF = 80
 THRESH_COV = 50
-pred_ds = 'Mettl3-KO_rep1'
+pred_ds = 'M3KO_rep1'
 bid_seq_calibrated = False
 restrict_motifs = True
 # comp_ds = 'BID-Seq'
 # mod_type = 'psi'
-comp_ds = 'WT_P2'
+comp_ds = 'WT_rep1'
 mod_type = 'm6A'
 
 dict_ds = {
@@ -44,6 +44,9 @@ dict_ds = {
     'B1_M3KO_CD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/Diet/B1_M3KO_CD/chrALL.mAFiA.sites.bed',
     'C1_WT_WD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/Diet/C1_WT_WD/chrALL.mAFiA.sites.bed',
     'D1_M3KO_WD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/Diet/D1_M3KO_WD/chrALL.mAFiA.sites.bed',
+
+    'M3KO_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/CM/M3KO_rep1/chrALL.mAFiA.sites.bed',
+    'WT_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/CM/WT_rep1/chrALL.mAFiA.sites.bed',
 
     'GLORI': '/home/adrian/Data/GLORI/bed_files/GLORI.chrALL.tsv',
     'BID-Seq': '/home/adrian/Data/BID_seq/BID_seq_HEK293T.bed',
