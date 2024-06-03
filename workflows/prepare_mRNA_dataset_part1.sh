@@ -1,72 +1,14 @@
 #!/usr/bin/env bash
 shopt -s globstar
 
-MODEL="${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.torch"
-#REF_GENOME="/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa"
-REF_GENOME="/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa"
+MODEL="${HOME}/git/mAFiA_dev/models/RODAN_HEK293_IVT.torch"
+
+WORKSPACE="/prj/TRR319_RMaP_BaseCalling/Adrian/${ds}"
+REF_GENOME="/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa"
+
 #WORKSPACE="/prj/TRR319_RMaP_BaseCalling/Adrian/mouse_heart/Diet/D2_M3KO_WD"
-WORKSPACE="/prj/TRR319_RMaP_BaseCalling/Adrian/mouse_heart/${ds}"
+#REF_GENOME="/biodb/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa"
 
-### new HEK293 #########################################################################################################
-#DATASET=0_WT_100_IVT
-#DATASET=25_WT_75_IVT
-#DATASET=50_WT_50_IVT
-#DATASET=75_WT_25_IVT
-#DATASET=100_WT_0_IVT
-#DATASET=P2_WT
-#DATASET=Mettl3-KO
-
-#WORKSPACE=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/HEK293/${DATASET}
-
-########################################################################################################################
-#DATASET=A1_WT_CD
-#DATASET=A2_WT_CD
-#WORKSPACE=/prj/TRR319_RMaP_BaseCalling/Adrian/mouse_heart/Federica_Accornero/${DATASET}
-
-########################################################################################################################
-
-#DATASET=JK_HEK293_DMSO_1_2_RTA
-#DATASET=JK_HEK293_DMSO_3_4_RTA
-#DATASET=JK_HEK293_STM2457_5_6_RTA
-#DATASET=JK_HEK293_STM2457_7_8_RTA
-#DATASET=JK_HEK293_DMSO_merged
-
-#DATASET=mESC_WT_DMSO_merged
-#DATASET=mESC_Mettl3_KO_merged
-#DATASET=mESC_WT_STM_merged
-
-#WORKSPACE=/prj/TRR319_RMaP/Project_B01/Adrian/${DATASET}
-
-########################################################################################################################
-#DATASET=40-26
-#DATASET=40-27
-#DATASET=40-28
-#DATASET=40-29
-#DATASET=40-30
-#DATASET=40-31
-#DATASET=40-32
-#DATASET=40-33
-#DATASET=40-34
-
-#WORKSPACE=/prj/Dewenter_TAC_Backs_lab/achan/${DATASET}
-#DATA_DIR=/prj/Dewenter_TAC_Backs_lab/raw_data/Nanopore_dRNA/Cologne
-########################################################################################################################
-
-#WORKSPACE=/prj/TRR319_RMaP_BaseCalling/Adrian/HeLa_SRR28796313
-
-########################################################################################################################
-#ds=HEK_siCtrl_input_rep1
-#ds=HEK_siMETTL3_input_rep1
-#ds=HEK_siTRUB1_input_rep1
-
-#ds=HEK_siCtrl_input_rep2
-#ds=HEK_siMETTL3_input_rep2
-#ds=HEK_siTRUB1_input_rep2
-
-#WORKSPACE=/prj/TRR319_RMaP_BaseCalling/Adrian/NanoSPA/${ds}
-########################################################################################################################
-
-#mkdir -p ${WORKSPACE}
 cd ${WORKSPACE}
 
 ########################################################################################################################
