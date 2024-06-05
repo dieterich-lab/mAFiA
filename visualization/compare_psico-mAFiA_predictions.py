@@ -8,13 +8,13 @@ import os
 
 THRESH_CONF = 80
 THRESH_COV = 50
-pred_ds = 'M3KO_rep1'
+pred_ds = 'WT_P2'
 bid_seq_calibrated = False
 restrict_motifs = True
-# comp_ds = 'BID-Seq'
-# mod_type = 'psi'
-comp_ds = 'WT_rep1'
-mod_type = 'm6A'
+comp_ds = 'PRAISE'
+mod_type = 'psi'
+# comp_ds = 'GLORI'
+# mod_type = 'm6A'
 
 dict_ds = {
     'RNA004_HEK293_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/RNA004/dorado/RNA004_HEK293_WT_RTA.mAFiA.bed',
@@ -26,7 +26,8 @@ dict_ds = {
     '50_WT_50_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/50_WT_50_IVT/chrALL.mAFiA.sites.bed',
     '25_WT_75_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/25_WT_75_IVT/chrALL.mAFiA.sites.bed',
     '0_WT_100_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/0_WT_100_IVT/chrALL.mAFiA.sites.bed',
-    'Mettl3-KO_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293T-Mettl3-KO/rep1//chrALL.mAFiA.sites.bed',
+
+    'Mettl3-KO_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293T-Mettl3-KO/rep1/chrALL.mAFiA.sites.bed',
 
     'HeLa_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HeLa/chrALL.mAFiA.sites.bed',
     # 'HeLa_SRR28796313': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HeLa_SRR28796313/chrALL.mAFiA.sites.bed',
@@ -38,7 +39,7 @@ dict_ds = {
     'siMETTL3_input_merged': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siMETTL3_input_rep1/chrALL.mAFiA.sites.bed',
     'siTRUB1_input_merged': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siTRUB1_input_rep1/chrALL.mAFiA.sites.bed',
 
-    'TAC_ctrl': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/TAC/40-34/chrALL.mAFiA.sites.bed',
+    'TAC_ctrl': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/TAC/40-34/chrALL.mAFiA.sites.bed',
     'SHAM_day1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/TAC/40-31/chrALL.mAFiA.sites.bed',
     'A1_WT_CD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/Diet/A1_WT_CD/chrALL.mAFiA.sites.bed',
     'B1_M3KO_CD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/Diet/B1_M3KO_CD/chrALL.mAFiA.sites.bed',
