@@ -23,7 +23,7 @@ FMT = 'png'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
-mod = 'psi'
+mod = 'm6A'
 thresh_confidence = 80
 thresh_coverage = 50
 
@@ -45,19 +45,19 @@ def import_ref(ref_path):
 ########################################################################################################################
 
 
-source_data_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293'
+source_data_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293'
 img_out = '/home/adrian/img_out/mixing'
 os.makedirs(img_out, exist_ok=True)
 
 all_ds = [
-    '0_WT_100_IVT',
-    '25_WT_75_IVT',
-    '50_WT_50_IVT',
-    '75_WT_25_IVT',
-    # '100_WT_0_IVT'
+    '0WT',
+    '25WT',
+    '50WT',
+    '75WT',
+    # '100WT'
 ]
-ds_names = {this_ds: f"{this_ds.split('_')[0]}% WT" for this_ds in all_ds}
-f_wt = {this_ds: int(this_ds.split('_')[0])/100.0 for this_ds in all_ds}
+ds_names = {this_ds: f"{this_ds.rstrip('WT')}% WT" for this_ds in all_ds}
+f_wt = {this_ds: int(this_ds.rstrip('WT'))/100.0 for this_ds in all_ds}
 
 # ref_name = '100% WT'
 # df_reference = import_mAFiA('100_WT_0_IVT', thresh_conf=thresh_confidence, thresh_cov=thresh_coverage)

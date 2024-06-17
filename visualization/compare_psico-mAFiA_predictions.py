@@ -8,13 +8,14 @@ import os
 
 THRESH_CONF = 80
 THRESH_COV = 50
-pred_ds = 'WT_P2'
+pred_ds = 'Mettl3-KO_rep3'
 bid_seq_calibrated = False
 restrict_motifs = True
-comp_ds = 'PRAISE'
-mod_type = 'psi'
+# comp_ds = 'PRAISE'
+# mod_type = 'psi'
 # comp_ds = 'GLORI'
-# mod_type = 'm6A'
+comp_ds = 'WT_P2'
+mod_type = 'm6A'
 
 dict_ds = {
     'RNA004_HEK293_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/RNA004/dorado/RNA004_HEK293_WT_RTA.mAFiA.bed',
@@ -27,7 +28,9 @@ dict_ds = {
     '25_WT_75_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/25_WT_75_IVT/chrALL.mAFiA.sites.bed',
     '0_WT_100_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/0_WT_100_IVT/chrALL.mAFiA.sites.bed',
 
-    'Mettl3-KO_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293T-Mettl3-KO/rep1/chrALL.mAFiA.sites.bed',
+    'Mettl3-KO_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293T-Mettl3-KO/rep1/chrALL.mAFiA.sites.bed',
+    'Mettl3-KO_rep2': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293T-Mettl3-KO/rep2/chrALL.mAFiA.sites.bed',
+    'Mettl3-KO_rep3': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293T-Mettl3-KO/rep3/chrALL.mAFiA.sites.bed',
 
     'HeLa_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HeLa/chrALL.mAFiA.sites.bed',
     # 'HeLa_SRR28796313': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HeLa_SRR28796313/chrALL.mAFiA.sites.bed',
