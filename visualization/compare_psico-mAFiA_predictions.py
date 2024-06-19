@@ -7,15 +7,15 @@ import numpy as np
 import os
 
 THRESH_CONF = 80
-THRESH_COV = 50
-pred_ds = 'Mettl3-KO_rep3'
+THRESH_COV = 20
+pred_ds = 'HeLa_WT'
 bid_seq_calibrated = False
 restrict_motifs = True
-# comp_ds = 'PRAISE'
-# mod_type = 'psi'
+comp_ds = 'BACS'
+mod_type = 'psi'
 # comp_ds = 'GLORI'
-comp_ds = 'WT_P2'
-mod_type = 'm6A'
+# comp_ds = 'WT_P2'
+# mod_type = 'm6A'
 
 dict_ds = {
     'RNA004_HEK293_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/RNA004/dorado/RNA004_HEK293_WT_RTA.mAFiA.bed',
@@ -32,7 +32,7 @@ dict_ds = {
     'Mettl3-KO_rep2': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293T-Mettl3-KO/rep2/chrALL.mAFiA.sites.bed',
     'Mettl3-KO_rep3': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293T-Mettl3-KO/rep3/chrALL.mAFiA.sites.bed',
 
-    'HeLa_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HeLa/chrALL.mAFiA.sites.bed',
+    'HeLa_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/NanoSPA/HeLa_WT/chrALL.mAFiA.sites.bed',
     # 'HeLa_SRR28796313': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HeLa_SRR28796313/chrALL.mAFiA.sites.bed',
 
     'siCtrl_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siCtrl_input_rep1/chrALL.mAFiA.sites.bed',
