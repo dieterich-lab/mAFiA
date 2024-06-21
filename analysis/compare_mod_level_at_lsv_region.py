@@ -5,6 +5,7 @@ from pybedtools import BedTool
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import numpy as np
 
 
@@ -16,7 +17,7 @@ dict_mod_display = {
 # gtf_file = '/home/adrian/Data/genomes/mus_musculus/GRCm38_102/GRCm38.102.gtf'
 # gtf = BedTool(gtf_file)
 
-thresh_conf = 50.0
+thresh_conf = 0.0
 # day = 'day1'
 
 # majiq_file = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/majiq/TAC/voila_modulize_{}/summary.tsv'
@@ -75,15 +76,15 @@ gene_exon_ranges = {
     #     source_target = this_lsv_region.split(':')[-2]
     #     chromStart, chromEnd = [int(x) for x in this_lsv_region.split(':')[-1].split('-')]
 
-# gene_name = 'Fhl1'
-# exon_ranges = gene_exon_ranges[gene_name]
-# chrom = 'X'
-# strand = '+'
-
-gene_name = 'Synpo2l'
+gene_name = 'Fhl1'
 exon_ranges = gene_exon_ranges[gene_name]
-chrom = '14'
-strand = '-'
+chrom = 'X'
+strand = '+'
+
+# gene_name = 'Synpo2l'
+# exon_ranges = gene_exon_ranges[gene_name]
+# chrom = '14'
+# strand = '-'
 
 sel_days = ['day1', 'day7', 'day21', 'day56']
 for this_exon_ind, this_exon_range in exon_ranges.items():
@@ -94,8 +95,8 @@ for this_exon_ind, this_exon_range in exon_ranges.items():
     for day in sel_days:
         df_sham = pd.read_csv(sham_file.format(day), sep='\t', dtype={'chrom': str})
         df_tac = pd.read_csv(tac_file.format(day), sep='\t', dtype={'chrom': str})
-        sub_df_sham = filter_df(df_sham, chrom, strand, chromStart, chromEnd, 0.0)
-        sub_df_tac = filter_df(df_tac, chrom, strand, chromStart, chromEnd, 0.0)
+        sub_df_sham = filter_df(df_sham, chrom, strand, chromStart, chromEnd, thresh_conf)
+        sub_df_tac = filter_df(df_tac, chrom, strand, chromStart, chromEnd, thresh_conf)
         merged_df_sham_tac = pd.merge(sub_df_sham, sub_df_tac,
                                       on=['chrom', 'chromStart', 'chromEnd', 'name', 'score', 'strand', 'ref5mer'],
                                       suffixes=['_sham', '_tac'],
@@ -183,3 +184,34 @@ for this_exon_ind, this_exon_range in exon_ranges.items():
             bbox_inches='tight'
         )
         plt.close('all')
+
+    cond_colors = {
+        'tac': 'r',
+        'sham': 'b'
+    }
+
+    label = condition.upper() if day_ind == 0 else None
+    labels = [(mpatches.Patch(color=cond_colors[this_label]), this_label.upper()) for this_label in ['tac', 'sham']]
+
+    plt.figure(figsize=(8, 8))
+    for subplot_ind, this_mod in enumerate(['m6A', 'psi']):
+        plt.subplot(2, 1, subplot_ind+1)
+        for cond_ind, condition in enumerate(['tac', 'sham']):
+            for day_ind, this_day in enumerate(sel_days):
+                this_data = df_all_days[df_all_days['name'] == this_mod][f'modRatio_{condition}_{this_day}'].values
+                this_data = this_data[~np.isnan(this_data)]
+                if len(this_data):
+                    violin_parts = plt.violinplot(this_data, [cond_ind+1-0.5+day_ind*0.25], widths=0.2)
+                    for pc in violin_parts['bodies']:
+                        pc.set_facecolor(cond_colors[condition])
+                        pc.set_edgecolor(cond_colors[condition])
+                    violin_parts['cmaxes'].set_edgecolor(cond_colors[condition])
+                    violin_parts['cmins'].set_edgecolor(cond_colors[condition])
+                    violin_parts['cbars'].set_edgecolor(cond_colors[condition])
+        plt.xticks([this_cond_ind+1-0.5+this_day_ind*0.25 for this_cond_ind in range(2) for this_day_ind in range(len(sel_days))], sel_days + sel_days)
+        plt.ylim([-5, 100])
+        plt.ylabel(f'$S_{{{dict_mod_display[this_mod]}}}$', fontsize=12)
+        plt.xlabel('Days', fontsize=12)
+        plt.legend(*zip(*labels))
+    plt.suptitle(f'{gene_name}, exon {this_exon_ind}, chr{chrom}: {chromStart+1}-{chromEnd+1}', fontsize=15)
+    plt.savefig(os.path.join(img_out, f'mod_dist_{gene_name}_exon{this_exon_ind}.png'), bbox_inches='tight')
