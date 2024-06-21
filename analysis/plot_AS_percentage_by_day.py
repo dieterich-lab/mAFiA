@@ -27,7 +27,7 @@ width = 0.4
 
 ### Synpo2l ###
 gene_name = 'Synpo2l'
-events = ['3 -> 5', 'i -> 5']
+events = ['3 -> 5', 'AFE']
 colors = ['red', 'green']
 counts = {
     'TAC': {
