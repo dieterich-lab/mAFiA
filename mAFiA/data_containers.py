@@ -79,7 +79,7 @@ class DataContainer:
 
     def _index_fast5_files(self, fast5_dir, index_bam_queries_only=False):
         print(f'Indexing fast5 files from {fast5_dir}')
-        f5_paths = glob(os.path.join(fast5_dir, '*.fast5'), recursive=True)
+        f5_paths = glob(os.path.join(fast5_dir, '**/*.fast5'), recursive=True)
         self.indexed_read_ids = {}
         if index_bam_queries_only:
             bam_query_names = [alignment.query_name for alignment in self.bam.fetch()]
