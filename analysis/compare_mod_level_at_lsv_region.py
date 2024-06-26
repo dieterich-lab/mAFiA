@@ -59,6 +59,11 @@ gene_exon_ranges = {
         '4': [20664397, 20664574],
         '4intron5': [20662466, 20664396],
         '5': [20658946, 20662465]
+    },
+    'Rcan1': {
+        '2': [92465833, 92466146],
+        '4': [92399896, 92400077],
+        '6': [92397263, 92397436]
     }
 }
 
@@ -76,15 +81,20 @@ gene_exon_ranges = {
     #     source_target = this_lsv_region.split(':')[-2]
     #     chromStart, chromEnd = [int(x) for x in this_lsv_region.split(':')[-1].split('-')]
 
-gene_name = 'Fhl1'
-exon_ranges = gene_exon_ranges[gene_name]
-chrom = 'X'
-strand = '+'
+# gene_name = 'Fhl1'
+# exon_ranges = gene_exon_ranges[gene_name]
+# chrom = 'X'
+# strand = '+'
 
 # gene_name = 'Synpo2l'
 # exon_ranges = gene_exon_ranges[gene_name]
 # chrom = '14'
 # strand = '-'
+
+gene_name = 'Rcan1'
+exon_ranges = gene_exon_ranges[gene_name]
+chrom = '16'
+strand = '-'
 
 sel_days = ['day1', 'day7', 'day21', 'day56']
 for this_exon_ind, this_exon_range in exon_ranges.items():
@@ -190,7 +200,6 @@ for this_exon_ind, this_exon_range in exon_ranges.items():
         'sham': 'b'
     }
 
-    label = condition.upper() if day_ind == 0 else None
     labels = [(mpatches.Patch(color=cond_colors[this_label]), this_label.upper()) for this_label in ['tac', 'sham']]
 
     plt.figure(figsize=(8, 8))
@@ -198,18 +207,20 @@ for this_exon_ind, this_exon_range in exon_ranges.items():
         plt.subplot(2, 1, subplot_ind+1)
         for cond_ind, condition in enumerate(['tac', 'sham']):
             for day_ind, this_day in enumerate(sel_days):
+                label = condition.upper() if day_ind == 0 else None
                 this_data = df_all_days[df_all_days['name'] == this_mod][f'modRatio_{condition}_{this_day}'].values
                 this_data = this_data[~np.isnan(this_data)]
                 if len(this_data):
-                    violin_parts = plt.violinplot(this_data, [cond_ind+1-0.5+day_ind*0.25], widths=0.2)
+                    violin_parts = plt.violinplot(this_data, [cond_ind+1-0.5+day_ind*0.25], widths=0.2, showmeans=True)
                     for pc in violin_parts['bodies']:
                         pc.set_facecolor(cond_colors[condition])
                         pc.set_edgecolor(cond_colors[condition])
                     violin_parts['cmaxes'].set_edgecolor(cond_colors[condition])
+                    violin_parts['cmeans'].set_edgecolor(cond_colors[condition])
                     violin_parts['cmins'].set_edgecolor(cond_colors[condition])
                     violin_parts['cbars'].set_edgecolor(cond_colors[condition])
         plt.xticks([this_cond_ind+1-0.5+this_day_ind*0.25 for this_cond_ind in range(2) for this_day_ind in range(len(sel_days))], sel_days + sel_days)
-        plt.ylim([-5, 100])
+        # plt.ylim([-5, 100])
         plt.ylabel(f'$S_{{{dict_mod_display[this_mod]}}}$', fontsize=12)
         plt.xlabel('Days', fontsize=12)
         plt.legend(*zip(*labels))

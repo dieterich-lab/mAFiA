@@ -1,0 +1,126 @@
+import os
+import pandas as pd
+pd.set_option('display.max_columns', None)
+import matplotlib
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+import numpy as np
+
+
+res_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/TAC'
+img_out = '/home/adrian/img_out/TAC_mod_level_by_isoform_exon'
+os.makedirs(img_out, exist_ok=True)
+
+gene_name = 'Rcan1'
+chrom = '16'
+strand = '-'
+exon_ranges = {
+    '2': [92465833, 92466146],
+    '4': [92399896, 92400077],
+    '6': [92397263, 92397436],
+    '7': [92395866, 92396025],
+    '8': [92391953, 92393628]
+}
+
+mods = ['m6A', 'psi']
+conditions = ['TAC', 'SHAM']
+days = ['day1', 'day7', 'day21', 'day56']
+events = ['exon2', 'exon4']
+isoforms = ['ENSMUST00000060005', 'ENSMUST00000023672']
+dict_event_isoform = {ev: iso for (ev, iso) in zip(events, isoforms)}
+colors = ['blue', 'purple']
+dict_event_color = {ev: color for (ev, color) in zip(events, colors)}
+dict_condition_color = {'TAC': 'red', 'SHAM': 'blue'}
+
+dict_mod_display = {
+    'm6A': 'm^6A',
+    'psi': '\psi'
+}
+
+labels = [(mpatches.Patch(color=dict_event_color[this_event]), dict_event_isoform[this_event]) for this_event in events]
+
+### split by condition and day ###
+# for this_cond in conditions:
+#     for this_day in days:
+#         plt.figure(figsize=(10, 10))
+#         for mod_ind, this_mod in enumerate(mods):
+#             plt.subplot(2, 1, mod_ind+1)
+#             for event_ind, this_event in enumerate(events):
+#                 bed_file = os.path.join(res_dir, '_'.join([this_cond, this_day]), f'{gene_name}.{this_event}.bed')
+#                 if os.path.exists(bed_file):
+#                     df_bed = pd.read_csv(bed_file, sep='\t', dtype={'chrom': str})
+#                     df_mod = df_bed[df_bed['name']==this_mod]
+#                     exon_mod_ratios = [
+#                         df_mod[(df_mod['chromStart'] >= (this_exon_range[0]-1))
+#                                * (df_mod['chromEnd'] <= (this_exon_range[1]-1))
+#                                ]['modRatio'].values
+#                         for this_exon_range in exon_ranges.values()
+#                         ]
+#                     exon_mod_ratios = [this_arr if len(this_arr) else np.array([0]) for this_arr in exon_mod_ratios]
+#                 else:
+#                     exon_mod_ratios = [np.array([0]) for this_exon_range in exon_ranges]
+#
+#                 violin_parts = plt.violinplot(exon_mod_ratios,
+#                                               np.arange(len(exon_ranges))-0.1+0.2*event_ind, widths=0.2)
+#                 for pc in violin_parts['bodies']:
+#                     pc.set_facecolor(dict_condition_color[this_event])
+#                     pc.set_edgecolor(dict_condition_color[this_event])
+#                 violin_parts['cmaxes'].set_edgecolor(dict_event_color[this_event])
+#                 # violin_parts['cmeans'].set_edgecolor(dict_event_color[this_event])
+#                 violin_parts['cmins'].set_edgecolor(dict_event_color[this_event])
+#                 violin_parts['cbars'].set_edgecolor(dict_event_color[this_event])
+#             # plt.legend(loc='upper left', fontsize=10)
+#             plt.xticks(range(len(exon_ranges)), list(exon_ranges.keys()))
+#             plt.xlabel('Exon', fontsize=12)
+#             plt.ylim([-5, 105])
+#             plt.ylabel(f'$S_{{{dict_mod_display[this_mod]}}}$', fontsize=12)
+#             # plt.title(f'${{{}}}$', fontsize=15)
+#             if mod_ind==0:
+#                 plt.legend(*zip(*labels), loc='upper left')
+#         plt.suptitle(f'{this_cond} {this_day}', fontsize=15)
+
+### split by exon ###
+for this_exon_ind, this_exon_range in exon_ranges.items():
+    plt.figure(figsize=(16, 10))
+    for mod_ind, this_mod in enumerate(mods):
+        for event_ind, this_event in enumerate(events):
+            plt.subplot(2, 2, mod_ind * len(events) + event_ind + 1)
+            for cond_ind, this_cond in enumerate(conditions):
+                day_mod_ratios = []
+                for day_ind, this_day in enumerate(days):
+                    bed_file = os.path.join(res_dir, '_'.join([this_cond, this_day]), f'{gene_name}.{this_event}.bed')
+                    if os.path.exists(bed_file):
+                        df_bed = pd.read_csv(bed_file, sep='\t', dtype={'chrom': str})
+                        df_mod = df_bed[df_bed['name']==this_mod]
+                        exon_mod_ratios = df_mod[
+                            (df_mod['chromStart'] >= (this_exon_range[0]-1))
+                            * (df_mod['chromEnd'] <= (this_exon_range[1]-1))
+                            ]['modRatio'].values
+                        exon_mod_ratios = exon_mod_ratios if len(exon_mod_ratios) else np.array([0])
+                    else:
+                        exon_mod_ratios = np.array([0])
+                    day_mod_ratios.append(exon_mod_ratios)
+
+                violin_parts = plt.violinplot(day_mod_ratios,
+                                              cond_ind - 0.3 + np.arange(len(days))*0.2, widths=0.2,
+                                              quantiles=[[0.75]] * len(days)
+                                              )
+                for pc in violin_parts['bodies']:
+                    pc.set_facecolor(dict_condition_color[this_cond])
+                    pc.set_edgecolor(dict_condition_color[this_cond])
+                violin_parts['cmaxes'].set_edgecolor(dict_condition_color[this_cond])
+                violin_parts['cquantiles'].set_edgecolor(dict_condition_color[this_cond])
+                violin_parts['cmins'].set_edgecolor(dict_condition_color[this_cond])
+                violin_parts['cbars'].set_edgecolor(dict_condition_color[this_cond])
+            plt.xticks(np.concatenate([event_ind - 0.3 + np.arange(len(days))*0.2 for event_ind in range(len(events))]),
+                       days + days)
+            if mod_ind==(len(mods)-1):
+                plt.xlabel('Days', fontsize=12)
+            plt.ylim([-5, 105])
+            plt.ylabel(f'$S_{{{dict_mod_display[this_mod]}}}$', fontsize=12)
+            plt.title(f'{dict_event_isoform[this_event]}', fontsize=15)
+            # if (mod_ind==0) and (cond_ind==0):
+            #     plt.legend(*zip(*labels), loc='lower left')
+            plt.suptitle(f'Exon {this_exon_ind}', fontsize=20)
+    plt.savefig(os.path.join(img_out, f'{gene_name}_exon{this_exon_ind}.png'))
