@@ -61,23 +61,25 @@ def plot_bar_chart(in_counts, long_short):
 
 
 ### Fhl1 ###
-# gene_name = 'Fhl1'
-# events = ['3 -> 9', '5 -> 9']
-# colors = ['red', 'purple']
-# counts = {
-#     'TAC': {
-#         'day1': [119, 25],
-#         'day7': [158, 593],
-#         'day21': [168, 820],
-#         'day56': [189, 865]
-#     },
-#     'SHAM': {
-#         'day1': [109, 14],
-#         'day7': [147, 15],
-#         'day21': [172, 19],
-#         'day56': [153, 63]
-#     }
-# }
+gene_name = 'Fhl1'
+events = ['3 -> 9', '5 -> 9']
+isoforms = ['ENSMUST00000023854', 'ENSMUST00000114772']
+dict_event_isoform = {ev: iso for (ev, iso) in zip(events, isoforms)}
+colors = ['red', 'purple']
+short_counts = {
+    'TAC': {
+        'day1': [119, 25],
+        'day7': [158, 593],
+        'day21': [168, 820],
+        'day56': [189, 865]
+    },
+    'SHAM': {
+        'day1': [109, 14],
+        'day7': [147, 15],
+        'day21': [172, 19],
+        'day56': [153, 63]
+    }
+}
 
 ### Synpo2l ###
 # gene_name = 'Synpo2l'
@@ -99,29 +101,27 @@ def plot_bar_chart(in_counts, long_short):
 # }
 
 ### Rcan1 ###
-gene_name = 'Rcan1'
-events = ['2 -> 6', '4 -> 6']
-isoforms = ['ENSMUST00000060005', 'ENSMUST00000023672']
-dict_event_isoform = {ev: iso for (ev, iso) in zip(events, isoforms)}
-colors = ['blue', 'purple']
-short_counts = {
-    'TAC': {
-        'day1': [146, 14],
-        'day7': [102, 372],
-        'day21': [149, 307],
-        'day56': [149, 327]
-    },
-    'SHAM': {
-        'day1': [100, 13],
-        'day7': [88, 27],
-        'day21': [108, 66],
-        'day56': [126, 91]
-    }
-}
+# gene_name = 'Rcan1'
+# events = ['2 -> 6', '4 -> 6']
+# isoforms = ['ENSMUST00000060005', 'ENSMUST00000023672']
+# dict_event_isoform = {ev: iso for (ev, iso) in zip(events, isoforms)}
+# colors = ['blue', 'purple']
+# short_counts = {
+#     'TAC': {
+#         'day1': [146, 14],
+#         'day7': [102, 372],
+#         'day21': [149, 307],
+#         'day56': [149, 327]
+#     },
+#     'SHAM': {
+#         'day1': [100, 13],
+#         'day7': [88, 27],
+#         'day21': [108, 66],
+#         'day56': [126, 91]
+#     }
+# }
 
 res_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/TAC'
-long_counts = get_long_read_counts_from_bam(res_dir, gene_name, ['exon2', 'exon4'])
-
 
 ### Vdac3 ###
 # gene_name = 'Vdac3'
@@ -175,4 +175,6 @@ days = [
 ]
 
 plot_bar_chart(short_counts, 'short')
+
+long_counts = get_long_read_counts_from_bam(res_dir, gene_name, isoforms)
 plot_bar_chart(long_counts, 'long')
