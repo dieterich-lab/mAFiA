@@ -3,10 +3,10 @@
 #SBATCH --cpus-per-task=40
 #SBATCH --mem=90GB
 #SBATCH --verbose
-#SBATCH --job-name=pileup_bambu_Mettl3
-#SBATCH --output=/home/achan/slurm/pileup_Rcan1.out
+#SBATCH --job-name=pileup_Rcan1
+#SBATCH --output=/home/achan/slurm/pileup_Rcan1_%A.out
 
-workspace="/beegfs/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/TAC/40-33"
+workspace="/beegfs/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/TAC/TAC_day1"
 out_dir=${workspace}
 
 cd ${workspace}
@@ -24,7 +24,7 @@ samtools view -N ids_exon2 Rcan1.mAFiA.reads.bam -U Rcan1.exon4.mAFiA.reads.bam
 samtools index Rcan1.exon4.mAFiA.reads.bam
 
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
-mod=/prj/TRR319_RMaP_BaseCalling/Adrian/site_annotations/homo_sapiens/GRCh38_102/m6A.psi.GRCh38_102.chr${chr}.bed
+mod=/prj/TRR319_RMaP_BaseCalling/Adrian/site_annotations/mus_musculus/GRCm38_102/m6A.psi.GRCm38_102.chr${chr}.bed
 
 for exon in 2 4
 do
