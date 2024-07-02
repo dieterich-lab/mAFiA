@@ -4,7 +4,7 @@ library(bambu)
 # args = commandArgs(trailingOnly=TRUE)
 # workspace <- args[1]
 # out.dir <- args[2]
-workspace <- "/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/TAC/SHAM_day1"
+workspace <- "/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/TAC/SHAM_day56"
 out.dir <- file.path(workspace, "bambu")
 
 bam <- file.path(workspace, "Fhl1.mAFiA.reads.bam")

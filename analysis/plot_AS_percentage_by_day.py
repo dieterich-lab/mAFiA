@@ -17,12 +17,15 @@ def get_long_read_counts_from_bam(in_res_dir, in_gene_name, in_events):
         for this_day in ['day1', 'day7', 'day21', 'day56']:
             out_dict[this_cond][this_day] = []
             for this_event in in_events:
-                bam_file = os.path.join(in_res_dir, '_'.join([this_cond, this_day]), f'{in_gene_name}.{this_event}.mAFiA.reads.bam')
-                out_dict[this_cond][this_day].append(
-                    reduce(lambda x, y: x + y,
-                           [int(this_line.split('\t')[2]) for this_line in pysam.idxstats(bam_file).split('\n') if
-                            len(this_line)])
-                )
+                bam_file = os.path.join(in_res_dir, '_'.join([this_cond, this_day]), 'bambu', f'{in_gene_name}.{this_event}.bam')
+                if os.path.exists(bam_file):
+                    out_dict[this_cond][this_day].append(
+                        reduce(lambda x, y: x + y,
+                               [int(this_line.split('\t')[2]) for this_line in pysam.idxstats(bam_file).split('\n') if
+                                len(this_line)])
+                    )
+                else:
+                    out_dict[this_cond][this_day].append(0)
     return out_dict
 
 
