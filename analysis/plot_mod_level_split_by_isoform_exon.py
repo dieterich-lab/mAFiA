@@ -12,31 +12,54 @@ res_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_
 img_out = '/home/adrian/img_out/TAC_mod_level_by_isoform_exon'
 os.makedirs(img_out, exist_ok=True)
 
-gene_name = 'Rcan1'
-chrom = '16'
-strand = '-'
+### Fhl1 ###############################################################################################################
+gene_name = 'Fhl1'
+chrom = 'X'
+strand = '+'
 exon_ranges = {
-    '2': [92465833, 92466146],
-    '4': [92399896, 92400077],
-    '6': [92397263, 92397436],
-    '7': [92395866, 92396025],
-    '8': [92391953, 92393628]
+    '1': [56731787, 56731868],
+    '3': [56754335, 56754391],
+    'new': [56764288, 56764402],
+    '5': [56779723, 56779794],
+    '9': [56787989, 56788170],
+    '10': [56789144, 56789743],
+    '11': [56789877, 56790046],
+    '12': [56790464, 56790666],
+    '13': [56791844, 56793346]
 }
+# isoforms = ['ENSMUST00000023854', 'ENSMUST00000114772', 'unclassified.new_exon']
+isoforms = ['ENSMUST00000023854', 'ENSMUST00000114772']
+events = isoforms
+# colors = ['red', 'purple', 'green']
+colors = ['red', 'purple']
 
+### Rcan1 ##############################################################################################################
+# gene_name = 'Rcan1'
+# chrom = '16'
+# strand = '-'
+# exon_ranges = {
+#     '2': [92465833, 92466146],
+#     '4': [92399896, 92400077],
+#     '6': [92397263, 92397436],
+#     '7': [92395866, 92396025],
+#     '8': [92391953, 92393628]
+# }
+#
+# events = ['exon2', 'exon4']
+# isoforms = ['ENSMUST00000060005', 'ENSMUST00000023672']
+# colors = ['blue', 'purple']
+
+########################################################################################################################
 mods = ['m6A', 'psi']
 conditions = ['TAC', 'SHAM']
 days = ['day1', 'day7', 'day21', 'day56']
-events = ['exon2', 'exon4']
-isoforms = ['ENSMUST00000060005', 'ENSMUST00000023672']
-dict_event_isoform = {ev: iso for (ev, iso) in zip(events, isoforms)}
-colors = ['blue', 'purple']
-dict_event_color = {ev: color for (ev, color) in zip(events, colors)}
-dict_condition_color = {'TAC': 'red', 'SHAM': 'blue'}
-
 dict_mod_display = {
     'm6A': 'm^6A',
     'psi': '\psi'
 }
+dict_event_isoform = {ev: iso for (ev, iso) in zip(events, isoforms)}
+dict_event_color = {ev: color for (ev, color) in zip(events, colors)}
+dict_condition_color = {'TAC': 'red', 'SHAM': 'blue'}
 
 ### split by condition and day ###
 isoform_labels = [(mpatches.Patch(color=dict_event_color[this_event]), dict_event_isoform[this_event]) for this_event in events]
@@ -47,7 +70,7 @@ for this_cond in conditions:
         for mod_ind, this_mod in enumerate(mods):
             plt.subplot(2, 1, mod_ind+1)
             for event_ind, this_event in enumerate(events):
-                bed_file = os.path.join(res_dir, '_'.join([this_cond, this_day]), f'{gene_name}.{this_event}.bed')
+                bed_file = os.path.join(res_dir, '_'.join([this_cond, this_day]), 'bambu', f'{gene_name}.{this_event}.bed')
                 if os.path.exists(bed_file):
                     df_bed = pd.read_csv(bed_file, sep='\t', dtype={'chrom': str})
                     df_mod = df_bed[df_bed['name']==this_mod]
@@ -80,6 +103,7 @@ for this_cond in conditions:
                 plt.legend(*zip(*isoform_labels), loc='upper left')
         plt.suptitle(f'{this_cond} {this_day}', fontsize=15)
         plt.savefig(os.path.join(img_out, f'{gene_name}_{this_cond}_{this_day}.png'))
+        plt.close('all')
 
 
 ### split by day and isoform ###
@@ -91,7 +115,7 @@ for this_day in days:
         for mod_ind, this_mod in enumerate(mods):
             plt.subplot(2, 1, mod_ind+1)
             for cond_ind, this_cond in enumerate(conditions):
-                bed_file = os.path.join(res_dir, '_'.join([this_cond, this_day]), f'{gene_name}.{this_event}.bed')
+                bed_file = os.path.join(res_dir, '_'.join([this_cond, this_day]), 'bambu', f'{gene_name}.{this_event}.bed')
                 if os.path.exists(bed_file):
                     df_bed = pd.read_csv(bed_file, sep='\t', dtype={'chrom': str})
                     df_mod = df_bed[df_bed['name']==this_mod]
@@ -125,18 +149,19 @@ for this_day in days:
                 plt.legend(*zip(*cond_labels), loc='upper left')
         plt.suptitle(this_day, fontsize=15)
         plt.savefig(os.path.join(img_out, f'{gene_name}_{dict_event_isoform[this_event]}_{this_day}.png'))
+        plt.close('all')
 
 
 ### split by exon ###
 for this_exon_ind, this_exon_range in exon_ranges.items():
-    plt.figure(figsize=(16, 10))
+    plt.figure(figsize=(6*len(events), 10))
     for mod_ind, this_mod in enumerate(mods):
         for event_ind, this_event in enumerate(events):
-            plt.subplot(2, 2, mod_ind * len(events) + event_ind + 1)
+            plt.subplot(2, len(events), mod_ind * len(events) + event_ind + 1)
             for cond_ind, this_cond in enumerate(conditions):
                 day_mod_ratios = []
                 for day_ind, this_day in enumerate(days):
-                    bed_file = os.path.join(res_dir, '_'.join([this_cond, this_day]), f'{gene_name}.{this_event}.bed')
+                    bed_file = os.path.join(res_dir, '_'.join([this_cond, this_day]), 'bambu', f'{gene_name}.{this_event}.bed')
                     if os.path.exists(bed_file):
                         df_bed = pd.read_csv(bed_file, sep='\t', dtype={'chrom': str})
                         df_mod = df_bed[df_bed['name']==this_mod]
@@ -162,8 +187,8 @@ for this_exon_ind, this_exon_range in exon_ranges.items():
                 violin_parts['cbars'].set_edgecolor(dict_condition_color[this_cond])
             if (mod_ind==0) and (event_ind==0):
                 plt.legend(*zip(*cond_labels), loc='upper left')
-            plt.xticks(np.concatenate([event_ind - 0.3 + np.arange(len(days))*0.2 for event_ind in range(len(events))]),
-                       days + days)
+            plt.xticks(np.concatenate([cond_ind - 0.3 + np.arange(len(days))*0.2 for cond_ind in range(len(conditions))]),
+                       days*len(conditions))
             if mod_ind==(len(mods)-1):
                 plt.xlabel('Days', fontsize=12)
             plt.ylim([-5, 105])
@@ -173,3 +198,4 @@ for this_exon_ind, this_exon_range in exon_ranges.items():
             #     plt.legend(*zip(*labels), loc='lower left')
             plt.suptitle(f'Exon {this_exon_ind}', fontsize=20)
     plt.savefig(os.path.join(img_out, f'{gene_name}_exon{this_exon_ind}.png'))
+    plt.close('all')
