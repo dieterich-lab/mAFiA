@@ -153,6 +153,7 @@ for this_day in days:
 
 
 ### split by exon ###
+conditions = ['TAC']
 for this_exon_ind, this_exon_range in exon_ranges.items():
     plt.figure(figsize=(6*len(events), 10))
     for mod_ind, this_mod in enumerate(mods):
@@ -175,18 +176,19 @@ for this_exon_ind, this_exon_range in exon_ranges.items():
                     day_mod_ratios.append(exon_mod_ratios)
 
                 violin_parts = plt.violinplot(day_mod_ratios,
-                                              cond_ind - 0.3 + np.arange(len(days))*0.2, widths=0.2,
+                                              cond_ind - 0.3 + np.arange(len(days))*0.2, widths=0.1,
                                               # quantiles=[[0.75]] * len(days)
                                               )
+                this_color = dict_event_color[this_event]
                 for pc in violin_parts['bodies']:
-                    pc.set_facecolor(dict_condition_color[this_cond])
-                    pc.set_edgecolor(dict_condition_color[this_cond])
-                violin_parts['cmaxes'].set_edgecolor(dict_condition_color[this_cond])
-                # violin_parts['cquantiles'].set_edgecolor(dict_condition_color[this_cond])
-                violin_parts['cmins'].set_edgecolor(dict_condition_color[this_cond])
-                violin_parts['cbars'].set_edgecolor(dict_condition_color[this_cond])
-            if (mod_ind==0) and (event_ind==0):
-                plt.legend(*zip(*cond_labels), loc='upper left')
+                    pc.set_facecolor(this_color)
+                    pc.set_edgecolor(this_color)
+                violin_parts['cmaxes'].set_edgecolor(this_color)
+                # violin_parts['cquantiles'].set_edgecolor(this_color)
+                violin_parts['cmins'].set_edgecolor(this_color)
+                violin_parts['cbars'].set_edgecolor(this_color)
+            # if (mod_ind==0) and (event_ind==0):
+            #     plt.legend(*zip(*cond_labels), loc='upper left')
             plt.xticks(np.concatenate([cond_ind - 0.3 + np.arange(len(days))*0.2 for cond_ind in range(len(conditions))]),
                        days*len(conditions))
             if mod_ind==(len(mods)-1):
