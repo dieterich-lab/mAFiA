@@ -41,7 +41,10 @@ def plot_bar_chart(in_counts, long_short):
         ax = fig.add_subplot(2, 1, subplot_ind+1)
         bottom = np.zeros(len(days))
         for this_event, this_ratio in ds_ratios.items():
-            p = ax.bar(days, this_ratio, bar_width, label=dict_event_isoform[this_event], bottom=bottom, color=event_colors[this_event])
+            if long_short=='long':
+                p = ax.bar(days, this_ratio, bar_width, label=dict_event_isoform[this_event], bottom=bottom, color=event_colors[this_event])
+            else:
+                p = ax.bar(days, this_ratio, bar_width, label=this_event, bottom=bottom, color=event_colors[this_event])
             bottom += this_ratio
         total_counts = [sum(this_val) for this_val in in_counts[ds].values()]
         for x_loc, this_total_count in enumerate(total_counts):
@@ -65,7 +68,7 @@ def plot_bar_chart(in_counts, long_short):
 
 ### Fhl1 ###
 gene_name = 'Fhl1'
-events = ['3 -> 9', '5 -> 9']
+events = ['exon3 -> exon9', 'exon5 -> exon9']
 isoforms = ['ENSMUST00000023854', 'ENSMUST00000114772']
 dict_event_isoform = {ev: iso for (ev, iso) in zip(events, isoforms)}
 colors = ['red', 'purple']

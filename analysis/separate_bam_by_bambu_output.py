@@ -2,12 +2,17 @@ import pandas as pd
 import pysam
 import os
 from collections import Counter
+from sys import argv
 
-ds = 'SHAM_day56'
-bam_file = f'/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/TAC/{ds}/Fhl1.mAFiA.reads.bam'
-bambu_dir = f'/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/TAC/{ds}/bambu'
-tx_map = os.path.join(bambu_dir, 'Fhl1.tx_map.tsv')
-tx_id = os.path.join(bambu_dir, 'Fhl1.tx_id.tsv')
+# ds = 'SHAM_day56'
+# bam_file = f'/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/TAC/{ds}/Fhl1.mAFiA.reads.bam'
+# bambu_dir = f'/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/TAC/{ds}/bambu'
+bam_file = argv[1]
+bambu_dir = argv[2]
+gene = argv[3]
+
+tx_map = os.path.join(bambu_dir, f'{gene}.tx_map.tsv')
+tx_id = os.path.join(bambu_dir, f'{gene}.tx_id.tsv')
 df_tx_map = pd.read_csv(tx_map, sep='\t').convert_dtypes()
 # df_tx_map = pd.read_csv(tx_map, sep='\t')
 tx_ids = pd.read_csv(tx_id, sep='\t', header=None).values[:, 0]
@@ -40,14 +45,14 @@ for _, this_row in df_tx_map.iterrows():
 
 tx_counts = Counter(readId_txId.values()).most_common()
 df_tx_counts = pd.DataFrame(tx_counts, columns=['transcript', 'counts'])
-df_tx_counts.to_csv(os.path.join(bambu_dir, 'Fhl1_tx_counts.tsv'), sep='\t')
+df_tx_counts.to_csv(os.path.join(bambu_dir, f'{gene}_tx_counts.tsv'), sep='\t')
 with pysam.AlignmentFile(bam_file, 'rb') as bam_in:
     txId_reads = {tx: [] for tx, counts in tx_counts}
     for this_read in bam_in.fetch():
         if this_read.query_name in readId_txId.keys():
             txId_reads[readId_txId[this_read.query_name]].append(this_read)
     for txId, reads in txId_reads.items():
-        bam_out_file = os.path.join(bambu_dir, f'Fhl1.{txId}.bam')
+        bam_out_file = os.path.join(bambu_dir, f'{gene}.{txId}.bam')
         with pysam.AlignmentFile(bam_out_file, 'wb', template=bam_in) as bam_out:
             for this_read in reads:
                 bam_out.write(this_read)

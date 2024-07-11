@@ -1,25 +1,27 @@
 #!/usr/bin/env Rscript
 
 library(bambu)
-# args = commandArgs(trailingOnly=TRUE)
-# workspace <- args[1]
-# out.dir <- args[2]
-workspace <- "/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/TAC/SHAM_day56"
-out.dir <- file.path(workspace, "bambu")
+args = commandArgs(trailingOnly=TRUE)
+workspace <- args[1]
+out.dir <- args[2]
+gene <- args[3]
 
-bam <- file.path(workspace, "Fhl1.mAFiA.reads.bam")
+# workspace <- "/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/TAC/SHAM_day56"
+# out.dir <- file.path(workspace, "bambu")
+bam <- file.path(workspace, sprintf("%s.mAFiA.reads.bam", gene))
+
 dir.create(out.dir)
 # fa <- "/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa"
 # gtf <- "/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38.102.gtf"
-fa <- '/home/adrian/Data/genomes/mus_musculus/GRCm38_102/GRCm38_102_X.fa'
-gtf <- '/home/adrian/Data/genomes/mus_musculus/GRCm38_102/Fhl1.GRCm38.102.gtf'
+fa <- '/home/adrian/Data/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa'
+gtf <- sprintf('/home/adrian/Data/genomes/mus_musculus/GRCm38_102/%s.GRCm38.102.gtf', gene)
 annot <- prepareAnnotations(gtf)
 
-se <- bambu(reads = bam, annotations = annot, genome = fa, trackReads = TRUE, discovery=TRUE, NDR=1, ncore=4)
+se <- bambu(reads = bam, annotations = annot, genome = fa, trackReads = TRUE, discovery=FALSE, ncore=4)
 tx.map <- metadata(se)$readToTranscriptMaps[[1]]
 
-write.table(apply(data.frame(tx.map), 2, as.character), file.path(out.dir, "Fhl1.tx_map.tsv"), sep="\t", row.names = FALSE)
-write.table(rowData(se)[["TXNAME"]], file.path(out.dir, "Fhl1.tx_id.tsv"), sep="\t", col.names = FALSE, row.names = FALSE)
+write.table(apply(data.frame(tx.map), 2, as.character), file.path(out.dir, sprintf("%s.tx_map.tsv", gene)), sep="\t", row.names = FALSE)
+write.table(rowData(se)[["TXNAME"]], file.path(out.dir, sprintf("%s.tx_id.tsv", gene)), sep="\t", col.names = FALSE, row.names = FALSE)
 
 # mask <- !sapply(metadata(se)$readToTranscriptMaps[[1]][["equalMatches"]], is.null)
 # mask.equalMatches <- sapply(tx.map[["equalMatches"]], length)==1
