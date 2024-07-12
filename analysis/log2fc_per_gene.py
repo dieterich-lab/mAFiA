@@ -156,11 +156,23 @@ for mod_ind, this_mod in enumerate(mods):
     plt.ylabel('Gene counts', fontsize=12)
     plt.title(f'N={len(all_log2fc[this_mod])}', fontsize=15)
 
+
+### output table ###
+df_log2fc_stats = []
+for this_gene, this_log2fc_stats in gene_log2fc_stats.items():
+    this_protein_log2fc = gene_protein_log2fc.get(this_gene)
+    for this_mod in mods:
+        this_mod_log2fc_stats = this_log2fc_stats.get(this_mod)
+        if this_mod_log2fc_stats is not None:
+            df_log2fc_stats.append([this_gene, this_mod] + list(this_mod_log2fc_stats) + [this_protein_log2fc])
+df_log2fc_stats = pd.DataFrame(df_log2fc_stats, columns=['gene', 'mod', 'num_mod_sites', 'SHAM', 'TAC', 'log2fc_mod', 'log2fc_protein'])
+df_log2fc_stats.to_csv(os.path.join(img_out, f'gene_log2fc_{this_day}.tsv'), sep='\t')
+
 ### common gene and thresholded by min. sites ###
 common_genes, common_log2fc_m6A, common_log2fc_psi = np.vstack(
     [(gene, val['m6A'][3], val['psi'][3]) for gene, val in gene_log2fc_stats.items()
      if (set(val.keys()).issuperset((set(['m6A', 'psi']))))
-     and (val['m6A'][0]>=thresh_num_sites) and (val['psi'][0]>=thresh_num_sites)
+     # and (val['m6A'][0]>=thresh_num_sites) and (val['psi'][0]>=thresh_num_sites)
      ]
 ).T
 common_log2fc = {
@@ -179,6 +191,45 @@ for mod_ind, this_mod in enumerate(mods):
     plt.xlabel(f'$log_{2}FC ({dict_mod_display[this_mod]})$', fontsize=12)
     plt.ylabel('Gene counts', fontsize=12)
     plt.title(f'N={len(common_log2fc[this_mod])}', fontsize=15)
+
+
+### set up bins ###
+max_bin = 3
+bin_edges = np.linspace(-max_bin, max_bin, 2*max_bin+1)
+bin_width = bin_edges[1] - bin_edges[0]
+bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
+
+### m6A vs psi ###
+plt.figure(figsize=(10, 4))
+for mod_ind, this_mod in enumerate(mods):
+    that_mod = [mod for mod in mods if mod!=this_mod][0]
+    plt.subplot(1, 2, mod_ind+1)
+    binned_that_mod_log2fc = []
+    bin_counts = []
+    for i in range(len(bin_edges)-1):
+        bin_start = bin_edges[i]
+        bin_end = bin_edges[i+1]
+        binned_that_mod = common_log2fc[that_mod][
+            (common_log2fc[this_mod] >= bin_start)
+            * (common_log2fc[this_mod] < bin_end)
+            ]
+        bin_counts.append(len(binned_that_mod))
+        binned_that_mod_log2fc.append(np.mean(binned_that_mod))
+    total_counts = np.sum(bin_counts)
+    plt.axhline(y=0, c='gray')
+    plt.bar(bin_centers, binned_that_mod_log2fc, width=bin_width*0.8)
+    for this_bin_center, this_bin_count, that_mod_log2fc in zip(bin_centers, bin_counts, binned_that_mod_log2fc):
+        if not np.isnan(that_mod_log2fc):
+            plt.text(this_bin_center, that_mod_log2fc + np.sign(that_mod_log2fc) * 0.1, this_bin_count,
+                 horizontalalignment='center', verticalalignment='center')
+    plt.title(f'N={total_counts}')
+    plt.xlim([-max_bin, max_bin])
+    max_y = np.ceil(np.nanmax(np.abs(binned_that_mod_log2fc)))
+    plt.ylim([-max_y, max_y])
+    plt.xlabel(f'$log_{2}FC ({dict_mod_display[this_mod]})$', fontsize=12)
+    plt.ylabel(f'$log_{2}FC ({dict_mod_display[that_mod]})$', fontsize=12)
+plt.suptitle(f'{this_day}', fontsize=15)
+plt.savefig(os.path.join(img_out, f'log2fc_m6A_vs_psi_{this_day}.png'), bbox_inches='tight')
 
 
 ### protein vs mods ###
@@ -210,28 +261,30 @@ for mod_ind, this_mod in enumerate(mods):
 plt.suptitle(f'{this_day}', fontsize=15)
 
 ### aggregate protein changes binned by mod changes ###
-bins = np.linspace(-3, 3, 7)
-bin_centers = 0.5 * (bins[:-1] + bins[1:])
-
 plt.figure(figsize=(10, 4))
 for mod_ind, this_mod in enumerate(mods):
     plt.subplot(1, 2, mod_ind+1)
     binned_protein_log2fc = []
-    total_n = 0
-    for i in range(len(bins)-1):
-        bin_start = bins[i]
-        bin_end = bins[i+1]
+    bin_counts = []
+    for i in range(len(bin_edges)-1):
+        bin_start = bin_edges[i]
+        bin_end = bin_edges[i+1]
         binned_protein = vec_log2fc_protein[this_mod][
             (vec_log2fc_mod[this_mod] >= bin_start)
             *(vec_log2fc_mod[this_mod] < bin_end)
             ]
-        total_n += len(binned_protein)
+        bin_counts.append(len(binned_protein))
         binned_protein_log2fc.append(np.mean(binned_protein))
+    total_counts = np.sum(bin_counts)
     plt.axhline(y=0, c='gray')
-    plt.bar(bin_centers, binned_protein_log2fc)
-    plt.title(f'N={total_n}')
-    plt.xlim([-3, 3])
-    plt.ylim([-0.25, 0.25])
+    plt.bar(bin_centers, binned_protein_log2fc, width=bin_width*0.8)
+    for this_bin_center, this_bin_count, this_protein_log2fc in zip(bin_centers, bin_counts, binned_protein_log2fc):
+        if not np.isnan(this_protein_log2fc):
+            plt.text(this_bin_center, this_protein_log2fc + np.sign(this_protein_log2fc) * 0.025, this_bin_count,
+                 horizontalalignment='center', verticalalignment='center')
+    plt.title(f'N={total_counts}')
+    plt.xlim([-max_bin, max_bin])
+    plt.ylim([-max_y, max_y])
     plt.xlabel(f'$log_{2}FC ({dict_mod_display[this_mod]})$', fontsize=12)
     if mod_ind==0:
         plt.ylabel('$log_{2}FC (protein)$', fontsize=12)
