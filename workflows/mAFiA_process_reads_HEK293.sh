@@ -15,21 +15,8 @@ else
 chr=${SLURM_ARRAY_TASK_ID}
 fi
 
-#ds=HEK_sicond_input_rep1
-#ds=HEK_siMETTL3_input_rep1
-#ds=HEK_siTRUB1_input_rep1
-#ds=HEK_siCtrl_input_rep2
-#ds=HEK_siMETTL3_input_rep2
-#ds=HEK_siTRUB1_input_rep2
-#ds=Mettl3-KO
-#workspace=/prj/TRR319_RMaP_BaseCalling/Adrian/NanoSPA/${ds}
-
-workspace=/prj/TRR319_RMaP_BaseCalling/Adrian/HEK293/${ds}
-output=/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/${ds}/chr${chr}
-
-#ds=HeLa_SRR28796313
-#workspace=/prj/TRR319_RMaP_BaseCalling/Adrian/${ds}
-#output=/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/${ds}/chr${chr}
+workspace=/prj/TRR319_RMaP_BaseCalling/Adrian/${ds}
+output=/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/${ds}/chr${chr}
 
 bam=${workspace}/chr${chr}/sorted.chr${chr}.bam
 fast5_dir=${workspace}/chr${chr}/fast5
