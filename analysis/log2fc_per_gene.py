@@ -8,11 +8,11 @@ from scipy.stats import kstest
 import numpy as np
 from scipy.stats import trim_mean
 
-this_day = 'day21'
+this_day = 'day1'
 
 thresh_confidence = 0.0
 thresh_coverage = 20
-thresh_pval = 0.1
+thresh_pval = 1.0
 thresh_num_sites = 10
 mods = ['m6A', 'psi']
 dict_mod_display = {
@@ -53,20 +53,25 @@ for _, this_row in df_gene_gtf.iterrows():
     df_gene_bed.append([chrom, chromStart, chromEnd, name, score, strand])
 df_gene_bed = pd.DataFrame(df_gene_bed, columns=['chrom', 'chromStart', 'chromEnd', 'name', 'score', 'strand'])
 
-proteome_xls = '/home/adrian/Data/Dewenter_TAC_Backs_lab/TACOMA_differential_proteome_analysis.xlsx'
-df_proteome = pd.read_excel('/home/adrian/Data/Dewenter_TAC_Backs_lab/TACOMA_differential_proteome_analysis.xlsx')
+# proteome_file = '/home/adrian/Data/Dewenter_TAC_Backs_lab/TACOMA_differential_proteome_analysis.xlsx'
+# df_proteome = pd.read_excel(proteome_file)
+proteome_file = '/home/adrian/Data/Dewenter_TAC_Backs_lab/TACOMA_differential_proteome_analysis_benjamini_hochberg.tsv'
+df_proteome = pd.read_csv(proteome_file, sep='\t')
+df_proteome = df_proteome[
+    (df_proteome['main.comparison']=='TAC vs Sham')
+    * (df_proteome['tp']==('Day ' + this_day.lstrip('day')))
+    * (df_proteome['p.adj']<thresh_pval)
+    ]
 gene_protein_log2fc = {}
 for this_gene in df_proteome['SYMBOL'].unique():
-    sub_df = df_proteome[
-        (df_proteome['SYMBOL']==this_gene)
-        * (df_proteome['main.comparison']=='TAC vs Sham')
-        * (df_proteome['tp']==('Day ' + this_day.lstrip('day')))
-    ]
+    sub_df = df_proteome[df_proteome['SYMBOL']==this_gene]
     gene_protein_log2fc[this_gene] = sub_df['logFC'].values[0]
 
 res_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/TAC'
 conditions = ['SHAM', 'TAC']
 condition_days = [f'{this_cond}_{this_day}' for this_cond in conditions]
+
+log2fc_file = os.path.join(img_out, f'gene_log2fc_{this_day}.tsv')
 
 ### merge SHAM and TAC ###
 dfs = {}
@@ -80,69 +85,95 @@ df_merged = pd.merge(*list(dfs.values()),
                      on=['chrom', 'chromStart', 'chromEnd', 'name', 'score', 'strand', 'ref5mer'],
                      suffixes=[f'_{this_key}' for this_key in dfs.keys()])
 
-### segregate by gene ###
-gene_mod_values = {}
-for this_gene in tqdm(df_gene_bed['name'].unique()):
-    gene_subdf = df_gene_bed[df_gene_bed['name']==this_gene]
-    chrom = gene_subdf['chrom'].unique()[0]
-    chromStart = gene_subdf['chromStart'].min()
-    chromEnd = gene_subdf['chromEnd'].max()
-    strand = gene_subdf['strand'].unique()[0]
-    df_gene_mod_sites = df_merged[
-        (df_merged['chrom']==chrom)
-        * (df_merged['chromStart']>=chromStart)
-        * (df_merged['chromEnd']<chromEnd)
-        * (df_merged['strand']==strand)
-    ]
-    this_gene_mod_values = {
-        this_mod: {
-            this_cond_day: df_gene_mod_sites[df_gene_mod_sites['name']==this_mod][f'modRatio_{this_cond_day}'].values
-            for this_cond_day in condition_days
+def calc_log2fc_stats():
+    ### segregate by gene ###
+    gene_mod_values = {}
+    for this_gene in tqdm(df_gene_bed['name'].unique()):
+        gene_subdf = df_gene_bed[df_gene_bed['name']==this_gene]
+        chrom = gene_subdf['chrom'].unique()[0]
+        chromStart = gene_subdf['chromStart'].min()
+        chromEnd = gene_subdf['chromEnd'].max()
+        strand = gene_subdf['strand'].unique()[0]
+        df_gene_mod_sites = df_merged[
+            (df_merged['chrom']==chrom)
+            * (df_merged['chromStart']>=chromStart)
+            * (df_merged['chromEnd']<chromEnd)
+            * (df_merged['strand']==strand)
+        ]
+        this_gene_mod_values = {
+            this_mod: {
+                this_cond_day: df_gene_mod_sites[df_gene_mod_sites['name']==this_mod][f'modRatio_{this_cond_day}'].values
+                for this_cond_day in condition_days
+            }
+            for this_mod in ['m6A', 'psi']
         }
-        for this_mod in ['m6A', 'psi']
-    }
 
-    if np.concatenate([this_cond_vals for this_mod_vals in this_gene_mod_values.values() for this_cond_vals in this_mod_vals.values()]).any():
-        gene_mod_values[this_gene] = this_gene_mod_values
+        if np.concatenate([this_cond_vals for this_mod_vals in this_gene_mod_values.values() for this_cond_vals in this_mod_vals.values()]).any():
+            gene_mod_values[this_gene] = this_gene_mod_values
 
 
-### log2FC ###
-metric = 'mean'
-gene_log2fc_stats = {}
-for gene, mod_ratios in gene_mod_values.items():
-        gene_log2fc_stats[gene] = {}
-        for this_mod in ['m6A', 'psi']:
-            if np.concatenate(list(mod_ratios[this_mod].values())).any():
-                num_sites = len(mod_ratios[this_mod][f'SHAM_{this_day}'])
-                sham_vals = mod_ratios[this_mod][f'SHAM_{this_day}']
-                tac_vals = mod_ratios[this_mod][f'TAC_{this_day}']
-                if metric=='mean':
-                    sham_metric = np.mean(sham_vals)
-                    tac_metric = np.mean(tac_vals)
-                elif metric=='trimmed_mean':
-                    sham_metric = trim_mean(sham_vals, 0.1)
-                    tac_metric = trim_mean(tac_vals, 0.1)
-                elif metric=='median':
-                    sham_metric = np.median(sham_vals)
-                    tac_metric = np.median(tac_vals)
-                elif metric=='75percentile':
-                    sham_metric = np.percentile(sham_vals, q=75)
-                    tac_metric = np.percentile(tac_vals, q=75)
-                elif metric=='90percentile':
-                    sham_metric = np.percentile(sham_vals, q=90)
-                    tac_metric = np.percentile(tac_vals, q=90)
-                elif metric=='max':
-                    sham_metric = np.max(sham_vals)
-                    tac_metric = np.max(tac_vals)
-                tac_metric += 0.000001
-                sham_metric += 0.000001
-                log2fc = np.log2(tac_metric / sham_metric)
-                gene_log2fc_stats[gene][this_mod] = (num_sites, sham_metric, tac_metric, log2fc)
+    ### log2FC ###
+    metric = 'mean'
+    gene_log2fc_stats = {}
+    for gene, mod_ratios in gene_mod_values.items():
+            gene_log2fc_stats[gene] = {}
+            for this_mod in ['m6A', 'psi']:
+                if np.concatenate(list(mod_ratios[this_mod].values())).any():
+                    num_sites = len(mod_ratios[this_mod][f'SHAM_{this_day}'])
+                    sham_vals = mod_ratios[this_mod][f'SHAM_{this_day}']
+                    tac_vals = mod_ratios[this_mod][f'TAC_{this_day}']
+                    if metric=='mean':
+                        sham_metric = np.mean(sham_vals)
+                        tac_metric = np.mean(tac_vals)
+                    elif metric=='trimmed_mean':
+                        sham_metric = trim_mean(sham_vals, 0.1)
+                        tac_metric = trim_mean(tac_vals, 0.1)
+                    elif metric=='median':
+                        sham_metric = np.median(sham_vals)
+                        tac_metric = np.median(tac_vals)
+                    elif metric=='75percentile':
+                        sham_metric = np.percentile(sham_vals, q=75)
+                        tac_metric = np.percentile(tac_vals, q=75)
+                    elif metric=='90percentile':
+                        sham_metric = np.percentile(sham_vals, q=90)
+                        tac_metric = np.percentile(tac_vals, q=90)
+                    elif metric=='max':
+                        sham_metric = np.max(sham_vals)
+                        tac_metric = np.max(tac_vals)
+                    tac_metric += 0.000001
+                    sham_metric += 0.000001
+                    log2fc = np.log2(tac_metric / sham_metric)
+                    gene_log2fc_stats[gene][this_mod] = (num_sites, sham_metric, tac_metric, log2fc)
+
+    return gene_log2fc_stats
+
+if os.path.exists(log2fc_file):
+    df_log2fc = pd.read_csv(log2fc_file, sep='\t')
+    gene_log2fc_stats = {}
+    for _, this_row in df_log2fc.iterrows():
+        if this_row['gene'] not in gene_log2fc_stats.keys():
+            gene_log2fc_stats[this_row['gene']] = {}
+        gene_log2fc_stats[this_row['gene']][this_row['mod']] = (this_row['num_mod_sites'],
+                                                                this_row['SHAM'],
+                                                                this_row['TAC'],
+                                                                this_row['log2fc_mod'])
+else:
+    gene_log2fc_stats = calc_log2fc_stats()
 
 ### all ###
 max_range = 1.5
-gene_log2fc_m6A = {this_gene: this_gene_log2fc.get('m6A')[3] for this_gene, this_gene_log2fc in gene_log2fc_stats.items() if this_gene_log2fc.get('m6A') is not None}
-gene_log2fc_psi = {this_gene: this_gene_log2fc.get('psi')[3] for this_gene, this_gene_log2fc in gene_log2fc_stats.items() if this_gene_log2fc.get('psi') is not None}
+gene_log2fc_m6A = {
+    this_gene: this_gene_log2fc.get('m6A')[3]
+    for this_gene, this_gene_log2fc in gene_log2fc_stats.items()
+    if (this_gene_log2fc.get('m6A') is not None)
+       # and (this_gene_log2fc.get('m6A')[0]>=thresh_num_sites)
+}
+gene_log2fc_psi = {
+    this_gene: this_gene_log2fc.get('psi')[3]
+    for this_gene, this_gene_log2fc in gene_log2fc_stats.items()
+    if (this_gene_log2fc.get('psi') is not None)
+       # and (this_gene_log2fc.get('psi')[0]>=thresh_num_sites)
+}
 all_log2fc = {
     'm6A': gene_log2fc_m6A.values(),
     'psi': gene_log2fc_psi.values()
@@ -165,8 +196,9 @@ for this_gene, this_log2fc_stats in gene_log2fc_stats.items():
         this_mod_log2fc_stats = this_log2fc_stats.get(this_mod)
         if this_mod_log2fc_stats is not None:
             df_log2fc_stats.append([this_gene, this_mod] + list(this_mod_log2fc_stats) + [this_protein_log2fc])
-df_log2fc_stats = pd.DataFrame(df_log2fc_stats, columns=['gene', 'mod', 'num_mod_sites', 'SHAM', 'TAC', 'log2fc_mod', 'log2fc_protein'])
-df_log2fc_stats.to_csv(os.path.join(img_out, f'gene_log2fc_{this_day}.tsv'), sep='\t')
+if not os.path.exists(log2fc_file):
+    df_log2fc_stats = pd.DataFrame(df_log2fc_stats, columns=['gene', 'mod', 'num_mod_sites', 'SHAM', 'TAC', 'log2fc_mod', 'log2fc_protein'])
+    df_log2fc_stats.to_csv(log2fc_file, sep='\t', index=False)
 
 ### common gene and thresholded by min. sites ###
 common_genes, common_log2fc_m6A, common_log2fc_psi = np.vstack(
@@ -248,19 +280,25 @@ vec_log2fc_protein = {}
 vec_log2fc_protein['m6A'] = vec_log2fc_m6A_protein
 vec_log2fc_protein['psi'] = vec_log2fc_psi_protein
 
-plt.figure(figsize=(10, 4))
-for mod_ind, this_mod in enumerate(mods):
-    plt.subplot(1, 2, mod_ind+1)
-    plt.scatter(vec_log2fc_mod[this_mod], vec_log2fc_protein[this_mod], s=2)
-    plt.xlim([-3, 3])
-    plt.ylim([-2, 2])
-    plt.axvline(x=0, c='r', ls='--')
-    plt.axhline(y=0, c='r', ls='--')
-    plt.xlabel(f'$log_{2}FC ({dict_mod_display[this_mod]})$', fontsize=12)
-    plt.ylabel('$log_{2}FC (protein)$', fontsize=12)
-plt.suptitle(f'{this_day}', fontsize=15)
+# plt.figure(figsize=(10, 4))
+# for mod_ind, this_mod in enumerate(mods):
+#     plt.subplot(1, 2, mod_ind+1)
+#     plt.scatter(vec_log2fc_mod[this_mod], vec_log2fc_protein[this_mod], s=2)
+#     plt.xlim([-3, 3])
+#     plt.ylim([-2, 2])
+#     plt.axvline(x=0, c='r', ls='--')
+#     plt.axhline(y=0, c='r', ls='--')
+#     plt.xlabel(f'$log_{2}FC ({dict_mod_display[this_mod]})$', fontsize=12)
+#     plt.ylabel('$log_{2}FC (protein)$', fontsize=12)
+# plt.suptitle(f'{this_day}', fontsize=15)
 
 ### aggregate protein changes binned by mod changes ###
+max_bin = 3
+bin_edges = np.linspace(-max_bin, max_bin, 7)
+bin_width = bin_edges[1] - bin_edges[0]
+bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
+max_y = 0.3
+
 plt.figure(figsize=(10, 4))
 for mod_ind, this_mod in enumerate(mods):
     plt.subplot(1, 2, mod_ind+1)
@@ -285,6 +323,8 @@ for mod_ind, this_mod in enumerate(mods):
     plt.title(f'N={total_counts}')
     plt.xlim([-max_bin, max_bin])
     plt.ylim([-max_y, max_y])
+    # max_y = (np.nanmax(np.abs(binned_protein_log2fc)) // 0.25 + 1) * 0.25
+    # plt.ylim([-max_y, max_y])
     plt.xlabel(f'$log_{2}FC ({dict_mod_display[this_mod]})$', fontsize=12)
     if mod_ind==0:
         plt.ylabel('$log_{2}FC (protein)$', fontsize=12)
