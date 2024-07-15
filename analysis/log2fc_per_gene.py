@@ -8,7 +8,7 @@ from scipy.stats import kstest
 import numpy as np
 from scipy.stats import trim_mean
 
-this_day = 'day1'
+this_day = 'day56'
 
 thresh_confidence = 0.0
 thresh_coverage = 20
@@ -18,6 +18,10 @@ mods = ['m6A', 'psi']
 dict_mod_display = {
     'm6A': 'm^6A',
     'psi': '\psi'
+}
+mod_color = {
+    'm6A': 'r',
+    'psi': 'b'
 }
 condition_color = {
     'SHAM': 'blue',
@@ -293,15 +297,16 @@ vec_log2fc_protein['psi'] = vec_log2fc_psi_protein
 # plt.suptitle(f'{this_day}', fontsize=15)
 
 ### aggregate protein changes binned by mod changes ###
-max_bin = 3
-bin_edges = np.linspace(-max_bin, max_bin, 7)
+max_bin = 2
+bin_edges = np.linspace(-max_bin, max_bin, 5)
 bin_width = bin_edges[1] - bin_edges[0]
 bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
-max_y = 0.3
+max_y = 1.5
 
-plt.figure(figsize=(10, 4))
+mod_means = {}
+plt.figure(figsize=(15, 4))
 for mod_ind, this_mod in enumerate(mods):
-    plt.subplot(1, 2, mod_ind+1)
+    plt.subplot(1, 3, mod_ind+1)
     binned_protein_log2fc = []
     bin_counts = []
     for i in range(len(bin_edges)-1):
@@ -312,22 +317,53 @@ for mod_ind, this_mod in enumerate(mods):
             *(vec_log2fc_mod[this_mod] < bin_end)
             ]
         bin_counts.append(len(binned_protein))
-        binned_protein_log2fc.append(np.mean(binned_protein))
+        binned_protein_log2fc.append(binned_protein)
+        # binned_protein_log2fc.append(np.mean(binned_protein))
+    mask = np.array([len(x) > 0 for x in binned_protein_log2fc])
+    medians = [np.median(this_binned_log2fc) for this_binned_log2fc in binned_protein_log2fc]
+    means = [np.mean(this_binned_log2fc) for this_binned_log2fc in binned_protein_log2fc]
+    mod_means[this_mod] = means
+    violin_parts = plt.violinplot(
+        [this_bin for this_ind, this_bin in enumerate(binned_protein_log2fc) if mask[this_ind]],
+        bin_centers[mask],
+        # showmeans=True
+    )
+    for pc in violin_parts['bodies']:
+        pc.set_facecolor(mod_color[this_mod])
+        pc.set_edgecolor(mod_color[this_mod])
+    violin_parts['cmaxes'].set_edgecolor(mod_color[this_mod])
+    # violin_parts['cmeans'].set_edgecolor(mod_color[this_mod])
+    violin_parts['cmins'].set_edgecolor(mod_color[this_mod])
+    violin_parts['cbars'].set_edgecolor(mod_color[this_mod])
+    plt.plot(bin_centers, means, c=mod_color[this_mod])
+    plt.plot(bin_centers, means, c=mod_color[this_mod], marker='o')
     total_counts = np.sum(bin_counts)
-    plt.axhline(y=0, c='gray')
-    plt.bar(bin_centers, binned_protein_log2fc, width=bin_width*0.8)
-    for this_bin_center, this_bin_count, this_protein_log2fc in zip(bin_centers, bin_counts, binned_protein_log2fc):
-        if not np.isnan(this_protein_log2fc):
-            plt.text(this_bin_center, this_protein_log2fc + np.sign(this_protein_log2fc) * 0.025, this_bin_count,
-                 horizontalalignment='center', verticalalignment='center')
+    # plt.axhline(y=0, c='gray')
+    # plt.bar(bin_centers, binned_protein_log2fc, width=bin_width*0.8)
+    # for this_bin_center, this_bin_count, this_protein_log2fc in zip(bin_centers, bin_counts, binned_protein_log2fc):
+    #     if not np.isnan(this_protein_log2fc):
+    #         plt.text(this_bin_center, this_protein_log2fc + np.sign(this_protein_log2fc) * 0.025, this_bin_count,
+    #              horizontalalignment='center', verticalalignment='center')
     plt.title(f'N={total_counts}')
     plt.xlim([-max_bin, max_bin])
-    plt.ylim([-max_y, max_y])
-    # max_y = (np.nanmax(np.abs(binned_protein_log2fc)) // 0.25 + 1) * 0.25
+    plt.xticks(bin_edges)
     # plt.ylim([-max_y, max_y])
+    max_y = (np.nanmax(np.abs(np.concatenate(binned_protein_log2fc))) // 0.5 + 1) * 0.5
+    plt.ylim([-max_y, max_y])
     plt.xlabel(f'$log_{2}FC ({dict_mod_display[this_mod]})$', fontsize=12)
-    if mod_ind==0:
-        plt.ylabel('$log_{2}FC (protein)$', fontsize=12)
+    # if mod_ind==0:
+    plt.ylabel('$log_{2}FC (protein)$', fontsize=12)
+plt.subplot(1, 3, 3)
+for this_mod in mods:
+    plt.plot(bin_centers, mod_means[this_mod], mod_color[this_mod], label=f'${dict_mod_display[this_mod]}$')
+    plt.plot(bin_centers, mod_means[this_mod], mod_color[this_mod], marker='o')
+plt.xlabel(f'$log_{2}FC (mod)$', fontsize=12)
+plt.ylabel('$log_{2}FC (protein)$', fontsize=12)
+ymax = 0.2
+plt.ylim([-ymax, ymax])
+plt.xticks(bin_edges)
+plt.yticks(np.arange(-ymax, ymax+0.1, 0.1))
+plt.legend(fontsize=12)
 plt.suptitle(f'{this_day}', fontsize=15)
 plt.savefig(os.path.join(img_out, f'log2fc_protein_vs_mods_{this_day}.png'), bbox_inches='tight')
 

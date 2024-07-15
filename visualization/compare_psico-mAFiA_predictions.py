@@ -8,29 +8,37 @@ import os
 
 THRESH_CONF = 80
 THRESH_COV = 20
-pred_ds = 'HeLa_WT'
+pred_ds = 'Mettl3-KO_rep2'
 bid_seq_calibrated = False
 restrict_motifs = True
-comp_ds = 'BACS'
-mod_type = 'psi'
+comp_ds = 'WT_P2'
+# mod_type = 'psi'
 # comp_ds = 'GLORI'
 # comp_ds = 'WT_P2'
-# mod_type = 'm6A'
+mod_type = 'm6A'
+
+mods = ['m6A', 'psi']
+dict_mod_display = {
+    'm6A': 'm^6A',
+    'psi': '\psi'
+}
 
 dict_ds = {
     'RNA004_HEK293_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/RNA004/dorado/RNA004_HEK293_WT_RTA.mAFiA.bed',
 
     'WT_P2': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/WT_P2/chrALL.mAFiA.sites.bed',
 
-    '100_WT_0_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/100_WT_0_IVT/chrALL.mAFiA.sites.bed',
-    '75_WT_25_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/75_WT_25_IVT/chrALL.mAFiA.sites.bed',
-    '50_WT_50_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/50_WT_50_IVT/chrALL.mAFiA.sites.bed',
-    '25_WT_75_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/25_WT_75_IVT/chrALL.mAFiA.sites.bed',
-    '0_WT_100_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/HEK293/0_WT_100_IVT/chrALL.mAFiA.sites.bed',
+    '100WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/100WT/chrALL.mAFiA.sites.bed',
+    '75WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/75WT/chrALL.mAFiA.sites.bed',
+    '50WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/50WT/chrALL.mAFiA.sites.bed',
+    '25WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/25WT/chrALL.mAFiA.sites.bed',
+    '0WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/0WT/chrALL.mAFiA.sites.bed',
 
     'Mettl3-KO_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293T-Mettl3-KO/rep1/chrALL.mAFiA.sites.bed',
     'Mettl3-KO_rep2': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293T-Mettl3-KO/rep2/chrALL.mAFiA.sites.bed',
     'Mettl3-KO_rep3': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293T-Mettl3-KO/rep3/chrALL.mAFiA.sites.bed',
+
+    'TRUB1_OE_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293_TRUB1_OE/rep1/chrALL.mAFiA.sites.bed',
 
     'HeLa_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/NanoSPA/HeLa_WT/chrALL.mAFiA.sites.bed',
     # 'HeLa_SRR28796313': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HeLa_SRR28796313/chrALL.mAFiA.sites.bed',
@@ -99,7 +107,7 @@ def scatter_plot(df_in, key_x, key_y, mod_type, fig_name, corr=None):
     plt.xlabel("$S_{{{}}}$".format('-'.join(key_x.split('_')[1:])), fontsize=10)
     plt.ylabel("$S_{{{}}}$".format('-'.join(key_y.split('_')[1:])), fontsize=10)
     if corr is not None:
-        title = f'{len(df_in)} {mod_type} sites\nconf$\geq${THRESH_CONF}%, corr. {corr:.2f}'
+        title = f'Others\n{len(df_in)} {mod_type} sites\nconf$\geq${THRESH_CONF}%, corr. {corr:.2f}'
     else:
         title = f'{len(df_in)} {mod_type} sites\nconf$\geq${THRESH_CONF}%'
     plt.suptitle(title, fontsize=12)
@@ -153,12 +161,13 @@ if mod_type=='m6A':
     num_cols = 6
 elif mod_type=='psi':
     motifs = [
-        'GTTCA', 'GTTCG', 'GTTCC', 'GTTCT', 'TGTAG', 'TGTGG',
-        'GGTGG', 'ATTTG', 'GATGC', 'AGTGG', 'CATAA', 'CATCC',
+        'GTTCA', 'GTTCG', 'GTTCC', 'GTTCT',
+        'TGTAG', 'TGTGG', 'GGTGG', 'ATTTG',
+        'GATGC', 'AGTGG', 'CATAA', 'CATCC',
         'CCTCC', 'CTTTA', 'GGTCC', 'TATAA'
     ]
-    num_rows = 3
-    num_cols = 6
+    num_rows = 4
+    num_cols = 4
 
 def calc_correlation(in_df):
     in_array = in_df[[f'modRatio_{pred_ds}', f'modRatio_{comp_ds}']].values
@@ -168,18 +177,35 @@ def calc_correlation(in_df):
 
 ### compare to Bid-Seq ###
 df_comp_pred = pd.merge(df_comp, df_pred, on=['chrom', 'chromStart', 'chromEnd', 'name', 'strand', 'ref5mer'], suffixes=[f'_{comp_ds}', f'_{pred_ds}'])
-df_comp_pred = df_comp_pred[df_comp_pred['name']==mod_type]
+df_comp_pred_sel = df_comp_pred[df_comp_pred['name']==mod_type]
 if restrict_motifs:
-    df_comp_pred_sel = df_comp_pred[df_comp_pred['ref5mer'].isin(motifs)]
+    df_comp_pred_sel = df_comp_pred_sel[df_comp_pred_sel['ref5mer'].isin(motifs)]
 else:
-    df_comp_pred_sel = df_comp_pred
+    df_comp_pred_sel = df_comp_pred_sel
 corr, num_sites = calc_correlation(df_comp_pred_sel)
 with open(os.path.join(img_out, f'corr_{mod_type}_pred_vs_{comp_ds}_conf{THRESH_CONF}_cov{THRESH_COV}.txt'), 'w') as f_out:
     f_out.write('num_sites' + '\t' + 'correlation' + '\n')
     f_out.write(str(num_sites) + '\t' + str(corr) + '\t' + '\n')
 scatter_plot_by_motif(df_comp_pred_sel, f'modRatio_{comp_ds}', f'modRatio_{pred_ds}', mod_type, motifs, num_rows, num_cols, f'{mod_type}_pred_vs_{comp_ds}_conf{THRESH_CONF}_cov{THRESH_COV}.png')
 if restrict_motifs:
-    out_filename = f'{mod_type}_pred_vs_{comp_ds}_combined_conf{THRESH_CONF}_cov{THRESH_COV}_restrict_motifs.png'
+    out_filename = f'{mod_type}_pred_vs_{comp_ds}_combined_conf{THRESH_CONF}_cov{THRESH_COV}_restrict_motifs_others.png'
 else:
     out_filename = f'{mod_type}_pred_vs_{comp_ds}_combined_conf{THRESH_CONF}_cov{THRESH_COV}.png'
 scatter_plot(df_comp_pred_sel, f'modRatio_{comp_ds}', f'modRatio_{pred_ds}', mod_type, out_filename, corr=corr)
+
+### histogram of deltaS ###
+bin_max = 100
+plt.figure(figsize=(10, 4))
+for mod_ind, this_mod in enumerate(mods):
+    plt.subplot(1, 2, mod_ind+1)
+    sub_df = df_comp_pred[df_comp_pred['name']==this_mod]
+    delta = sub_df[f'modRatio_{pred_ds}'] - sub_df[f'modRatio_{comp_ds}']
+    plt.hist(delta[delta>=0], bins=bin_max, range=[0, bin_max], histtype='step', facecolor='b', label=f'$\Delta S \geq 0$')
+    plt.hist(-delta[delta<0], bins=bin_max, range=[0, bin_max], histtype='step', facecolor='r', label=f'$\Delta S < 0$')
+    plt.legend(loc='upper right')
+    # plt.axvline(x=0, c='r')
+    plt.xlabel(f'$Abs(\Delta S_{{{dict_mod_display[this_mod]}}})$', fontsize=12)
+    plt.ylabel('Site Counts', fontsize=12)
+    plt.yscale('log')
+plt.suptitle(f'{pred_ds} cf. {comp_ds}', fontsize=15)
+plt.savefig(os.path.join(img_out, f'deltaS_{pred_ds}_cf_{comp_ds}.png'), bbox_inches='tight')
