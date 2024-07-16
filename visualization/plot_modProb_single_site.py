@@ -82,10 +82,10 @@ for ref_pos, mod_probs in ref_pos_mod_probs.items():
         ref5mer = ref[sel_chrom][ref_pos-2:ref_pos+3]
         if ref5mer[2]=='A':
             mod = 'm6A'
-            color = 'purple'
+            color = 'red'
         elif ref5mer[2]=='T':
             mod = 'psi'
-            color = 'green'
+            color = 'blue'
         plt.figure(figsize=(3*cm, 2*cm))
         counts, bins, _ = plt.hist(mod_probs, bins=50, range=[0, 1], facecolor=color)
         plt.xlim([-0.01, 1.01])

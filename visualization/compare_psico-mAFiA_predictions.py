@@ -8,14 +8,11 @@ import os
 
 THRESH_CONF = 80
 THRESH_COV = 20
-pred_ds = 'Mettl3-KO_rep2'
+pred_ds = 'TRUB1_OE'
 bid_seq_calibrated = False
-restrict_motifs = True
-comp_ds = 'WT_P2'
-# mod_type = 'psi'
-# comp_ds = 'GLORI'
-# comp_ds = 'WT_P2'
-mod_type = 'm6A'
+restrict_motifs = 'GUUCN'
+comp_ds = 'WT'
+mod_type = 'psi'
 
 mods = ['m6A', 'psi']
 dict_mod_display = {
@@ -26,7 +23,7 @@ dict_mod_display = {
 dict_ds = {
     'RNA004_HEK293_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/RNA004/dorado/RNA004_HEK293_WT_RTA.mAFiA.bed',
 
-    'WT_P2': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/WT_P2/chrALL.mAFiA.sites.bed',
+    'WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/WT_P2/chrALL.mAFiA.sites.bed',
 
     '100WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/100WT/chrALL.mAFiA.sites.bed',
     '75WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/75WT/chrALL.mAFiA.sites.bed',
@@ -34,11 +31,14 @@ dict_ds = {
     '25WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/25WT/chrALL.mAFiA.sites.bed',
     '0WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/0WT/chrALL.mAFiA.sites.bed',
 
-    'Mettl3-KO_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293T-Mettl3-KO/rep1/chrALL.mAFiA.sites.bed',
-    'Mettl3-KO_rep2': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293T-Mettl3-KO/rep2/chrALL.mAFiA.sites.bed',
-    'Mettl3-KO_rep3': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293T-Mettl3-KO/rep3/chrALL.mAFiA.sites.bed',
+    'Mettl3_KO_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293T_Mettl3_KO/rep1/chrALL.mAFiA.sites.bed',
+    'Mettl3_KO_rep2': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293T_Mettl3_KO/rep2/chrALL.mAFiA.sites.bed',
+    'Mettl3_KO_rep3': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293T_Mettl3_KO/rep3/chrALL.mAFiA.sites.bed',
+    'Mettl3_KO': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293T_Mettl3_KO/merged/chrALL.mAFiA.sites.bed',
 
     'TRUB1_OE_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293_TRUB1_OE/rep1/chrALL.mAFiA.sites.bed',
+    'TRUB1_OE_rep2': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293_TRUB1_OE/rep2/chrALL.mAFiA.sites.bed',
+    'TRUB1_OE': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293_TRUB1_OE/merged/chrALL.mAFiA.sites.bed',
 
     'HeLa_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/NanoSPA/HeLa_WT/chrALL.mAFiA.sites.bed',
     # 'HeLa_SRR28796313': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HeLa_SRR28796313/chrALL.mAFiA.sites.bed',
@@ -48,7 +48,7 @@ dict_ds = {
     'siTRUB1_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siTRUB1_input_rep1/chrALL.mAFiA.sites.bed',
     'siCtrl_input_merged': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siCtrl_input_rep1/chrALL.mAFiA.sites.bed',
     'siMETTL3_input_merged': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siMETTL3_input_rep1/chrALL.mAFiA.sites.bed',
-    'siTRUB1_input_merged': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siTRUB1_input_rep1/chrALL.mAFiA.sites.bed',
+    'siTRUB1_input_merged': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siTRUB1_input_merged/chrALL.mAFiA.sites.bed',
 
     'TAC_ctrl': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/TAC/40-34/chrALL.mAFiA.sites.bed',
     'SHAM_day1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/TAC/40-31/chrALL.mAFiA.sites.bed',
@@ -107,7 +107,10 @@ def scatter_plot(df_in, key_x, key_y, mod_type, fig_name, corr=None):
     plt.xlabel("$S_{{{}}}$".format('-'.join(key_x.split('_')[1:])), fontsize=10)
     plt.ylabel("$S_{{{}}}$".format('-'.join(key_y.split('_')[1:])), fontsize=10)
     if corr is not None:
-        title = f'Others\n{len(df_in)} {mod_type} sites\nconf$\geq${THRESH_CONF}%, corr. {corr:.2f}'
+        if restrict_motifs:
+            title = f'{restrict_motifs}\n{len(df_in)} {mod_type} sites\nconf$\geq${THRESH_CONF}%, corr. {corr:.2f}'
+        else:
+            title = f'{len(df_in)} {mod_type} sites\nconf$\geq${THRESH_CONF}%, corr. {corr:.2f}'
     else:
         title = f'{len(df_in)} {mod_type} sites\nconf$\geq${THRESH_CONF}%'
     plt.suptitle(title, fontsize=12)
@@ -160,12 +163,23 @@ if mod_type=='m6A':
     num_rows = 3
     num_cols = 6
 elif mod_type=='psi':
-    motifs = [
-        'GTTCA', 'GTTCG', 'GTTCC', 'GTTCT',
+    if restrict_motifs=='GUUCN':
+        motifs = [
+            'GTTCA', 'GTTCG', 'GTTCC', 'GTTCT'
+        ]
+    elif restrict_motifs=='Others':
+        motifs = [
         'TGTAG', 'TGTGG', 'GGTGG', 'ATTTG',
         'GATGC', 'AGTGG', 'CATAA', 'CATCC',
         'CCTCC', 'CTTTA', 'GGTCC', 'TATAA'
     ]
+    else:
+        motifs = [
+            'GTTCA', 'GTTCG', 'GTTCC', 'GTTCT',
+            'TGTAG', 'TGTGG', 'GGTGG', 'ATTTG',
+            'GATGC', 'AGTGG', 'CATAA', 'CATCC',
+            'CCTCC', 'CTTTA', 'GGTCC', 'TATAA'
+        ]
     num_rows = 4
     num_cols = 4
 
@@ -188,7 +202,7 @@ with open(os.path.join(img_out, f'corr_{mod_type}_pred_vs_{comp_ds}_conf{THRESH_
     f_out.write(str(num_sites) + '\t' + str(corr) + '\t' + '\n')
 scatter_plot_by_motif(df_comp_pred_sel, f'modRatio_{comp_ds}', f'modRatio_{pred_ds}', mod_type, motifs, num_rows, num_cols, f'{mod_type}_pred_vs_{comp_ds}_conf{THRESH_CONF}_cov{THRESH_COV}.png')
 if restrict_motifs:
-    out_filename = f'{mod_type}_pred_vs_{comp_ds}_combined_conf{THRESH_CONF}_cov{THRESH_COV}_restrict_motifs_others.png'
+    out_filename = f'{mod_type}_pred_vs_{comp_ds}_combined_conf{THRESH_CONF}_cov{THRESH_COV}_restrict_motifs_{restrict_motifs}.png'
 else:
     out_filename = f'{mod_type}_pred_vs_{comp_ds}_combined_conf{THRESH_CONF}_cov{THRESH_COV}.png'
 scatter_plot(df_comp_pred_sel, f'modRatio_{comp_ds}', f'modRatio_{pred_ds}', mod_type, out_filename, corr=corr)

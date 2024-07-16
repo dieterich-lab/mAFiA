@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from scipy.stats import kstest
 import numpy as np
-from scipy.stats import trim_mean
+from scipy.stats import trim_mean, ttest_ind
 
 this_day = 'day56'
 
@@ -64,12 +64,12 @@ df_proteome = pd.read_csv(proteome_file, sep='\t')
 df_proteome = df_proteome[
     (df_proteome['main.comparison']=='TAC vs Sham')
     * (df_proteome['tp']==('Day ' + this_day.lstrip('day')))
-    * (df_proteome['p.adj']<thresh_pval)
+    # * (df_proteome['p.adj']<thresh_pval)
     ]
 gene_protein_log2fc = {}
 for this_gene in df_proteome['SYMBOL'].unique():
     sub_df = df_proteome[df_proteome['SYMBOL']==this_gene]
-    gene_protein_log2fc[this_gene] = sub_df['logFC'].values[0]
+    gene_protein_log2fc[this_gene] = (sub_df['logFC'].values[0], sub_df['p.adj'].values[0])
 
 res_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/TAC'
 conditions = ['SHAM', 'TAC']
@@ -147,7 +147,8 @@ def calc_log2fc_stats():
                     tac_metric += 0.000001
                     sham_metric += 0.000001
                     log2fc = np.log2(tac_metric / sham_metric)
-                    gene_log2fc_stats[gene][this_mod] = (num_sites, sham_metric, tac_metric, log2fc)
+                    t_stat, p_val = ttest_ind(sham_vals, tac_vals, equal_var=False)
+                    gene_log2fc_stats[gene][this_mod] = (num_sites, sham_metric, tac_metric, log2fc, p_val)
 
     return gene_log2fc_stats
 
@@ -160,7 +161,9 @@ if os.path.exists(log2fc_file):
         gene_log2fc_stats[this_row['gene']][this_row['mod']] = (this_row['num_mod_sites'],
                                                                 this_row['SHAM'],
                                                                 this_row['TAC'],
-                                                                this_row['log2fc_mod'])
+                                                                this_row['log2fc_mod'],
+                                                                this_row['p_val_mod']
+                                                                )
 else:
     gene_log2fc_stats = calc_log2fc_stats()
 
@@ -182,27 +185,38 @@ all_log2fc = {
     'm6A': gene_log2fc_m6A.values(),
     'psi': gene_log2fc_psi.values()
 }
-plt.figure(figsize=(10, 5))
-for mod_ind, this_mod in enumerate(mods):
-    plt.subplot(1, 2, mod_ind+1)
-    plt.hist(all_log2fc[this_mod], bins=50, range=[-max_range, max_range], alpha=0.5)
-    plt.axvline(x=0, c='g')
-    plt.xlabel(f'$log_{2}FC ({dict_mod_display[this_mod]})$', fontsize=12)
-    plt.ylabel('Gene counts', fontsize=12)
-    plt.title(f'N={len(all_log2fc[this_mod])}', fontsize=15)
+# plt.figure(figsize=(10, 5))
+# for mod_ind, this_mod in enumerate(mods):
+#     plt.subplot(1, 2, mod_ind+1)
+#     plt.hist(all_log2fc[this_mod], bins=50, range=[-max_range, max_range], alpha=0.5)
+#     plt.axvline(x=0, c='g')
+#     plt.xlabel(f'$log_{2}FC ({dict_mod_display[this_mod]})$', fontsize=12)
+#     plt.ylabel('Gene counts', fontsize=12)
+#     plt.title(f'N={len(all_log2fc[this_mod])}', fontsize=15)
 
 
 ### output table ###
 df_log2fc_stats = []
 for this_gene, this_log2fc_stats in gene_log2fc_stats.items():
-    this_protein_log2fc = gene_protein_log2fc.get(this_gene)
+    this_protein_log2fc_stats = gene_protein_log2fc.get(this_gene)
     for this_mod in mods:
         this_mod_log2fc_stats = this_log2fc_stats.get(this_mod)
-        if this_mod_log2fc_stats is not None:
-            df_log2fc_stats.append([this_gene, this_mod] + list(this_mod_log2fc_stats) + [this_protein_log2fc])
+        if (this_mod_log2fc_stats is not None) and (this_protein_log2fc_stats is not None):
+            df_log2fc_stats.append([this_gene, this_mod] + list(this_mod_log2fc_stats) + list(this_protein_log2fc_stats))
 if not os.path.exists(log2fc_file):
-    df_log2fc_stats = pd.DataFrame(df_log2fc_stats, columns=['gene', 'mod', 'num_mod_sites', 'SHAM', 'TAC', 'log2fc_mod', 'log2fc_protein'])
-    df_log2fc_stats.to_csv(log2fc_file, sep='\t', index=False)
+    df_log2fc_stats = pd.DataFrame(df_log2fc_stats,
+                                   columns=[
+                                       'gene',
+                                       'mod',
+                                       'num_mod_sites',
+                                       'SHAM',
+                                       'TAC',
+                                       'log2fc_mod',
+                                       'p_val_mod',
+                                       'log2fc_protein',
+                                       'p_val_protein'
+                                   ])
+    df_log2fc_stats.to_csv(log2fc_file, sep='\t', index=False, float_format='%.3f')
 
 ### common gene and thresholded by min. sites ###
 common_genes, common_log2fc_m6A, common_log2fc_psi = np.vstack(
@@ -216,17 +230,17 @@ common_log2fc = {
     'psi': np.float64(common_log2fc_psi)
 }
 
-plt.figure(figsize=(10, 5))
-for mod_ind, this_mod in enumerate(mods):
-    that_mod = [m for m in mods if m!=this_mod][0]
-    plt.subplot(1, 2, mod_ind+1)
-    plt.hist(common_log2fc[this_mod][common_log2fc[that_mod]>=0], bins=50, range=[-max_range, max_range], fc='b', label=f'${dict_mod_display[that_mod]}$ up', alpha=0.5)
-    plt.hist(common_log2fc[this_mod][common_log2fc[that_mod]<0], bins=50, range=[-max_range, max_range], fc='r', label=f'${dict_mod_display[that_mod]}$ down', alpha=0.5)
-    plt.axvline(x=0, c='g')
-    plt.legend(loc='upper left')
-    plt.xlabel(f'$log_{2}FC ({dict_mod_display[this_mod]})$', fontsize=12)
-    plt.ylabel('Gene counts', fontsize=12)
-    plt.title(f'N={len(common_log2fc[this_mod])}', fontsize=15)
+# plt.figure(figsize=(10, 5))
+# for mod_ind, this_mod in enumerate(mods):
+#     that_mod = [m for m in mods if m!=this_mod][0]
+#     plt.subplot(1, 2, mod_ind+1)
+#     plt.hist(common_log2fc[this_mod][common_log2fc[that_mod]>=0], bins=50, range=[-max_range, max_range], fc='b', label=f'${dict_mod_display[that_mod]}$ up', alpha=0.5)
+#     plt.hist(common_log2fc[this_mod][common_log2fc[that_mod]<0], bins=50, range=[-max_range, max_range], fc='r', label=f'${dict_mod_display[that_mod]}$ down', alpha=0.5)
+#     plt.axvline(x=0, c='g')
+#     plt.legend(loc='upper left')
+#     plt.xlabel(f'$log_{2}FC ({dict_mod_display[this_mod]})$', fontsize=12)
+#     plt.ylabel('Gene counts', fontsize=12)
+#     plt.title(f'N={len(common_log2fc[this_mod])}', fontsize=15)
 
 
 ### set up bins ###
@@ -236,46 +250,46 @@ bin_width = bin_edges[1] - bin_edges[0]
 bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
 
 ### m6A vs psi ###
-plt.figure(figsize=(10, 4))
-for mod_ind, this_mod in enumerate(mods):
-    that_mod = [mod for mod in mods if mod!=this_mod][0]
-    plt.subplot(1, 2, mod_ind+1)
-    binned_that_mod_log2fc = []
-    bin_counts = []
-    for i in range(len(bin_edges)-1):
-        bin_start = bin_edges[i]
-        bin_end = bin_edges[i+1]
-        binned_that_mod = common_log2fc[that_mod][
-            (common_log2fc[this_mod] >= bin_start)
-            * (common_log2fc[this_mod] < bin_end)
-            ]
-        bin_counts.append(len(binned_that_mod))
-        binned_that_mod_log2fc.append(np.mean(binned_that_mod))
-    total_counts = np.sum(bin_counts)
-    plt.axhline(y=0, c='gray')
-    plt.bar(bin_centers, binned_that_mod_log2fc, width=bin_width*0.8)
-    for this_bin_center, this_bin_count, that_mod_log2fc in zip(bin_centers, bin_counts, binned_that_mod_log2fc):
-        if not np.isnan(that_mod_log2fc):
-            plt.text(this_bin_center, that_mod_log2fc + np.sign(that_mod_log2fc) * 0.1, this_bin_count,
-                 horizontalalignment='center', verticalalignment='center')
-    plt.title(f'N={total_counts}')
-    plt.xlim([-max_bin, max_bin])
-    max_y = np.ceil(np.nanmax(np.abs(binned_that_mod_log2fc)))
-    plt.ylim([-max_y, max_y])
-    plt.xlabel(f'$log_{2}FC ({dict_mod_display[this_mod]})$', fontsize=12)
-    plt.ylabel(f'$log_{2}FC ({dict_mod_display[that_mod]})$', fontsize=12)
-plt.suptitle(f'{this_day}', fontsize=15)
-plt.savefig(os.path.join(img_out, f'log2fc_m6A_vs_psi_{this_day}.png'), bbox_inches='tight')
+# plt.figure(figsize=(10, 4))
+# for mod_ind, this_mod in enumerate(mods):
+#     that_mod = [mod for mod in mods if mod!=this_mod][0]
+#     plt.subplot(1, 2, mod_ind+1)
+#     binned_that_mod_log2fc = []
+#     bin_counts = []
+#     for i in range(len(bin_edges)-1):
+#         bin_start = bin_edges[i]
+#         bin_end = bin_edges[i+1]
+#         binned_that_mod = common_log2fc[that_mod][
+#             (common_log2fc[this_mod] >= bin_start)
+#             * (common_log2fc[this_mod] < bin_end)
+#             ]
+#         bin_counts.append(len(binned_that_mod))
+#         binned_that_mod_log2fc.append(np.mean(binned_that_mod))
+#     total_counts = np.sum(bin_counts)
+#     plt.axhline(y=0, c='gray')
+#     plt.bar(bin_centers, binned_that_mod_log2fc, width=bin_width*0.8)
+#     for this_bin_center, this_bin_count, that_mod_log2fc in zip(bin_centers, bin_counts, binned_that_mod_log2fc):
+#         if not np.isnan(that_mod_log2fc):
+#             plt.text(this_bin_center, that_mod_log2fc + np.sign(that_mod_log2fc) * 0.1, this_bin_count,
+#                  horizontalalignment='center', verticalalignment='center')
+#     plt.title(f'N={total_counts}')
+#     plt.xlim([-max_bin, max_bin])
+#     max_y = np.ceil(np.nanmax(np.abs(binned_that_mod_log2fc)))
+#     plt.ylim([-max_y, max_y])
+#     plt.xlabel(f'$log_{2}FC ({dict_mod_display[this_mod]})$', fontsize=12)
+#     plt.ylabel(f'$log_{2}FC ({dict_mod_display[that_mod]})$', fontsize=12)
+# plt.suptitle(f'{this_day}', fontsize=15)
+# plt.savefig(os.path.join(img_out, f'log2fc_m6A_vs_psi_{this_day}.png'), bbox_inches='tight')
 
 
 ### protein vs mods ###
 common_genes_m6A = list(set(gene_log2fc_m6A.keys()).intersection(set(gene_protein_log2fc.keys())))
 vec_log2fc_m6A, vec_log2fc_m6A_protein = np.vstack(
-    [(gene_log2fc_m6A[this_gene], gene_protein_log2fc[this_gene]) for this_gene in common_genes_m6A]
+    [(gene_log2fc_m6A[this_gene], gene_protein_log2fc[this_gene][0]) for this_gene in common_genes_m6A]
 ).T
 common_genes_psi = list(set(gene_log2fc_psi.keys()).intersection(set(gene_protein_log2fc.keys())))
 vec_log2fc_psi, vec_log2fc_psi_protein = np.vstack(
-    [(gene_log2fc_psi[this_gene], gene_protein_log2fc[this_gene]) for this_gene in common_genes_psi]
+    [(gene_log2fc_psi[this_gene], gene_protein_log2fc[this_gene][0]) for this_gene in common_genes_psi]
 ).T
 vec_log2fc_mod = {}
 vec_log2fc_mod['m6A'] = vec_log2fc_m6A
