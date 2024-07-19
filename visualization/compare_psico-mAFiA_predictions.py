@@ -5,12 +5,13 @@ import matplotlib.pyplot as plt
 from collections import Counter
 import numpy as np
 import os
+from tqdm import tqdm
 
 THRESH_CONF = 80
 THRESH_COV = 20
-pred_ds = 'TRUB1_OE'
+pred_ds = 'TRUB1_KD'
 bid_seq_calibrated = False
-restrict_motifs = 'GUUCN'
+restrict_motifs = 'Others'
 comp_ds = 'WT'
 mod_type = 'psi'
 
@@ -47,8 +48,8 @@ dict_ds = {
     'siMETTL3_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siMETTL3_input_rep1/chrALL.mAFiA.sites.bed',
     'siTRUB1_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siTRUB1_input_rep1/chrALL.mAFiA.sites.bed',
     'siCtrl_input_merged': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siCtrl_input_rep1/chrALL.mAFiA.sites.bed',
-    'siMETTL3_input_merged': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siMETTL3_input_rep1/chrALL.mAFiA.sites.bed',
-    'siTRUB1_input_merged': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siTRUB1_input_merged/chrALL.mAFiA.sites.bed',
+    'METTL3_KD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/NanoSPA/HEK_siMETTL3_input_merged/chrALL.mAFiA.sites.bed',
+    'TRUB1_KD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/NanoSPA/HEK_siTRUB1_input_merged/chrALL.mAFiA.sites.bed',
 
     'TAC_ctrl': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/TAC/40-34/chrALL.mAFiA.sites.bed',
     'SHAM_day1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/TAC/40-31/chrALL.mAFiA.sites.bed',
@@ -223,3 +224,130 @@ for mod_ind, this_mod in enumerate(mods):
     plt.yscale('log')
 plt.suptitle(f'{pred_ds} cf. {comp_ds}', fontsize=15)
 plt.savefig(os.path.join(img_out, f'deltaS_{pred_ds}_cf_{comp_ds}.png'), bbox_inches='tight')
+
+### correlation vs distance ###
+df_gene_bed = pd.read_csv('/home/adrian/Data/genomes/homo_sapiens/GRCh38_102/gene.GRCh38.102.bed', sep='\t')
+
+df_comp_pred['delta'] = df_comp_pred[f'modRatio_{pred_ds}'] - df_comp_pred[f'modRatio_{comp_ds}']
+
+if pred_ds=='TRUB1_OE':
+    base_mod = 'psi'
+    other_mod = 'm6A'
+    thresh_deltaS = 20
+    df_deltaS = df_comp_pred[
+        (df_comp_pred['name'] == base_mod)
+        * (df_comp_pred['delta'] >= thresh_deltaS)
+        ]
+    ylim = 50
+    xlabel = rf"Distance (bps) from ${{{dict_mod_display[base_mod]}}}$ site"\
+             "\n"\
+             rf"$\Delta S_{{{dict_mod_display[base_mod]}}}\geq{thresh_deltaS}$"
+    fig_name = f'corr_func_deltaS_{other_mod}_from_{base_mod}_up_thresh{thresh_deltaS}.png'
+elif pred_ds=='siTRUB1_input':
+    base_mod = 'psi'
+    other_mod = 'm6A'
+    thresh_deltaS = 20
+    df_deltaS = df_comp_pred[
+        (df_comp_pred['name'] == base_mod)
+        * (df_comp_pred['delta'] < -thresh_deltaS)
+    ]
+    ylim = 50
+    xlabel = rf"Distance (bps) from ${{{dict_mod_display[base_mod]}}}$ site"\
+             "\n"\
+             rf"$\Delta S_{{{dict_mod_display[base_mod]}}}<-{thresh_deltaS}$"
+    fig_name = f'corr_func_deltaS_{other_mod}_from_{base_mod}_down_thresh{thresh_deltaS}.png'
+elif pred_ds=='Mettl3_KO':
+    base_mod = 'm6A'
+    other_mod = 'psi'
+    thresh_deltaS = 50
+    df_deltaS = df_comp_pred[
+        (df_comp_pred['name'] == base_mod)
+        * (df_comp_pred['delta'] < -thresh_deltaS)
+    ]
+    ylim = 100
+    xlabel = rf"Distance (bps) from ${{{dict_mod_display[base_mod]}}}$ site"\
+             "\n"\
+             rf"$\Delta S_{{{dict_mod_display[base_mod]}}}<-{thresh_deltaS}$"
+    fig_name = f'corr_func_deltaS_{other_mod}_from_{base_mod}_down_thresh{thresh_deltaS}.png'
+elif pred_ds=='siMETTL3_input_rep1':
+    base_mod = 'm6A'
+    other_mod = 'psi'
+    thresh_deltaS = 20
+    df_deltaS = df_comp_pred[
+        (df_comp_pred['name'] == base_mod)
+        * (df_comp_pred['delta'] < -thresh_deltaS)
+    ]
+    ylim = 50
+    xlabel = rf"Distance (bps) from ${{{dict_mod_display[base_mod]}}}$ site"\
+             "\n"\
+             rf"$\Delta S_{{{dict_mod_display[base_mod]}}}<-{thresh_deltaS}$"
+    fig_name = f'corr_func_deltaS_{other_mod}_from_{base_mod}_down_thresh{thresh_deltaS}.png'
+
+
+
+all_vec_r = []
+all_vec_d = []
+genes_deltaS = []
+for _, this_row in tqdm(df_deltaS.iterrows()):
+    this_chrom = this_row['chrom']
+    this_chromStart = this_row['chromStart']
+    this_chromEnd = this_row['chromEnd']
+    this_strand = this_row['strand']
+
+    sub_df_gene_bed = df_gene_bed[
+        (df_gene_bed['chrom']==this_chrom)
+        * (df_gene_bed['chromStart']<=this_chromStart)
+        * (df_gene_bed['chromEnd']>=this_chromEnd)
+        * (df_gene_bed['strand']==this_strand)
+    ]
+
+    if len(sub_df_gene_bed)==0:
+        continue
+
+    genes_deltaS.append(sub_df_gene_bed['name'].unique()[0])
+    gene_chromStart = sub_df_gene_bed['chromStart'].min()
+    gene_chromEnd = sub_df_gene_bed['chromEnd'].max()
+
+    sub_df = df_comp_pred[
+        (df_comp_pred['chrom']==this_chrom)
+        * (df_comp_pred['name']==other_mod)
+        * (df_comp_pred['strand']==this_strand)
+        * (df_comp_pred['chromStart']>=gene_chromStart)
+        * (df_comp_pred['chromStart']<gene_chromEnd)
+    ]
+    vec_r = sub_df['chromStart'].values - this_chromStart
+    vec_d = sub_df['delta'].values
+    if this_strand=='-':
+        vec_r = -vec_r
+    all_vec_r.append(vec_r)
+    all_vec_d.append(vec_d)
+all_vec_r = np.concatenate(all_vec_r)
+all_vec_d = np.concatenate(all_vec_d)
+
+max_dist = 4500
+bin_width = 1000
+bin_edges = np.arange(-max_dist, max_dist+bin_width, bin_width)
+bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
+
+binned_d = []
+for this_bin_i in range(len(bin_edges)-1):
+    bin_start = bin_edges[this_bin_i]
+    bin_end = bin_edges[this_bin_i+1]
+    binned_d.append(all_vec_d[(all_vec_r>=bin_start) * (all_vec_r<bin_end)])
+binned_d_mean = [np.mean(this_bin) if len(this_bin) else np.nan for this_bin in binned_d]
+binned_d_median = [np.median(this_bin) if len(this_bin) else np.nan for this_bin in binned_d]
+binned_d = [this_bin if len(this_bin) else [0] for this_bin in binned_d]
+
+plt.figure(figsize=(5, 5))
+# plt.subplot(1, 2, 1)
+plt.violinplot(binned_d, bin_centers, widths=int(bin_width/2))
+plt.xlim([-max_dist, max_dist])
+plt.ylim([-ylim, ylim])
+plt.axhspan(-20, 20, color='gray', alpha=0.1)
+# plt.axhline(y=25, c='gray')
+# plt.axhline(y=-25, c='gray')
+plt.xticks(bin_edges)
+plt.xlabel(xlabel, fontsize=12)
+plt.ylabel(f"$\Delta S_{{{dict_mod_display[other_mod]}}}$", fontsize=12)
+plt.title(f"{pred_ds} cf. {comp_ds}", fontsize=15)
+plt.savefig(os.path.join(img_out, fig_name), bbox_inches='tight')
