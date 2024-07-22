@@ -172,6 +172,16 @@ if os.path.exists(log2fc_file):
 else:
     gene_log2fc_stats = calc_log2fc_stats()
 
+### distribution of num. sites per gene ###
+plt.figure(figsize=(10, 4))
+for mod_ind, this_mod in enumerate(mods):
+    plt.subplot(1, 2, mod_ind+1)
+    plt.hist([stats.get(this_mod)[0] for gene, stats in gene_log2fc_stats.items() if stats.get(this_mod)], bins=50, range=[0, 100])
+    plt.xlabel('Num. comparable sites in gene', fontsize=12)
+    plt.ylabel('Gene count', fontsize=12)
+plt.suptitle(f'{this_day}', fontsize=15)
+plt.savefig(os.path.join(img_out, 'hist_num_mod_sites_per_gene.png'), bbox_inches='tight')
+
 ### all ###
 max_range = 1.5
 gene_log2fc_m6A = {
