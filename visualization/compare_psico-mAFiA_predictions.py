@@ -9,11 +9,11 @@ from tqdm import tqdm
 
 THRESH_CONF = 80
 THRESH_COV = 20
-pred_ds = 'TRUB1_KD'
+pred_ds = 'METTL3_KD'
 bid_seq_calibrated = False
-restrict_motifs = 'Others'
+restrict_motifs = None
 comp_ds = 'WT'
-mod_type = 'psi'
+mod_type = 'm6A'
 
 mods = ['m6A', 'psi']
 dict_mod_display = {
@@ -32,10 +32,10 @@ dict_ds = {
     '25WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/25WT/chrALL.mAFiA.sites.bed',
     '0WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/0WT/chrALL.mAFiA.sites.bed',
 
-    'Mettl3_KO_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293T_Mettl3_KO/rep1/chrALL.mAFiA.sites.bed',
-    'Mettl3_KO_rep2': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293T_Mettl3_KO/rep2/chrALL.mAFiA.sites.bed',
-    'Mettl3_KO_rep3': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293T_Mettl3_KO/rep3/chrALL.mAFiA.sites.bed',
-    'Mettl3_KO': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293T_Mettl3_KO/merged/chrALL.mAFiA.sites.bed',
+    'METTL3_KO_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293T_Mettl3_KO/rep1/chrALL.mAFiA.sites.bed',
+    'METTL3_KO_rep2': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293T_Mettl3_KO/rep2/chrALL.mAFiA.sites.bed',
+    'METTL3_KO_rep3': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293T_Mettl3_KO/rep3/chrALL.mAFiA.sites.bed',
+    'METTL3_KO': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293T_Mettl3_KO/merged/chrALL.mAFiA.sites.bed',
 
     'TRUB1_OE_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293_TRUB1_OE/rep1/chrALL.mAFiA.sites.bed',
     'TRUB1_OE_rep2': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293_TRUB1_OE/rep2/chrALL.mAFiA.sites.bed',
@@ -48,7 +48,7 @@ dict_ds = {
     'siMETTL3_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siMETTL3_input_rep1/chrALL.mAFiA.sites.bed',
     'siTRUB1_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siTRUB1_input_rep1/chrALL.mAFiA.sites.bed',
     'siCtrl_input_merged': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siCtrl_input_rep1/chrALL.mAFiA.sites.bed',
-    'METTL3_KD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/NanoSPA/HEK_siMETTL3_input_merged/chrALL.mAFiA.sites.bed',
+    'METTL3_KD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/NanoSPA/HEK_siMETTL3_input_merged//chrALL.mAFiA.sites.bed',
     'TRUB1_KD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/NanoSPA/HEK_siTRUB1_input_merged/chrALL.mAFiA.sites.bed',
 
     'TAC_ctrl': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/TAC/40-34/chrALL.mAFiA.sites.bed',
@@ -256,7 +256,7 @@ elif pred_ds=='siTRUB1_input':
              "\n"\
              rf"$\Delta S_{{{dict_mod_display[base_mod]}}}<-{thresh_deltaS}$"
     fig_name = f'corr_func_deltaS_{other_mod}_from_{base_mod}_down_thresh{thresh_deltaS}.png'
-elif pred_ds=='Mettl3_KO':
+elif pred_ds=='METTL3_KO':
     base_mod = 'm6A'
     other_mod = 'psi'
     thresh_deltaS = 50
@@ -269,7 +269,7 @@ elif pred_ds=='Mettl3_KO':
              "\n"\
              rf"$\Delta S_{{{dict_mod_display[base_mod]}}}<-{thresh_deltaS}$"
     fig_name = f'corr_func_deltaS_{other_mod}_from_{base_mod}_down_thresh{thresh_deltaS}.png'
-elif pred_ds=='siMETTL3_input_rep1':
+elif pred_ds=='METTL3_KD':
     base_mod = 'm6A'
     other_mod = 'psi'
     thresh_deltaS = 20

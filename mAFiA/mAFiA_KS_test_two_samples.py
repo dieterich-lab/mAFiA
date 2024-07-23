@@ -61,9 +61,19 @@ def main():
         site_writer = KSWriter(out_path=os.path.join(args.out_dir, args.out_filename))
     else:
         site_writer = KSWriter(out_path=os.path.join(args.out_dir, 'mAFiA.KSTest.bed'))
-    df_mod = pd.read_csv(args.mod_file, sep='\t', dtype={'chrom': str, 'chromStart': int, 'chromEnd': int}, iterator=True, chunksize=args.chunk_size)
 
-    for chunk in df_mod:
+    # df_mod = pd.read_csv(args.mod_file, sep='\t', dtype={'chrom': str, 'chromStart': int, 'chromEnd': int}, iterator=True, chunksize=args.chunk_size)
+
+    df_bed1 = pd.read_csv(args.bed_file_1, sep='\t', dtype={'chrom': str, 'chromStart': int, 'chromEnd': int})
+    df_bed2 = pd.read_csv(args.bed_file_2, sep='\t', dtype={'chrom': str, 'chromStart': int, 'chromEnd': int})
+    df_bed1 = df_bed1[df_bed1['coverage'] >= args.min_coverage]
+    df_bed2 = df_bed2[df_bed2['coverage'] >= args.min_coverage]
+    df_mod = pd.merge(df_bed1, df_bed2, on=['chrom', 'chromStart', 'chromEnd', 'name', 'score', 'strand', 'ref5mer'], suffixes=['_1', '_2'])
+
+    # for chunk in df_mod:
+    for chunk_start in range(0, len(df_mod), args.chunk_size):
+        chunk_end = min(len(df_mod), chunk_start + args.chunk_size)
+        chunk = df_mod.iloc[chunk_start:chunk_end]
         sites = Parallel(n_jobs=args.num_jobs)(delayed(KSTest_on_single_site)(chunk.iloc[i], args) for i in range(len(chunk)))
         for this_site in sites:
             if this_site:

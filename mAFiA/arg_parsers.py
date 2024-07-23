@@ -56,9 +56,11 @@ class KSTestArgsParser(ArgsParser):
         super().__init__()
         self.add_argument('--bam_file_1')
         self.add_argument('--bam_file_2')
+        self.add_argument('--bed_file_1')
+        self.add_argument('--bed_file_2')
         self.add_argument('--mod_file')
         self.add_argument('--out_dir')
         self.add_argument('--out_filename', default=None)
-        self.add_argument('--chunk_size', type=int, default=10000)
+        self.add_argument('--chunk_size', type=int, default=1000)
         self.add_argument('--num_jobs', type=int, default=2)
 
