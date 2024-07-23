@@ -57,6 +57,7 @@ class KSTestArgsParser(ArgsParser):
         self.add_argument('--bam_file_1')
         self.add_argument('--bam_file_2')
         self.add_argument('--mod_file')
+        self.add_argument('--min_coverage', type=int, default=1)
         self.add_argument('--out_dir')
         self.add_argument('--out_filename', default=None)
         self.add_argument('--chunk_size', type=int, default=10000)

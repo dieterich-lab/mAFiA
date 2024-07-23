@@ -28,6 +28,7 @@ python3 ${HOME}/git/mAFiA_dev/mAFiA/mAFiA_KS_test_two_samples.py \
 --bam_file_1 ${bam1} \
 --bam_file_2 ${bam2} \
 --mod_file ${mod} \
+--min_coverage 10 \
 --out_dir ${out_dir} \
 --num_jobs 36 \
 --out_filename ${out_filename}

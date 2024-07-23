@@ -40,7 +40,7 @@ def collect_mod_prob(in_bam_file, in_site):
 def KSTest_on_single_site(in_row, args):
     mod_probs_1 = collect_mod_prob(args.bam_file_1, in_row)
     mod_probs_2 = collect_mod_prob(args.bam_file_2, in_row)
-    if len(mod_probs_1) and len(mod_probs_2):
+    if (len(mod_probs_1)>=args.min_coverage) and (len(mod_probs_2)>=args.min_coverage):
         ks_stat, pval = kstest(mod_probs_1, mod_probs_2)
         return {'in_row': in_row, 'coverage_1': len(mod_probs_1), 'coverage_2': len(mod_probs_2),'ks_stat': ks_stat, 'pval': pval}
     else:
