@@ -3,7 +3,7 @@ import pandas as pd
 import pysam
 import numpy as np
 
-bed_fields = [
+mAFiA_fields = [
     'chrom',
     'chromStart',
     'chromEnd',
@@ -14,6 +14,20 @@ bed_fields = [
     'coverage',
     'modRatio',
     'confidence'
+]
+
+KS_fields = [
+    'chrom',
+    'chromStart',
+    'chromEnd',
+    'name',
+    'score',
+    'strand',
+    'ref5mer',
+    'ks_stat',
+    'pval',
+    'coverage_1',
+    'coverage_2'
 ]
 
 class DataframeWriter:
@@ -33,7 +47,7 @@ class DataframeWriter:
     #     if empty:
     #         self.df_out = pd.DataFrame()
 
-    def write_df(self, empty=False):
+    def write_df(self, empty=False, bed_fields=mAFiA_fields):
         out_df = pd.DataFrame(self.out_rows, columns=bed_fields)
         if not os.path.exists(self.out_path):
             out_df.to_csv(self.out_path, sep='\t', index=False, header=True)
@@ -78,6 +92,24 @@ class SiteWriter(DataframeWriter):
         # self.df_out = pd.concat([self.df_out, pd.DataFrame(in_row).T])
         self.out_rows.append(in_row)
         self.site_counts += 1
+
+
+class KSWriter(DataframeWriter):
+    def __init__(self, out_path):
+        super().__init__(out_path)
+        self.out_rows = []
+        self.site_counts = 0
+
+    def update_sites(self, in_row, ks_stat, pval, coverage_1, coverage_2):
+        in_row['ks_stat'] = round(ks_stat, 4)
+        in_row['pval'] = round(pval, 4)
+        in_row['coverage_1'] = coverage_1
+        in_row['coverage_2'] = coverage_2
+        self.out_rows.append(in_row)
+        self.site_counts += 1
+
+    def write_df(self):
+        super(KSWriter, self).write_df(empty=True, bed_fields=KS_fields)
 
 
 class BAMWriter:

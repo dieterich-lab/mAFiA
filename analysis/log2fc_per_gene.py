@@ -8,7 +8,7 @@ from scipy.stats import kstest
 import numpy as np
 from scipy.stats import trim_mean, ttest_ind
 
-this_day = 'day56'
+this_day = 'day21'
 
 thresh_confidence = 0.0
 thresh_coverage = 20
@@ -179,6 +179,7 @@ for mod_ind, this_mod in enumerate(mods):
     plt.hist([stats.get(this_mod)[0] for gene, stats in gene_log2fc_stats.items() if stats.get(this_mod)], bins=50, range=[0, 100])
     plt.xlabel('Num. comparable sites in gene', fontsize=12)
     plt.ylabel('Gene count', fontsize=12)
+    plt.title(rf'${{{dict_mod_display[this_mod]}}}$', fontsize=15)
 plt.suptitle(f'{this_day}', fontsize=15)
 plt.savefig(os.path.join(img_out, 'hist_num_mod_sites_per_gene.png'), bbox_inches='tight')
 
