@@ -19,7 +19,7 @@ dict_mod_code = {
 }
 
 
-def collect_mod_prob(in_bam_file, in_site):
+def collect_mod_prob(in_bam_file, in_site, min_coverage):
     in_chrom, in_chromStart, in_chromEnd, in_name, in_strand = in_site[
         ['chrom', 'chromStart', 'chromEnd', 'name', 'strand']]
     out_mod_probs = []
@@ -28,18 +28,20 @@ def collect_mod_prob(in_bam_file, in_site):
         for pileupcolumn in in_bam.pileup(in_chrom, in_chromStart, in_chromEnd, truncate=True,
                                           flag_require=flag_require):
             if pileupcolumn.pos == in_chromStart:
-                for pileupread in pileupcolumn.pileups:
-                    if not pileupread.is_del and not pileupread.is_refskip:
-                        this_read_mod_probs = [score for (pos, score) in pileupread.alignment.modified_bases.get(
-                            ('N', 0, dict_mod_code[in_name]), [])
-                                               if pos == pileupread.query_position]
-                        out_mod_probs.extend(this_read_mod_probs)
+                this_site_coverage = pileupcolumn.get_num_aligned()
+                if this_site_coverage >= min_coverage:
+                    for pileupread in pileupcolumn.pileups:
+                        if not pileupread.is_del and not pileupread.is_refskip:
+                            this_read_mod_probs = [score for (pos, score) in pileupread.alignment.modified_bases.get(
+                                ('N', 0, dict_mod_code[in_name]), [])
+                                                   if pos == pileupread.query_position]
+                            out_mod_probs.extend(this_read_mod_probs)
     return np.array(out_mod_probs) / 255.0
 
 
 def KSTest_on_single_site(in_row, args):
-    mod_probs_1 = collect_mod_prob(args.bam_file_1, in_row)
-    mod_probs_2 = collect_mod_prob(args.bam_file_2, in_row)
+    mod_probs_1 = collect_mod_prob(args.bam_file_1, in_row, args.min_coverage)
+    mod_probs_2 = collect_mod_prob(args.bam_file_2, in_row, args.min_coverage)
     if (len(mod_probs_1)>=args.min_coverage) and (len(mod_probs_2)>=args.min_coverage):
         ks_stat, pval = kstest(mod_probs_1, mod_probs_2)
         return {'in_row': in_row, 'coverage_1': len(mod_probs_1), 'coverage_2': len(mod_probs_2),'ks_stat': ks_stat, 'pval': pval}
