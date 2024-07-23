@@ -4,30 +4,25 @@
 #SBATCH --mem=90GB
 #SBATCH --verbose
 #SBATCH --job-name=kstest_mouse
-#SBATCH --output=/home/achan/slurm/kstest_mouse_%A_chr%a.out
-
-if [[ ${SLURM_ARRAY_TASK_ID} -eq 23 ]]
-then
-chr="X"
-else
-chr=${SLURM_ARRAY_TASK_ID}
-fi
+#SBATCH --output=/home/achan/slurm/kstest_mouse_%A.out
 
 set -e -u
 
-workspace=/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/${ds}
-bam1=${workspace}/SHAM_day${day}/chr${chr}/mAFiA.reads.bam
-bam2=${workspace}/TAC_day${day}/chr${chr}/mAFiA.reads.bam
-mod=/prj/TRR319_RMaP_BaseCalling/Adrian/site_annotations/mus_musculus/GRCm38_102/m6A.psi.GRCm38_102.chr${chr}.bed
-out_dir=${workspace}/SHAM_TAC_day${day}
-out_filename=KSTest.chr${chr}.bed
+workspace=/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/TAC
+bam1=${workspace}/SHAM_day${day}/chrALL.mAFiA.reads.bam
+bam2=${workspace}/TAC_day${day}/chrALL.mAFiA.reads.bam
+bed1=${workspace}/SHAM_day${day}/chrALL.mAFiA.sites.bed
+bed2=${workspace}/TAC_day${day}/chrALL.mAFiA.sites.bed
+out_dir=${workspace}/KS_test
+out_filename=SHAM_TAC_day${day}.bed
 
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
 
 python3 ${HOME}/git/mAFiA_dev/mAFiA/mAFiA_KS_test_two_samples.py \
 --bam_file_1 ${bam1} \
 --bam_file_2 ${bam2} \
---mod_file ${mod} \
+--bed_file_1 ${bed1} \
+--bed_file_2 ${bed2} \
 --min_coverage 50 \
 --out_dir ${out_dir} \
 --num_jobs 36 \
