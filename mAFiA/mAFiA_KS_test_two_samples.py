@@ -44,7 +44,13 @@ def KSTest_on_single_site(in_row, args):
     mod_probs_2 = collect_mod_prob(args.bam_file_2, in_row, args.min_coverage)
     if (len(mod_probs_1)>=args.min_coverage) and (len(mod_probs_2)>=args.min_coverage):
         ks_stat, pval = kstest(mod_probs_1, mod_probs_2)
-        return {'in_row': in_row, 'coverage_1': len(mod_probs_1), 'coverage_2': len(mod_probs_2),'ks_stat': ks_stat, 'pval': pval}
+        return {
+            'in_row': in_row,
+            'ks_stat': ks_stat,
+            'pval': pval,
+            'coverage_1': len(mod_probs_1),
+            'coverage_2': len(mod_probs_2),
+        }
     else:
         return {}
 
@@ -69,6 +75,7 @@ def main():
     df_bed1 = df_bed1[df_bed1['coverage'] >= args.min_coverage]
     df_bed2 = df_bed2[df_bed2['coverage'] >= args.min_coverage]
     df_mod = pd.merge(df_bed1, df_bed2, on=['chrom', 'chromStart', 'chromEnd', 'name', 'score', 'strand', 'ref5mer'], suffixes=['_1', '_2'])
+    df_mod['delta'] = np.round(df_mod['modRatio_2'] - df_mod['modRatio_1'], 1)
 
     # for chunk in df_mod:
     for chunk_start in range(0, len(df_mod), args.chunk_size):

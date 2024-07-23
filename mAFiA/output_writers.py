@@ -27,7 +27,10 @@ KS_fields = [
     'ks_stat',
     'pval',
     'coverage_1',
-    'coverage_2'
+    'coverage_2',
+    'modRatio_1',
+    'modRatio_2',
+    'delta'
 ]
 
 class DataframeWriter:
