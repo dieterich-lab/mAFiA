@@ -72,8 +72,8 @@ def main():
 
     df_bed1 = pd.read_csv(args.bed_file_1, sep='\t', dtype={'chrom': str, 'chromStart': int, 'chromEnd': int})
     df_bed2 = pd.read_csv(args.bed_file_2, sep='\t', dtype={'chrom': str, 'chromStart': int, 'chromEnd': int})
-    df_bed1 = df_bed1[df_bed1['coverage'] >= args.min_coverage]
-    df_bed2 = df_bed2[df_bed2['coverage'] >= args.min_coverage]
+    df_bed1 = df_bed1[(df_bed1['coverage'] >= args.min_coverage) * (df_bed1['confidence'] >= args.min_confidence)]
+    df_bed2 = df_bed2[(df_bed2['coverage'] >= args.min_coverage) * (df_bed2['confidence'] >= args.min_confidence)]
     df_mod = pd.merge(df_bed1, df_bed2, on=['chrom', 'chromStart', 'chromEnd', 'name', 'score', 'strand', 'ref5mer'], suffixes=['_1', '_2'])
     df_mod['delta'] = np.round(df_mod['modRatio_2'] - df_mod['modRatio_1'], 1)
 

@@ -58,6 +58,7 @@ class KSTestArgsParser(ArgsParser):
         self.add_argument('--bam_file_2')
         self.add_argument('--bed_file_1')
         self.add_argument('--bed_file_2')
+        self.add_argument('--min_confidence', type=float, default=0.0)
         self.add_argument('--mod_file')
         self.add_argument('--out_dir')
         self.add_argument('--out_filename', default=None)

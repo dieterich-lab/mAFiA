@@ -24,6 +24,7 @@ python3 ${HOME}/git/mAFiA_dev/mAFiA/mAFiA_KS_test_two_samples.py \
 --bed_file_1 ${bed1} \
 --bed_file_2 ${bed2} \
 --min_coverage 50 \
+--min_confidence 80.0 \
 --out_dir ${out_dir} \
 --num_jobs 36 \
 --out_filename ${out_filename}
