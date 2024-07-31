@@ -1,5 +1,7 @@
 import os
 import pandas as pd
+pd.set_option('display.max_columns', 500)
+pd.set_option('display.width', 1000)
 import numpy as np
 import pysam
 import matplotlib
@@ -14,7 +16,7 @@ polyA_sham_file = f'/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psi
 polyA_tac_file = f'/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/TAC/polyA/TAC_{day}_read2polyA_length.txt'
 sham_bam_file = f'/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/TAC/SHAM_{day}/chrALL.mAFiA.reads.bam'
 tac_bam_file = f'/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/TAC/TAC_{day}/chrALL.mAFiA.reads.bam'
-gene_bed_file = '/home/adrian/Data/genomes/mus_musculus/GRCm38_102/gene.GRCm38.102.bed'
+# gene_bed_file = '/home/adrian/Data/genomes/mus_musculus/GRCm38_102/gene.GRCm38.102.bed'
 
 img_out = '/home/adrian/img_out/polyA_len'
 os.makedirs(img_out, exist_ok=True)
@@ -59,92 +61,140 @@ def collect_polyA_len(in_df, in_read_ids, thresh_len=0):
     return out_len
 
 
+def collect_polyA_len_from_target_genes(target_genes):
+    polyA_len = {}
+    for this_gene in tqdm(target_genes):
+        polyA_len[this_gene] = {}
+        df_gene = df_ks_sel[df_ks_sel['gene'] == this_gene]
+        chrom, strand, geneStart, geneEnd = df_gene[['chrom', 'strand', 'geneStart', 'geneEnd']].values[0]
+        sham_read_ids = get_gene_read_ids(sham_bam_file, chrom, strand, geneStart, geneEnd)
+        tac_read_ids = get_gene_read_ids(tac_bam_file, chrom, strand, geneStart, geneEnd)
+        sham_polyA_len = collect_polyA_len(df_polyA_sham, sham_read_ids)
+        tac_polyA_len = collect_polyA_len(df_polyA_tac, tac_read_ids)
+        polyA_len[this_gene]['SHAM'] = sham_polyA_len
+        polyA_len[this_gene]['TAC'] = tac_polyA_len
+    return polyA_len
+
+
 df_ks = pd.read_csv(ks_file, sep='\t')
-df_ks_sel = df_ks[
-    (df_ks['feature']=='three_prime_utr')
-    * (np.abs(df_ks['delta']) >= 10.0)
-    ]
-target_genes = df_ks_sel['gene_name'].unique()
 df_polyA_sham = pd.read_csv(polyA_sham_file, sep='\t', names=['read_id', 'polyA_len'])
 df_polyA_tac = pd.read_csv(polyA_tac_file, sep='\t', names=['read_id', 'polyA_len'])
 
 plt.figure(figsize=(5, 4))
-plt.hist(df_polyA_sham['polyA_len'], range=[0, 400], bins=50, alpha=0.5, label='SHAM')
-plt.hist(df_polyA_tac['polyA_len'], range=[0, 400], bins=50, alpha=0.5, label='TAC')
+plt.hist(df_polyA_sham['polyA_len'], range=[0, 400], bins=50, alpha=0.5, label='SHAM', density=True)
+plt.hist(df_polyA_tac['polyA_len'], range=[0, 400], bins=50, alpha=0.5, label='TAC', density=True)
 plt.legend(loc='upper right')
 plt.xlabel('polyA length', fontsize=12)
 plt.ylabel('Read count', fontsize=12)
 plt.title(day, fontsize=15)
 plt.savefig(os.path.join(img_out, 'hist_polyA_length_overall.png'), bbox_inches='tight')
 
-gene_bed = pd.read_csv(gene_bed_file, sep='\t', names=bed_fields)
-gene_bed['gene_name'] = [field.split(' ')[1].strip('\"')
-                         for desc in gene_bed['description']
-                         for field in desc.split('; ') if field.split(' ')[0] == 'gene_name']
+df_ks_sel = df_ks[
+    (df_ks['feature']=='three_prime_utr')
+    * (np.abs(df_ks['delta']) >= 5.0)
+    ]
 
-delta_polyA_lens = {}
-for this_gene in tqdm(target_genes):
-    df_gene = df_ks_sel[df_ks_sel['gene_name'] == this_gene]
-    chrom, strand = df_gene[['chrom', 'strand']].values[0]
-    geneStart, geneEnd = gene_bed[gene_bed['gene_name']==this_gene][['chromStart', 'chromEnd']].values[0]
-    sham_read_ids = get_gene_read_ids(sham_bam_file, chrom, strand, geneStart, geneEnd)
-    tac_read_ids = get_gene_read_ids(tac_bam_file, chrom, strand, geneStart, geneEnd)
+m6A_up_genes = df_ks_sel[(df_ks_sel['name'] == 'm6A') * (df_ks_sel['delta'] >= 0.0)]['gene']
+m6A_up_polyA_len = collect_polyA_len_from_target_genes(m6A_up_genes)
 
-    sham_polyA_len = collect_polyA_len(df_polyA_sham, sham_read_ids)
-    tac_polyA_len = collect_polyA_len(df_polyA_tac, tac_read_ids)
-    ks_stat, pval = kstest(sham_polyA_len, tac_polyA_len)
+m6A_down_genes = df_ks_sel[(df_ks_sel['name'] == 'm6A') * (df_ks_sel['delta'] < 0.0)]['gene']
+m6A_down_polyA_len = collect_polyA_len_from_target_genes(m6A_down_genes)
 
-    delta_polyA_lens[this_gene] = (list(zip(df_gene['name'].values, df_gene['delta'].values)),
-                                   np.mean(sham_polyA_len), np.mean(tac_polyA_len),
-                                   len(sham_polyA_len), len(tac_polyA_len), ks_stat, pval)
+m6A_polyA_len = {
+    'up': m6A_up_polyA_len,
+    'down': m6A_down_polyA_len
+}
 
-delta_mod_polyA_len = {}
-for k, v in delta_polyA_lens.items():
-    if v[6]>=0.3:
-        continue
-    polyA_delta = v[2] - v[1]
-    mod_mean_deltas = {}
-    for this_mod in mods:
-        deltas = [delta for mod, delta in v[0] if mod==this_mod]
-        if len(deltas):
-            mod_mean_deltas[this_mod] = np.mean(deltas)
-            # mod_mean_deltas[this_mod] = deltas[np.argmax(np.abs(deltas))]
-    if len(mod_mean_deltas.values()):
-        delta_mod_polyA_len[k] = (mod_mean_deltas, polyA_delta)
+plt.figure(figsize=(10, 5))
+for reg_in, reg in enumerate(['up', 'down']):
+    plt.subplot(1, 2, reg_in+1)
+    for cond in ['SHAM', 'TAC']:
+        all_gene_vals = [x for val in m6A_polyA_len[reg].values() for x in val[cond]]
+        plt.hist(all_gene_vals, range=[0, 400], bins=40, alpha=0.5, label=cond)
+    plt.legend(loc='upper right')
+    plt.xlabel('Tail length', fontsize=12)
+    plt.ylabel('Count', fontsize=12)
+    plt.title(f'm6A {reg}', fontsize=15)
 
-plt.figure(figsize=(10, 4))
-for mod_ind, this_mod in enumerate(mods):
-    plt.subplot(1, 2, mod_ind+1)
-    # vec_x, vec_y = np.vstack([v[this_mod] for v in delta_mod_polyA_len.values()]).T
-    vec_x, vec_y = np.vstack([(v[0].get(this_mod, np.nan), v[1]) for v in delta_mod_polyA_len.values()]).T
-    plt.scatter(vec_x, vec_y)
-    plt.xlim([-30, 30])
-    plt.ylim([-100, 100])
-    plt.xlabel(rf'$\Delta S_{{{dict_mod_display[this_mod]}}}$')
-    plt.ylabel(r'$\Delta L(polyA)$ (bps)')
-plt.suptitle(f'{day}', fontsize=15)
+# for this_gene, this_gene_vals in m6A_up_polyA_len.items():
+#     plt.figure(figsize=(5, 5))
+#     for cond in ['SHAM', 'TAC']:
+#         plt.hist(this_gene_vals[cond], range=[0, 400], bins=40, alpha=0.5, label=cond)
+#     plt.legend(loc='upper right')
+#     plt.xlabel('Tail length', fontsize=12)
+#     plt.ylabel('Count', fontsize=12)
+#     plt.title(this_gene, fontsize=15)
 
-plt.figure(figsize=(10, 4))
-for mod_ind, this_mod in enumerate(mods):
-    plt.subplot(1, 2, mod_ind+1)
-    # vec_x, vec_y = np.vstack([v[this_mod] for v in delta_mod_polyA_len.values()]).T
-    vec_x, vec_y = np.vstack([(v[0].get(this_mod, np.nan), v[1]) for v in delta_mod_polyA_len.values()]).T
-    down_changes = vec_y[vec_x<0]
-    up_changes = vec_y[vec_x>0]
-    plt.violinplot([down_changes, up_changes], range(2), showmeans=True)
-    # down_change = np.mean(vec_y[vec_x<0])
-    # up_change = np.mean(vec_y[vec_x>0])
-    # plt.bar(range(2), [down_change, up_change], width=0.4)
-    plt.xticks(range(2), ['down', 'up'])
-    plt.xlim([-0.5, 1.5])
-    # plt.ylim([-2.5, 2.5])
-    # plt.scatter(vec_x, vec_y)
-    # plt.xlim([-30, 30])
-    # plt.ylim([-100, 100])
-    plt.axhline(y=0, c='gray')
-    plt.xlabel(rf'$\Delta S_{{{dict_mod_display[this_mod]}}}$')
-    plt.ylabel(r'$\Delta L(polyA)$ (bps)')
-plt.suptitle(f'{day}', fontsize=15)
+# target_genes = df_ks_sel['gene'].unique()
+
+# gene_bed = pd.read_csv(gene_bed_file, sep='\t', names=bed_fields)
+# gene_bed['gene_name'] = [field.split(' ')[1].strip('\"')
+#                          for desc in gene_bed['description']
+#                          for field in desc.split('; ') if field.split(' ')[0] == 'gene_name']
+
+# delta_polyA_lens = {}
+# for this_gene in tqdm(target_genes):
+#     df_gene = df_ks_sel[df_ks_sel['gene'] == this_gene]
+#     chrom, strand = df_gene[['chrom', 'strand']].values[0]
+#     geneStart, geneEnd = df_gene[['geneStart', 'geneEnd']].values[0]
+#     sham_read_ids = get_gene_read_ids(sham_bam_file, chrom, strand, geneStart, geneEnd)
+#     tac_read_ids = get_gene_read_ids(tac_bam_file, chrom, strand, geneStart, geneEnd)
+#
+#     sham_polyA_len = collect_polyA_len(df_polyA_sham, sham_read_ids)
+#     tac_polyA_len = collect_polyA_len(df_polyA_tac, tac_read_ids)
+#     ks_stat, pval = kstest(sham_polyA_len, tac_polyA_len)
+#
+#     delta_polyA_lens[this_gene] = (list(zip(df_gene['name'].values, df_gene['delta'].values)),
+#                                    np.mean(sham_polyA_len), np.mean(tac_polyA_len),
+#                                    len(sham_polyA_len), len(tac_polyA_len), ks_stat, pval)
+#
+# delta_mod_polyA_len = {}
+# for k, v in delta_polyA_lens.items():
+#     if v[6]>=0.3:
+#         continue
+#     polyA_delta = v[2] - v[1]
+#     mod_mean_deltas = {}
+#     for this_mod in mods:
+#         deltas = [delta for mod, delta in v[0] if mod==this_mod]
+#         if len(deltas):
+#             mod_mean_deltas[this_mod] = np.mean(deltas)
+#             # mod_mean_deltas[this_mod] = deltas[np.argmax(np.abs(deltas))]
+#     if len(mod_mean_deltas.values()):
+#         delta_mod_polyA_len[k] = (mod_mean_deltas, polyA_delta)
+#
+# plt.figure(figsize=(10, 4))
+# for mod_ind, this_mod in enumerate(mods):
+#     plt.subplot(1, 2, mod_ind+1)
+#     # vec_x, vec_y = np.vstack([v[this_mod] for v in delta_mod_polyA_len.values()]).T
+#     vec_x, vec_y = np.vstack([(v[0].get(this_mod, np.nan), v[1]) for v in delta_mod_polyA_len.values()]).T
+#     plt.scatter(vec_x, vec_y)
+#     plt.xlim([-30, 30])
+#     plt.ylim([-100, 100])
+#     plt.xlabel(rf'$\Delta S_{{{dict_mod_display[this_mod]}}}$')
+#     plt.ylabel(r'$\Delta L(polyA)$ (bps)')
+# plt.suptitle(f'{day}', fontsize=15)
+#
+# plt.figure(figsize=(10, 4))
+# for mod_ind, this_mod in enumerate(mods):
+#     plt.subplot(1, 2, mod_ind+1)
+#     # vec_x, vec_y = np.vstack([v[this_mod] for v in delta_mod_polyA_len.values()]).T
+#     vec_x, vec_y = np.vstack([(v[0].get(this_mod, np.nan), v[1]) for v in delta_mod_polyA_len.values()]).T
+#     down_changes = vec_y[vec_x<0]
+#     up_changes = vec_y[vec_x>0]
+#     plt.violinplot([down_changes, up_changes], range(2), showmeans=True)
+#     # down_change = np.mean(vec_y[vec_x<0])
+#     # up_change = np.mean(vec_y[vec_x>0])
+#     # plt.bar(range(2), [down_change, up_change], width=0.4)
+#     plt.xticks(range(2), ['down', 'up'])
+#     plt.xlim([-0.5, 1.5])
+#     # plt.ylim([-2.5, 2.5])
+#     # plt.scatter(vec_x, vec_y)
+#     # plt.xlim([-30, 30])
+#     # plt.ylim([-100, 100])
+#     plt.axhline(y=0, c='gray')
+#     plt.xlabel(rf'$\Delta S_{{{dict_mod_display[this_mod]}}}$')
+#     plt.ylabel(r'$\Delta L(polyA)$ (bps)')
+# plt.suptitle(f'{day}', fontsize=15)
 
 # plot_genes = [
 #     'Ube2d3',
