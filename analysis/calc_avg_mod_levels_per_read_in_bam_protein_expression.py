@@ -16,7 +16,7 @@ dict_mod_code = {
     'psi': 17802,
 }
 
-day = 'day56'
+day = 'day7'
 thresh_pval = 0.5
 
 proteome_file = '/home/adrian/Data/Dewenter_TAC_Backs_lab/TACOMA_differential_proteome_analysis_TAC_vs_SHAM_benjamini_hochberg.tsv'

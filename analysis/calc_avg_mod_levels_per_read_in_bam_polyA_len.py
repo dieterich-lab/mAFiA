@@ -22,18 +22,18 @@ polyA_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFi
 # below_bam_file = os.path.join(polyA_dir, f'SHAM_{day}_reads_polyA_len_below_{lower_limit}.bam')
 # above_bam_file = os.path.join(polyA_dir, f'SHAM_{day}_reads_polyA_len_above_{upper_limit}.bam')
 polyA_conditions = [
-    '<50',
-    '[50, 150)',
-    '>=150'
+    '$< 50$',
+    # '[50, 150)',
+    '$\geq 150$'
 ]
 condition_colors = [
     'skyblue',
-    'royalblue',
+    # 'royalblue',
     'midnightblue'
 ]
 bam_files = [
     os.path.join(polyA_dir, f'SHAM_{day}_reads_polyA_len_below_50.bam'),
-    os.path.join(polyA_dir, f'SHAM_{day}_reads_polyA_len_50_150.bam'),
+    # os.path.join(polyA_dir, f'SHAM_{day}_reads_polyA_len_50_150.bam'),
     os.path.join(polyA_dir, f'SHAM_{day}_reads_polyA_len_above_150.bam'),
 ]
 
@@ -50,40 +50,18 @@ def calc_mod_level_per_read(in_bam_file, thresh_mod_prob=192.0, num_bases=5):
     read_avg_mod_level = {}
     with pysam.AlignmentFile(in_bam_file, 'rb') as in_bam:
         for this_read in tqdm(in_bam.fetch()):
-            # dict_base_counts = Counter(this_read.query_sequence)
             read_avg_mod_level[this_read.query_name] = {}
             for this_mod in dict_mod_code.keys():
-                # if this_mod=='m6A':
-                #     base_count = dict_base_counts['A']
-                # elif this_mod=='psi':
-                #     base_count = dict_base_counts['T']
                 mod_bases = this_read.modified_bases.get(('N', 0, dict_mod_code[this_mod]), [])
 
-                # vec_pos, vec_mod_prob = np.vstack(mod_bases).T
-                # plt.figure(figsize=(5, 5))
-                # plt.plot(vec_pos, vec_mod_prob, '-o')
-                # plt.title(f'{this_mod}, {this_read.flag}')
-
                 if len(mod_bases)>=num_bases:
-                    # if this_read.flag==0:
-                    #     sel_mod_probs = [this_mod_base[1] for this_mod_base in mod_bases[-num_bases:]]
-                    # elif this_read.flag==16:
-                    #     sel_mod_probs = [this_mod_base[1] for this_mod_base in mod_bases[:num_bases]]
-                    # read_avg_mod_level[this_read.query_name][this_mod] = np.mean(sel_mod_probs) / 255.0
-
                     read_avg_mod_level[this_read.query_name][this_mod] = np.mean(np.partition([tup[1] for tup in mod_bases], -num_bases)[-num_bases:]) / 255.0
                 else:
                     read_avg_mod_level[this_read.query_name][this_mod] = np.mean([tup[1] for tup in mod_bases]) / 255.0
 
-                # read_avg_mod_level[this_read.query_name][this_mod] = np.sum([this_mod_base[1] >= thresh_mod_prob
-                #                                                              for this_mod_base in mod_bases]) / base_count
-                # read_avg_mod_level[this_read.query_name][this_mod] = np.mean([this_mod_base[1] >= thresh_mod_prob
-                #                                                              for this_mod_base in mod_bases])
     return read_avg_mod_level
 
 
-# below_mod_level_per_read = calc_mod_level_per_read(below_bam_file)
-# above_mod_level_per_read = calc_mod_level_per_read(above_bam_file)
 mod_level_per_read = [
     calc_mod_level_per_read(this_bam_file)
     for this_bam_file in bam_files
@@ -113,40 +91,4 @@ for mod_ind, this_mod in enumerate(mods):
     plt.xlabel(rf'$\langle P({{{dict_mod_display[this_mod]}}}) \rangle $ per read', fontsize=12)
     plt.ylabel('Frequency', fontsize=12)
 plt.suptitle(f'SHAM {day}', fontsize=15)
-plt.savefig(os.path.join(img_out, 'hist_avg_mods_per_read_grouped_by_polyA_len.png'), bbox_inches='tight')
-
-
-# mods_tail_len = [(v['m6A'], v['psi'], dict_polyA_sham[k]) for k, v in sham_read_percentage_mods.items()]
-# vec_m6A, vec_psi, vec_tail_len = np.vstack(mods_tail_len).T
-#
-# plt.figure(figsize=(10, 5))
-# plt.subplot(1, 2, 1)
-# plt.scatter(vec_m6A, vec_tail_len, s=0.5)
-# plt.xlabel(rf"$\%{{{dict_mod_display['m6A']}}}$ in read", fontsize=12)
-# plt.ylabel('polyA tail length (bps)', fontsize=12)
-# plt.subplot(1, 2, 2)
-# plt.scatter(vec_psi, vec_tail_len, s=0.5)
-# plt.xlabel(rf"$\%{{{dict_mod_display['psi']}}}$ in read", fontsize=12)
-# plt.ylabel('polyA tail length (bps)', fontsize=12)
-#
-# num_bins = 10
-# bin_width = 0.02
-# bin_edges = np.arange(0.0, (num_bins+1)*bin_width, bin_width)
-# mat_tail_len = np.zeros((num_bins, num_bins))
-# for i_ind in range(len(bin_edges)-1):
-#     i_start = bin_edges[i_ind]
-#     i_end = bin_edges[i_ind+1]
-#     i_mask = (vec_psi>=i_start) * (vec_psi<i_end)
-#     for j_ind in range(len(bin_edges)-1):
-#         j_start = bin_edges[j_ind]
-#         j_end = bin_edges[j_ind + 1]
-#         j_mask = (vec_m6A>=j_start) * (vec_m6A<j_end)
-#         mat_tail_len[i_ind, j_ind] = np.mean(vec_tail_len[i_mask * j_mask])
-#
-# plt.figure(figsize=(5, 5))
-# im = plt.imshow(mat_tail_len, origin='lower')
-# plt.xticks(np.arange(num_bins+1)-0.5, bin_edges)
-# plt.yticks(np.arange(num_bins+1)-0.5, bin_edges)
-# plt.xlabel(rf"$\%{{{dict_mod_display['m6A']}}}$ in read", fontsize=12)
-# plt.ylabel(rf"$\%{{{dict_mod_display['psi']}}}$ in read", fontsize=12)
-# clb = plt.colorbar(im)
+plt.savefig(os.path.join(img_out, f'hist_avg_mods_per_read_grouped_by_polyA_len_{day}.png'), bbox_inches='tight')
