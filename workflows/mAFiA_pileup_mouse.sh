@@ -6,9 +6,6 @@
 #SBATCH --job-name=pileup_mouse
 #SBATCH --output=/home/achan/slurm/pileup_mouse_%A_chr%a.out
 
-#ds=100_WT_0_IVT
-#ds=0_WT_100_IVT
-#chr=X
 if [[ ${SLURM_ARRAY_TASK_ID} -eq 23 ]]
 then
 chr="X"

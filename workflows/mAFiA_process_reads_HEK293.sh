@@ -5,8 +5,8 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=90GB
 #SBATCH --verbose
-#SBATCH --job-name=psico-mAFiA_HEK293
-#SBATCH --output=/home/achan/slurm/psico-mAFiA_HEK293_%A_chr%a.out
+#SBATCH --job-name=psico-mAFiA_human
+#SBATCH --output=/home/achan/slurm/psico-mAFiA_human_%A_chr%a.out
 
 if [[ ${SLURM_ARRAY_TASK_ID} -eq 23 ]]
 then

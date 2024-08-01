@@ -8,13 +8,17 @@
 
 set -e -u
 
-workspace=/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/TAC
-bam1=${workspace}/SHAM_day${day}/chrALL.mAFiA.reads.bam
-bam2=${workspace}/TAC_day${day}/chrALL.mAFiA.reads.bam
-bed1=${workspace}/SHAM_day${day}/chrALL.mAFiA.sites.bed
-bed2=${workspace}/TAC_day${day}/chrALL.mAFiA.sites.bed
+cond=Diet
+ds1=M3KO_CD_merged
+ds2=M3KO_WD_merged
+
+workspace=/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/${cond}
+bam1=${workspace}/${ds1}/chrALL.mAFiA.reads.bam
+bed1=${workspace}/${ds1}/chrALL.mAFiA.sites.bed
+bam2=${workspace}/${ds2}/chrALL.mAFiA.reads.bam
+bed2=${workspace}/${ds2}/chrALL.mAFiA.sites.bed
 out_dir=${workspace}/KS_test
-out_filename=SHAM_TAC_day${day}.bed
+out_filename=${ds1}_${ds2}.bed
 
 source ${HOME}/git/mAFiA/mafia-venv/bin/activate
 

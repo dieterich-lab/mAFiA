@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 shopt -s globstar
 
+ds="NTERA/rep2"
+
 MODEL="${HOME}/git/mAFiA_dev/models/RODAN_HEK293_IVT.torch"
 
 WORKSPACE="/prj/TRR319_RMaP_BaseCalling/Adrian/${ds}"

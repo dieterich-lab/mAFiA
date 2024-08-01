@@ -3,8 +3,8 @@
 #SBATCH --cpus-per-task=40
 #SBATCH --mem=90GB
 #SBATCH --verbose
-#SBATCH --job-name=pileup_HEK293
-#SBATCH --output=/home/achan/slurm/pileup_HEK293_%A_chr%a.out
+#SBATCH --job-name=pileup_human
+#SBATCH --output=/home/achan/slurm/pileup_human_%A_chr%a.out
 
 if [[ ${SLURM_ARRAY_TASK_ID} -eq 23 ]]
 then
