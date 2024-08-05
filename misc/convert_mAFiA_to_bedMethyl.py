@@ -1,10 +1,17 @@
+import argparse
 import pandas as pd
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 import numpy as np
 
-in_file = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/WT_P2/chrALL.mAFiA.sites.bed'
-out_file = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/WT_P2/chrALL.bedMethyl'
+# infile = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/WT_P2/chrALL.mAFiA.sites.bed'
+# outfile = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/WT_P2/chrALL.bedMethyl'
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-i', '--infile')
+parser.add_argument('-o', '--outfile')
+args = parser.parse_args()
+print(args)
 
 mAFiA_fields = [
     'chrom',
@@ -38,7 +45,7 @@ dict_mod_names = {
     'psi': 'Y'
 }
 
-in_bed = pd.read_csv(in_file, sep='\t', dtype={'chrom': str})
+in_bed = pd.read_csv(args.infile, sep='\t', dtype={'chrom': str})
 
 out_bed = in_bed.copy()
 out_bed['name'] = [dict_mod_names[this_name] for this_name in in_bed['name']]
@@ -51,4 +58,4 @@ out_bed['itemRgb'] = '0,0,0'
 out_bed['frequency'] = np.int64(np.round(in_bed['modRatio']))
 
 out_bed = out_bed[bedMethyl_fields]
-out_bed.to_csv(out_file, sep='\t', index=False)
+out_bed.to_csv(args.outfile, sep='\t', index=False)
