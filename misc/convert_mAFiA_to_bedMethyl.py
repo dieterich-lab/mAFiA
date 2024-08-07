@@ -59,7 +59,10 @@ out_bed = in_bed.copy()
 out_bed['name'] = [dict_mod_names[this_name] for this_name in in_bed['name']]
 log_pval = -np.log10((100.0 - in_bed['confidence']) / 100.0)
 log_pval[np.isinf(log_pval)] = 1000
-out_bed['score'] = np.int64(np.round(log_pval))
+if args.modkit:
+    out_bed['score'] = out_bed['coverage']
+else:
+    out_bed['score'] = np.int64(np.round(log_pval))
 out_bed['thickStart'] = out_bed['chromStart']
 out_bed['thickEnd'] = out_bed['chromEnd']
 out_bed['itemRgb'] = '0,0,0'
@@ -67,7 +70,6 @@ if args.modkit:
     out_bed['frequency'] = np.round(in_bed['modRatio'], 2)
 else:
     out_bed['frequency'] = np.int64(np.round(in_bed['modRatio']))
-
 out_bed = out_bed[bedMethyl_fields]
 if args.modkit:
     outfile = os.path.join(os.path.dirname(args.outfile), 'modkit.' + os.path.basename(args.outfile))
