@@ -71,4 +71,6 @@ else:
 out_bed = out_bed[bedMethyl_fields]
 if args.modkit:
     outfile = os.path.join(os.path.dirname(args.outfile), 'modkit.' + os.path.basename(args.outfile))
-out_bed.to_csv(outfile, sep='\t', index=False)
+    out_bed.to_csv(outfile, sep='\t', index=False, header=False)
+else:
+    out_bed.to_csv(args.outfile, sep='\t', index=False)
