@@ -10,7 +10,7 @@ import numpy as np
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--infile')
 parser.add_argument('-o', '--outfile')
-parser.add_argument('--ont', default=False)
+parser.add_argument('--ont', action='store_true')
 args = parser.parse_args()
 print(args)
 
