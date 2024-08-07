@@ -16,8 +16,13 @@ dict_mod_code = {
     'psi': 17802,
 }
 
-day = 'day7'
-thresh_pval = 0.5
+day = 'day21'
+thresh_pval = 1.0
+num_bases = 5
+
+lower_limit = -0.5
+upper_limit = 0.5
+
 
 proteome_file = '/home/adrian/Data/Dewenter_TAC_Backs_lab/TACOMA_differential_proteome_analysis_TAC_vs_SHAM_benjamini_hochberg.tsv'
 df_proteome = pd.read_csv(proteome_file, sep='\t')
@@ -44,15 +49,12 @@ df_gene = pd.read_csv(gene_bed_file, sep='\t', names=gene_bed_fields)
 df_gene = df_gene[df_gene['source'] == 'ensembl_havana']
 df_gene['gene_name'] = [re.search('gene_name "(.*?)";', desc).group(1) for desc in df_gene['description']]
 
-lower_limit = -0.5
-upper_limit = 0.5
-
 proteome_conditions = [
     f'logFC $< {str(lower_limit)}$',
     # 'logFC $\smallin [-0.5, 0.5)$',
     f'logFC $\geq {str(upper_limit)}$'
 ]
-condition_colors = [
+proteome_colors = [
     'skyblue',
     # 'royalblue',
     'midnightblue'
@@ -74,7 +76,7 @@ dict_mod_display = {
     'psi': '\psi'
 }
 
-def calc_mod_level_per_read_aligned_to_region(in_bam_file, in_chrom, in_chromStart, in_chromEnd, in_strand, num_bases=5):
+def calc_mod_level_per_read_aligned_to_region(in_bam_file, in_chrom, in_chromStart, in_chromEnd, in_strand, num_bases):
     read_avg_mod_level = {}
     if in_strand=='+':
         flag_require = 0
@@ -104,13 +106,13 @@ def collect_gene_avg_mod_level(in_df_proteome, in_bam_file):
         this_chromEnd = sub_df_gene['chromEnd'].max()
         this_strand = sub_df_gene['strand'].iloc[0]
         gene_avg_mod_level[this_gene] = calc_mod_level_per_read_aligned_to_region(
-            in_bam_file, this_chrom, this_chromStart, this_chromEnd, this_strand)
+            in_bam_file, this_chrom, this_chromStart, this_chromEnd, this_strand, num_bases=num_bases)
     return gene_avg_mod_level
 
 
 df_proteome_negative = df_proteome_sel[df_proteome_sel['logFC'] < lower_limit]
 # df_proteome_neutral = df_proteome_sel[(df_proteome_sel['logFC'] >= -0.5) * (df_proteome_sel['logFC'] < 0.5)]
-df_proteome_positive = df_proteome_sel[df_proteome_sel['logFC'] >= lower_limit]
+df_proteome_positive = df_proteome_sel[df_proteome_sel['logFC'] >= upper_limit]
 cond_df_proteome = {
     this_cond: this_df for this_cond, this_df in
     zip(proteome_conditions,
@@ -119,36 +121,29 @@ cond_df_proteome = {
          df_proteome_positive])
 }
 
+experiments = ['SHAM', 'TAC']
 exp_ls = {
     'SHAM': '--',
     'TAC': '-'
 }
 
-plt.figure(figsize=(10, 4))
-for exp in ['SHAM', 'TAC']:
-    exp_cond_gene_avg_mod_level = {
-        this_cond: collect_gene_avg_mod_level(this_df_proteome, bam_files[exp])
-        for this_cond, this_df_proteome in cond_df_proteome.items()
-    }
-
-    for mod_ind, this_mod in enumerate(mods):
-        plt.subplot(1, 2, mod_ind+1)
-
-        for (this_proteome_cond, this_cond_gene_avg_mod_level), this_color in \
-                zip(exp_cond_gene_avg_mod_level.items(), condition_colors):
-
+plt.figure(figsize=(10, 10))
+for row_ind, this_exp in enumerate(experiments):
+    for col_ind, this_mod in enumerate(mods):
+        for this_proteome_cond, this_color in zip(proteome_conditions, proteome_colors):
+            plt.subplot(2, 2, row_ind*2+col_ind+1)
+            all_gene_avg_mod_level = collect_gene_avg_mod_level(cond_df_proteome[this_proteome_cond], bam_files[this_exp])
             this_mod_vals = [this_read_mod_level.get(this_mod, np.nan)
-                             for this_gene_read_mod_level in this_cond_gene_avg_mod_level.values()
+                             for this_gene_read_mod_level in all_gene_avg_mod_level.values()
                              for this_read_mod_level in this_gene_read_mod_level.values()]
-
             this_hist, bin_edges = np.histogram(this_mod_vals, range=[0, max_bin], bins=num_bins)
             this_hist = this_hist / np.sum(this_hist)
             bin_centers = (bin_edges[1:] + bin_edges[:-1]) / 2
-            plt.plot(bin_centers, this_hist, c=this_color, ls=exp_ls[exp], label=f'{exp}, ' + this_proteome_cond)
-
+            plt.plot(bin_centers, this_hist, c=this_color, label=this_proteome_cond)
         plt.xlim([-0.01, 1.01])
-        plt.ylim([0, 0.2])
-        plt.legend(title='protein expression', fontsize=8)
+        # plt.ylim([0, 0.1])
+        plt.legend(fontsize=8)
+        plt.title(this_exp, fontsize=12)
         plt.xlabel(rf'$\langle P({{{dict_mod_display[this_mod]}}}) \rangle $ per read', fontsize=12)
         plt.ylabel('Frequency', fontsize=12)
 plt.suptitle(day, fontsize=15)
