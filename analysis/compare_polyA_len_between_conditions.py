@@ -27,6 +27,32 @@ def calc_mod_level_per_read(in_bam_file, num_bases=5):
     return read_avg_mod_level
 
 
+def get_read_norm_pos(in_bam_file, thresh_read_ids=[], num_bases=5):
+    def main_function():
+        mod_bases = this_read.modified_bases.get(('N', 0, dict_mod_code[this_mod]), [])
+        if len(mod_bases):
+            vec_pos, vec_mod_prob = np.vstack(mod_bases).T
+            if len(mod_bases) > num_bases:
+                sel_pos = vec_pos[np.argpartition([tup[1] for tup in mod_bases], -num_bases)[-num_bases:]]
+            else:
+                sel_pos = vec_pos
+            if this_read.flag == 0:
+                norm_pos = sel_pos / this_read.query_length
+            elif this_read.flag == 16:
+                norm_pos = (this_read.query_length - sel_pos - 1) / this_read.query_length
+            read_norm_pos[this_read.query_name] = norm_pos
+
+    read_norm_pos = {}
+    with pysam.AlignmentFile(in_bam_file, 'rb') as in_bam:
+        for this_read in tqdm(in_bam.fetch()):
+            if len(thresh_read_ids):
+                if this_read.query_name in thresh_read_ids:
+                    main_function()
+            else:
+                main_function()
+    return read_norm_pos
+
+
 mods = ['m6A', 'psi']
 dict_mod_display = {
     'm6A': 'm^6A',
@@ -42,7 +68,7 @@ dict_mod_code = {
 ### define datasets ####################################################################################################
 ########################################################################################################################
 ds = 'TAC'
-conditions = ['SHAM_day56', 'TAC_day56']
+conditions = ['SHAM_day7', 'TAC_day7']
 
 # ds = 'HFpEF'
 # conditions = ['ctrl', 'HFpEF']
@@ -151,7 +177,6 @@ for mod_ind, this_mod in enumerate(mods):
             this_hist = this_hist / np.sum(this_hist)
             bin_centers = (bin_edges[1:] + bin_edges[:-1]) / 2
             plt.plot(bin_centers, this_hist, c=this_polyA_color, ls=cond_ls[this_cond], label=f'{this_cond}, {this_polyA_text}')
-
     plt.xlim([-0.01, 1.01])
     plt.ylim([0, 0.1])
     plt.legend(title='poly(A) len, bps')
@@ -159,3 +184,50 @@ for mod_ind, this_mod in enumerate(mods):
     plt.ylabel('Frequency', fontsize=12)
 plt.suptitle(f'{conditions[0]} vs {conditions[1]}', fontsize=15)
 plt.savefig(os.path.join(img_out, f'mod_per_read_{ds}_{conditions[0]}_vs_{conditions[1]}.png'), bbox_inches='tight')
+
+########################################################################################################################
+### location of high mods on read ######################################################################################
+########################################################################################################################
+thresh_avg_mod = 0.0
+num_bins = 10
+top_mods = 5
+# for this_cond in conditions:
+#     for this_polyA in [f'below_{lower_lim}', f'above_{upper_lim}']:
+
+cond_binned_mod_profile = {}
+for this_cond in conditions:
+    cond_binned_mod_profile[this_cond] = {}
+    this_bam_file = bam_files[this_cond]
+    plt.figure(figsize=(5, 4))
+    for this_mod in mods:
+        this_cond_read_norm_pos = get_read_norm_pos(this_bam_file, num_bases=top_mods)
+        flat_norm_pos = np.concatenate(list(this_cond_read_norm_pos.values()))
+        this_hist, bin_edges = np.histogram(flat_norm_pos, range=[0, max_bin], bins=num_bins)
+        this_hist = this_hist / np.sum(this_hist)
+        bin_centers = (bin_edges[1:] + bin_edges[:-1]) / 2
+        plt.plot(bin_centers, this_hist, '-o', label=this_mod)
+        cond_binned_mod_profile[this_cond][this_mod] = this_hist
+    plt.legend()
+    plt.xlim([-0.01, 1.01])
+    plt.xticks(np.arange(0, 1.01, 0.25), np.arange(0, 101, 25))
+    plt.xlabel('Normalized read position (%)', fontsize=12)
+    plt.ylabel('Frequency', fontsize=12)
+    plt.title(f'{this_cond}, top {top_mods} mods in read', fontsize=15)
+    plt.savefig(os.path.join(img_out, f'hist_mod_profile_top_mod_locations_{ds}_{this_cond}.png'), bbox_inches='tight')
+
+
+########################################################################################################################
+### correlation ########################################################################################################
+########################################################################################################################
+# for this_cond in conditions:
+#     for this_polyA in [f'below_{lower_lim}', f'above_{upper_lim}']:
+#         read_avg_mods = [(this_read_avg_mods['m6A'], this_read_avg_mods['psi'])
+#                          for this_read_avg_mods in mod_level_per_read[this_cond][this_polyA].values()
+#                          if set(['m6A', 'psi']).issubset(set(this_read_avg_mods.keys()))]
+#         read_avg_mods = [tup for tup in read_avg_mods if ~np.isnan(tup).any()]
+#         vec_avg_m6A, vec_avg_psi = np.vstack(read_avg_mods).T
+#         corrcoef = np.corrcoef(vec_avg_m6A, vec_avg_psi)[0, 1]
+#
+#         plt.figure(figsize=(5, 5))
+#         plt.plot(vec_avg_m6A, vec_avg_psi, '.')
+#         plt.title(f'{this_cond}, {this_polyA}, corr. {corrcoef:.2f}')
