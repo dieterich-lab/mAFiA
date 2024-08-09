@@ -70,7 +70,7 @@ if args.modkit:
     out_bed['frequency'] = np.round(in_bed['modRatio'], 2)
 else:
     out_bed['frequency'] = np.int64(np.round(in_bed['modRatio']))
-    out_bed[out_bed['frequency']==0]['frequency'] = 1
+    out_bed.loc[out_bed['frequency'] == 0, :]['frequency'] = 1
 out_bed = out_bed[bedMethyl_fields]
 if args.modkit:
     outfile = os.path.join(os.path.dirname(args.outfile), 'modkit.' + os.path.basename(args.outfile))
