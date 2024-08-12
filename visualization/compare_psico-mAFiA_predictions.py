@@ -9,11 +9,11 @@ from tqdm import tqdm
 
 THRESH_CONF = 80
 THRESH_COV = 20
-pred_ds = 'METTL3_KD'
+pred_ds = 'HeLa_rep1'
 bid_seq_calibrated = False
 restrict_motifs = None
-comp_ds = 'WT'
-mod_type = 'm6A'
+comp_ds = 'BACS'
+mod_type = 'psi'
 
 mods = ['m6A', 'psi']
 dict_mod_display = {
@@ -24,7 +24,7 @@ dict_mod_display = {
 dict_ds = {
     'RNA004_HEK293_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/RNA004/dorado/RNA004_HEK293_WT_RTA.mAFiA.bed',
 
-    'WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/WT_P2/chrALL.mAFiA.sites.bed',
+    'HEK293_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/WT_P2/chrALL.mAFiA.sites.bed',
 
     '100WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/100WT/chrALL.mAFiA.sites.bed',
     '75WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/75WT/chrALL.mAFiA.sites.bed',
@@ -41,7 +41,10 @@ dict_ds = {
     'TRUB1_OE_rep2': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293_TRUB1_OE/rep2/chrALL.mAFiA.sites.bed',
     'TRUB1_OE': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293_TRUB1_OE/merged/chrALL.mAFiA.sites.bed',
 
-    'HeLa_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/NanoSPA/HeLa_WT/chrALL.mAFiA.sites.bed',
+    'HeLa_NanoSPA_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/NanoSPA/HeLa_WT/chrALL.mAFiA.sites.bed',
+    'HeLa_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HeLa/rep1/chrALL.mAFiA.sites.bed',
+    'HeLa_rep2': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HeLa/rep2/chrALL.mAFiA.sites.bed',
+    'HeLa_rep3': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HeLa/rep3/chrALL.mAFiA.sites.bed',
     # 'HeLa_SRR28796313': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA/HeLa_SRR28796313/chrALL.mAFiA.sites.bed',
 
     'siCtrl_input_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v0/NanoSPA/HEK_siCtrl_input_rep1/chrALL.mAFiA.sites.bed',
