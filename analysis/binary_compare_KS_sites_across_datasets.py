@@ -10,6 +10,7 @@ from functools import reduce
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 
 
 def get_df_annotated(in_df):
@@ -90,16 +91,23 @@ df_annot = df_annot[df_annot['source']=='ensembl_havana']
 annot = pybedtools.BedTool.from_dataframe(df_annot)
 
 ds = [
-    # 'TAC_SHAM_day1_TAC_day1',
-    'TAC_SHAM_day7_TAC_day7',
-    # 'TAC_SHAM_day21_TAC_day21',
-    # 'TAC_SHAM_day56_TAC_day56',
+    # 'TAC_SHAM_day7_TAC_day7',
     'Diet_WT_CD_merged_WT_WD_merged',
-    # 'HFpEF_ctrl_merged_HFpEF_merged'
+    'HFpEF_ctrl_merged_HFpEF_merged'
 ]
 
+ds_names = {
+    'TAC_SHAM_day7_TAC_day7': 'TAC',
+    'Diet_WT_CD_merged_WT_WD_merged': 'Diet',
+    'HFpEF_ctrl_merged_HFpEF_merged': 'HFpEF'
+}
+
 ds_colors = {
-    this_ds: this_color for (this_ds, this_color) in zip(ds, ['b', 'r'])
+    this_ds: this_color for (this_ds, this_color) in zip([
+        'TAC_SHAM_day7_TAC_day7',
+        'Diet_WT_CD_merged_WT_WD_merged',
+        'HFpEF_ctrl_merged_HFpEF_merged'
+    ], ['g', 'b', 'r'])
 }
 
 merge_fields = [
@@ -136,27 +144,11 @@ for this_ds in ds:
     all_dfs.append(this_df_thresh)
 
 df_merged = reduce(lambda left, right: pd.merge(left, right, on=merge_fields), all_dfs)
-
-vec_x = df_merged[f'delta_{ds[0]}'].values
-vec_y = df_merged[f'delta_{ds[1]}'].values
-
-xylim = [-15, 15]
-
-plt.figure(figsize=(4, 4))
-plt.scatter(vec_x, vec_y, s=3)
-plt.axvline(0, c='gray', alpha=0.5)
-plt.axhline(0, c='gray', alpha=0.5)
-plt.xlabel(ds[0], fontsize=12)
-plt.ylabel(ds[1], fontsize=12)
-plt.xlim(xylim)
-plt.ylim(xylim)
-
 df_annotated_sites = get_df_annotated(df_merged)
 
-thresh_log2fc = 0.5
-thresh_min_num_sites = 1
+thresh_log2fc = 0.25
+thresh_min_num_sites = 2
 
-# this_mod = 'm6A'
 plt.figure(figsize=(15, 15))
 for mod_ind, this_mod in enumerate(mods):
     this_mod_df_annotated_sites = df_annotated_sites[df_annotated_sites['name']==this_mod]
@@ -168,33 +160,35 @@ for mod_ind, this_mod in enumerate(mods):
             gene_ds_delta[this_gene] = [sub_df[f'log2fc_{ds[0]}'].values, sub_df[f'log2fc_{ds[1]}'].values]
 
     # sorted_genes = np.array(list(gene_ds_delta.keys()))[
-    #     np.argsort([np.max(this_val) for this_val in gene_ds_delta.values()])
+    #     np.argsort([(np.mean(this_val[1]) - np.mean(this_val[0])) for this_val in gene_ds_delta.values()])
     # ][::-1]
     sorted_genes = np.array(list(gene_ds_delta.keys()))[
-        np.argsort([(np.mean(this_val[1]) - np.mean(this_val[0])) for this_val in gene_ds_delta.values()])
-    ][::-1]
+        np.argsort([np.mean(this_val[0]) for this_val in gene_ds_delta.values()])
+    ]
 
     plt.subplot(1, 2, mod_ind+1)
     labelled = False
     for row_ind, this_gene in enumerate(sorted_genes):
-        this_ds_delta = gene_ds_delta[this_gene]
+        ds_delta = gene_ds_delta[this_gene]
         if not labelled:
-            plt.scatter(this_ds_delta[0], [row_ind-0.1] * len(this_ds_delta[0]), c=ds_colors[ds[0]], label=ds[0])
-            plt.scatter(this_ds_delta[1], [row_ind+0.1] * len(this_ds_delta[1]), c=ds_colors[ds[1]], label=ds[1])
-            labelled = True
+            for ds_ind, (this_ds, this_ds_delta) in enumerate(zip(ds, ds_delta)):
+                plt.scatter(this_ds_delta, [row_ind-0.1+0.2*ds_ind] * len(this_ds_delta),
+                            c=ds_colors[this_ds], label=ds_names[this_ds])
+                labelled = True
         else:
-            plt.scatter(this_ds_delta[0], [row_ind-0.1] * len(this_ds_delta[0]), c=ds_colors[ds[0]])
-            plt.scatter(this_ds_delta[1], [row_ind+0.1] * len(this_ds_delta[1]), c=ds_colors[ds[1]])
+            for ds_ind, (this_ds, this_ds_delta) in enumerate(zip(ds, ds_delta)):
+                plt.scatter(this_ds_delta, [row_ind-0.1+0.2*ds_ind] * len(this_ds_delta),
+                            c=ds_colors[this_ds])
     plt.gca().invert_yaxis()
     plt.yticks(range(len(gene_ds_delta.keys())), gene_ds_delta.keys())
     plt.xlim([-1.5, 1.5])
-    plt.axvline(x=0, c='g', ls='--')
+    plt.axvline(x=0, c='gray', alpha=0.5, ls='--')
     plt.legend(loc='lower left')
     plt.xlabel(rf'$log2fc$', fontsize=12)
     plt.ylabel('Gene', fontsize=12)
     plt.title(f'${{{dict_mod_display[this_mod]}}}$', fontsize=15)
 plt.suptitle(rf'$log2fc\geq{thresh_log2fc}$' + f'\nmin. {thresh_min_num_sites} sites per gene', fontsize=20)
-plt.savefig(os.path.join(img_out, f'individual_sites_{ds[0]}_{ds[1]}.png'), bbox_inches='tight')
+plt.savefig(os.path.join(img_out, f'individual_sites_{ds_names[ds[0]]}_{ds_names[ds[1]]}.png'), bbox_inches='tight')
 
 ### meta-transcript profile ###
 ds_hist = {
@@ -235,10 +229,69 @@ for mod_ind, this_mod in enumerate(mods):
             mask = (vec_pos >= bin_start) * (vec_pos<bin_end)
             masked_vals = [x for x in vec_log2fc[mask] if ~np.isnan(x) and ~np.isinf(x)]
             vec_hist.append(np.mean(masked_vals))
-        plt.bar(bin_centers, vec_hist, width=0.08, label=this_ds, color=ds_colors[this_ds], alpha=0.5)
+        plt.bar(bin_centers, vec_hist, width=0.08, label=ds_names[this_ds], color=ds_colors[this_ds], alpha=0.5)
     plt.title(rf'${{{dict_mod_display[this_mod]}}}$', fontsize=15)
     plt.ylim(ylim)
     plt.xlabel('% gene span', fontsize=12)
     plt.ylabel('Avg. log2fc', fontsize=12)
-    plt.legend(loc='lower right', fontsize=8)
-plt.savefig(os.path.join(img_out, f'metagene_profile_{ds[0]}_{ds[1]}.png'), bbox_inches='tight')
+    plt.legend(loc='lower right')
+plt.savefig(os.path.join(img_out, f'metagene_profile_{ds_names[ds[0]]}_{ds_names[ds[1]]}.png'), bbox_inches='tight')
+
+### violinplot by transcript region ###
+regions = [
+    'five_prime_utr',
+    'CDS',
+    'three_prime_utr'
+]
+
+ylim = [-2, 2]
+
+plt.figure(figsize=(10, 4))
+for mod_ind, this_mod in enumerate(mods):
+    plt.subplot(1, 2, mod_ind+1)
+    plt.axhline(y=0, c='gray', ls='--', alpha=0.2)
+    labels = [(mpatches.Patch(color=ds_colors[this_ds]), ds_names[this_ds]) for this_ds in ds]
+    for ds_ind, this_ds in enumerate(ds):
+        region_log2fc = [
+            df_annotated_sites[
+                (df_annotated_sites['name'] == this_mod)
+                * (df_annotated_sites['feature'] == this_region)
+            ][f'log2fc_{this_ds}'].values
+            for this_region in regions
+        ]
+        region_log2fc = [
+            [x for x in this_region_log2fc if ~np.isnan(x) and ~np.isinf(x)]
+            for this_region_log2fc in region_log2fc
+        ]
+        # region_num_sites = [len(x) for x in region_log2fc]
+        # region_max = [max(x) for x in region_log2fc]
+        # region_log2fc = [x if len(x) else [0] for x in region_log2fc]
+
+        bplot = plt.boxplot(region_log2fc, positions=np.arange(len(regions))-0.2+ds_ind*0.4,
+                    showfliers=False, patch_artist=True)
+        for patch in bplot['boxes']:
+            patch.set_facecolor(ds_colors[this_ds])
+        for patch in bplot['medians']:
+            patch.set_color('k')
+
+        # violin_parts = plt.violinplot(region_log2fc, np.arange(len(regions))-0.2+ds_ind*0.4,
+        #                               widths=0.3, showmedians=True)
+        # for pc in violin_parts['bodies']:
+        #     pc.set_facecolor(ds_colors[this_ds])
+        #     pc.set_edgecolor(ds_colors[this_ds])
+        # violin_parts['cmaxes'].set_edgecolor(ds_colors[this_ds])
+        # violin_parts['cmedians'].set_edgecolor(ds_colors[this_ds])
+        # violin_parts['cmins'].set_edgecolor(ds_colors[this_ds])
+        # violin_parts['cbars'].set_edgecolor(ds_colors[this_ds])
+
+        # for region_ind, (this_max, this_num_sites) in enumerate(zip(region_max, region_num_sites)):
+        #     plt.text(region_ind-0.2+ds_ind*0.4, this_max+0.1, this_num_sites,
+        #              c=ds_colors[this_ds], horizontalalignment='center')
+
+    plt.legend(*zip(*labels), loc='upper left')
+    plt.xticks(range(len(regions)), regions)
+    plt.ylim(ylim)
+    plt.xlabel('Region', fontsize=12)
+    plt.ylabel('log2fc', fontsize=12)
+    plt.title(rf'${{{dict_mod_display[this_mod]}}}$', fontsize=15)
+plt.savefig(os.path.join(img_out, f'boxplot_by_region_{ds_names[ds[0]]}_{ds_names[ds[1]]}.png'), bbox_inches='tight')
