@@ -91,13 +91,13 @@ df_annot = df_annot[df_annot['source']=='ensembl_havana']
 annot = pybedtools.BedTool.from_dataframe(df_annot)
 
 ds = [
-    'TAC_SHAM_day7_TAC_day7',
+    'TAC_SHAM_merged_TAC_merged',
     'Diet_WT_CD_merged_WT_WD_merged',
     'HFpEF_ctrl_merged_HFpEF_merged'
 ]
 
 ds_names = {
-    'TAC_SHAM_day7_TAC_day7': 'TAC',
+    'TAC_SHAM_merged_TAC_merged': 'TAC',
     'Diet_WT_CD_merged_WT_WD_merged': 'Diet',
     'HFpEF_ctrl_merged_HFpEF_merged': 'HFpEF'
 }

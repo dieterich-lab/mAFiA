@@ -91,22 +91,22 @@ df_annot = df_annot[df_annot['source']=='ensembl_havana']
 annot = pybedtools.BedTool.from_dataframe(df_annot)
 
 ds = [
-    # 'TAC_SHAM_day7_TAC_day7',
+    'TAC_SHAM_merged_TAC_merged',
     'Diet_WT_CD_merged_WT_WD_merged',
-    'HFpEF_ctrl_merged_HFpEF_merged'
+    # 'HFpEF_ctrl_merged_HFpEF_merged',
 ]
 
 ds_names = {
-    'TAC_SHAM_day7_TAC_day7': 'TAC',
+    'TAC_SHAM_merged_TAC_merged': 'TAC',
     'Diet_WT_CD_merged_WT_WD_merged': 'Diet',
-    'HFpEF_ctrl_merged_HFpEF_merged': 'HFpEF'
+    'HFpEF_ctrl_merged_HFpEF_merged': 'HFpEF',
 }
 
 ds_colors = {
     this_ds: this_color for (this_ds, this_color) in zip([
-        'TAC_SHAM_day7_TAC_day7',
+        'TAC_SHAM_merged_TAC_merged',
         'Diet_WT_CD_merged_WT_WD_merged',
-        'HFpEF_ctrl_merged_HFpEF_merged'
+        'HFpEF_ctrl_merged_HFpEF_merged',
     ], ['g', 'b', 'r'])
 }
 
@@ -145,6 +145,8 @@ for this_ds in ds:
 
 df_merged = reduce(lambda left, right: pd.merge(left, right, on=merge_fields), all_dfs)
 df_annotated_sites = get_df_annotated(df_merged)
+df_annotated_sites.to_csv(os.path.join(img_out, f'annotated_diff_sites_{ds_names[ds[0]]}_{ds_names[ds[1]]}.tsv'),
+                          sep='\t', index=False)
 
 thresh_log2fc = 0.25
 thresh_min_num_sites = 2
@@ -180,7 +182,7 @@ for mod_ind, this_mod in enumerate(mods):
                 plt.scatter(this_ds_delta, [row_ind-0.1+0.2*ds_ind] * len(this_ds_delta),
                             c=ds_colors[this_ds])
     plt.gca().invert_yaxis()
-    plt.yticks(range(len(gene_ds_delta.keys())), gene_ds_delta.keys())
+    plt.yticks(range(len(sorted_genes)), sorted_genes)
     plt.xlim([-1.5, 1.5])
     plt.axvline(x=0, c='gray', alpha=0.5, ls='--')
     plt.legend(loc='lower left')
