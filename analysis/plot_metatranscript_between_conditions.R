@@ -37,10 +37,10 @@ compare_mods <- function(in.metagene.coord, in_cond) {
 
 
 compare_conditions <- function(in.metagene.coord, in_mod) {
-  transcript.region <- c(in.metagene.coord[[conditions[1]]][[in_mod]], 
-                         in.metagene.coord[[conditions[2]]][[in_mod]])
-  conditions <- c(rep(conditions[1], length(in.metagene.coord[[conditions[1]]][[in_mod]])), 
-                  rep(conditions[2], length(in.metagene.coord[[conditions[2]]][[in_mod]]))) 
+  transcript.region <- c(in.metagene.coord[["ctrl_merged"]][[in_mod]], 
+                         in.metagene.coord[["HFpEF_merged"]][[in_mod]])
+  conditions <- c(rep("ctrl_merged", length(in.metagene.coord[["ctrl_merged"]][[in_mod]])),
+                  rep("HFpEF_merged", length(in.metagene.coord[["HFpEF_merged"]][[in_mod]])))
   df <- data.frame(transcript.region, conditions)
   
   ggplot(df) + 
@@ -70,8 +70,8 @@ coverage_profile <- coverage_df$chrALL.mAFiA.reads / sum(coverage_df$chrALL.mAFi
 
 metagene.coord <- list()
 bins <- seq(0, 3, 0.05)
-for (this_cond in conditions) {
-  for (this_mod in mods) {
+for (this_cond in all_conditions) {
+  for (this_mod in all_mods) {
     metagene.coord[[this_cond]][[this_mod]] <- get_metagene_coord(file.path(res_dir, sprintf("%s_%s_%s_%s.dist.measures.txt", ds, this_cond, this_mod, "modRatio50.0")))
   }
 }
