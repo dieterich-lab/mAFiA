@@ -67,14 +67,14 @@ dict_mod_code = {
 ########################################################################################################################
 ### define datasets ####################################################################################################
 ########################################################################################################################
-ds = 'TAC'
-conditions = ['SHAM', 'TAC']
+# ds = 'TAC'
+# conditions = ['SHAM', 'TAC']
 
 # ds = 'HFpEF'
 # conditions = ['ctrl', 'HFpEF']
 
-# ds = 'Diet'
-# conditions = ['WT_CD', 'WT_WD']
+ds = 'Diet'
+conditions = ['WT_CD', 'WT_WD']
 
 cond_colors = {this_cond: this_color for this_cond, this_color in zip(conditions, ['b', 'r'])}
 
@@ -99,7 +99,17 @@ num_bins = 100
 bin_edges = np.linspace(0, 500, num_bins+1)
 bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
 
-plt.figure(figsize=(8, 4.5))
+plt.figure(figsize=(10, 4))
+plt.subplot(1, 2, 1)
+for cond_ind, this_cond in enumerate(conditions):
+    # plt.hist(dict_polyA[this_cond].values(), range=[0, 500], bins=50, label=this_cond, alpha=0.5, density=True)
+    this_hist, _ = np.histogram(list(dict_polyA[this_cond].values()), bins=bin_edges)
+    norm_hist = this_hist / np.sum(this_hist)
+    plt.plot(bin_centers, norm_hist, c=cond_colors[this_cond], label=this_cond)
+plt.legend(fontsize=10)
+plt.xlabel('polyA length (bps)', fontsize=12)
+plt.ylabel('Density', fontsize=12)
+plt.subplot(1, 2, 2)
 for cond_ind, this_cond in enumerate(conditions):
     # plt.hist(dict_polyA[this_cond].values(), range=[0, 500], bins=50, label=this_cond, alpha=0.5, density=True)
     this_hist, _ = np.histogram(list(dict_polyA[this_cond].values()), bins=bin_edges)
@@ -108,8 +118,8 @@ for cond_ind, this_cond in enumerate(conditions):
     plt.yscale('log')
 plt.legend(fontsize=10)
 plt.xlabel('polyA length (bps)', fontsize=12)
-plt.ylabel('Density', fontsize=12)
-plt.title(ds, fontsize=15)
+plt.ylabel('Density (log)', fontsize=12)
+plt.suptitle(ds, fontsize=15)
 plt.savefig(os.path.join(img_out, f'hist_{ds}_{conditions[0]}_vs_{conditions[1]}_polyA_length.png'), bbox_inches='tight')
 
 ########################################################################################################################
