@@ -71,6 +71,7 @@ hist_num_bins = 50
 bin_edges = np.linspace(*hist_range, hist_num_bins+1)
 bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
 
+ymax = 0.175
 plt.figure(figsize=(10, 4))
 for cond_ind, this_cond in enumerate(conditions):
     plt.subplot(1, 2, cond_ind+1)
@@ -86,8 +87,10 @@ for cond_ind, this_cond in enumerate(conditions):
     plt.plot(bin_centers, norm_hetero_hist, c='g',
              label=rf"${{{dict_mod_display['m6A']}}}$" + r'$\longleftrightarrow$' + rf"${{{dict_mod_display['psi']}}}$")
     plt.legend()
-    plt.ylim([0, 0.175])
-    plt.xlabel('Norm. distance', fontsize=12)
+    plt.ylim([0, ymax])
+    plt.xticks([0, 1.5, 3], ['0', '50', '100'])
+    plt.yticks(np.arange(0, ymax, 0.05))
+    plt.xlabel('Transcript distance (%)', fontsize=12)
     plt.ylabel('Density', fontsize=12)
     plt.title(cond_names[this_cond], fontsize=15)
     # plt.title(rf'${{{dict_mod_display[this_mod]}}}$', fontsize=15)

@@ -68,28 +68,21 @@ dict_mod_code = {
 ### define datasets ####################################################################################################
 ########################################################################################################################
 ds = 'TAC'
-conditions = ['SHAM_day7', 'TAC_day7']
+conditions = ['SHAM', 'TAC']
 
 # ds = 'HFpEF'
 # conditions = ['ctrl', 'HFpEF']
 
 # ds = 'Diet'
 # conditions = ['WT_CD', 'WT_WD']
-# # # conditions = ['M3KO_CD', 'M3KO_WD']
-# # # conditions = ['WT_CD', 'M3KO_CD']
-# # conditions = ['WT_WD', 'M3KO_WD']
 
-# ds = 'CM'
-# conditions = ['WT', 'M3KO']
+cond_colors = {this_cond: this_color for this_cond, this_color in zip(conditions, ['b', 'r'])}
 
 polyA_dir = f'/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/{ds}/polyA'
 polyA_files = {this_cond: os.path.join(polyA_dir, f'{this_cond}_read2polyA_length.txt') for this_cond in conditions}
 
 bam_dir = f'/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/{ds}'
-if ds == 'TAC':
-    bam_files = {this_cond: os.path.join(bam_dir, f'{this_cond}/chrALL.mAFiA.reads.bam') for this_cond in conditions}
-else:
-    bam_files = {this_cond: os.path.join(bam_dir, f'{this_cond}_merged/chrALL.mAFiA.reads.bam') for this_cond in conditions}
+bam_files = {this_cond: os.path.join(bam_dir, f'{this_cond}_merged/chrALL.mAFiA.reads.bam') for this_cond in conditions}
 
 img_out = '/home/adrian/img_out/polyA_len'
 os.makedirs(img_out, exist_ok=True)
@@ -102,12 +95,20 @@ df_polyA = {this_cond: pd.read_csv(polyA_files[this_cond], sep='\t', names=['rea
 dict_polyA = {this_cond: {k: v for k, v in df_polyA[this_cond][['read_id', 'polyA_len']].values}
               for this_cond in conditions}
 
+num_bins = 100
+bin_edges = np.linspace(0, 500, num_bins+1)
+bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
+
 plt.figure(figsize=(8, 4.5))
 for cond_ind, this_cond in enumerate(conditions):
-    plt.hist(dict_polyA[this_cond].values(), range=[0, 500], bins=50, label=this_cond, alpha=0.5, density=True)
+    # plt.hist(dict_polyA[this_cond].values(), range=[0, 500], bins=50, label=this_cond, alpha=0.5, density=True)
+    this_hist, _ = np.histogram(list(dict_polyA[this_cond].values()), bins=bin_edges)
+    norm_hist = this_hist / np.sum(this_hist)
+    plt.plot(bin_centers, norm_hist, c=cond_colors[this_cond], label=this_cond)
+    plt.yscale('log')
 plt.legend(fontsize=10)
 plt.xlabel('polyA length (bps)', fontsize=12)
-plt.ylabel('Frequency', fontsize=12)
+plt.ylabel('Density', fontsize=12)
 plt.title(ds, fontsize=15)
 plt.savefig(os.path.join(img_out, f'hist_{ds}_{conditions[0]}_vs_{conditions[1]}_polyA_length.png'), bbox_inches='tight')
 
@@ -116,6 +117,8 @@ plt.savefig(os.path.join(img_out, f'hist_{ds}_{conditions[0]}_vs_{conditions[1]}
 ########################################################################################################################
 upper_lim = 150
 lower_lim = 50
+
+polyA_thresholds = [f'below_{lower_lim}', f'above_{upper_lim}']
 
 for this_cond, this_df in df_polyA.items():
     above_read_ids = this_df[this_df['polyA_len'] >= upper_lim]['read_id'].tolist()
@@ -143,7 +146,7 @@ for this_cond, this_df in df_polyA.items():
 mod_level_per_read = {
     this_cond: {
         polyA_suffix: calc_mod_level_per_read(os.path.join(polyA_dir, f'{this_cond}_polyA_len_{polyA_suffix}.bam'))
-        for polyA_suffix in [f'below_{lower_lim}', f'above_{upper_lim}']
+        for polyA_suffix in polyA_thresholds
     }
     for this_cond in conditions
 }
@@ -152,7 +155,7 @@ num_bins = 20
 max_bin = 1.0
 
 cond_ls = {
-    this_cond: this_ls for this_cond, this_ls in zip(conditions, ['-', '--'])
+    this_cond: this_ls for this_cond, this_ls in zip(conditions, [':', '-'])
 }
 
 polyA_text = [
@@ -169,51 +172,53 @@ polyA_colors = [
 plt.figure(figsize=(10, 4))
 for mod_ind, this_mod in enumerate(mods):
     plt.subplot(1, 2, mod_ind+1)
-    for this_cond in conditions:
-        for this_mod_level_per_read, this_polyA_text, this_polyA_color in \
-                zip(mod_level_per_read[this_cond].values(), polyA_text, polyA_colors):
+    for this_polyA_thresh, this_polyA_text, this_polyA_color in zip(polyA_thresholds, polyA_text, polyA_colors):
+        for this_cond in conditions:
+            this_mod_level_per_read = mod_level_per_read[this_cond][this_polyA_thresh]
             this_mod_vals = [val.get(this_mod, np.nan) for val in this_mod_level_per_read.values()]
             this_hist, bin_edges = np.histogram(this_mod_vals, range=[0, max_bin], bins=num_bins)
             this_hist = this_hist / np.sum(this_hist)
             bin_centers = (bin_edges[1:] + bin_edges[:-1]) / 2
-            plt.plot(bin_centers, this_hist, c=this_polyA_color, ls=cond_ls[this_cond], label=f'{this_cond}, {this_polyA_text}')
+            plt.plot(bin_centers, this_hist, c=this_polyA_color,
+                     ls=cond_ls[this_cond], label=f'{this_cond}, {this_polyA_text}')
     plt.xlim([-0.01, 1.01])
     plt.ylim([0, 0.1])
     plt.legend(title='poly(A) len, bps')
     plt.xlabel(rf'$\langle P({{{dict_mod_display[this_mod]}}}) \rangle $ per read', fontsize=12)
-    plt.ylabel('Frequency', fontsize=12)
+    plt.ylabel('Density', fontsize=12)
+    plt.title(rf'${{{dict_mod_display[this_mod]}}}$', fontsize=15)
 plt.suptitle(f'{conditions[0]} vs {conditions[1]}', fontsize=15)
 plt.savefig(os.path.join(img_out, f'mod_per_read_{ds}_{conditions[0]}_vs_{conditions[1]}.png'), bbox_inches='tight')
 
 ########################################################################################################################
 ### location of high mods on read ######################################################################################
 ########################################################################################################################
-thresh_avg_mod = 0.0
-num_bins = 10
-top_mods = 5
+# thresh_avg_mod = 0.0
+# num_bins = 10
+# top_mods = 5
+# # for this_cond in conditions:
+# #     for this_polyA in [f'below_{lower_lim}', f'above_{upper_lim}']:
+#
+# cond_binned_mod_profile = {}
 # for this_cond in conditions:
-#     for this_polyA in [f'below_{lower_lim}', f'above_{upper_lim}']:
-
-cond_binned_mod_profile = {}
-for this_cond in conditions:
-    cond_binned_mod_profile[this_cond] = {}
-    this_bam_file = bam_files[this_cond]
-    plt.figure(figsize=(5, 4))
-    for this_mod in mods:
-        this_cond_read_norm_pos = get_read_norm_pos(this_bam_file, num_bases=top_mods)
-        flat_norm_pos = np.concatenate(list(this_cond_read_norm_pos.values()))
-        this_hist, bin_edges = np.histogram(flat_norm_pos, range=[0, max_bin], bins=num_bins)
-        this_hist = this_hist / np.sum(this_hist)
-        bin_centers = (bin_edges[1:] + bin_edges[:-1]) / 2
-        plt.plot(bin_centers, this_hist, '-o', label=this_mod)
-        cond_binned_mod_profile[this_cond][this_mod] = this_hist
-    plt.legend()
-    plt.xlim([-0.01, 1.01])
-    plt.xticks(np.arange(0, 1.01, 0.25), np.arange(0, 101, 25))
-    plt.xlabel('Normalized read position (%)', fontsize=12)
-    plt.ylabel('Frequency', fontsize=12)
-    plt.title(f'{this_cond}, top {top_mods} mods in read', fontsize=15)
-    plt.savefig(os.path.join(img_out, f'hist_mod_profile_top_mod_locations_{ds}_{this_cond}.png'), bbox_inches='tight')
+#     cond_binned_mod_profile[this_cond] = {}
+#     this_bam_file = bam_files[this_cond]
+#     plt.figure(figsize=(5, 4))
+#     for this_mod in mods:
+#         this_cond_read_norm_pos = get_read_norm_pos(this_bam_file, num_bases=top_mods)
+#         flat_norm_pos = np.concatenate(list(this_cond_read_norm_pos.values()))
+#         this_hist, bin_edges = np.histogram(flat_norm_pos, range=[0, max_bin], bins=num_bins)
+#         this_hist = this_hist / np.sum(this_hist)
+#         bin_centers = (bin_edges[1:] + bin_edges[:-1]) / 2
+#         plt.plot(bin_centers, this_hist, '-o', label=this_mod)
+#         cond_binned_mod_profile[this_cond][this_mod] = this_hist
+#     plt.legend()
+#     plt.xlim([-0.01, 1.01])
+#     plt.xticks(np.arange(0, 1.01, 0.25), np.arange(0, 101, 25))
+#     plt.xlabel('Normalized read position (%)', fontsize=12)
+#     plt.ylabel('Frequency', fontsize=12)
+#     plt.title(f'{this_cond}, top {top_mods} mods in read', fontsize=15)
+#     plt.savefig(os.path.join(img_out, f'hist_mod_profile_top_mod_locations_{ds}_{this_cond}.png'), bbox_inches='tight')
 
 
 ########################################################################################################################
