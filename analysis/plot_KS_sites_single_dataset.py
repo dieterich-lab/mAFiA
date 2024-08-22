@@ -142,7 +142,7 @@ else:
     df_annotated_sites.to_csv(annotated_sites_file, sep='\t', index=False)
 
 thresh_log2fc = 0.25
-thresh_min_num_sites = 2
+thresh_min_num_sites = 5
 display_genes = 20
 for pos_neg in ['positive', 'negative']:
     plt.figure(figsize=(15, 15))
@@ -155,15 +155,13 @@ for pos_neg in ['positive', 'negative']:
                 gene_ds_delta[this_gene] = [x for x in sub_df['log2fc'].values if ~np.isnan(x) and ~np.isinf(x)]
 
         gene_ds_delta = {k: v for k, v in gene_ds_delta.items() if len(v)}
+        gene_ds_delta = {k: v
+                         for k, v in sorted(gene_ds_delta.items(), key=lambda item: np.mean(item[1]), reverse=True)}
 
         if pos_neg == 'positive':
-            sorted_genes = np.array(list(gene_ds_delta.keys()))[
-                np.argsort([np.mean(this_val[0]) for this_val in gene_ds_delta.values()])[::-1][:display_genes]
-            ]
+            sorted_genes = list(gene_ds_delta.keys())[:display_genes]
         elif pos_neg == 'negative':
-            sorted_genes = np.array(list(gene_ds_delta.keys()))[
-                np.argsort([np.mean(this_val[0]) for this_val in gene_ds_delta.values()])[:display_genes]
-            ]
+            sorted_genes = list(gene_ds_delta.keys())[::-1][:display_genes]
 
         plt.subplot(2, 1, mod_ind+1)
         for col_ind, this_gene in enumerate(sorted_genes):
