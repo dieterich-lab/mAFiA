@@ -11,6 +11,9 @@
 if [[ ${SLURM_ARRAY_TASK_ID} -eq 23 ]]
 then
 chr="X"
+elif [[ ${SLURM_ARRAY_TASK_ID} -eq 24 ]]
+then
+chr="MT"
 else
 chr=${SLURM_ARRAY_TASK_ID}
 fi

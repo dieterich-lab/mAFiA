@@ -8,9 +8,9 @@
 
 set -e -u
 
-cond=Diet
-ds1=M3KO_CD_merged
-ds2=M3KO_WD_merged
+cond=TAC
+ds1=SHAM_merged
+ds2=TAC_merged
 
 workspace=/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/${cond}
 bam1=${workspace}/${ds1}/chrALL.mAFiA.reads.bam
