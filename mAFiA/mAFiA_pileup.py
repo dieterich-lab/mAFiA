@@ -74,7 +74,7 @@ def main():
     parser.parse_and_print()
     args = parser.args
 
-    bam_ref_min, bam_ref_max = get_bam_ref_start_end(args.bam_file)
+    # bam_ref_min, bam_ref_max = get_bam_ref_start_end(args.bam_file)
 
     if not os.path.exists(args.out_dir):
         os.makedirs(args.out_dir, exist_ok=True)
@@ -84,23 +84,28 @@ def main():
         site_writer = SiteWriter(out_path=os.path.join(args.out_dir, 'mAFiA.sites.bed'))
     df_mod = pd.read_csv(args.mod_file, sep='\t', dtype={'chrom': str, 'chromStart': int, 'chromEnd': int}, iterator=True, chunksize=args.chunk_size)
 
-    # with pysam.Samfile(args.bam_file, 'r') as bam:
-        # for _, row in tqdm(list(df_mod.iterrows())):
-        #     this_site = calc_single_site(row, bam, args)
-        #     if this_site:
-        #         site_writer.update_sites(**this_site)
-        #     if site_writer.site_counts%args.chunk_size==0:
-        #         site_writer.write_df(empty=True)
-
     for chunk in df_mod:
-        if (chunk['chromStart'].values[0]<=bam_ref_max) and (chunk['chromEnd'].values[-1]>=bam_ref_min):
+        # if (chunk['chromStart'].values[0]<=bam_ref_max) and (chunk['chromEnd'].values[-1]>=bam_ref_min):
+        this_chunk_max_coverage = []
+        with pysam.AlignmentFile(args.bam_file, 'rb') as bam:
+            for this_chrom in chunk['chrom'].unique():
+                sub_chunk = chunk[chunk['chrom'] == this_chrom]
+                # this_chunk_reads.extend(
+                #     list(bam.fetch(this_chrom, sub_chunk['chromStart'].iloc[0], sub_chunk['chromEnd'].iloc[-1]))
+                # )
+                this_chunk_max_coverage.append(
+                    np.vstack(
+                        bam.count_coverage(this_chrom, sub_chunk['chromStart'].iloc[0], sub_chunk['chromEnd'].iloc[-1],
+                                           quality_threshold=0)
+                    ).sum(axis=0).max()
+                )
+        if max(this_chunk_max_coverage) >= args.min_coverage:
             sites = Parallel(n_jobs=args.num_jobs)(delayed(calc_single_site)(chunk.iloc[i], args) for i in range(len(chunk)))
             for this_site in sites:
                 if this_site:
                     site_writer.update_sites(**this_site)
             site_writer.write_df(empty=True)
-        # print(f'{site_writer.site_counts} sites written')
-        print(f'{chunk.index[-1]+1} rows processed', flush=True)
+            print(f'{chunk.index[-1]+1} rows processed', flush=True)
 
     print(f'Total {site_writer.site_counts} mod. sites written to {site_writer.out_path}', flush=True)
     toc = time.time()
