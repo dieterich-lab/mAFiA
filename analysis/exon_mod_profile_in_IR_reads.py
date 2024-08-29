@@ -91,8 +91,8 @@ thresh_IntronDepth = 5
 thresh_IRratio = 0.05
 thresh_intronic_percentage = 0.01
 
-ds = 'Diet'
-cond = 'WT_WD_merged'
+ds = 'TAC'
+cond = 'TAC_merged'
 res_dir = f'/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/{ds}/{cond}'
 irf_file = os.path.join(res_dir, 'IRFinder/IRFinder-IR-nondir.txt')
 bam_file = os.path.join(res_dir, 'chrALL.mAFiA.reads.bam')
@@ -110,9 +110,10 @@ df_irf_thresh = df_irf[
 ]
 df_irf_clean = df_irf_thresh.loc[['known-exon' not in this_name.split('/')[-1] for this_name in df_irf_thresh['Name']], :]
 df_irf_clean = df_irf_clean[df_irf_clean['Warnings'] == '-']
-unique_tx = df_irf_clean['Name'].unique()
-
+df_irf_clean.to_csv(os.path.join(img_out, f'df_irf_clean_{ds}_{cond}.tsv'), sep='\t', index=False)
 print(f'{len(df_irf_clean)} IR junctions')
+
+unique_tx = df_irf_clean['Name'].unique()
 
 def get_norm_coord_mod_probs(in_refPos_modProbs, in_left_exon_range, in_right_exon_range, in_strand):
     left_exon_len = in_left_exon_range[1] - in_left_exon_range[0]
@@ -246,16 +247,16 @@ total_exonic_profile = {this_mod: np.mean(np.vstack([this_profile[this_mod]
                                    if this_profile.get(this_mod) is not None]), axis=0)
                         for this_mod in mods}
 
-splice_type = ['non-IR', 'IR reads']
+splice_type = ['spliced', 'IR']
 
 total_profile = {
-    'IR reads': total_intronic_profile,
-    'non-IR': total_exonic_profile
+    'IR': total_intronic_profile,
+    'spliced': total_exonic_profile
 }
 
 splice_colors = {
-    'IR reads': 'r',
-    'non-IR': 'b'
+    'IR': 'r',
+    'spliced': 'b'
 }
 
 ymax = np.round(
@@ -271,11 +272,11 @@ for mod_ind, this_mod in enumerate(mods):
         plt.plot(bin_centers, total_profile[this_splice][this_mod], f'{splice_colors[this_splice]}-o', label=this_splice)
     plt.ylim([-0.01, ymax+0.01])
     plt.yticks(np.arange(0, ymax+0.01, 0.05))
-    plt.ylabel(rf'$\langle$$P({{{dict_mod_display[this_mod]}}})$$\rangle$', fontsize=15)
+    plt.ylabel(rf'$\langle$$S_{{{dict_mod_display[this_mod]}}}$$\rangle$', fontsize=15)
     plt.legend(loc='upper left')
     plt.axvspan(xmin=1, xmax=2, fc='gray', alpha=0.5)
-    plt.xticks([0.5, 1.5, 2.5], ['5\' exon', 'intron', '3\' exon'])
-plt.suptitle(f'{ds}, {cond}', fontsize=20)
+    plt.xticks([0.5, 1.5, 2.5], ['5\' exon', 'intron', '3\' exon'], fontsize=15)
+plt.suptitle(f'{ds}, {cond}\nAvg. profile of {len(df_irf_clean)} IR junctions', fontsize=20)
 plt.savefig(os.path.join(img_out, f'region_mod_profile_{ds}_{cond}.png'), bbox_inches='tight')
 
 ########################################################################################################################
@@ -342,7 +343,7 @@ pysam.index(exonic_bamfile)
 #         # plt.title(f'${{{dict_mod_display[this_mod]}}}$', fontsize=15)
 #         plt.legend(*zip(*mod_labels), loc='upper left')
 #         plt.xlabel(f'Distance from IR {roi}', fontsize=12)
-#         plt.ylabel(r'log2fc ($N_{IR}$ / $N_{non-IR}$)', fontsize=12)
+#         plt.ylabel(r'log2fc ($N_{IR}$ / $N_{spliced}$)', fontsize=12)
 # plt.suptitle(f'{ds}, {cond}', fontsize=20)
 # plt.savefig(os.path.join(img_out, f'log2gc_by_IR_distance_{ds}_{cond}.png'), bbox_inches='tight')
 
