@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
-#SBATCH --partition=medium
+#SBATCH --partition=general
 #SBATCH --cpus-per-task=40
 #SBATCH --mem=90GB
 #SBATCH --verbose
-#SBATCH --job-name=pileup_mouse
-#SBATCH --output=/home/achan/slurm/pileup_mouse_%A.out
+#SBATCH --job-name=pileup_mouse_chrALL
+#SBATCH --output=/home/achan/slurm/pileup_mouse_chrALL_%A.out
 
-workspace=/beegfs/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/TAC/polyA
-bam=${workspace}/SHAM_day7_reads_polyA_len_above_90.bam
+ds="HFpEF"
+cond="ctrl"
+
+workspace=/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/${ds}/polyA
+bam=${workspace}/${cond}_polyA_len_below_50.bam
 mod=/prj/TRR319_RMaP_BaseCalling/Adrian/site_annotations/mus_musculus/GRCm38_102/m6A.psi.GRCm38_102.bed
 output=${workspace}
 
