@@ -6,11 +6,11 @@
 #SBATCH --job-name=pileup_mouse_chrALL
 #SBATCH --output=/home/achan/slurm/pileup_mouse_chrALL_%A.out
 
-ds="HFpEF"
-cond="ctrl"
+ds="Diet"
+cond="WT_WD"
 
 workspace=/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/${ds}/polyA
-bam=${workspace}/${cond}_polyA_len_below_50.bam
+bam=${workspace}/${cond}_polyA_len_above_90.bam
 mod=/prj/TRR319_RMaP_BaseCalling/Adrian/site_annotations/mus_musculus/GRCm38_102/m6A.psi.GRCm38_102.bed
 output=${workspace}
 
