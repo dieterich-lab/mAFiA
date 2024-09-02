@@ -7,10 +7,25 @@ from tqdm import tqdm
 import pybedtools
 from collections import Counter
 from functools import reduce
-import matplotlib
-matplotlib.use('TkAgg')
-import matplotlib.pyplot as plt
 from matplotlib_venn import venn3
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+#######################################################################
+cm = 1/2.54  # centimeters in inches
+gr = 1.618
+# mpl.rcParams['figure.dpi'] = 600
+# mpl.rcParams['savefig.dpi'] = 600
+mpl.rcParams['font.size'] = 5
+mpl.rcParams['legend.fontsize'] = 5
+mpl.rcParams['xtick.labelsize'] = 5
+mpl.rcParams['ytick.labelsize'] = 5
+mpl.rcParams['xtick.major.size'] = 1.5
+mpl.rcParams['ytick.major.size'] = 1.5
+mpl.rcParams['lines.linewidth'] = 0.5
+mpl.rcParams['font.family'] = 'Arial'
+FMT = 'pdf'
+fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
+#######################################################################
 
 
 def get_df_annotated(in_df):
@@ -71,7 +86,7 @@ dict_mod_display = {
 
 
 ks_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/KS_test'
-img_out = '/home/adrian/img_out/comparison_KS_sites_across_datasets'
+img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
 os.makedirs(img_out, exist_ok=True)
 
 annot_file = '/home/adrian/Data/genomes/mus_musculus/GRCm38_102/GRCm38.102.bed'
@@ -144,15 +159,15 @@ ds_sites = [
     for this_df in all_dfs
 ]
 
-plt.figure(figsize=(5, 5))
+plt.figure(figsize=(7*cm, 7*cm))
 venn3(ds_sites, ds_names.values(), set_colors=ds_colors.values())
-plt.title('Common differential sites across datasets', fontsize=15)
-plt.savefig(os.path.join(img_out, 'venn_diagram_all_ds.png'), bbox_inches='tight')
+# plt.title('Common differential sites across datasets', fontsize=15)
+plt.savefig(os.path.join(img_out, f'venn_diagram_all_ds.{FMT}'), **fig_kwargs)
 
-df_merged = reduce(lambda left, right: pd.merge(left, right, on=merge_fields, how='inner'), all_dfs)
-df_annotated_sites = get_df_annotated(df_merged)
-
-gene_counts = Counter(df_annotated_sites['gene']).most_common()
-with open(os.path.join(img_out, 'common_site_genes_all_ds.tsv'), 'w') as f_out:
-    for this_count in gene_counts:
-        f_out.write(f'{this_count[0]}\t{this_count[1]}\n')
+# df_merged = reduce(lambda left, right: pd.merge(left, right, on=merge_fields, how='inner'), all_dfs)
+# df_annotated_sites = get_df_annotated(df_merged)
+#
+# gene_counts = Counter(df_annotated_sites['gene']).most_common()
+# with open(os.path.join(img_out, 'common_site_genes_all_ds.tsv'), 'w') as f_out:
+#     for this_count in gene_counts:
+#         f_out.write(f'{this_count[0]}\t{this_count[1]}\n')

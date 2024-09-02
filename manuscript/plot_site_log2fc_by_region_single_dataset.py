@@ -27,11 +27,12 @@ fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
 
-# ds = 'TAC_SHAM_merged_TAC_merged',
-# ds = 'Diet_WT_CD_merged_WT_WD_merged',
-ds = 'HFpEF_ctrl_merged_HFpEF_merged'
+# ds = 'TAC_SHAM_merged_TAC_merged'
+ds = 'Diet_WT_CD_merged_WT_WD_merged'
+# ds = 'HFpEF_ctrl_merged_HFpEF_merged'
 
-img_out = '/home/adrian/img_out/comparison_KS_sites_across_datasets'
+img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
+os.makedirs(img_out, exist_ok=True)
 
 def get_df_annotated(in_df):
     df_annotated = []
@@ -91,7 +92,6 @@ dict_mod_display = {
 
 
 ks_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/KS_test'
-os.makedirs(img_out, exist_ok=True)
 
 annot_file = '/home/adrian/Data/genomes/mus_musculus/GRCm38_102/GRCm38.102.bed'
 df_annot = pd.read_csv(annot_file, sep='\t', names=[
@@ -149,7 +149,7 @@ df = pd.read_csv(os.path.join(ks_dir, f'{ds}.bed'), sep='\t', dtype={'chrom': st
 df_thresh = df[df['pval'] < thresh_pval]
 df_thresh['log2fc'] = np.log2(df_thresh['modRatio_2'] / df_thresh['modRatio_1'])
 
-annotated_sites_file = os.path.join(img_out, f'annotated_diff_sites_{ds_names[ds]}.tsv')
+annotated_sites_file = os.path.join(ks_dir, f'annotated_diff_sites_{ds_names[ds]}.tsv')
 if os.path.exists(annotated_sites_file):
     df_annotated_sites = pd.read_csv(annotated_sites_file, sep='\t', dtype={'chrom': str})
 else:
@@ -199,6 +199,13 @@ regions = [
     'three_prime_utr'
 ]
 
+region_names =\
+    {
+        'five_prime_utr': '5\' UTR',
+        'CDS': 'CDS',
+        'three_prime_utr': '3\' UTR'
+    }
+
 ylim = [-2, 2]
 
 plt.figure(figsize=(5*cm, 2*cm))
@@ -224,9 +231,9 @@ for mod_ind, this_mod in enumerate(mods):
     for patch in bplot['medians']:
         patch.set_color('k')
 
-    plt.xticks(range(len(regions)), regions)
+    plt.xticks(range(len(regions)), region_names.values())
     plt.ylim(ylim)
-    plt.xlabel('Region')
-    plt.ylabel('log2fc')
-    plt.title(rf'${{{dict_mod_display[this_mod]}}}$')
-plt.savefig(os.path.join(img_out, f'boxplot_log2fc_by_region_{ds}.{FMT}'))
+    # plt.xlabel('Region')
+    # plt.ylabel('log2fc')
+    # plt.title(rf'${{{dict_mod_display[this_mod]}}}$')
+plt.savefig(os.path.join(img_out, f'boxplot_log2fc_by_region_{ds}.{FMT}'), **fig_kwargs)
