@@ -23,12 +23,18 @@ fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 import matplotlib.pyplot as plt
 
 THRESH_CONF = 80
-THRESH_COV = 20
-pred_ds = 'HeLa_rep1'
+THRESH_COV = 50
+pred_ds = 'HEK293_WT'
 bid_seq_calibrated = False
 restrict_motifs = None
-comp_ds = 'BACS'
-mod_type = 'psi'
+
+# comp_ds = 'BID-Seq'
+# mod_type = 'psi'
+# pt_size = 2
+
+comp_ds = 'GLORI'
+mod_type = 'm6A'
+pt_size = 0.2
 
 mods = ['m6A', 'psi']
 dict_mod_display = {
@@ -112,19 +118,24 @@ if bid_seq_calibrated:
 elif comp_ds in ['GLORI', 'BID-Seq', 'BID-Seq_mouse_heart', 'PRAISE', 'BACS']:
     df_comp.rename(columns={'score': 'modRatio'}, inplace=True)
 
-img_out = f'/home/adrian/img_out/psi-co-mAFiA/{pred_ds}'
+img_out = f'/home/adrian/img_out/manuscript_psico_mAFiA/figure1'
 os.makedirs(img_out, exist_ok=True)
 
+mod_color = {
+    'm6A': 'red',
+    'psi': 'blue'
+}
+
 def scatter_plot(df_in, key_x, key_y, mod_type, fig_name, corr=None):
-    plt.figure(figsize=(5, 5))
-    plt.plot(df_in[key_x], df_in[key_y], '.', alpha=0.5)
-    plt.plot([0, 100], [0, 100], linestyle='--', c='r', alpha=0.5)
+    plt.figure(figsize=(4*cm, 4*cm))
+    ax = plt.scatter(df_in[key_x], df_in[key_y], c=mod_color[mod_type], s=pt_size, edgecolors='none')
+    plt.plot([0, 100], [0, 100], linestyle='--', c='gray', alpha=0.5)
     plt.xlim([-1, 101])
     plt.ylim([-1, 101])
     plt.xticks(np.linspace(0, 100, 5))
     plt.yticks(np.linspace(0, 100, 5))
-    plt.xlabel("$S_{{{}}}$".format('-'.join(key_x.split('_')[1:])), fontsize=10)
-    plt.ylabel("$S_{{{}}}$".format('-'.join(key_y.split('_')[1:])), fontsize=10)
+    # plt.xlabel("$S_{{{}}}$".format('-'.join(key_x.split('_')[1:])), fontsize=10)
+    # plt.ylabel("$S_{{{}}}$".format('-'.join(key_y.split('_')[1:])), fontsize=10)
     if corr is not None:
         if restrict_motifs:
             title = f'{restrict_motifs}\n{len(df_in)} {mod_type} sites\nconf$\geq${THRESH_CONF}%, corr. {corr:.2f}'
@@ -132,7 +143,7 @@ def scatter_plot(df_in, key_x, key_y, mod_type, fig_name, corr=None):
             title = f'{len(df_in)} {mod_type} sites\nconf$\geq${THRESH_CONF}%, corr. {corr:.2f}'
     else:
         title = f'{len(df_in)} {mod_type} sites\nconf$\geq${THRESH_CONF}%'
-    plt.suptitle(title, fontsize=12)
+    # plt.suptitle(title, fontsize=12)
     plt.savefig(os.path.join(img_out, fig_name), bbox_inches='tight')
 
 def scatter_plot_by_motif(df_in, key_x, key_y, mod_type, ordered_motifs, num_row, num_col, fig_name, thresh_err=25, calc_error=False):
@@ -219,153 +230,153 @@ corr, num_sites = calc_correlation(df_comp_pred_sel)
 with open(os.path.join(img_out, f'corr_{mod_type}_pred_vs_{comp_ds}_conf{THRESH_CONF}_cov{THRESH_COV}.txt'), 'w') as f_out:
     f_out.write('num_sites' + '\t' + 'correlation' + '\n')
     f_out.write(str(num_sites) + '\t' + str(corr) + '\t' + '\n')
-scatter_plot_by_motif(df_comp_pred_sel, f'modRatio_{comp_ds}', f'modRatio_{pred_ds}', mod_type, motifs, num_rows, num_cols, f'{mod_type}_pred_vs_{comp_ds}_conf{THRESH_CONF}_cov{THRESH_COV}.png')
+# scatter_plot_by_motif(df_comp_pred_sel, f'modRatio_{comp_ds}', f'modRatio_{pred_ds}', mod_type, motifs, num_rows, num_cols, f'{mod_type}_pred_vs_{comp_ds}_conf{THRESH_CONF}_cov{THRESH_COV}.png')
 if restrict_motifs:
     out_filename = f'{mod_type}_pred_vs_{comp_ds}_combined_conf{THRESH_CONF}_cov{THRESH_COV}_restrict_motifs_{restrict_motifs}.png'
 else:
-    out_filename = f'{mod_type}_pred_vs_{comp_ds}_combined_conf{THRESH_CONF}_cov{THRESH_COV}.png'
+    out_filename = f'{mod_type}_pred_vs_{comp_ds}_combined_conf{THRESH_CONF}_cov{THRESH_COV}.{FMT}'
 scatter_plot(df_comp_pred_sel, f'modRatio_{comp_ds}', f'modRatio_{pred_ds}', mod_type, out_filename, corr=corr)
 
 ### histogram of deltaS ###
-bin_max = 100
-plt.figure(figsize=(10, 4))
-for mod_ind, this_mod in enumerate(mods):
-    plt.subplot(1, 2, mod_ind+1)
-    sub_df = df_comp_pred[df_comp_pred['name']==this_mod]
-    delta = sub_df[f'modRatio_{pred_ds}'] - sub_df[f'modRatio_{comp_ds}']
-    plt.hist(delta[delta>=0], bins=bin_max, range=[0, bin_max], histtype='step', facecolor='b', label=f'$\Delta S \geq 0$')
-    plt.hist(-delta[delta<0], bins=bin_max, range=[0, bin_max], histtype='step', facecolor='r', label=f'$\Delta S < 0$')
-    plt.legend(loc='upper right')
-    # plt.axvline(x=0, c='r')
-    plt.xlabel(f'$Abs(\Delta S_{{{dict_mod_display[this_mod]}}})$', fontsize=12)
-    plt.ylabel('Site Counts', fontsize=12)
-    plt.yscale('log')
-plt.suptitle(f'{pred_ds} cf. {comp_ds}', fontsize=15)
-plt.savefig(os.path.join(img_out, f'deltaS_{pred_ds}_cf_{comp_ds}.png'), bbox_inches='tight')
+# bin_max = 100
+# plt.figure(figsize=(10, 4))
+# for mod_ind, this_mod in enumerate(mods):
+#     plt.subplot(1, 2, mod_ind+1)
+#     sub_df = df_comp_pred[df_comp_pred['name']==this_mod]
+#     delta = sub_df[f'modRatio_{pred_ds}'] - sub_df[f'modRatio_{comp_ds}']
+#     plt.hist(delta[delta>=0], bins=bin_max, range=[0, bin_max], histtype='step', facecolor='b', label=f'$\Delta S \geq 0$')
+#     plt.hist(-delta[delta<0], bins=bin_max, range=[0, bin_max], histtype='step', facecolor='r', label=f'$\Delta S < 0$')
+#     plt.legend(loc='upper right')
+#     # plt.axvline(x=0, c='r')
+#     plt.xlabel(f'$Abs(\Delta S_{{{dict_mod_display[this_mod]}}})$', fontsize=12)
+#     plt.ylabel('Site Counts', fontsize=12)
+#     plt.yscale('log')
+# plt.suptitle(f'{pred_ds} cf. {comp_ds}', fontsize=15)
+# plt.savefig(os.path.join(img_out, f'deltaS_{pred_ds}_cf_{comp_ds}.png'), bbox_inches='tight')
 
 ### correlation vs distance ###
-df_gene_bed = pd.read_csv('/home/adrian/Data/genomes/homo_sapiens/GRCh38_102/gene.GRCh38.102.bed', sep='\t')
+# df_gene_bed = pd.read_csv('/home/adrian/Data/genomes/homo_sapiens/GRCh38_102/gene.GRCh38.102.bed', sep='\t')
+#
+# df_comp_pred['delta'] = df_comp_pred[f'modRatio_{pred_ds}'] - df_comp_pred[f'modRatio_{comp_ds}']
+#
+# if pred_ds=='TRUB1_OE':
+#     base_mod = 'psi'
+#     other_mod = 'm6A'
+#     thresh_deltaS = 20
+#     df_deltaS = df_comp_pred[
+#         (df_comp_pred['name'] == base_mod)
+#         * (df_comp_pred['delta'] >= thresh_deltaS)
+#         ]
+#     ylim = 50
+#     xlabel = rf"Distance (bps) from ${{{dict_mod_display[base_mod]}}}$ site"\
+#              "\n"\
+#              rf"$\Delta S_{{{dict_mod_display[base_mod]}}}\geq{thresh_deltaS}$"
+#     fig_name = f'corr_func_deltaS_{other_mod}_from_{base_mod}_up_thresh{thresh_deltaS}.png'
+# elif pred_ds=='siTRUB1_input':
+#     base_mod = 'psi'
+#     other_mod = 'm6A'
+#     thresh_deltaS = 20
+#     df_deltaS = df_comp_pred[
+#         (df_comp_pred['name'] == base_mod)
+#         * (df_comp_pred['delta'] < -thresh_deltaS)
+#     ]
+#     ylim = 50
+#     xlabel = rf"Distance (bps) from ${{{dict_mod_display[base_mod]}}}$ site"\
+#              "\n"\
+#              rf"$\Delta S_{{{dict_mod_display[base_mod]}}}<-{thresh_deltaS}$"
+#     fig_name = f'corr_func_deltaS_{other_mod}_from_{base_mod}_down_thresh{thresh_deltaS}.png'
+# elif pred_ds=='METTL3_KO':
+#     base_mod = 'm6A'
+#     other_mod = 'psi'
+#     thresh_deltaS = 50
+#     df_deltaS = df_comp_pred[
+#         (df_comp_pred['name'] == base_mod)
+#         * (df_comp_pred['delta'] < -thresh_deltaS)
+#     ]
+#     ylim = 100
+#     xlabel = rf"Distance (bps) from ${{{dict_mod_display[base_mod]}}}$ site"\
+#              "\n"\
+#              rf"$\Delta S_{{{dict_mod_display[base_mod]}}}<-{thresh_deltaS}$"
+#     fig_name = f'corr_func_deltaS_{other_mod}_from_{base_mod}_down_thresh{thresh_deltaS}.png'
+# elif pred_ds=='METTL3_KD':
+#     base_mod = 'm6A'
+#     other_mod = 'psi'
+#     thresh_deltaS = 20
+#     df_deltaS = df_comp_pred[
+#         (df_comp_pred['name'] == base_mod)
+#         * (df_comp_pred['delta'] < -thresh_deltaS)
+#     ]
+#     ylim = 50
+#     xlabel = rf"Distance (bps) from ${{{dict_mod_display[base_mod]}}}$ site"\
+#              "\n"\
+#              rf"$\Delta S_{{{dict_mod_display[base_mod]}}}<-{thresh_deltaS}$"
+#     fig_name = f'corr_func_deltaS_{other_mod}_from_{base_mod}_down_thresh{thresh_deltaS}.png'
 
-df_comp_pred['delta'] = df_comp_pred[f'modRatio_{pred_ds}'] - df_comp_pred[f'modRatio_{comp_ds}']
-
-if pred_ds=='TRUB1_OE':
-    base_mod = 'psi'
-    other_mod = 'm6A'
-    thresh_deltaS = 20
-    df_deltaS = df_comp_pred[
-        (df_comp_pred['name'] == base_mod)
-        * (df_comp_pred['delta'] >= thresh_deltaS)
-        ]
-    ylim = 50
-    xlabel = rf"Distance (bps) from ${{{dict_mod_display[base_mod]}}}$ site"\
-             "\n"\
-             rf"$\Delta S_{{{dict_mod_display[base_mod]}}}\geq{thresh_deltaS}$"
-    fig_name = f'corr_func_deltaS_{other_mod}_from_{base_mod}_up_thresh{thresh_deltaS}.png'
-elif pred_ds=='siTRUB1_input':
-    base_mod = 'psi'
-    other_mod = 'm6A'
-    thresh_deltaS = 20
-    df_deltaS = df_comp_pred[
-        (df_comp_pred['name'] == base_mod)
-        * (df_comp_pred['delta'] < -thresh_deltaS)
-    ]
-    ylim = 50
-    xlabel = rf"Distance (bps) from ${{{dict_mod_display[base_mod]}}}$ site"\
-             "\n"\
-             rf"$\Delta S_{{{dict_mod_display[base_mod]}}}<-{thresh_deltaS}$"
-    fig_name = f'corr_func_deltaS_{other_mod}_from_{base_mod}_down_thresh{thresh_deltaS}.png'
-elif pred_ds=='METTL3_KO':
-    base_mod = 'm6A'
-    other_mod = 'psi'
-    thresh_deltaS = 50
-    df_deltaS = df_comp_pred[
-        (df_comp_pred['name'] == base_mod)
-        * (df_comp_pred['delta'] < -thresh_deltaS)
-    ]
-    ylim = 100
-    xlabel = rf"Distance (bps) from ${{{dict_mod_display[base_mod]}}}$ site"\
-             "\n"\
-             rf"$\Delta S_{{{dict_mod_display[base_mod]}}}<-{thresh_deltaS}$"
-    fig_name = f'corr_func_deltaS_{other_mod}_from_{base_mod}_down_thresh{thresh_deltaS}.png'
-elif pred_ds=='METTL3_KD':
-    base_mod = 'm6A'
-    other_mod = 'psi'
-    thresh_deltaS = 20
-    df_deltaS = df_comp_pred[
-        (df_comp_pred['name'] == base_mod)
-        * (df_comp_pred['delta'] < -thresh_deltaS)
-    ]
-    ylim = 50
-    xlabel = rf"Distance (bps) from ${{{dict_mod_display[base_mod]}}}$ site"\
-             "\n"\
-             rf"$\Delta S_{{{dict_mod_display[base_mod]}}}<-{thresh_deltaS}$"
-    fig_name = f'corr_func_deltaS_{other_mod}_from_{base_mod}_down_thresh{thresh_deltaS}.png'
 
 
+# all_vec_r = []
+# all_vec_d = []
+# genes_deltaS = []
+# for _, this_row in tqdm(df_deltaS.iterrows()):
+#     this_chrom = this_row['chrom']
+#     this_chromStart = this_row['chromStart']
+#     this_chromEnd = this_row['chromEnd']
+#     this_strand = this_row['strand']
+#
+#     sub_df_gene_bed = df_gene_bed[
+#         (df_gene_bed['chrom']==this_chrom)
+#         * (df_gene_bed['chromStart']<=this_chromStart)
+#         * (df_gene_bed['chromEnd']>=this_chromEnd)
+#         * (df_gene_bed['strand']==this_strand)
+#     ]
+#
+#     if len(sub_df_gene_bed)==0:
+#         continue
+#
+#     genes_deltaS.append(sub_df_gene_bed['name'].unique()[0])
+#     gene_chromStart = sub_df_gene_bed['chromStart'].min()
+#     gene_chromEnd = sub_df_gene_bed['chromEnd'].max()
+#
+#     sub_df = df_comp_pred[
+#         (df_comp_pred['chrom']==this_chrom)
+#         * (df_comp_pred['name']==other_mod)
+#         * (df_comp_pred['strand']==this_strand)
+#         * (df_comp_pred['chromStart']>=gene_chromStart)
+#         * (df_comp_pred['chromStart']<gene_chromEnd)
+#     ]
+#     vec_r = sub_df['chromStart'].values - this_chromStart
+#     vec_d = sub_df['delta'].values
+#     if this_strand=='-':
+#         vec_r = -vec_r
+#     all_vec_r.append(vec_r)
+#     all_vec_d.append(vec_d)
+# all_vec_r = np.concatenate(all_vec_r)
+# all_vec_d = np.concatenate(all_vec_d)
+#
+# max_dist = 4500
+# bin_width = 1000
+# bin_edges = np.arange(-max_dist, max_dist+bin_width, bin_width)
+# bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
+#
+# binned_d = []
+# for this_bin_i in range(len(bin_edges)-1):
+#     bin_start = bin_edges[this_bin_i]
+#     bin_end = bin_edges[this_bin_i+1]
+#     binned_d.append(all_vec_d[(all_vec_r>=bin_start) * (all_vec_r<bin_end)])
+# binned_d_mean = [np.mean(this_bin) if len(this_bin) else np.nan for this_bin in binned_d]
+# binned_d_median = [np.median(this_bin) if len(this_bin) else np.nan for this_bin in binned_d]
+# binned_d = [this_bin if len(this_bin) else [0] for this_bin in binned_d]
 
-all_vec_r = []
-all_vec_d = []
-genes_deltaS = []
-for _, this_row in tqdm(df_deltaS.iterrows()):
-    this_chrom = this_row['chrom']
-    this_chromStart = this_row['chromStart']
-    this_chromEnd = this_row['chromEnd']
-    this_strand = this_row['strand']
-
-    sub_df_gene_bed = df_gene_bed[
-        (df_gene_bed['chrom']==this_chrom)
-        * (df_gene_bed['chromStart']<=this_chromStart)
-        * (df_gene_bed['chromEnd']>=this_chromEnd)
-        * (df_gene_bed['strand']==this_strand)
-    ]
-
-    if len(sub_df_gene_bed)==0:
-        continue
-
-    genes_deltaS.append(sub_df_gene_bed['name'].unique()[0])
-    gene_chromStart = sub_df_gene_bed['chromStart'].min()
-    gene_chromEnd = sub_df_gene_bed['chromEnd'].max()
-
-    sub_df = df_comp_pred[
-        (df_comp_pred['chrom']==this_chrom)
-        * (df_comp_pred['name']==other_mod)
-        * (df_comp_pred['strand']==this_strand)
-        * (df_comp_pred['chromStart']>=gene_chromStart)
-        * (df_comp_pred['chromStart']<gene_chromEnd)
-    ]
-    vec_r = sub_df['chromStart'].values - this_chromStart
-    vec_d = sub_df['delta'].values
-    if this_strand=='-':
-        vec_r = -vec_r
-    all_vec_r.append(vec_r)
-    all_vec_d.append(vec_d)
-all_vec_r = np.concatenate(all_vec_r)
-all_vec_d = np.concatenate(all_vec_d)
-
-max_dist = 4500
-bin_width = 1000
-bin_edges = np.arange(-max_dist, max_dist+bin_width, bin_width)
-bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
-
-binned_d = []
-for this_bin_i in range(len(bin_edges)-1):
-    bin_start = bin_edges[this_bin_i]
-    bin_end = bin_edges[this_bin_i+1]
-    binned_d.append(all_vec_d[(all_vec_r>=bin_start) * (all_vec_r<bin_end)])
-binned_d_mean = [np.mean(this_bin) if len(this_bin) else np.nan for this_bin in binned_d]
-binned_d_median = [np.median(this_bin) if len(this_bin) else np.nan for this_bin in binned_d]
-binned_d = [this_bin if len(this_bin) else [0] for this_bin in binned_d]
-
-plt.figure(figsize=(5, 5))
-# plt.subplot(1, 2, 1)
-plt.violinplot(binned_d, bin_centers, widths=int(bin_width/2))
-plt.xlim([-max_dist, max_dist])
-plt.ylim([-ylim, ylim])
-plt.axhspan(-20, 20, color='gray', alpha=0.1)
-# plt.axhline(y=25, c='gray')
-# plt.axhline(y=-25, c='gray')
-plt.xticks(bin_edges)
-plt.xlabel(xlabel, fontsize=12)
-plt.ylabel(f"$\Delta S_{{{dict_mod_display[other_mod]}}}$", fontsize=12)
-plt.title(f"{pred_ds} cf. {comp_ds}", fontsize=15)
-plt.savefig(os.path.join(img_out, fig_name), bbox_inches='tight')
+# plt.figure(figsize=(5, 5))
+# # plt.subplot(1, 2, 1)
+# plt.violinplot(binned_d, bin_centers, widths=int(bin_width/2))
+# plt.xlim([-max_dist, max_dist])
+# plt.ylim([-ylim, ylim])
+# plt.axhspan(-20, 20, color='gray', alpha=0.1)
+# # plt.axhline(y=25, c='gray')
+# # plt.axhline(y=-25, c='gray')
+# plt.xticks(bin_edges)
+# plt.xlabel(xlabel, fontsize=12)
+# plt.ylabel(f"$\Delta S_{{{dict_mod_display[other_mod]}}}$", fontsize=12)
+# plt.title(f"{pred_ds} cf. {comp_ds}", fontsize=15)
+# plt.savefig(os.path.join(img_out, fig_name), bbox_inches='tight')

@@ -32,7 +32,7 @@ bed6_fields = [
 miCLIP_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/miCLIP'
 mAFiA_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/TAC'
 
-img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure4'
+img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure1'
 os.makedirs(img_out, exist_ok=True)
 
 # cond = 'SHAM'
@@ -61,7 +61,11 @@ for cond in conditions:
     print(f'Enough coverage for {len(df_merged)} / {len(df_miCLIP)} miCLIP sites')
 
     thresh_confidence = 80.0
-    df_merged_thresh = df_merged[df_merged['confidence'] >= thresh_confidence]
+    thresh_coverage = 50
+    df_merged_thresh = df_merged[
+        (df_merged['confidence'] >= thresh_confidence)
+        * (df_merged['coverage'] >= thresh_coverage)
+        ]
 
     # plt.figure(figsize=(5, 5))
     # plt.scatter(df_merged_thresh['score'], df_merged_thresh['modRatio'], s=1)
@@ -79,10 +83,11 @@ for cond in conditions:
         binned_modRatios.append(
             df_merged_thresh[(df_merged_thresh['score'] >= bin_start) * (df_merged_thresh['score'] < bin_end)]['modRatio'].values)
 
-    plt.figure(figsize=(5, 5))
-    plt.boxplot(binned_modRatios, positions=bin_centers, widths=0.05, whis=0.5, showfliers=False)
+    plt.figure(figsize=(4*cm, 4*cm))
+    plt.boxplot(binned_modRatios, positions=bin_centers, widths=0.05, whis=0.3, showfliers=False)
     plt.xlim([bin_min, bin_max])
     plt.xticks(bin_edges, np.round(bin_edges, 1))
+    plt.yticks(np.arange(0, 101, 25))
     # plt.xlabel('miCLIP score', fontsize=12)
     # plt.ylabel('mAFiA stoichiometry', fontsize=12)
     # plt.title(cond, fontsize=15)
