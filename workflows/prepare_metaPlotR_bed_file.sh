@@ -17,29 +17,27 @@ conditions="ctrl HFpEF"
 #res_dir="/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/metaPlotR"
 ########################################################################################################################
 
-res_dir="/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/polyA"
+#res_dir="/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/polyA"
+res_dir="/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/metaPlotR"
 
-polyAs="below_50 above_150"
+#polyAs="below_50 above_150"
 thresholds="0.0 50.0"
 
 for this_cond in ${conditions}
 do
-  for this_polyA in ${polyAs}
+  file_prefix="${ds}_${this_cond}"
+  for thresh_modRatio in ${thresholds}
   do
-    file_prefix="${ds}_${this_cond}_${this_polyA}"
-    for thresh_modRatio in ${thresholds}
+    for this_mod in "m6A" "psi"
     do
-      for this_mod in "m6A" "psi"
-      do
-        in_bed="${res_dir}/${file_prefix}_${this_mod}_modRatio${thresh_modRatio}.bed"
-        out_bed="${res_dir}/${file_prefix}_${this_mod}_modRatio${thresh_modRatio}.dist.measures.txt"
+      in_bed="${res_dir}/${file_prefix}_${this_mod}_modRatio${thresh_modRatio}.bed"
+      out_bed="${res_dir}/${file_prefix}_${this_mod}_modRatio${thresh_modRatio}.dist.measures.txt"
 
-        sort -k1,1 -k2,2n ${in_bed} > ${in_bed}.sorted
-        perl ${metaPlotR}/annotate_bed_file.pl --bed ${in_bed}.sorted --bed2 ${annot_bed} > ${in_bed}.sorted.annot
-        perl ${metaPlotR}/rel_and_abs_dist_calc.pl --bed ${in_bed}.sorted.annot --regions ${region_sizes} > ${out_bed}
+      sort -k1,1 -k2,2n ${in_bed} > ${in_bed}.sorted
+      perl ${metaPlotR}/annotate_bed_file.pl --bed ${in_bed}.sorted --bed2 ${annot_bed} > ${in_bed}.sorted.annot
+      perl ${metaPlotR}/rel_and_abs_dist_calc.pl --bed ${in_bed}.sorted.annot --regions ${region_sizes} > ${out_bed}
 
-        rm ${in_bed}.sorted ${in_bed}.sorted.annot
-      done
+      rm ${in_bed}.sorted ${in_bed}.sorted.annot
     done
   done
 done
