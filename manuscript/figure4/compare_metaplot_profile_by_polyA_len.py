@@ -5,8 +5,9 @@ import matplotlib as mpl
 #######################################################################
 cm = 1/2.54  # centimeters in inches
 gr = 1.618
-# mpl.rcParams['figure.dpi'] = 600
-# mpl.rcParams['savefig.dpi'] = 600
+dpi = 1200
+mpl.rcParams['figure.dpi'] = dpi
+mpl.rcParams['savefig.dpi'] = dpi
 mpl.rcParams['font.size'] = 5
 mpl.rcParams['legend.fontsize'] = 5
 mpl.rcParams['xtick.labelsize'] = 5
@@ -15,8 +16,8 @@ mpl.rcParams['xtick.major.size'] = 1.5
 mpl.rcParams['ytick.major.size'] = 1.5
 mpl.rcParams['lines.linewidth'] = 0.5
 mpl.rcParams['font.family'] = 'Arial'
-FMT = 'pdf'
-fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
+FMT = 'svg'
+fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi, transparent=True)
 #######################################################################
 import matplotlib.pyplot as plt
 
@@ -27,17 +28,17 @@ def smooth(y, box_pts=10):
     return y_smooth
 
 
-ds = 'HFpEF'
-sub_ds = 'ctrl'
+# ds = 'HFpEF'
+# sub_ds = 'ctrl'
 # sub_ds = 'HFpEF'
 
 # ds = 'Diet'
 # sub_ds = 'WT_CD'
 # sub_ds = 'WT_WD'
 
-# ds = 'TAC'
+ds = 'TAC'
 # sub_ds = 'SHAM'
-# sub_ds = 'TAC'
+sub_ds = 'TAC'
 
 conditions = ['below_90', 'above_90']
 # conditions = ['below_50', 'above_150']
