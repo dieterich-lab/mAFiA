@@ -15,7 +15,7 @@ mpl.rcParams['xtick.major.size'] = 1.5
 mpl.rcParams['ytick.major.size'] = 1.5
 mpl.rcParams['lines.linewidth'] = 0.5
 mpl.rcParams['font.family'] = 'Arial'
-FMT = 'pdf'
+FMT = 'svg'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 import matplotlib.pyplot as plt
@@ -58,14 +58,18 @@ for cond in conditions:
         'strand'
     ])
 
-    print(f'Enough coverage for {len(df_merged)} / {len(df_miCLIP)} miCLIP sites')
-
     thresh_confidence = 80.0
-    thresh_coverage = 50
+    thresh_coverage = 20
     df_merged_thresh = df_merged[
         (df_merged['confidence'] >= thresh_confidence)
         * (df_merged['coverage'] >= thresh_coverage)
         ]
+
+    print(f'Enough coverage for {len(df_merged_thresh)} / {len(df_miCLIP)} miCLIP sites')
+    with open(os.path.join(img_out, f'mAFiA_miCLIP_{cond}_conf{thresh_confidence}_cov{thresh_coverage}.txt'), 'w') as f_out:
+        f_out.write(f'coverage\tmiCLiP_sites\n')
+        f_out.write(f'{len(df_merged_thresh)}\t{len(df_miCLIP)}\n')
+
 
     # plt.figure(figsize=(5, 5))
     # plt.scatter(df_merged_thresh['score'], df_merged_thresh['modRatio'], s=1)

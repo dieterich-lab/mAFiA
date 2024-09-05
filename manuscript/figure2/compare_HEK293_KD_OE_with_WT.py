@@ -7,7 +7,7 @@ import matplotlib as mpl
 #######################################################################
 cm = 1/2.54  # centimeters in inches
 gr = 1.618
-dpi = 300
+dpi = 1200
 mpl.rcParams['figure.dpi'] = dpi
 mpl.rcParams['savefig.dpi'] = dpi
 mpl.rcParams['font.size'] = 5
@@ -18,8 +18,8 @@ mpl.rcParams['xtick.major.size'] = 1.5
 mpl.rcParams['ytick.major.size'] = 1.5
 mpl.rcParams['lines.linewidth'] = 0.5
 mpl.rcParams['font.family'] = 'Arial'
-FMT = 'pdf'
-fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi)
+FMT = 'svg'
+fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi, transparent=True)
 #######################################################################
 import matplotlib.pyplot as plt
 
@@ -27,10 +27,10 @@ THRESH_CONF = 80
 THRESH_COV = 20
 
 #######################################################################
-# pred_ds = 'METTL3_KO'
-# bid_seq_calibrated = False
-# restrict_motifs = None
-# mod_type = 'm6A'
+pred_ds = 'METTL3_KO'
+bid_seq_calibrated = False
+restrict_motifs = None
+mod_type = 'm6A'
 
 # pred_ds = 'METTL3_KD'
 # bid_seq_calibrated = False
@@ -42,10 +42,10 @@ THRESH_COV = 20
 # restrict_motifs = 'GUUCN'
 # mod_type = 'psi'
 
-pred_ds = 'TRUB1_OE'
-bid_seq_calibrated = False
-restrict_motifs = 'GUUCN'
-mod_type = 'psi'
+# pred_ds = 'TRUB1_OE'
+# bid_seq_calibrated = False
+# restrict_motifs = 'GUUCN'
+# mod_type = 'psi'
 #######################################################################
 
 comp_ds = 'HEK293_WT'
@@ -164,7 +164,7 @@ def scatter_plot(df_in, key_x, key_y, mod_type, fig_name, corr=None):
     else:
         title = f'{len(df_in)} {mod_type} sites\nconf$\geq${THRESH_CONF}%'
     # plt.suptitle(title, fontsize=12)
-    plt.savefig(os.path.join(img_out, fig_name), bbox_inches='tight')
+    plt.savefig(os.path.join(img_out, fig_name), **fig_kwargs)
 
 def scatter_plot_by_motif(df_in, key_x, key_y, mod_type, ordered_motifs, num_row, num_col, fig_name, thresh_err=25, calc_error=False):
     motif_counts = Counter(df_in['ref5mer'])

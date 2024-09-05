@@ -7,8 +7,9 @@ import matplotlib as mpl
 #######################################################################
 cm = 1/2.54  # centimeters in inches
 gr = 1.618
-# mpl.rcParams['figure.dpi'] = 600
-# mpl.rcParams['savefig.dpi'] = 600
+dpi = 1200
+mpl.rcParams['figure.dpi'] = dpi
+mpl.rcParams['savefig.dpi'] = dpi
 mpl.rcParams['font.size'] = 5
 mpl.rcParams['legend.fontsize'] = 5
 mpl.rcParams['xtick.labelsize'] = 5
@@ -17,24 +18,24 @@ mpl.rcParams['xtick.major.size'] = 1.5
 mpl.rcParams['ytick.major.size'] = 1.5
 mpl.rcParams['lines.linewidth'] = 0.5
 mpl.rcParams['font.family'] = 'Arial'
-FMT = 'pdf'
-fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
+FMT = 'svg'
+fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi, transparent=True)
 #######################################################################
 import matplotlib.pyplot as plt
 
 THRESH_CONF = 80
-THRESH_COV = 50
+THRESH_COV = 20
 pred_ds = 'HEK293_WT'
 bid_seq_calibrated = False
 restrict_motifs = None
 
-# comp_ds = 'BID-Seq'
-# mod_type = 'psi'
-# pt_size = 2
+comp_ds = 'BID-Seq'
+mod_type = 'psi'
+pt_size = 3
 
-comp_ds = 'GLORI'
-mod_type = 'm6A'
-pt_size = 0.2
+# comp_ds = 'GLORI'
+# mod_type = 'm6A'
+# pt_size = 0.2
 
 mods = ['m6A', 'psi']
 dict_mod_display = {
@@ -128,7 +129,8 @@ mod_color = {
 
 def scatter_plot(df_in, key_x, key_y, mod_type, fig_name, corr=None):
     plt.figure(figsize=(4*cm, 4*cm))
-    ax = plt.scatter(df_in[key_x], df_in[key_y], c=mod_color[mod_type], s=pt_size, edgecolors='none')
+    ax = plt.scatter(df_in[key_x], df_in[key_y], c=mod_color[mod_type], s=pt_size,
+                     edgecolors='none', rasterized=True)
     plt.plot([0, 100], [0, 100], linestyle='--', c='gray', alpha=0.5)
     plt.xlim([-1, 101])
     plt.ylim([-1, 101])
@@ -144,7 +146,7 @@ def scatter_plot(df_in, key_x, key_y, mod_type, fig_name, corr=None):
     else:
         title = f'{len(df_in)} {mod_type} sites\nconf$\geq${THRESH_CONF}%'
     # plt.suptitle(title, fontsize=12)
-    plt.savefig(os.path.join(img_out, fig_name), bbox_inches='tight')
+    plt.savefig(os.path.join(img_out, fig_name), **fig_kwargs)
 
 def scatter_plot_by_motif(df_in, key_x, key_y, mod_type, ordered_motifs, num_row, num_col, fig_name, thresh_err=25, calc_error=False):
     motif_counts = Counter(df_in['ref5mer'])
@@ -182,7 +184,7 @@ def scatter_plot_by_motif(df_in, key_x, key_y, mod_type, ordered_motifs, num_row
         if ind % num_col == 0:
             plt.ylabel("$S_{{{}}}$".format('-'.join(key_y.split('_')[1:])), fontsize=10)
     plt.suptitle(f'{len(df_in)} {mod_type} sites\nconf$\geq${THRESH_CONF}%', fontsize=12)
-    plt.savefig(os.path.join(img_out, fig_name), bbox_inches='tight')
+    plt.savefig(os.path.join(img_out, fig_name), **fig_kwargs)
 
 if mod_type=='m6A':
     motifs = [
