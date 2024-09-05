@@ -27,6 +27,8 @@ THRESH_CONF = 80
 THRESH_COV = 20
 
 #######################################################################
+comp_ds = 'HEK293_WT'
+
 pred_ds = 'METTL3_KO'
 bid_seq_calibrated = False
 restrict_motifs = None
@@ -47,8 +49,16 @@ mod_type = 'm6A'
 # restrict_motifs = 'GUUCN'
 # mod_type = 'psi'
 #######################################################################
+# comp_ds = 'CM_WT'
+# pred_ds = 'CM_M3KO'
 
-comp_ds = 'HEK293_WT'
+# comp_ds = 'WT_WD'
+# pred_ds = 'M3KO_WD'
+#
+# bid_seq_calibrated = False
+# restrict_motifs = None
+# mod_type = 'm6A'
+#######################################################################
 
 if mod_type == 'm6A':
     pt_size = 0.2
@@ -96,13 +106,14 @@ dict_ds = {
 
     'TAC_ctrl': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/TAC/40-34/chrALL.mAFiA.sites.bed',
     'SHAM_day1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/TAC/40-31/chrALL.mAFiA.sites.bed',
-    'A1_WT_CD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/Diet/A1_WT_CD/chrALL.mAFiA.sites.bed',
-    'B1_M3KO_CD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/Diet/B1_M3KO_CD/chrALL.mAFiA.sites.bed',
-    'C1_WT_WD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/Diet/C1_WT_WD/chrALL.mAFiA.sites.bed',
-    'D1_M3KO_WD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/Diet/D1_M3KO_WD/chrALL.mAFiA.sites.bed',
 
-    'M3KO_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/CM/M3KO_rep1/chrALL.mAFiA.sites.bed',
-    'WT_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/CM/WT_rep1/chrALL.mAFiA.sites.bed',
+    'WT_CD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/Diet/WT_CD_merged/chrALL.mAFiA.sites.bed',
+    'M3KO_CD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/Diet/M3KO_CD_merged/chrALL.mAFiA.sites.bed',
+    'WT_WD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/Diet/WT_WD_merged/chrALL.mAFiA.sites.bed',
+    'M3KO_WD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/Diet/M3KO_WD_merged/chrALL.mAFiA.sites.bed',
+
+    'CM_M3KO': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/CM/M3KO_merged/chrALL.mAFiA.sites.bed',
+    'CM_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/CM/WT_merged/chrALL.mAFiA.sites.bed',
 
     'GLORI': '/home/adrian/Data/GLORI/bed_files/GLORI.chrALL.tsv',
     'BID-Seq': '/home/adrian/Data/BID_seq/BID_seq_HEK293T.bed',

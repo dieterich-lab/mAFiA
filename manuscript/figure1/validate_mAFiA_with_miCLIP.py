@@ -59,7 +59,7 @@ for cond in conditions:
     ])
 
     thresh_confidence = 80.0
-    thresh_coverage = 20
+    thresh_coverage = 50
     df_merged_thresh = df_merged[
         (df_merged['confidence'] >= thresh_confidence)
         * (df_merged['coverage'] >= thresh_coverage)
