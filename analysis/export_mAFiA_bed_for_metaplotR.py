@@ -12,14 +12,17 @@ bed6_fields = [
 
 # polyA = ['below_90', 'above_90']
 
-ds = 'HFpEF'
-conditions = ['ctrl', 'HFpEF']
+# ds = 'HFpEF'
+# conditions = ['ctrl', 'HFpEF']
 
 # ds = 'Diet'
 # conditions = ['WT_CD', 'WT_WD']
 
 # ds = 'TAC'
 # conditions = ['SHAM', 'TAC']
+
+ds = 'CM'
+conditions = ['WT', 'M3KO']
 
 in_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart'
 out_dir = os.path.join(in_dir, 'metaPlotR')

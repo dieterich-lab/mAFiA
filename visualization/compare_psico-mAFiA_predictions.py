@@ -5,30 +5,30 @@ import os
 from tqdm import tqdm
 import matplotlib as mpl
 #######################################################################
-cm = 1/2.54  # centimeters in inches
-gr = 1.618
-# mpl.rcParams['figure.dpi'] = 600
-# mpl.rcParams['savefig.dpi'] = 600
-mpl.rcParams['font.size'] = 5
-mpl.rcParams['legend.fontsize'] = 5
-mpl.rcParams['xtick.labelsize'] = 5
-mpl.rcParams['ytick.labelsize'] = 5
-mpl.rcParams['xtick.major.size'] = 1.5
-mpl.rcParams['ytick.major.size'] = 1.5
-mpl.rcParams['lines.linewidth'] = 0.5
-mpl.rcParams['font.family'] = 'Arial'
-FMT = 'pdf'
-fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
+# cm = 1/2.54  # centimeters in inches
+# gr = 1.618
+# # mpl.rcParams['figure.dpi'] = 600
+# # mpl.rcParams['savefig.dpi'] = 600
+# mpl.rcParams['font.size'] = 5
+# mpl.rcParams['legend.fontsize'] = 5
+# mpl.rcParams['xtick.labelsize'] = 5
+# mpl.rcParams['ytick.labelsize'] = 5
+# mpl.rcParams['xtick.major.size'] = 1.5
+# mpl.rcParams['ytick.major.size'] = 1.5
+# mpl.rcParams['lines.linewidth'] = 0.5
+# mpl.rcParams['font.family'] = 'Arial'
+# FMT = 'pdf'
+# fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 import matplotlib.pyplot as plt
 
 THRESH_CONF = 80
 THRESH_COV = 20
-pred_ds = 'HeLa_rep1'
+pred_ds = 'CM_M3KO_rep2'
 bid_seq_calibrated = False
 restrict_motifs = None
-comp_ds = 'BACS'
-mod_type = 'psi'
+comp_ds = 'CM_WT_rep2'
+mod_type = 'm6A'
 
 mods = ['m6A', 'psi']
 dict_mod_display = {
@@ -76,8 +76,13 @@ dict_ds = {
     'C1_WT_WD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/Diet/C1_WT_WD/chrALL.mAFiA.sites.bed',
     'D1_M3KO_WD': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/Diet/D1_M3KO_WD/chrALL.mAFiA.sites.bed',
 
-    'M3KO_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/CM/M3KO_rep1/chrALL.mAFiA.sites.bed',
-    'WT_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/CM/WT_rep1/chrALL.mAFiA.sites.bed',
+    'CM_M3KO_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/CM/M3KO_rep1/chrALL.mAFiA.sites.bed',
+    'CM_WT_rep1': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/CM/WT_rep1/chrALL.mAFiA.sites.bed',
+    'CM_M3KO_rep2': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/CM/M3KO_rep2/chrALL.mAFiA.sites.bed',
+    'CM_WT_rep2': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/CM/WT_rep2/chrALL.mAFiA.sites.bed',
+
+    'CM_M3KO': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/CM/M3KO_merged/chrALL.mAFiA.sites.bed',
+    'CM_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/CM/WT_merged/chrALL.mAFiA.sites.bed',
 
     'GLORI': '/home/adrian/Data/GLORI/bed_files/GLORI.chrALL.tsv',
     'BID-Seq': '/home/adrian/Data/BID_seq/BID_seq_HEK293T.bed',

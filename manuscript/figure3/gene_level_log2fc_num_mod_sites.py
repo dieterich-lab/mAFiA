@@ -131,7 +131,7 @@ if os.path.exists(file_mod_gene_log2fc):
         mod_df = df_mod_gene_log2fc[df_mod_gene_log2fc['mod']==this_mod]
         for _, this_row in mod_df.iterrows():
             mod_gene_log2fc[this_mod][this_row['gene']] = (
-                this_row['mod_ratio_ctrl'], this_row['mod_ratio_HFpEF'], this_row['log2fc']
+                this_row[f'mod_ratio_{conditions[0]}'], this_row[f'mod_ratio_{conditions[1]}'], this_row['log2fc']
             )
 else:
     mod_gene_log2fc = get_mod_gene_log2fc()
@@ -142,8 +142,31 @@ else:
     df_mod_gene_log2fc.to_csv(file_mod_gene_log2fc, sep='\t', index=False, float_format='%.3f')
 
 
-max_display_genes = 4
+### output gene sets ###
+thresh_log2fc = 0.25
 
+genes_mod_up_down = {this_mod: {} for this_mod in mods}
+for this_mod in mods:
+    genes_mod_up_down[this_mod]['up'] = df_mod_gene_log2fc[
+        (df_mod_gene_log2fc['mod'] == this_mod)
+        * (df_mod_gene_log2fc['log2fc'] >= thresh_log2fc)
+    ]['gene'].tolist()
+
+    genes_mod_up_down[this_mod]['down'] = df_mod_gene_log2fc[
+        (df_mod_gene_log2fc['mod'] == this_mod)
+        * (df_mod_gene_log2fc['log2fc'] < -thresh_log2fc)
+    ]['gene'].tolist()
+
+with open(os.path.join(img_out, f'gene_sets_{ds}.tsv'), 'w') as f_out:
+    for this_mod in mods:
+        for this_reg in ['up', 'down']:
+            f_out.write(f'#{this_mod}_{this_reg}\n')
+            f_out.write('\n'.join(genes_mod_up_down[this_mod][this_reg]) + '\n\n')
+
+
+### bar chart ###
+max_display_genes = 4
+xmax = 1.25
 plt.figure(figsize=(5*cm, 2*cm))
 for mod_ind, this_mod in enumerate(mods):
     top_log2fc_genes = [item[0]
@@ -160,8 +183,8 @@ for mod_ind, this_mod in enumerate(mods):
     if mod_ind == 1:
         plt.gca().yaxis.tick_right()
     plt.barh(range(len(sorted_genes)), [mod_gene_log2fc[this_mod][this_gene][2] for this_gene in sorted_genes])
-    plt.xlim([-1, 1])
-    plt.xticks(np.arange(-1, 1.01, 0.5))
+    plt.xlim([-xmax, xmax])
+    plt.xticks(np.arange(-1, 1 + 0.01, 1))
     plt.yticks(range(len(sorted_genes)), sorted_genes)
     plt.axvline(x=0, c='gray', ls='--', lw=0.5)
 plt.savefig(os.path.join(img_out, f'log2fc_num_mod_sites_{ds}.{FMT}'), **fig_kwargs)

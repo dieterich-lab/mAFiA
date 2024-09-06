@@ -5,14 +5,17 @@ region_sizes="/home/adrian/Data/genomes/mus_musculus/mm10/region_sizes.txt"
 metaPlotR="/home/adrian/git/metaPlotR"
 
 ########################################################################################################################
-ds="HFpEF"
-conditions="ctrl HFpEF"
+#ds="HFpEF"
+#conditions="ctrl HFpEF"
 
 #ds="Diet"
 #conditions="WT_CD WT_WD"
 
 #ds="TAC"
 #conditions="SHAM TAC"
+
+ds="CM"
+conditions="WT M3KO"
 
 #res_dir="/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/metaPlotR"
 ########################################################################################################################
