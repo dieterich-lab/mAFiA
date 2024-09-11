@@ -46,9 +46,9 @@ module load ont-fast5-api/4.1.1_deb12
 # shellcheck disable=SC2203
 if [[ $(basename "${REF_GENOME}") == *"GRCm"* ]]
 then
-  chrs=$(echo {1..19} X)
+  chrs=$(echo {1..19} X MT)
 else
-  chrs=$(echo {1..22} X)
+  chrs=$(echo {1..22} X MT)
 fi
 
 for chr in ${chrs}
