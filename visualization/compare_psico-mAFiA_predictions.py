@@ -25,11 +25,11 @@ import matplotlib.pyplot as plt
 
 THRESH_CONF = 80
 THRESH_COV = 20
-pred_ds = 'TAC_TAC'
+pred_ds = 'CM_IVT'
 bid_seq_calibrated = False
 restrict_motifs = None
-comp_ds = 'TAC_SHAM'
-mod_type = 'm6A'
+comp_ds = 'CM_WT'
+mod_type = 'psi'
 
 mods = ['m6A', 'psi']
 dict_mod_display = {
@@ -94,6 +94,7 @@ dict_ds = {
     'CM_WT_rep2': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/CM/WT_rep2/chrALL.mAFiA.sites.bed',
     'CM_M3KO': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/CM/M3KO_merged/chrALL.mAFiA.sites.bed',
     'CM_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/CM/WT_merged/chrALL.mAFiA.sites.bed',
+    'CM_IVT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/CM/IVT/chrALL.mAFiA.sites.bed',
 
     'GLORI': '/home/adrian/Data/GLORI/bed_files/GLORI.chrALL.tsv',
     'BID-Seq': '/home/adrian/Data/BID_seq/BID_seq_HEK293T.bed',
@@ -149,7 +150,7 @@ def scatter_plot(df_in, key_x, key_y, mod_type, fig_name, corr=None):
     else:
         title = f'{len(df_in)} {mod_type} sites\nconf$\geq${THRESH_CONF}%'
     plt.suptitle(title, fontsize=12)
-    # plt.savefig(os.path.join(img_out, fig_name), bbox_inches='tight')
+    plt.savefig(os.path.join(img_out, fig_name), bbox_inches='tight')
 
 def scatter_plot_by_motif(df_in, key_x, key_y, mod_type, ordered_motifs, num_row, num_col, fig_name, thresh_err=25, calc_error=False):
     motif_counts = Counter(df_in['ref5mer'])
@@ -187,7 +188,7 @@ def scatter_plot_by_motif(df_in, key_x, key_y, mod_type, ordered_motifs, num_row
         if ind % num_col == 0:
             plt.ylabel("$S_{{{}}}$".format('-'.join(key_y.split('_')[1:])), fontsize=10)
     plt.suptitle(f'{len(df_in)} {mod_type} sites\nconf$\geq${THRESH_CONF}%', fontsize=12)
-    # plt.savefig(os.path.join(img_out, fig_name), bbox_inches='tight')
+    plt.savefig(os.path.join(img_out, fig_name), bbox_inches='tight')
 
 if mod_type=='m6A':
     motifs = [
