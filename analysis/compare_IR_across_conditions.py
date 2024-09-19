@@ -50,7 +50,7 @@ for this_cond in conditions:
     # cond_df_irf[this_cond] = df_irf_clean[df_irf_clean['Warnings'] == '-']
     cond_df_irf[this_cond] = df_irf_clean
 
-thresh_IRratio = 0.001
+thresh_IRratio = 0.01
 thresh_IntronDepth = 5
 
 df_irf_merged = pd.merge(*list(cond_df_irf.values()), on=['chrom', 'chromStart', 'chromEnd', 'name', 'score', 'strand'],
@@ -63,10 +63,10 @@ df_irf_merged_thresh = df_irf_merged[
     # ((df_irf_merged.loc[:, df_irf_merged.keys().str.find('IntronDepth_') >= 0] >= thresh_IntronDepth).any(axis=1))
     (df_irf_merged[f'IntronDepth_{cond_names[0]}'] >= thresh_IntronDepth)
     * (df_irf_merged[f'IntronDepth_{cond_names[1]}'] >= thresh_IntronDepth)
-    # (df_irf_merged[f'IRratio_{cond_names[0]}'] >= thresh_IRratio)
-    # * (df_irf_merged[f'IRratio_{cond_names[0]}'] < 1.0)
-    # * (df_irf_merged[f'IRratio_{cond_names[1]}'] >= thresh_IRratio)
-    # * (df_irf_merged[f'IRratio_{cond_names[1]}'] < 1.0)
+    * (df_irf_merged[f'IRratio_{cond_names[0]}'] >= thresh_IRratio)
+    * (df_irf_merged[f'IRratio_{cond_names[0]}'] < 1.0)
+    * (df_irf_merged[f'IRratio_{cond_names[1]}'] >= thresh_IRratio)
+    * (df_irf_merged[f'IRratio_{cond_names[1]}'] < 1.0)
     ].copy()
 # df_irf_merged_thresh['delta_IRratio'] = df_irf_merged_thresh[f'IRratio_{cond_names[1]}'] - \
 #                                         df_irf_merged_thresh[f'IRratio_{cond_names[0]}']
@@ -161,10 +161,10 @@ yticks = np.round(np.linspace(-ymax, ymax, 5), 2)
 
 bin_centers = 0.5 * (xticks[1:] + xticks[:-1])
 
-boundary = 0.1
+boundary = 0.25
 
 global_IR_shift = np.median([x for x in df_irf_merged_thresh[f'log2fc_IRratio'].values if ~np.isnan(x) and ~np.isinf(x)])
-
+1
 plt.figure(figsize=(10, 4))
 for mod_ind, this_mod in enumerate(mods):
     plt.subplot(1, 2, mod_ind+1)
@@ -191,15 +191,15 @@ for mod_ind, this_mod in enumerate(mods):
         [x for x in df_irf_merged_thresh[f'log2fc_IRratio'].values[(vec_x >= boundary)] if
          ~np.isnan(x) and ~np.isinf(x)],
     ]
-    print([len(ll) for ll in binned_y])
+    print(this_mod, [len(ll) for ll in binned_y])
     # plt.axhline(y=global_IR_shift, c='red', ls='--', alpha=0.5)
-    plt.boxplot(binned_y, positions=[-0.5, 0.5], widths=0.25, whis=1.0, showfliers=False)
+    plt.boxplot(binned_y, positions=[-0.5, 0.5], widths=0.25, whis=1.5, showfliers=False)
     # plt.violinplot(binned_y, positions=[-0.5, 0.5])
     # plt.bar([-0.5, 0.5], [np.median(this_bin) for this_bin in binned_y], width=0.3)
     plt.xlim([-xmax, xmax])
     # plt.ylim([-ymax, ymax])
     # plt.xticks(xticks, xticks)
-    plt.xticks([-0.5, 0.5], [f'< -{boundary}', rf'$\geq$ {boundary}'])
+    plt.xticks([-0.5, 0.5], [f'< -{boundary} ({len(binned_y[0])})', rf'$\geq$ {boundary} ({len(binned_y[1])})'])
     plt.yticks(yticks, yticks)
     plt.xlabel(r'$log_{2}fc$ $\bar{S}$')
     plt.ylabel(r'$log_{2}fc$ IR ratio')
