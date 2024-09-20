@@ -164,7 +164,7 @@ bin_centers = 0.5 * (xticks[1:] + xticks[:-1])
 boundary = 0.25
 
 global_IR_shift = np.median([x for x in df_irf_merged_thresh[f'log2fc_IRratio'].values if ~np.isnan(x) and ~np.isinf(x)])
-1
+
 plt.figure(figsize=(10, 4))
 for mod_ind, this_mod in enumerate(mods):
     plt.subplot(1, 2, mod_ind+1)
