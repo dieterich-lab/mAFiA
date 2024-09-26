@@ -25,12 +25,12 @@ dict_mod_code = {
     'psi': 17802,
 }
 
-# ds = 'HFpEF'
-# conditions = ['ctrl_merged', 'HFpEF_merged']
+ds = 'HFpEF'
+conditions = ['ctrl_merged', 'HFpEF_merged']
 # ds = 'Diet'
 # conditions = ['WT_CD_merged', 'WT_WD_merged']
-ds = 'TAC'
-conditions = ['SHAM_merged', 'TAC_merged']
+# ds = 'TAC'
+# conditions = ['SHAM_merged', 'TAC_merged']
 cond_names = [this_cond.rstrip('_merged') for this_cond in conditions]
 
 ### delta IR ratio ###
@@ -152,7 +152,7 @@ print(df_irf_merged_thresh[['log2fc_IRratio', 'log2fc_m6A', 'log2fc_psi']])
 # xmax = np.round((np.nanmax(np.abs(df_irf_merged_thresh['delta_IRratio'].values)) // 0.05 + 1) * 0.05, 2)
 # ymax = np.round((np.nanmax(np.abs(df_irf_merged_thresh[['log2fc_m6A', 'log2fc_psi']].values)) // 0.05 + 1) * 0.05, 2)
 xmax = 1.0
-ymax = 1.0
+ymax = 0.8
 
 # xticks = np.round(np.arange(-xmax, xmax+0.01, 0.05), 2)
 # yticks = np.round(np.arange(-ymax, ymax+0.01, 0.05), 2)
@@ -161,7 +161,7 @@ yticks = np.round(np.linspace(-ymax, ymax, 5), 2)
 
 bin_centers = 0.5 * (xticks[1:] + xticks[:-1])
 
-boundary = 0.25
+boundary = 0.1
 
 global_IR_shift = np.median([x for x in df_irf_merged_thresh[f'log2fc_IRratio'].values if ~np.isnan(x) and ~np.isinf(x)])
 
@@ -172,7 +172,8 @@ for mod_ind, this_mod in enumerate(mods):
     # plt.axvline(x=0, c='gray')
     # plt.axhline(y=0, c='gray')
     binned_y = []
-    vec_x = df_irf_merged_thresh[f'log2fc_{this_mod}'].values
+    vec_y = df_irf_merged_thresh[f'log2fc_{this_mod}'].values
+    vec_x = df_irf_merged_thresh[f'log2fc_IRratio'].values
     # vec_x = df_irf_merged_thresh['log2fc_IRratio'].values
     # for this_bin_ind in range(len(xticks)-1):
     #     bin_start = xticks[this_bin_ind]
@@ -186,9 +187,9 @@ for mod_ind, this_mod in enumerate(mods):
     binned_y = [
         # [x for x in df_irf_merged_thresh[f'log2fc_IRratio'].values[(vec_x < -boundary) * (vec_x >= -1.0)] if ~np.isnan(x) and ~np.isinf(x)],
         # [x for x in df_irf_merged_thresh[f'log2fc_IRratio'].values[(vec_x >= boundary) * (vec_x < 1.0)] if ~np.isnan(x) and ~np.isinf(x)],
-        [x for x in df_irf_merged_thresh[f'log2fc_IRratio'].values[(vec_x < -boundary)] if
+        [x for x in vec_y[(vec_x < -boundary)] if
          ~np.isnan(x) and ~np.isinf(x)],
-        [x for x in df_irf_merged_thresh[f'log2fc_IRratio'].values[(vec_x >= boundary)] if
+        [x for x in vec_y[(vec_x >= boundary)] if
          ~np.isnan(x) and ~np.isinf(x)],
     ]
     print(this_mod, [len(ll) for ll in binned_y])
@@ -201,8 +202,9 @@ for mod_ind, this_mod in enumerate(mods):
     # plt.xticks(xticks, xticks)
     plt.xticks([-0.5, 0.5], [f'< -{boundary} ({len(binned_y[0])})', rf'$\geq$ {boundary} ({len(binned_y[1])})'])
     plt.yticks(yticks, yticks)
-    plt.xlabel(r'$log_{2}fc$ $\bar{S}$')
-    plt.ylabel(r'$log_{2}fc$ IR ratio')
+    plt.ylabel(r'$log_{2}fc$ $\bar{S}$')
+    plt.xlabel(r'$log_{2}fc$ IR ratio')
     plt.title(rf'${{{dict_mod_display[this_mod]}}}$')
 plt.suptitle(f'{ds}\n{cond_names[1]} vs {cond_names[0]}')
-plt.savefig(os.path.join(img_out, f'log2fc_IR_vs_log2fc_mod_{ds}.png'), bbox_inches='tight')
+# plt.savefig(os.path.join(img_out, f'log2fc_IR_vs_log2fc_mod_{ds}.png'), bbox_inches='tight')
+plt.savefig(os.path.join(img_out, f'log2fc_mod_vs_log2fc_IR_{ds}.png'), bbox_inches='tight')
