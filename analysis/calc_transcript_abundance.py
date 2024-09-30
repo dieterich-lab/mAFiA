@@ -6,9 +6,6 @@ import pysam
 import numpy as np
 import re
 from scipy.stats import kstest
-import matplotlib
-matplotlib.use('TkAgg')
-import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 res_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart'
@@ -54,19 +51,6 @@ with pysam.AlignmentFile(os.path.join(res_dir, ds, conditions[0], 'chrALL.mAFiA.
 
 with pysam.AlignmentFile(os.path.join(res_dir, ds, conditions[1], 'chrALL.mAFiA.reads.bam'), 'rb') as bam1:
     coverage1 = get_coverage_per_gene(bam1, df_gene)
-
-    # with pysam.AlignmentFile(os.path.join(res_dir, ds, conditions[1], 'chrALL.mAFiA.reads.bam'), 'rb') as bam_1:
-    #     for _, this_row in tqdm(df_gene.iterrows()):
-    #         chrom, chromStart, chromEnd, strand, gene = this_row[['chrom', 'chromStart', 'chromEnd', 'strand', 'gene']]
-    #         coverage_0 = np.sum(bam_0.count_coverage(chrom, chromStart, chromEnd, quality_threshold=0), axis=0)
-    #         coverage_1 = np.sum(bam_1.count_coverage(chrom, chromStart, chromEnd, quality_threshold=0), axis=0)
-    #         # if (coverage_0.max() == 0) or (coverage_1.max() == 0):
-    #         #     gene_meanCoverage_log2fc_pval[gene] = (0.0, 0.0, np.nan, 1.0)
-    #         # else:
-    #         if ~(coverage_0.max() == 0) and ~(coverage_1.max() == 0):
-    #             ks_stat, pval = kstest(coverage_0, coverage_1)
-    #             log2fc = np.log2(np.mean(coverage_1) / np.mean(coverage_0))
-    #             gene_meanCoverage_log2fc_pval[gene] = (np.mean(coverage_0), np.mean(coverage_1), log2fc, pval)
 
 sum0 = np.sum(list(coverage0.values()))
 sum1 = np.sum(list(coverage1.values()))
