@@ -7,6 +7,9 @@ import numpy as np
 import re
 from scipy.stats import kstest
 from tqdm import tqdm
+import matplotlib
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
 
 res_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart'
 out_dir = os.path.join(res_dir, 'transcript_stoichiometry')
@@ -98,3 +101,46 @@ df_out = pd.DataFrame([[k] + [kk] + list(vv) for k, v in gene_mod_log2fc.items()
 
 df_out.to_csv(os.path.join(out_dir, f'{ds}_{conditions[1]}_vs_{conditions[0]}.tsv'),
               sep='\t', index=False, float_format='%.3f')
+
+### volcano plot ###
+xmax = 4
+ymax = 10
+thresh_log_pval = 4
+thresh_log2fc = 0.1
+reg_genes = {mod: {} for mod in mods}
+plt.figure(figsize=(10, 4))
+for mod_ind, this_mod in enumerate(mods):
+    this_mod_df = df_out[df_out['mod'] == this_mod]
+    vec_gene, vec_log2fc, vec_pval = this_mod_df[['gene', 'log2fc', 'pval']].values.T
+    vec_log_pval = -np.log10(np.float64(vec_pval))
+
+    mask_up = (vec_log_pval >= thresh_log_pval) * (vec_log2fc > thresh_log2fc)
+    mask_down = (vec_log_pval >= thresh_log_pval) * (vec_log2fc < -thresh_log2fc)
+
+    plt.subplot(1, 2, mod_ind+1)
+    plt.scatter(vec_log2fc, vec_log_pval, s=1, c='gray', alpha=0.5)
+    plt.scatter(vec_log2fc[mask_up], vec_log_pval[mask_up], s=3, c='red')
+    plt.scatter(vec_log2fc[mask_down], vec_log_pval[mask_down], s=3, c='blue')
+    plt.xlim([-xmax, xmax])
+    plt.ylim([0, ymax])
+    plt.xlabel(f'log2fc transcript ${{{dict_mod_display[this_mod]}}}$')
+    plt.ylabel('-log10(pval)')
+
+    reg_genes[this_mod]['up'] = vec_gene[mask_up]
+    reg_genes[this_mod]['down'] = vec_gene[mask_down]
+
+    # reg_genes[this_mod]['up'] = [this_gene for this_gene in vec_gene[mask_up] if this_gene[:2]!='Gm']
+    # reg_genes[this_mod]['down'] = [this_gene for this_gene in vec_gene[mask_down] if this_gene[:2]!='Gm']
+
+    # plt.text(-xmax+1, 1, '\n'.join(reg_genes[this_mod]['down']), c='blue')
+    # plt.text(xmax-2, 1, '\n'.join(reg_genes[this_mod]['up']), c='red')
+
+plt.savefig(os.path.join(out_dir, f'volcano_plot_logPval{thresh_log_pval}_log2fc{thresh_log2fc}.png'),
+            bbox_inches='tight')
+
+with open(os.path.join(out_dir, f'reg_genes_logPval{thresh_log_pval}_log2fc{thresh_log2fc}.txt'), 'w') as f_out:
+    for this_mod in mods:
+        for this_reg in ['up', 'down']:
+            f_out.write(f'{this_mod}_{this_reg}\n')
+            f_out.write('\n'.join(reg_genes[this_mod][this_reg]))
+            f_out.write('\n\n')
