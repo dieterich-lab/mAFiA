@@ -15,6 +15,9 @@ res_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_
 out_dir = os.path.join(res_dir, 'transcript_stoichiometry')
 os.makedirs(out_dir, exist_ok=True)
 
+img_out = '/home/adrian/img_out/transcript_stoichiometry'
+os.makedirs(img_out, exist_ok=True)
+
 ds = 'TAC'
 conditions = ['SHAM_merged', 'TAC_merged']
 
@@ -135,10 +138,10 @@ for mod_ind, this_mod in enumerate(mods):
     # plt.text(-xmax+1, 1, '\n'.join(reg_genes[this_mod]['down']), c='blue')
     # plt.text(xmax-2, 1, '\n'.join(reg_genes[this_mod]['up']), c='red')
 
-plt.savefig(os.path.join(out_dir, f'volcano_plot_logPval{thresh_log_pval}_log2fc{thresh_log2fc}.png'),
+plt.savefig(os.path.join(img_out, f'volcano_plot_logPval{thresh_log_pval}_log2fc{thresh_log2fc}.png'),
             bbox_inches='tight')
 
-with open(os.path.join(out_dir, f'reg_genes_logPval{thresh_log_pval}_log2fc{thresh_log2fc}.txt'), 'w') as f_out:
+with open(os.path.join(img_out, f'reg_genes_logPval{thresh_log_pval}_log2fc{thresh_log2fc}.txt'), 'w') as f_out:
     for this_mod in mods:
         for this_reg in ['up', 'down']:
             f_out.write(f'{this_mod}_{this_reg}\n')
