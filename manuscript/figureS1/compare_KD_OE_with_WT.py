@@ -148,7 +148,7 @@ if bid_seq_calibrated:
 elif comp_ds in ['GLORI', 'BID-Seq', 'BID-Seq_mouse_heart', 'PRAISE', 'BACS']:
     df_comp.rename(columns={'score': 'modRatio'}, inplace=True)
 
-img_out = f'/home/adrian/img_out/manuscript_psico_mAFiA/figure2'
+img_out = f'/home/adrian/img_out/manuscript_psico_mAFiA/figureS1'
 os.makedirs(img_out, exist_ok=True)
 
 mod_color = {

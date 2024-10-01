@@ -68,7 +68,7 @@ def scatter_mafia_vs_ref(df_ref, df_pred):
 
 
 source_data_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293'
-img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure2'
+img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figureS1'
 os.makedirs(img_out, exist_ok=True)
 
 all_ds = [

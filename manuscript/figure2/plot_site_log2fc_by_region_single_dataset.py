@@ -31,7 +31,7 @@ fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 ds = 'Diet_WT_CD_merged_WT_WD_merged'
 # ds = 'HFpEF_ctrl_merged_HFpEF_merged'
 
-img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
+img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure2'
 os.makedirs(img_out, exist_ok=True)
 
 def get_df_annotated(in_df):

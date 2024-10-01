@@ -86,7 +86,7 @@ dict_mod_display = {
 
 
 ks_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/KS_test'
-img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
+img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure2'
 os.makedirs(img_out, exist_ok=True)
 
 annot_file = '/home/adrian/Data/genomes/mus_musculus/GRCm38_102/GRCm38.102.bed'

@@ -105,7 +105,7 @@ conditions = ['SHAM_merged', 'TAC_merged']
 # ds = 'Diet'
 # conditions = ['WT_CD_merged', 'WT_WD_merged']
 
-img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
+img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure2'
 os.makedirs(img_out, exist_ok=True)
 
 cond_mod_thresh_dfs = {

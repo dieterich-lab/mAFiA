@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import numpy as np
+from pybaselines import Baseline, utils
 import matplotlib as mpl
 #######################################################################
 cm = 1/2.54  # centimeters in inches
@@ -22,7 +23,7 @@ fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi, transparent=True)
 import matplotlib.pyplot as plt
 
 
-def smooth(y, box_pts=10):
+def smooth(y, box_pts=5):
     box = np.ones(box_pts)/box_pts
     y_smooth = np.convolve(y, box, mode='same')
     return y_smooth
@@ -31,11 +32,11 @@ def smooth(y, box_pts=10):
 # ds = 'HFpEF'
 # conditions = ['ctrl_merged', 'HFpEF_merged']
 
-ds = 'Diet'
-conditions = ['WT_CD_merged', 'WT_WD_merged']
+# ds = 'Diet'
+# conditions = ['WT_CD_merged', 'WT_WD_merged']
 
-# ds = 'TAC'
-# conditions = ['SHAM_merged', 'TAC_merged']
+ds = 'TAC'
+conditions = ['SHAM_merged', 'TAC_merged']
 
 cond_names = {this_cond: this_cond.rstrip('_merged') for this_cond in conditions}
 cond_colors = {this_cond: this_color for this_cond, this_color in zip(conditions, ['blue', 'red'])}
@@ -49,7 +50,7 @@ dict_mod_display = {
 thresholds = ['0.0', '50.0']
 
 metaplot_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/metaPlotR'
-img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
+img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure2'
 
 # metaplot_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/polyA'
 # img_out = '/home/adrian/img_out/metatranscript_polyA'
@@ -67,7 +68,7 @@ for this_cond in conditions:
             cond_mod_thresh_dist_measure[this_cond][this_mod][this_thresh] = pd.read_csv(this_dist_measure_file, sep='\t')
 
 hist_range = [0, 3]
-hist_num_bins = 60
+hist_num_bins = 30
 bin_edges = np.linspace(*hist_range, hist_num_bins+1)
 bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
 
@@ -82,27 +83,33 @@ for mod_ind, this_mod in enumerate(mods):
         this_cond_mod_hist_all, _ = np.histogram(
             cond_mod_thresh_dist_measure[this_cond][this_mod]['0.0'].rel_location.values, bins=bin_edges
         )
-        # norm_hist = this_cond_mod_hist
         # norm_hist = smooth(this_cond_mod_hist) / smooth(this_cond_mod_hist_all)
-        norm_hist = this_cond_mod_hist / this_cond_mod_hist_all
+        # norm_hist = this_cond_mod_hist / this_cond_mod_hist_all
+        baseline_fitter = Baseline(x_data=bin_centers)
+        bkg, params = baseline_fitter.modpoly(this_cond_mod_hist, poly_order=1)
+        bkg[bkg < 0] = 0
+        norm_hist = this_cond_mod_hist - bkg
         norm_hist = smooth(norm_hist)
+
         all_norm_hist.append(norm_hist)
         plt.plot(bin_centers, norm_hist, c=cond_colors[this_cond], label=cond_names[this_cond])
+        # plt.plot(bin_centers, bkg, c=cond_colors[this_cond], ls='--')
     # plt.legend(loc='upper left')
     plt.axvline(x=1, c='gray', alpha=0.5)
     plt.axvline(x=2, c='gray', alpha=0.5)
-    plt.xticks([0.5, 1.5, 2.5], ['5\' UTR', 'CDS', '3\' UTR'])
-    # plt.xticks([0.5, 1.5, 2.5], [])
+    # plt.xticks([0.5, 1.5, 2.5], ['5\' UTR', 'CDS', '3\' UTR'])
+    plt.xticks([0.5, 1.5, 2.5], [])
     # plt.ylabel('$N_{S\geq50}$ / $N_{covered}$')
-    plt.ylim([0, 0.1])
+    # plt.ylim([0, 0.1])
     # plt.title(rf'${{{dict_mod_display[this_mod]}}}$')
-ymax = np.round((np.max(all_norm_hist) // 0.05 + 1) * 0.05, 2)
+tick_spacing = int(round(np.max(all_norm_hist) / 5, -2))
+ymax = np.round((np.max(all_norm_hist) // tick_spacing + 1) * tick_spacing, 2)
 for mod_ind, this_mod in enumerate(mods):
     plt.subplot(1, 2, mod_ind+1)
     plt.ylim([0, ymax])
     if mod_ind==0:
-        plt.yticks(np.arange(0, ymax+0.01, 0.05))
+        plt.yticks(np.arange(0, ymax+0.01, tick_spacing))
     else:
-        plt.yticks(np.arange(0, ymax+0.01, 0.05), [])
+        plt.yticks(np.arange(0, ymax+0.01, tick_spacing), [])
 # plt.suptitle(f'{ds}')
 plt.savefig(os.path.join(img_out, f"profile_{ds}_{'_'.join(conditions)}.{FMT}"), **fig_kwargs)
