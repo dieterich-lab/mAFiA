@@ -102,14 +102,14 @@ df_out = pd.DataFrame([[k] + [kk] + list(vv) for k, v in gene_mod_log2fc.items()
                                ]
                       )
 
-df_out.to_csv(os.path.join(out_dir, f'{ds}_{conditions[1]}_vs_{conditions[0]}.tsv'),
+df_out.to_csv(os.path.join(out_dir, f'transcript_stoichiometry_{conditions[1]}_vs_{conditions[0]}.tsv'),
               sep='\t', index=False, float_format='%.3f')
 
 ### volcano plot ###
 xmax = 4
 ymax = 10
-thresh_log_pval = 4
-thresh_log2fc = 0.1
+thresh_log_pval = 2
+thresh_log2fc = 0.25
 reg_genes = {mod: {} for mod in mods}
 plt.figure(figsize=(10, 4))
 for mod_ind, this_mod in enumerate(mods):
@@ -144,6 +144,6 @@ plt.savefig(os.path.join(img_out, f'volcano_plot_logPval{thresh_log_pval}_log2fc
 with open(os.path.join(img_out, f'reg_genes_logPval{thresh_log_pval}_log2fc{thresh_log2fc}.txt'), 'w') as f_out:
     for this_mod in mods:
         for this_reg in ['up', 'down']:
-            f_out.write(f'{this_mod}_{this_reg}\n')
+            f_out.write(f'###{this_mod}_{this_reg}###\n')
             f_out.write('\n'.join(reg_genes[this_mod][this_reg]))
             f_out.write('\n\n')

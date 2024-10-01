@@ -77,4 +77,4 @@ df_out[f'norm_coverage_{conditions[0]}'] = df_out[f'norm_coverage_{conditions[0]
 df_out[f'norm_coverage_{conditions[1]}'] = df_out[f'norm_coverage_{conditions[1]}'].map('{:.3E}'.format)
 df_out[f'log2fc'] = df_out['log2fc'].map('{:.3f}'.format)
 
-df_out.to_csv(os.path.join(out_dir, f'{ds}_{conditions[1]}_vs_{conditions[0]}.tsv'), sep='\t', index=False)
+df_out.to_csv(os.path.join(out_dir, f'transcript_abundance_{conditions[1]}_vs_{conditions[0]}.tsv'), sep='\t', index=False)
