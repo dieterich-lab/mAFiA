@@ -103,7 +103,7 @@ df_out = pd.DataFrame([[k] + [kk] + list(vv) for k, v in gene_mod_log2fc.items()
                       )
 
 df_out.to_csv(os.path.join(out_dir, f'transcript_stoichiometry_{conditions[1]}_vs_{conditions[0]}.tsv'),
-              sep='\t', index=False, float_format='%.3f')
+              sep='\t', index=False, float_format='%.6f')
 
 ### volcano plot ###
 xmax = 4
