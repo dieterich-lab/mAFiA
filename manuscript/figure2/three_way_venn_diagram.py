@@ -1,9 +1,24 @@
 import os
 import pandas as pd
-import matplotlib as mpl
-mpl.use('TkAgg')
-import matplotlib.pyplot as plt
 from matplotlib_venn import venn3
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+#######################################################################
+cm = 1/2.54  # centimeters in inches
+gr = 1.618
+# mpl.rcParams['figure.dpi'] = 600
+# mpl.rcParams['savefig.dpi'] = 600
+mpl.rcParams['font.size'] = 5
+mpl.rcParams['legend.fontsize'] = 5
+mpl.rcParams['xtick.labelsize'] = 5
+mpl.rcParams['ytick.labelsize'] = 5
+mpl.rcParams['xtick.major.size'] = 1.5
+mpl.rcParams['ytick.major.size'] = 1.5
+mpl.rcParams['lines.linewidth'] = 0.5
+mpl.rcParams['font.family'] = 'Arial'
+FMT = 'svg'
+fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200, transparent=True)
+#######################################################################
 
 bed6_fields = [
     'chrom',
@@ -45,7 +60,7 @@ for this_ds, this_cond in zip(ds, conditions):
     ]
 
 
-plt.figure(figsize=(10, 5))
+plt.figure(figsize=(12*cm, 6*cm))
 # this_mod = 'm6A'
 for mod_ind, this_mod in enumerate(mods):
     plt.subplot(1, 2, mod_ind+1)
@@ -53,7 +68,7 @@ for mod_ind, this_mod in enumerate(mods):
     for this_ds in ds:
         this_df_mod = dfs[this_ds][dfs[this_ds]['name'] == this_mod]
         sites[this_ds] = set([tuple(val) for val in this_df_mod[bed6_fields].values])
-    venn3(sites.values(), conditions, set_colors=ds_colors.values())
+    venn3(sites.values(), ds, set_colors=ds_colors.values())
     plt.title(fr'${{{dict_mod_display[this_mod]}}}$')
 # plt.suptitle(rf'$S\geq{thresh_modRatio}$')
-plt.savefig(os.path.join(img_out, f"{'_'.join(conditions)}.png"), bbox_inches='tight')
+plt.savefig(os.path.join(img_out, f'three_way_venn_diagram.{FMT}'), **fig_kwargs)
