@@ -25,12 +25,12 @@ dict_mod_code = {
     'psi': 17802,
 }
 
-ds = 'HFpEF'
-conditions = ['ctrl_merged', 'HFpEF_merged']
+# ds = 'HFpEF'
+# conditions = ['ctrl_merged', 'HFpEF_merged']
 # ds = 'Diet'
 # conditions = ['WT_CD_merged', 'WT_WD_merged']
-# ds = 'TAC'
-# conditions = ['SHAM_merged', 'TAC_merged']
+ds = 'TAC'
+conditions = ['SHAM_merged', 'TAC_merged']
 cond_names = [this_cond.rstrip('_merged') for this_cond in conditions]
 
 ### delta IR ratio ###
@@ -83,10 +83,21 @@ df_irf_merged_thresh.sort_values('log2fc_IRratio', inplace=True)
 # )
 
 ### scatter plot of IR ratios ###
-xylim = [-0.05, 1.05]
+thresh_log2fc = 0.5
+mask_positive = df_irf_merged_thresh['log2fc_IRratio'].values >= thresh_log2fc
+mask_negative = df_irf_merged_thresh['log2fc_IRratio'].values < -thresh_log2fc
+up_reg_genes = [this_name.split('/')[0] for this_name in df_irf_merged_thresh.loc[mask_positive, 'name'].values]
+down_reg_genes = [this_name.split('/')[0] for this_name in df_irf_merged_thresh.loc[mask_negative, 'name'].values]
+
+xylim = [0, 1.0]
+
 plt.figure(figsize=(5, 5))
-plt.plot(df_irf_merged_thresh[f'IRratio_{cond_names[0]}'], df_irf_merged_thresh[f'IRratio_{cond_names[1]}'], '.')
+plt.plot(df_irf_merged_thresh[f'IRratio_{cond_names[0]}'], df_irf_merged_thresh[f'IRratio_{cond_names[1]}'], '.', c='gray', alpha=0.5)
+plt.plot(df_irf_merged_thresh.loc[mask_positive, f'IRratio_{cond_names[0]}'], df_irf_merged_thresh.loc[mask_positive, f'IRratio_{cond_names[1]}'], 'r.')
+plt.plot(df_irf_merged_thresh.loc[mask_negative, f'IRratio_{cond_names[0]}'], df_irf_merged_thresh.loc[mask_negative, f'IRratio_{cond_names[1]}'], 'b.')
 plt.plot([0, 1], [0, 1], c='gray', ls='--')
+plt.text(0.05, 0.95, '\n'.join(up_reg_genes), va='top', ha='left', c='red')
+plt.text(0.95, 0.05, '\n'.join(down_reg_genes), va='bottom', ha='right', c='blue')
 plt.xlim(xylim)
 plt.ylim(xylim)
 plt.xlabel(f'IR ratio, {cond_names[0]}')
