@@ -23,8 +23,8 @@ mpl.rcParams['xtick.major.size'] = 1.5
 mpl.rcParams['ytick.major.size'] = 1.5
 mpl.rcParams['lines.linewidth'] = 0.5
 mpl.rcParams['font.family'] = 'Arial'
-FMT = 'pdf'
-fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
+FMT = 'svg'
+fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200, transparent=True)
 #######################################################################
 
 
@@ -107,9 +107,9 @@ df_annot = df_annot[df_annot['source']=='ensembl_havana']
 annot = pybedtools.BedTool.from_dataframe(df_annot)
 
 ds = [
-    # 'TAC_SHAM_merged_TAC_merged',
+    'TAC_SHAM_merged_TAC_merged',
     'Diet_WT_CD_merged_WT_WD_merged',
-    'HFpEF_ctrl_merged_HFpEF_merged',
+    # 'HFpEF_ctrl_merged_HFpEF_merged',
 ]
 
 ds_names = {
@@ -175,43 +175,43 @@ thresh_min_num_sites = 2
 # xmax = (np.nanmax(all_abs_log2fc_vals[all_abs_log2fc_vals != np.inf]) // 0.5 + 1) * 0.5
 xmax = 1.5
 
-plt.figure(figsize=(6*cm, 8*cm))
-for mod_ind, this_mod in enumerate(mods):
-    this_mod_df_annotated_sites = df_annotated_sites[df_annotated_sites['name']==this_mod]
-    gene_ds_delta = {}
-    for this_gene, site_counts in Counter(this_mod_df_annotated_sites['gene']).most_common():
-        sub_df = this_mod_df_annotated_sites[this_mod_df_annotated_sites['gene'] == this_gene]
-        if (len(sub_df) >= thresh_min_num_sites) \
-                and (np.abs(sub_df[[f'log2fc_{ds[0]}', f'log2fc_{ds[1]}']].values).max() >= thresh_log2fc):
-            gene_ds_delta[this_gene] = [sub_df[f'log2fc_{ds[0]}'].values, sub_df[f'log2fc_{ds[1]}'].values]
-
-    sorted_genes = np.array(list(gene_ds_delta.keys()))[
-        np.argsort([np.mean(this_val[0]) for this_val in gene_ds_delta.values()])
-    ]
-
-    plt.subplot(1, 2, mod_ind+1)
-    labelled = False
-    for row_ind, this_gene in enumerate(sorted_genes):
-        ds_delta = gene_ds_delta[this_gene]
-        if not labelled:
-            for ds_ind, (this_ds, this_ds_delta) in enumerate(zip(ds, ds_delta)):
-                plt.scatter(this_ds_delta, [row_ind-0.1+0.2*ds_ind] * len(this_ds_delta),
-                            c=ds_colors[this_ds], label=ds_names[this_ds], s=1)
-                labelled = True
-        else:
-            for ds_ind, (this_ds, this_ds_delta) in enumerate(zip(ds, ds_delta)):
-                plt.scatter(this_ds_delta, [row_ind-0.1+0.2*ds_ind] * len(this_ds_delta),
-                            c=ds_colors[this_ds], s=1)
-        for this_pair in zip(*ds_delta):
-            plt.plot(this_pair, (row_ind-0.1, row_ind+0.1), c='gray', alpha=0.5)
-    if mod_ind == 1:
-        plt.gca().yaxis.tick_right()
-    plt.gca().invert_yaxis()
-    plt.yticks(range(len(sorted_genes)), sorted_genes)
-    plt.xticks(np.arange(-round(xmax), round(xmax)+0.1, 1))
-    plt.xlim([-xmax, xmax])
-    plt.axvline(x=0, c='gray', alpha=0.5, ls='--')
-plt.savefig(os.path.join(img_out, f'site_log2fc_by_gene_{ds_names[ds[0]]}_{ds_names[ds[1]]}.{FMT}'), **fig_kwargs)
+# plt.figure(figsize=(6*cm, 8*cm))
+# for mod_ind, this_mod in enumerate(mods):
+#     this_mod_df_annotated_sites = df_annotated_sites[df_annotated_sites['name']==this_mod]
+#     gene_ds_delta = {}
+#     for this_gene, site_counts in Counter(this_mod_df_annotated_sites['gene']).most_common():
+#         sub_df = this_mod_df_annotated_sites[this_mod_df_annotated_sites['gene'] == this_gene]
+#         if (len(sub_df) >= thresh_min_num_sites) \
+#                 and (np.abs(sub_df[[f'log2fc_{ds[0]}', f'log2fc_{ds[1]}']].values).max() >= thresh_log2fc):
+#             gene_ds_delta[this_gene] = [sub_df[f'log2fc_{ds[0]}'].values, sub_df[f'log2fc_{ds[1]}'].values]
+#
+#     sorted_genes = np.array(list(gene_ds_delta.keys()))[
+#         np.argsort([np.mean(this_val[0]) for this_val in gene_ds_delta.values()])
+#     ]
+#
+#     plt.subplot(1, 2, mod_ind+1)
+#     labelled = False
+#     for row_ind, this_gene in enumerate(sorted_genes):
+#         ds_delta = gene_ds_delta[this_gene]
+#         if not labelled:
+#             for ds_ind, (this_ds, this_ds_delta) in enumerate(zip(ds, ds_delta)):
+#                 plt.scatter(this_ds_delta, [row_ind-0.1+0.2*ds_ind] * len(this_ds_delta),
+#                             c=ds_colors[this_ds], label=ds_names[this_ds], s=1)
+#                 labelled = True
+#         else:
+#             for ds_ind, (this_ds, this_ds_delta) in enumerate(zip(ds, ds_delta)):
+#                 plt.scatter(this_ds_delta, [row_ind-0.1+0.2*ds_ind] * len(this_ds_delta),
+#                             c=ds_colors[this_ds], s=1)
+#         for this_pair in zip(*ds_delta):
+#             plt.plot(this_pair, (row_ind-0.1, row_ind+0.1), c='gray', alpha=0.5)
+#     if mod_ind == 1:
+#         plt.gca().yaxis.tick_right()
+#     plt.gca().invert_yaxis()
+#     plt.yticks(range(len(sorted_genes)), sorted_genes)
+#     plt.xticks(np.arange(-round(xmax), round(xmax)+0.1, 1))
+#     plt.xlim([-xmax, xmax])
+#     plt.axvline(x=0, c='gray', alpha=0.5, ls='--')
+# plt.savefig(os.path.join(img_out, f'site_log2fc_by_gene_{ds_names[ds[0]]}_{ds_names[ds[1]]}.{FMT}'), **fig_kwargs)
 
 ### boxplot by transcript region ###
 regions = [
@@ -228,13 +228,56 @@ region_names =\
     }
 
 
-ymax = 2
+# ymax = 2
+# ylim = [-ymax, ymax]
+#
+# plt.figure(figsize=(5*cm, 2*cm))
+# for mod_ind, this_mod in enumerate(mods):
+#     plt.subplot(1, 2, mod_ind+1)
+#     plt.axhline(y=0, c='gray', ls='--')
+#     labels = [(mpatches.Patch(color=ds_colors[this_ds]), ds_names[this_ds]) for this_ds in ds]
+#     for ds_ind, this_ds in enumerate(ds):
+#         region_log2fc = [
+#             df_annotated_sites[
+#                 (df_annotated_sites['name'] == this_mod)
+#                 * (df_annotated_sites['feature'] == this_region)
+#             ][f'log2fc_{this_ds}'].values
+#             for this_region in regions
+#         ]
+#         region_log2fc = [
+#             [x for x in this_region_log2fc if ~np.isnan(x) and ~np.isinf(x)]
+#             for this_region_log2fc in region_log2fc
+#         ]
+#
+#         bplot = plt.boxplot(region_log2fc, positions=np.arange(len(regions))-0.2+ds_ind*0.4,
+#                     showfliers=False, patch_artist=True, whis=1.0,
+#                             boxprops={"linewidth": 0.5}, medianprops={"linewidth": 0.5}, capprops={"linewidth": 0.5},
+#                             whiskerprops={"linewidth": 0.5})
+#         for patch in bplot['boxes']:
+#             patch.set_facecolor(ds_colors[this_ds])
+#         for patch in bplot['medians']:
+#             patch.set_color('k')
+#
+#     # if mod_ind == 0:
+#     #     plt.legend(*zip(*labels), loc='upper left')
+#     plt.xticks(range(len(regions)), region_names.values())
+#     if mod_ind == 1:
+#         plt.gca().yaxis.tick_right()
+#     # plt.yticks([-2, 0, 2])
+#     # plt.ylim(ylim)
+#     # plt.xlabel('Region', fontsize=12)
+#     # plt.ylabel('log2fc', fontsize=12)
+#     # plt.title(rf'${{{dict_mod_display[this_mod]}}}$', fontsize=15)
+# plt.savefig(os.path.join(img_out, f'site_log2fc_by_region_{ds_names[ds[0]]}_{ds_names[ds[1]]}.{FMT}'), **fig_kwargs)
+
+ymax = 1.25
+yticks = np.arange(-ymax, ymax+0.01, 0.25)
 ylim = [-ymax, ymax]
 
 plt.figure(figsize=(5*cm, 2*cm))
 for mod_ind, this_mod in enumerate(mods):
     plt.subplot(1, 2, mod_ind+1)
-    plt.axhline(y=0, c='gray', ls='--', alpha=0.2)
+    plt.axhline(y=0, c='gray', ls='--')
     labels = [(mpatches.Patch(color=ds_colors[this_ds]), ds_names[this_ds]) for this_ds in ds]
     for ds_ind, this_ds in enumerate(ds):
         region_log2fc = [
@@ -249,8 +292,8 @@ for mod_ind, this_mod in enumerate(mods):
             for this_region_log2fc in region_log2fc
         ]
 
-        bplot = plt.boxplot(region_log2fc, positions=np.arange(len(regions))-0.2+ds_ind*0.4,
-                    showfliers=False, patch_artist=True, whis=1.0,
+        bplot = plt.boxplot([x for region in region_log2fc for x in region], positions=[-0.5+ds_ind],
+                            showfliers=False, patch_artist=True, whis=0.5, widths=0.5,
                             boxprops={"linewidth": 0.5}, medianprops={"linewidth": 0.5}, capprops={"linewidth": 0.5},
                             whiskerprops={"linewidth": 0.5})
         for patch in bplot['boxes']:
@@ -261,9 +304,13 @@ for mod_ind, this_mod in enumerate(mods):
     # if mod_ind == 0:
     #     plt.legend(*zip(*labels), loc='upper left')
     plt.xticks(range(len(regions)), region_names.values())
-    plt.yticks([-2, 0, 2])
+    if mod_ind == 1:
+        plt.gca().yaxis.tick_right()
+    # plt.yticks([-2, 0, 2])
     plt.ylim(ylim)
+    plt.xticks([-0.5, 0.5], [ds_names[this_ds] for this_ds in ds])
+    plt.xlim([-1, 1])
     # plt.xlabel('Region', fontsize=12)
     # plt.ylabel('log2fc', fontsize=12)
     # plt.title(rf'${{{dict_mod_display[this_mod]}}}$', fontsize=15)
-plt.savefig(os.path.join(img_out, f'site_log2fc_by_region_{ds_names[ds[0]]}_{ds_names[ds[1]]}.{FMT}'), **fig_kwargs)
+plt.savefig(os.path.join(img_out, f'boxplot_site_log2fc_{ds_names[ds[0]]}_{ds_names[ds[1]]}.{FMT}'), **fig_kwargs)

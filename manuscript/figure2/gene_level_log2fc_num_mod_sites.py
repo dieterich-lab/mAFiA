@@ -96,14 +96,20 @@ res_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_
 thresholds = ['0.0', '50.0']
 mods = ['m6A', 'psi']
 
-ds = 'TAC'
-conditions = ['SHAM_merged', 'TAC_merged']
+# ds = 'TAC'
+# conditions = ['SHAM_merged', 'TAC_merged']
 
 # ds = 'HFpEF'
 # conditions = ['ctrl', 'HFpEF']
 
-# ds = 'Diet'
-# conditions = ['WT_CD_merged', 'WT_WD_merged']
+ds = 'Diet'
+conditions = ['WT_CD_merged', 'WT_WD_merged']
+
+ds_color = {
+    'TAC': 'g',
+    'HFpEF': 'r',
+    'Diet': 'b'
+}
 
 img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure2'
 os.makedirs(img_out, exist_ok=True)
@@ -182,7 +188,8 @@ for mod_ind, this_mod in enumerate(mods):
     plt.subplot(1, 2, mod_ind+1)
     if mod_ind == 1:
         plt.gca().yaxis.tick_right()
-    plt.barh(range(len(sorted_genes)), [mod_gene_log2fc[this_mod][this_gene][2] for this_gene in sorted_genes])
+    plt.barh(range(len(sorted_genes)), [mod_gene_log2fc[this_mod][this_gene][2] for this_gene in sorted_genes],
+             fc=ds_color[ds])
     plt.xlim([-xmax, xmax])
     plt.xticks(np.arange(-1, 1 + 0.01, 1))
     plt.yticks(range(len(sorted_genes)), sorted_genes)
