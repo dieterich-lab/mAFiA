@@ -20,10 +20,8 @@ FMT = 'svg'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200, transparent=True)
 #######################################################################
 
-proteome_file = os.path.join(
-    '/home/adrian/Data/Dewenter_TAC_Backs_lab',
-    'TACOMA_differential_proteome_analysis_TAC_vs_SHAM_benjamini_hochberg.tsv'
-)
+data_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/protein_abundance'
+proteome_file = os.path.join(data_dir, 'TACOMA_differential_proteome_analysis_TAC_vs_SHAM_benjamini_hochberg.tsv')
 
 img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
 
@@ -66,3 +64,11 @@ plt.text(xmax*0.55, ymax*0.05, '\n'.join(reg_genes['up']), c='red', ha='left', v
 plt.savefig(os.path.join(img_out,
                          f'volcano_plot_proteome_logPval{thresh_log_pval}_log2fc{thresh_log2fc}.{FMT}'),
             **fig_kwargs)
+
+with open(os.path.join(data_dir, 'up_down_reg_protein_TAC_SHAM_combined.txt'), 'w') as f_out:
+    f_out.write('#up_regulated\n')
+    for this_gene in reg_genes['up']:
+        f_out.write(f'{this_gene}\n')
+    f_out.write('#down_regulated\n')
+    for this_gene in reg_genes['down']:
+        f_out.write(f'{this_gene}\n')

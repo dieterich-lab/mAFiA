@@ -20,7 +20,8 @@ FMT = 'svg'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
-transcriptome_file = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/transcript_abundance/transcript_abundance_TAC_merged_vs_SHAM_merged.tsv'
+data_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/transcript_abundance'
+transcriptome_file = os.path.join(data_dir, '/transcript_abundance_TAC_merged_vs_SHAM_merged.tsv')
 img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
 
 df_transcriptome = pd.read_csv(transcriptome_file, sep='\t')
@@ -40,6 +41,14 @@ for this_gene in df_transcriptome.sort_values('norm_coverage_SHAM_merged', ascen
 sel_df = df_transcriptome[df_transcriptome['gene'].isin(sel_genes)].sort_values('log2fc')
 df_negative = sel_df[sel_df['log2fc'] < 0]
 df_positive = sel_df[sel_df['log2fc'] >= 0]
+
+with open(os.path.join(data_dir, f'up_down_regulated_transcripts_common{num_genes}.txt'), 'w') as f_out:
+    f_out.write('#up_regulated\n')
+    for val in df_positive['gene'].values:
+        f_out.write(f'{val}\n')
+    f_out.write('#down_regulated\n')
+    for val in df_negative['gene'].values:
+        f_out.write(f'{val}\n')
 
 plt.figure(figsize=(4*cm, 4*cm))
 plt.barh(np.arange(len(df_negative)), df_negative['log2fc'], fc='r')
