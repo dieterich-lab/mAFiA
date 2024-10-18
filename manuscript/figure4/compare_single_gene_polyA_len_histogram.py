@@ -125,7 +125,7 @@ num_bins = np.int64(xmax / bin_width)
 bin_edges = np.linspace(0, xmax, num_bins+1)
 bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
 
-plt.figure(figsize=(2*cm, 2*cm))
+plt.figure(figsize=(4*cm, 4*cm))
 for this_cond in conditions:
     this_hist, _ = np.histogram(gene_cond_distribution[this_cond], bins=bin_edges)
     norm_hist = this_hist / np.sum(this_hist)

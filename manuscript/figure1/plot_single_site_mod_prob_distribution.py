@@ -17,8 +17,8 @@ mpl.rcParams['ytick.labelsize'] = 5
 mpl.rcParams['xtick.major.size'] = 2
 mpl.rcParams['ytick.major.size'] = 2
 mpl.rcParams['font.family'] = 'Arial'
-FMT = 'pdf'
-fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
+FMT = 'svg'
+fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200, transparent=True)
 #######################################################################
 
 dict_mod_display = {
@@ -36,8 +36,10 @@ def load_genome_reference(ref_file, chrs=None):
             ref[record.id] = str(record.seq)
     return ref
 
-ref_file = '/home/adrian/Data/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa'
-bam_file = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/WT_P2/chrALL.mAFiA.reads.bam'
+# ref_file = '/home/adrian/Data/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa'
+# bam_file = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/WT_P2/chrALL.mAFiA.reads.bam'
+ref_file = '/home/adrian/Data/genomes/mus_musculus/GRCm38_102/GRCm38_102.fa'
+bam_file = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/HFpEF/ctrl_merged/chrALL.mAFiA.reads.bam'
 
 img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure1'
 os.makedirs(img_out, exist_ok=True)
@@ -49,8 +51,8 @@ ref = load_genome_reference(ref_file)
 # sel_chromEnd = 137108663
 
 sel_chrom = '1'
-sel_chromStart = 151008481
-sel_chromEnd = 151008658
+sel_chromStart = 135847978
+sel_chromEnd = 135848102
 
 ref_pos_mod_probs = {}
 with pysam.AlignmentFile(bam_file, 'rb') as bam:
@@ -74,7 +76,8 @@ with pysam.AlignmentFile(bam_file, 'rb') as bam:
 
 ## plot histogram ###
 thresh_mod = 0.5
-sel_pos = [151008502, 151008514, 151008569, 151008639]
+# sel_pos = [151008502, 151008514, 151008569, 151008639]
+sel_pos = [135847984, 135848025]
 for ref_pos, mod_probs in ref_pos_mod_probs.items():
     if ref_pos in sel_pos:
         mod_ratio = int(np.mean(np.array(mod_probs)>=thresh_mod) * 100)
