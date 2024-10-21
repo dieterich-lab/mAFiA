@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import numpy as np
+from scipy.stats import kstest
 import matplotlib as mpl
 #######################################################################
 cm = 1/2.54  # centimeters in inches
@@ -79,9 +80,9 @@ bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
 
 ymax = 0.08
 plt.figure(figsize=(5*cm, 2*cm))
-all_norm_hist = []
 for mod_ind, this_mod in enumerate(mods):
-    plt.subplot(1, 2, mod_ind+1)
+    ax = plt.subplot(1, 2, mod_ind+1)
+    all_norm_hist = []
     for this_cond in conditions:
         this_cond_mod_hist, _ = np.histogram(
             cond_mod_thresh_dist_measure[this_cond][this_mod][thresholds[1]].rel_location.values, bins=bin_edges
@@ -92,10 +93,12 @@ for mod_ind, this_mod in enumerate(mods):
         # norm_hist = this_cond_mod_hist
         # norm_hist = smooth(this_cond_mod_hist) / smooth(this_cond_mod_hist_all)
         norm_hist = this_cond_mod_hist / this_cond_mod_hist_all
-        norm_hist = smooth(norm_hist)
         all_norm_hist.append(norm_hist)
+        norm_hist = smooth(norm_hist)
         plt.plot(bin_centers, norm_hist, c=cond_colors[this_cond], label=cond_names[this_cond])
+    ks_dist, pval = kstest(*all_norm_hist)
     # plt.legend(loc='upper left')
+    plt.text(0.05, 0.95, rf'$\Delta$KS={ks_dist:.3f}', ha='left', va='top', transform=ax.transAxes)
     plt.axvline(x=1, c='gray', alpha=0.5)
     plt.axvline(x=2, c='gray', alpha=0.5)
     plt.xticks([0.5, 1.5, 2.5], ['5\' UTR', 'CDS', '3\' UTR'])

@@ -81,6 +81,22 @@ with pysam.AlignmentFile(os.path.join(res_dir, ds, conditions[0], 'chrALL.mAFiA.
 with pysam.AlignmentFile(os.path.join(res_dir, ds, conditions[1], 'chrALL.mAFiA.reads.bam'), 'rb') as bam1:
     mod_probs_1 = get_mod_probs_per_gene(bam1, df_gene)
 
+### example distribution of one gene ###
+from scipy.stats import kstest
+
+sel_gene = 'Rars'
+sel_mod = 'm6A'
+
+hist0, _ = np.histogram(np.array(mod_probs_0[sel_gene][sel_mod]) / 255.0, bins=50, range=[0, 1])
+hist0 = hist0 / np.sum(hist0)
+hist1, _ = np.histogram(np.array(mod_probs_1[sel_gene][sel_mod]) / 255.0, bins=50, range=[0, 1])
+hist1 = hist1 / np.sum(hist1)
+
+plt.figure()
+plt.plot(hist0, c='b')
+plt.plot(hist1, c='r')
+#########################################
+
 
 gene_mod_log2fc = {}
 for this_gene in tqdm(df_gene['gene']):
