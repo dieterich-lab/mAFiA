@@ -36,7 +36,7 @@ stoichiometry_file = os.path.join(base_dir, 'three_prime_utr_stoichiometry',
                                   'three_prime_utr_stoichiometry_TAC_merged_vs_SHAM_merged.tsv')
 polyA_file = os.path.join(base_dir, 'polyA/gene_polyA_log2fc_pval_TAC.tsv')
 
-img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure4'
+img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
 os.makedirs(img_out, exist_ok=True)
 
 thresh_pval = 0.05

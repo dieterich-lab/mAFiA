@@ -59,7 +59,7 @@ thresholds = ['0.0', '50.0']
 
 metaplot_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/polyA'
 
-img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure4'
+img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
 os.makedirs(img_out, exist_ok=True)
 
 cond_mod_thresh_dist_measure = {

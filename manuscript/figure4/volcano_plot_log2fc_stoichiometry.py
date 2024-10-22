@@ -35,7 +35,7 @@ stoichiometry_file = os.path.join(
     'transcript_stoichiometry_TAC_merged_vs_SHAM_merged.tsv'
 )
 
-img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
+img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure4'
 
 df_stoichiometry = pd.read_csv(stoichiometry_file, sep='\t')
 

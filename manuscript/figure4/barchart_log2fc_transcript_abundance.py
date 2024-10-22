@@ -22,7 +22,7 @@ fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 
 data_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/transcript_abundance'
 transcriptome_file = os.path.join(data_dir, '/transcript_abundance_TAC_merged_vs_SHAM_merged.tsv')
-img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
+img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure4'
 
 df_transcriptome = pd.read_csv(transcriptome_file, sep='\t')
 

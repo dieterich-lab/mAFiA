@@ -18,7 +18,7 @@ FMT = 'pdf'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 
-img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure4'
+img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
 
 ds = ['TAC', 'HFpEF', 'Diet']
 cond = {

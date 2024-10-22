@@ -39,7 +39,7 @@ ds = 'TAC'
 conditions = ['SHAM_merged', 'TAC_merged']
 cond_names = [this_cond.rstrip('_merged') for this_cond in conditions]
 
-img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
+img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure4'
 os.makedirs(img_out, exist_ok=True)
 
 res_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart'

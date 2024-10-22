@@ -121,7 +121,7 @@ bam_file = os.path.join(res_dir, 'chrALL.mAFiA.reads.bam')
 gtf_file = '/home/adrian/Data/genomes/mus_musculus/GRCm38_102/GRCm38.102.gtf'
 gtf_bedtools = pybedtools.BedTool(gtf_file)
 
-img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure4'
+img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
 os.makedirs(img_out, exist_ok=True)
 
 df_irf = pd.read_csv(irf_file, sep='\t', dtype={'Chr': str})

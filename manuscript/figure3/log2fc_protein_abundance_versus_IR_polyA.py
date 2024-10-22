@@ -25,7 +25,7 @@ protein_file = '/home/adrian/Data/Dewenter_TAC_Backs_lab/TACOMA_differential_pro
 IR_file = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/IRFinder/gene_log2fc_IRratio_pval_TAC.tsv'
 polyA_file = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/polyA/gene_polyA_log2fc_pval_TAC.tsv'
 
-img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure4'
+img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
 
 thresh_pval = 0.05
 thresh_num_IR = 10
