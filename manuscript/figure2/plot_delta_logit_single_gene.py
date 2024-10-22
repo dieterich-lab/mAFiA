@@ -57,18 +57,18 @@ ds_colors = {
     'TAC': 'g'
 }
 
-sel_gene = 'Tnnt2'
-sel_mod = 'm6A'
+sel_gene = 'Ttn'
+sel_mod = 'psi'
 sel_gene_row = df_gene[df_gene['gene'] == sel_gene].iloc[0]
 
-ds = 'TAC'
-conditions = ['SHAM_merged', 'TAC_merged']
+# ds = 'TAC'
+# conditions = ['SHAM_merged', 'TAC_merged']
 
 # ds = 'HFpEF'
 # conditions = ['ctrl_merged', 'HFpEF_merged']
 
-# ds = 'Diet'
-# conditions = ['WT_CD_merged', 'WT_WD_merged']
+ds = 'Diet'
+conditions = ['WT_CD_merged', 'WT_WD_merged']
 
 
 cond_df = {}
@@ -101,9 +101,9 @@ logit0 = get_logit(df_merged[f"modRatio_{conditions[0].rstrip('_merged')}"].valu
 df_merged['delta_logit'] = logit1 - logit0
 
 vec_delta_logit = df_merged['delta_logit'].values
-vec_delta_logit = vec_delta_logit[~np.isinf(vec_delta_logit)]
+vec_delta_logit = vec_delta_logit[~np.isinf(vec_delta_logit) * ~np.isnan(vec_delta_logit)]
 
-xlim = [-2.5, 2.5]
+xlim = [-2, 2]
 bin_width = 0.25
 num_bins = int((xlim[1] - xlim[0]) / bin_width)
 
@@ -116,17 +116,19 @@ gaussian = 1/(sigma * np.sqrt(2 * np.pi)) * np.exp(-vec_x**2 / (2 * sigma**2))
 gaussian = gaussian / gaussian.max() * hist.max()
 
 ks_stat, pval = kstest(gaussian, vec_delta_logit)
-mean_delta = np.mean(vec_delta_logit)
+mean_delta = np.nanmean(vec_delta_logit)
 
-yticks = np.int64(np.arange(0, np.max(hist), 5))
+yticks = np.int64(np.linspace(0, (np.max(hist) // 10 + 1) * 10, 3))
 
 plt.figure(figsize=(5*cm, 2*cm))
 plt.bar(bin_centers, hist, fc=ds_colors[ds], width=bin_width*0.8)
 plt.axvline(x=0, c='gray', ls='--')
-plt.plot(vec_x, gaussian, c='gray', ls='--')
+# plt.plot(vec_x, gaussian, c='gray', ls='--')
 plt.xlim(xlim)
 plt.yticks(yticks)
-plt.text(0.01, 0.95, f'mean: {mean_delta:.3f}\np-val: {pval:.3E}',
+# plt.text(0.01, 0.95, f'mean: {mean_delta:.3f}\np-val: {pval:.3E}',
+#          ha='left', va='top', transform=plt.gca().transAxes)
+plt.text(0.05, 0.9, f'mean: {mean_delta:.3f}',
          ha='left', va='top', transform=plt.gca().transAxes)
 plt.savefig(os.path.join(img_out, f"delta_logit_{sel_gene}_{sel_mod}_{ds}.{FMT}"), **fig_kwargs)
 

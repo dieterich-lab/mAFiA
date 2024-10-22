@@ -96,4 +96,4 @@ for this_gene in tqdm(df_gene['gene']):
 
 
 df_out = pd.DataFrame(gene_mod_sites_delta_pval, columns=['gene', 'mod', 'num_sites', 'delta_logit', 'pval'])
-df_out.to_csv(os.path.join(out_dir, f'delta_logitS_{ds}.tsv'), sep='\t')
+df_out.to_csv(os.path.join(out_dir, f'delta_logitS_{ds}.tsv'), sep='\t', index=False)
