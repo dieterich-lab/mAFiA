@@ -61,14 +61,14 @@ sel_gene = 'Tnnt2'
 sel_mod = 'm6A'
 sel_gene_row = df_gene[df_gene['gene'] == sel_gene].iloc[0]
 
-# ds = 'TAC'
-# conditions = ['SHAM_merged', 'TAC_merged']
+ds = 'TAC'
+conditions = ['SHAM_merged', 'TAC_merged']
 
 # ds = 'HFpEF'
 # conditions = ['ctrl_merged', 'HFpEF_merged']
 
-ds = 'Diet'
-conditions = ['WT_CD_merged', 'WT_WD_merged']
+# ds = 'Diet'
+# conditions = ['WT_CD_merged', 'WT_WD_merged']
 
 
 cond_df = {}
@@ -121,7 +121,7 @@ mean_delta = np.mean(vec_delta_logit)
 yticks = np.int64(np.arange(0, np.max(hist), 5))
 
 plt.figure(figsize=(5*cm, 2*cm))
-plt.bar(bin_centers, hist, fc=ds_colors[ds])
+plt.bar(bin_centers, hist, fc=ds_colors[ds], width=bin_width*0.8)
 plt.axvline(x=0, c='gray', ls='--')
 plt.plot(vec_x, gaussian, c='gray', ls='--')
 plt.xlim(xlim)
