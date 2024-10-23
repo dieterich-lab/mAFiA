@@ -53,6 +53,37 @@ def get_margin_avg_mod_prob(in_bam, in_row, margin=50, thresh_coverage=5):
     else:
         return {mod: np.nan for mod in mods}
 
+def get_margin_avg_logit(in_bam, in_row, margin=50, thresh_coverage=1):
+    flag_required = 0 if in_row['strand'] == '+' else 16
+    mod_read_mod_probs = {this_mod: [] for this_mod in mods}
+    read_count = 0
+    for this_read in in_bam.fetch(in_row['chrom'],
+                                  in_row['chromStart'] - margin,
+                                  in_row['chromEnd'] + margin):
+        if this_read.flag == flag_required:
+            query_to_ref_pos = {pair[0]: pair[1] for pair in this_read.get_aligned_pairs(matches_only=True)}
+            for mod in mods:
+                ref_pos_mod_prob = [(query_to_ref_pos[pair[0]], pair[1])
+                                    for pair in this_read.modified_bases.get(('N', 0, dict_mod_code[mod]), [])
+                                    ]
+                left_ref_pos_mod_prob = [pair for pair in ref_pos_mod_prob if
+                                         (pair[0] >= (in_row['chromStart'] - margin))
+                                         and (pair[0] <= in_row['chromStart'])]
+                right_ref_pos_mod_prob = [pair for pair in ref_pos_mod_prob if
+                                          (pair[0] >= in_row['chromEnd'])
+                                          and (pair[0] <= (in_row['chromEnd'] + margin))]
+                if len(left_ref_pos_mod_prob) and len(right_ref_pos_mod_prob):
+                    read_count += 1
+                    mod_read_mod_probs[mod].extend(left_ref_pos_mod_prob + right_ref_pos_mod_prob)
+    # print(read_count)
+    if read_count >= thresh_coverage:
+        return {mod: np.mean([np.log2(pair[1] / (256 - pair[1])) for pair in mod_read_mod_probs[mod]]) for mod in mods}
+    else:
+        return {mod: np.nan for mod in mods}
+
+
+def get_logit(in_val):
+    return np.log2(in_val / (1.0 - in_val))
 
 def get_df_irf_merged_thresh():
     cond_df_irf = {}
@@ -95,14 +126,21 @@ def get_df_irf_merged_thresh():
         with pysam.AlignmentFile(this_cond_bam_path, 'rb') as this_cond_bam:
             for this_index, this_row in tqdm(df_out.iterrows()):
                 index_cond_avg_mod_prob[this_index][this_cond] = get_margin_avg_mod_prob(this_cond_bam, this_row)
+                # index_cond_avg_mod_prob[this_index][this_cond] = get_margin_avg_logit(this_cond_bam, this_row)
+
+    # for mod in mods:
+    #     df_out[f'log2fc_{mod}'] = [np.log2(v[conditions[1]][mod] / v[conditions[0]][mod])
+    #                                                   for k, v in index_cond_avg_mod_prob.items()]
+    #
+    # print(df_out[['log2fc_IRratio', 'log2fc_m6A', 'log2fc_psi']])
+    # return df_out
 
     for mod in mods:
-        df_out[f'log2fc_{mod}'] = [np.log2(v[conditions[1]][mod] / v[conditions[0]][mod])
-                                                      for k, v in index_cond_avg_mod_prob.items()]
+        df_out[f'delta_logit_{mod}'] = [get_logit(v[conditions[1]][mod]) - get_logit(v[conditions[0]][mod])
+                                        for k, v in index_cond_avg_mod_prob.items()]
 
-    print(df_out[['log2fc_IRratio', 'log2fc_m6A', 'log2fc_psi']])
+    print(df_out[['log2fc_IRratio', 'delta_logit_m6A', 'delta_logit_psi']])
     return df_out
-
 
 res_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart'
 irfinder_dir = os.path.join(res_dir, 'IRFinder')
@@ -120,12 +158,13 @@ dict_mod_code = {
     'psi': 17802,
 }
 
+# ds = 'TAC'
+# conditions = ['SHAM_merged', 'TAC_merged']
 # ds = 'HFpEF'
 # conditions = ['ctrl_merged', 'HFpEF_merged']
-# ds = 'Diet'
-# conditions = ['WT_CD_merged', 'WT_WD_merged']
-ds = 'TAC'
-conditions = ['SHAM_merged', 'TAC_merged']
+ds = 'Diet'
+conditions = ['WT_CD_merged', 'WT_WD_merged']
+
 cond_names = [this_cond.rstrip('_merged') for this_cond in conditions]
 
 thresh_IRratio = 0.01
@@ -135,12 +174,12 @@ df_irf_merged_thresh_filename = os.path.join(
     irfinder_dir,
     f'df_irf_merged_{ds}_IRratio{thresh_IRratio}_IntronDepth{thresh_IntronDepth}.tsv'
 )
-if os.path.exists(df_irf_merged_thresh_filename):
-    df_irf_merged_thresh = pd.read_csv(df_irf_merged_thresh_filename, sep='\t')
-else:
-    df_irf_merged_thresh = get_df_irf_merged_thresh()
-    df_irf_merged_thresh.to_csv(df_irf_merged_thresh_filename, sep='\t', index=False, float_format='%.6f')
-
+# if os.path.exists(df_irf_merged_thresh_filename):
+#     df_irf_merged_thresh = pd.read_csv(df_irf_merged_thresh_filename, sep='\t')
+# else:
+#     df_irf_merged_thresh = get_df_irf_merged_thresh()
+#     df_irf_merged_thresh.to_csv(df_irf_merged_thresh_filename, sep='\t', index=False, float_format='%.6f')
+df_irf_merged_thresh = get_df_irf_merged_thresh()
 
 ### scatter plot of IR ratios ###
 df_irf_merged_thresh['delta_IRratio'] = df_irf_merged_thresh[f'IRratio_{cond_names[1]}'] - df_irf_merged_thresh[f'IRratio_{cond_names[0]}']
@@ -184,7 +223,8 @@ plt.figure(figsize=(5*cm, 4*cm))
 for mod_ind, this_mod in enumerate(mods):
     plt.subplot(1, 2, mod_ind+1)
     binned_y = []
-    vec_y = df_irf_merged_thresh[f'log2fc_{this_mod}'].values
+    # vec_y = df_irf_merged_thresh[f'log2fc_{this_mod}'].values
+    vec_y = df_irf_merged_thresh[f'delta_logit_{this_mod}'].values
     vec_x = df_irf_merged_thresh[f'log2fc_IRratio'].values
     binned_y = [
         [x for x in vec_y[(vec_x < -boundary)] if
@@ -204,4 +244,4 @@ for mod_ind, this_mod in enumerate(mods):
     # plt.xlabel(r'$log_{2}fc$ IR ratio')
     # plt.title(rf'${{{dict_mod_display[this_mod]}}}$')
 # plt.suptitle(f'{ds}\n{cond_names[1]} vs {cond_names[0]}')
-plt.savefig(os.path.join(img_out, f'boxplot_log2fc_stoichiometry_vs_log2fc_IRratio_{ds}.{FMT}'), **fig_kwargs)
+plt.savefig(os.path.join(img_out, f'boxplot_delta_logit_stoichiometry_vs_log2fc_IRratio_{ds}.{FMT}'), **fig_kwargs)

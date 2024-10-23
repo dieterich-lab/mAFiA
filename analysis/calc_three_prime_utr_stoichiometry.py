@@ -18,8 +18,12 @@ os.makedirs(out_dir, exist_ok=True)
 img_out = '/home/adrian/img_out/three_prime_utr_stoichiometry'
 os.makedirs(img_out, exist_ok=True)
 
-ds = 'TAC'
-conditions = ['SHAM_merged', 'TAC_merged']
+# ds = 'TAC'
+# conditions = ['SHAM_merged', 'TAC_merged']
+# ds = 'HFpEF'
+# conditions = ['ctrl_merged', 'HFpEF_merged']
+ds = 'Diet'
+conditions = ['WT_CD_merged', 'WT_WD_merged']
 
 three_prime_utr_bed = '/home/adrian/Data/genomes/mus_musculus/GRCm38_102/GRCm38.102.three_prime_utr.bed'
 bed_fields = [

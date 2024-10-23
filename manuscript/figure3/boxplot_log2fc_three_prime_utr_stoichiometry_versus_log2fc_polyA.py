@@ -24,40 +24,53 @@ FMT = 'svg'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200, transparent=True)
 #######################################################################
 
+def get_logit(in_val):
+    return np.log2(in_val / (1.0 - in_val))
+
 mods = ['m6A', 'psi']
 dict_mod_display = {
     'm6A': 'm^6A',
     'psi': '\psi'
 }
 
-ds = 'TAC'
+# ds = 'TAC'
+# conditions = ['SHAM_merged', 'TAC_merged']
+# ds = 'HFpEF'
+# conditions = ['ctrl_merged', 'HFpEF_merged']
+ds = 'Diet'
+conditions = ['WT_CD_merged', 'WT_WD_merged']
+
 base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart'
 stoichiometry_file = os.path.join(base_dir, 'three_prime_utr_stoichiometry',
-                                  'three_prime_utr_stoichiometry_TAC_merged_vs_SHAM_merged.tsv')
-polyA_file = os.path.join(base_dir, 'polyA/gene_polyA_log2fc_pval_TAC.tsv')
+                                  f'three_prime_utr_stoichiometry_{conditions[1]}_vs_{conditions[0]}.tsv')
+polyA_file = os.path.join(base_dir, f'polyA/gene_polyA_log2fc_pval_{ds}.tsv')
 
 img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
 os.makedirs(img_out, exist_ok=True)
 
-thresh_pval = 0.05
+thresh_pval = 0.1
 df_stoichiometry = pd.read_csv(stoichiometry_file, sep='\t')
 df_stoichiometry = df_stoichiometry[df_stoichiometry['pval'] < thresh_pval]
 df_polyA = pd.read_csv(polyA_file, sep='\t')
 df_polyA = df_polyA[df_polyA['pval'] < thresh_pval]
+
+df_stoichiometry['delta_logit_S'] = get_logit(df_stoichiometry[f'stoichiometry_{conditions[1]}'].values) - \
+                                    get_logit(df_stoichiometry[f'stoichiometry_{conditions[0]}'].values)
 
 common_genes = list(set(df_stoichiometry['gene']).intersection(set(df_polyA['gene'])))
 vec_log2fc_mod = {}
 for this_mod in mods:
     df_stoichiometry_this_mod = df_stoichiometry[df_stoichiometry['mod'] == this_mod].set_index('gene')
     vec_log2fc_mod[this_mod] = np.array(
-        [df_stoichiometry_this_mod.loc[this_gene]['log2fc']
+        # [df_stoichiometry_this_mod.loc[this_gene]['log2fc']
+        [df_stoichiometry_this_mod.loc[this_gene]['delta_logit_S']
          if this_gene in df_stoichiometry_this_mod.index else np.nan
          for this_gene in common_genes]
     )
 vec_log2fc_polyA = np.array([df_polyA.set_index('gene').loc[this_gene]['log2fc'] for this_gene in common_genes])
 
 boundary = 0.1
-ylim = [-0.2, 0.4]
+ylim = [-0.6, 0.2]
 yticks = np.round(np.linspace(*ylim, 4), 2)
 plt.figure(figsize=(5*cm, 4*cm))
 for mod_ind, this_mod in enumerate(mods):
@@ -73,5 +86,7 @@ for mod_ind, this_mod in enumerate(mods):
         plt.yticks(yticks, yticks)
     else:
         plt.yticks(yticks, [])
-plt.savefig(os.path.join(img_out, f'boxplot_log2fc_three_prime_utr_stoichiometry_vs_log2fc_polyA_{ds}.{FMT}'),
+# plt.savefig(os.path.join(img_out, f'boxplot_log2fc_three_prime_utr_stoichiometry_vs_log2fc_polyA_{ds}.{FMT}'),
+#             **fig_kwargs)
+plt.savefig(os.path.join(img_out, f'boxplot_delta_logit_S_three_prime_utr_stoichiometry_vs_log2fc_polyA_{ds}.{FMT}'),
             **fig_kwargs)

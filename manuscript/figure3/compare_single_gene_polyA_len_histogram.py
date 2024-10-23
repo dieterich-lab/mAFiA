@@ -27,7 +27,7 @@ fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200, transparent=True)
 
 
 def get_df_log2fc(in_cond_df):
-    common_genes = list(set(in_cond_df['SHAM']['gene'].unique()).intersection(set(in_cond_df['TAC']['gene'].unique())))
+    common_genes = list(set(in_cond_df[conditions[0]]['gene'].unique()).intersection(set(in_cond_df[conditions[1]]['gene'].unique())))
     out_gene_polyA_log2fc_pval = {}
     for thisGene in tqdm(common_genes):
         polyA_len_0 = in_cond_df[conditions[0]][in_cond_df[conditions[0]]['gene'] == thisGene]['polyA_length']
@@ -54,15 +54,21 @@ def get_df_log2fc(in_cond_df):
 polyA_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/polyA'
 img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
 
-ds = 'TAC'
-conditions = ['SHAM', 'TAC']
+# ds = 'TAC'
+# conditions = ['SHAM', 'TAC']
+# ds = 'HFpEF'
+# conditions = ['ctrl', 'HFpEF']
+ds = 'Diet'
+conditions = ['WT_CD', 'WT_WD']
+
 cond_colors = {this_cond: this_color for this_cond, this_color in zip(conditions, ['b', 'r'])}
 
 log2fc_filename = os.path.join(polyA_dir, f'gene_polyA_log2fc_pval_{ds}.tsv')
 
 cond_df = {}
 for this_cond in conditions:
-    all_filepaths = glob(os.path.join(polyA_dir, f'polyA_reads_annotated_{ds}_{this_cond}_day*.tsv'))
+    # all_filepaths = glob(os.path.join(polyA_dir, f'polyA_reads_annotated_{ds}_{this_cond}_day*.tsv'))
+    all_filepaths = glob(os.path.join(polyA_dir, f'polyA_reads_annotated_{ds}_{this_cond}.tsv'))
     all_dfs = []
     for this_filepath in all_filepaths:
         all_dfs.append(pd.read_csv(this_filepath, sep='\t'))
