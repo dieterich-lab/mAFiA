@@ -37,7 +37,7 @@ thresh_log2fc = 0.5
 
 reg_genes = {}
 
-plt.figure(figsize=(4*cm, 4*cm))
+plt.figure(figsize=(4*cm, 6*cm))
 vec_gene, vec_log2fc, vec_log_pval = df_proteome[['SYMBOL', 'logFC', 'LogPVal']].values.T
 
 mask_up = (vec_log_pval >= thresh_log_pval) * (vec_log2fc > thresh_log2fc)
@@ -58,8 +58,8 @@ reg_genes['up'] = vec_gene[mask_up]
 reg_genes['down'] = vec_gene[mask_down]
 reg_genes['up'] = [this_gene for this_gene in vec_gene[mask_up] if this_gene[:2]!='Gm']
 reg_genes['down'] = [this_gene for this_gene in vec_gene[mask_down] if this_gene[:2]!='Gm']
-plt.text(-xmax*0.9, ymax*0.05, '\n'.join(reg_genes['down']), c='blue', ha='left', va='bottom')
-plt.text(xmax*0.55, ymax*0.05, '\n'.join(reg_genes['up']), c='red', ha='left', va='bottom')
+plt.text(-xmax*0.9, ymax*0.8, '\n'.join(reg_genes['down']), c='blue', ha='left', va='top')
+plt.text(xmax*0.55, ymax*0.8, '\n'.join(reg_genes['up']), c='red', ha='left', va='top')
 
 plt.savefig(os.path.join(img_out,
                          f'volcano_plot_proteome_logPval{thresh_log_pval}_log2fc{thresh_log2fc}.{FMT}'),

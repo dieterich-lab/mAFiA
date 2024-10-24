@@ -52,7 +52,8 @@ df_proteome = df_proteome_all[
 ]
 df_proteome.rename(columns={'logFC': 'log2fc_proteome'}, inplace=True)
 
-epitranscriptome_file = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/transcript_stoichiometry/transcript_stoichiometry_TAC_merged_vs_SHAM_merged.tsv'
+# epitranscriptome_file = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/transcript_stoichiometry/transcript_stoichiometry_TAC_merged_vs_SHAM_merged.tsv'
+epitranscriptome_file = os.path.join(res_dir, 'transcript_logit/delta_logitS_TAC.tsv')
 df_epitranscriptome_all = pd.read_csv(epitranscriptome_file, sep='\t')
 df_epitranscriptome = df_epitranscriptome_all[
     df_epitranscriptome_all['pval'] < thresh_pval
@@ -62,7 +63,7 @@ df_epitranscriptome = df_epitranscriptome_all[
 #     (df_epitranscriptome_all['num_nts_SHAM_merged'] >= 1000)
 #     * (df_epitranscriptome_all['num_nts_TAC_merged'] >= 1000)
 # ]
-df_epitranscriptome.rename(columns={'log2fc': 'log2fc_epitranscriptome'}, inplace=True)
+# df_epitranscriptome.rename(columns={'log2fc': 'log2fc_epitranscriptome'}, inplace=True)
 
 transcriptome_file = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/transcript_abundance/transcript_abundance_TAC_merged_vs_SHAM_merged.tsv'
 df_transcriptome = pd.read_csv(transcriptome_file, sep='\t')
@@ -78,7 +79,8 @@ for this_gene in tqdm(df_proteome['SYMBOL']):
             if this_mod in sub_df_epitranscriptome['mod'].values:
                 log2fc_mods[this_mod] = sub_df_epitranscriptome[
                     sub_df_epitranscriptome['mod'] == this_mod
-                    ]['log2fc_epitranscriptome'].values[0]
+                ]['delta_logit'].values[0]
+                # ]['log2fc_epitranscriptome'].values[0]
             else:
                 log2fc_mods[this_mod] = None
         gene_transcriptome_epitranscriptome_proteome[this_gene] = (
@@ -108,15 +110,16 @@ def get_1d_binned_values(in_vec_x, in_vec_y, xmax, num_bins):
 def do_boxplot(vec_x, vec_y, xmax, ymax):
     x_bin_edges, x_bin_centers, binned_y, medians_y = get_1d_binned_values(vec_x, vec_y, xmax, 4)
     plt.boxplot(binned_y, positions=x_bin_centers, showfliers=False, whis=0.5, medianprops={'linewidth': 0})
+    # plt.boxplot(binned_y, positions=x_bin_centers, showfliers=False)
     plt.plot(x_bin_centers, medians_y, 'r-')
-    plt.plot(x_bin_centers, medians_y, 'r+', markersize=3)
+    plt.plot(x_bin_centers, medians_y, 'ro', markersize=3)
     plt.xticks(x_bin_edges, x_bin_edges)
     plt.yticks(yticks)
     plt.xlim([-xmax, xmax])
     plt.ylim([-ymax, ymax])
 
-ymax = 0.55
-yticks = np.linspace(-0.5, 0.5, 5)
+ymax = 0.6
+yticks = np.linspace(-ymax, ymax, 5)
 
 plt.figure(figsize=(13*cm, 4*cm))
 
