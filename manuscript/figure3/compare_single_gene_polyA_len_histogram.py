@@ -54,12 +54,12 @@ def get_df_log2fc(in_cond_df):
 polyA_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/polyA'
 img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
 
-# ds = 'TAC'
-# conditions = ['SHAM', 'TAC']
+ds = 'TAC'
+conditions = ['SHAM', 'TAC']
 # ds = 'HFpEF'
 # conditions = ['ctrl', 'HFpEF']
-ds = 'Diet'
-conditions = ['WT_CD', 'WT_WD']
+# ds = 'Diet'
+# conditions = ['WT_CD', 'WT_WD']
 
 cond_colors = {this_cond: this_color for this_cond, this_color in zip(conditions, ['b', 'r'])}
 
@@ -67,8 +67,8 @@ log2fc_filename = os.path.join(polyA_dir, f'gene_polyA_log2fc_pval_{ds}.tsv')
 
 cond_df = {}
 for this_cond in conditions:
-    # all_filepaths = glob(os.path.join(polyA_dir, f'polyA_reads_annotated_{ds}_{this_cond}_day*.tsv'))
-    all_filepaths = glob(os.path.join(polyA_dir, f'polyA_reads_annotated_{ds}_{this_cond}.tsv'))
+    all_filepaths = glob(os.path.join(polyA_dir, f'polyA_reads_annotated_{ds}_{this_cond}_day*.tsv'))
+    # all_filepaths = glob(os.path.join(polyA_dir, f'polyA_reads_annotated_{ds}_{this_cond}.tsv'))
     all_dfs = []
     for this_filepath in all_filepaths:
         all_dfs.append(pd.read_csv(this_filepath, sep='\t'))
@@ -116,17 +116,17 @@ plt.savefig(os.path.join(img_out, f'volcano_plot_polyA_len_log2fc_pval_{ds}.{FMT
 
 
 ### single transcript distribution ###
-this_gene = 'Mb'
+this_gene = 'Nppb'
 gene_cond_distribution = {}
 for this_cond in conditions:
     this_cond_df = cond_df[this_cond]
     gene_cond_distribution[this_cond] = this_cond_df[this_cond_df['gene'] == this_gene]['polyA_length']
 
 xmax = 300
-ymax = 0.17
+ymax = 0.4
 xticks = np.linspace(0, xmax, 4)
 yticks = np.arange(0, ymax+0.01, 0.1)
-bin_width = 10
+bin_width = 20
 num_bins = np.int64(xmax / bin_width)
 bin_edges = np.linspace(0, xmax, num_bins+1)
 bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
