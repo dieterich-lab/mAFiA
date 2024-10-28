@@ -119,9 +119,9 @@ ds_cmap = {
 xmax = 0.7
 zoom_factor = 2
 num_bins = 20
-levels = 3
+levels = np.linspace(0, 2, 5)
 ticks = np.linspace(-xmax, xmax, 3)
-plt.figure(figsize=(13*cm, 4*cm))
+plt.figure(figsize=(15*cm, 4*cm))
 for ds_ind, this_ds in enumerate(ds):
     plt.subplot(1, 3, ds_ind+1)
     plt.axvline(x=0, c='gray', ls='--', alpha=0.5)
@@ -131,11 +131,13 @@ for ds_ind, this_ds in enumerate(ds):
     mat_z, bin_y, bin_x = np.histogram2d(vec_x, vec_y, range=[[-xmax, xmax], [-xmax, xmax]], bins=num_bins)
     mat_z = scipy.ndimage.zoom(mat_z, zoom_factor)
     mat_z[mat_z < 10] = 0
+    delta_x = bin_x[1] - bin_x[0]
+    mat_z = mat_z / (np.sum(mat_z) * delta_x**2)
     # center_x = 0.5 * (bin_x[1:] + bin_x[:-1])
     zoom_bin_x = np.linspace(-xmax, xmax, num_bins*zoom_factor+1)
     zoom_center_x = 0.5 * (zoom_bin_x[1:] + zoom_bin_x[:-1])
     mat_x, mat_y = np.meshgrid(zoom_center_x, zoom_center_x)
-    plt.contourf(mat_x, mat_y, mat_z, levels=levels, cmap=ds_cmap[this_ds])
+    plt.contourf(mat_x, mat_y, mat_z, levels=levels, cmap=ds_cmap[this_ds], vmin=0, vmax=2)
     # plt.contourf(mat_z, levels=3, cmap=ds_cmap[this_ds], vmin=20, alpha=0.5)
     plt.xticks(ticks)
     if ds_ind == 0:
@@ -144,4 +146,6 @@ for ds_ind, this_ds in enumerate(ds):
         plt.yticks(ticks, [])
     plt.xlim([-xmax, xmax])
     plt.ylim([-xmax, xmax])
+    # plt.colorbar(orientation='horizontal', location='top', ticks=[0, 1, 2])
+    plt.colorbar(ticks=[0, 1, 2])
 plt.savefig(os.path.join(img_out, f'contour_delta_logit_S_all_ds.{FMT}'), **fig_kwargs)

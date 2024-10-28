@@ -28,15 +28,15 @@ def smooth(y, box_pts=10):
     y_smooth = np.convolve(y, box, mode='same')
     return y_smooth
 
+# ds = 'TAC'
+# conditions = ['SHAM_merged', 'TAC_merged']
 
 # ds = 'HFpEF'
 # conditions = ['ctrl_merged', 'HFpEF_merged']
 
-# ds = 'Diet'
-# conditions = ['WT_CD_merged', 'WT_WD_merged']
+ds = 'Diet'
+conditions = ['WT_CD_merged', 'WT_WD_merged']
 
-ds = 'TAC'
-conditions = ['SHAM_merged', 'TAC_merged']
 
 ds_colors = {
     'HFpEF': 'r',
@@ -98,7 +98,7 @@ for mod_ind, this_mod in enumerate(mods):
         plt.plot(bin_centers, norm_hist, c=cond_colors[this_cond], label=cond_names[this_cond])
     ks_dist, pval = kstest(*all_norm_hist)
     # plt.legend(loc='upper left')
-    plt.text(0.05, 0.95, rf'$\Delta$KS={ks_dist:.3f}', ha='left', va='top', transform=ax.transAxes)
+    plt.text(0.95, 0.05, rf'$\Delta$KS={ks_dist:.3f}' + f'\np-value={pval:.3E}', ha='right', va='bottom', transform=ax.transAxes)
     plt.axvline(x=1, c='gray', alpha=0.5)
     plt.axvline(x=2, c='gray', alpha=0.5)
     plt.xticks([0.5, 1.5, 2.5], ['5\' UTR', 'CDS', '3\' UTR'])
