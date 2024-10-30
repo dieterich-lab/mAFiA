@@ -16,8 +16,13 @@ mods = ['m6A', 'psi']
 
 thresh_fdr = 0.1
 
-ds = 'TAC'
-conditions = ['SHAM_merged', 'TAC_merged']
+# ds = 'TAC'
+# conditions = ['SHAM_merged', 'TAC_merged']
+# ds = 'HFpEF'
+# conditions = ['ctrl_merged', 'HFpEF_merged']
+ds = 'Diet'
+conditions = ['WT_CD_merged', 'WT_WD_merged']
+
 df_abundance = pd.read_excel(
     glob(os.path.join(abundance_dir, f'DTU_{ds}_*.xlsx'))[0],
     'DGE'
@@ -29,7 +34,7 @@ df_logit = pd.read_csv(
     os.path.join(logit_dir, f'delta_logitS_{ds}.tsv'),
     sep='\t'
 )
-df_logit = df_logit[df_logit['pval'] < 0.001]
+# df_logit = df_logit[df_logit['pval'] < 0.05]
 
 gene_dge_m6A_psi = []
 for this_gene, this_dge in df_abundance[['gene', 'logFC']].values:
