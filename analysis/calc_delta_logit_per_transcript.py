@@ -24,7 +24,7 @@ bed_fields = [
     'description'
 ]
 df_gene = pd.read_csv(gene_bed, sep='\t', names=bed_fields)
-df_gene = df_gene[df_gene['source'] == 'ensembl_havana']
+# df_gene = df_gene[df_gene['source'] == 'ensembl_havana']
 df_gene['gene'] = [re.search('gene_name "(.*?)";', desc).group(1) for desc in df_gene['description']]
 
 ########################################################################################################################
@@ -33,18 +33,14 @@ res_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_
 out_dir = os.path.join(res_dir, 'transcript_logit')
 os.makedirs(out_dir, exist_ok=True)
 
-# sel_gene = 'Tnnt2'
-# sel_mod = 'm6A'
-# sel_gene_row = df_gene[df_gene['gene'] == sel_gene].iloc[0]
-
-# ds = 'TAC'
-# conditions = ['SHAM_merged', 'TAC_merged']
+ds = 'TAC'
+conditions = ['SHAM_merged', 'TAC_merged']
 
 # ds = 'HFpEF'
 # conditions = ['ctrl_merged', 'HFpEF_merged']
 
-ds = 'Diet'
-conditions = ['WT_CD_merged', 'WT_WD_merged']
+# ds = 'Diet'
+# conditions = ['WT_CD_merged', 'WT_WD_merged']
 
 ### merge conditions ###
 cond_df = {}
