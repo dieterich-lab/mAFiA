@@ -18,12 +18,12 @@ os.makedirs(out_dir, exist_ok=True)
 img_out = '/home/adrian/img_out/three_prime_utr_stoichiometry'
 os.makedirs(img_out, exist_ok=True)
 
-# ds = 'TAC'
-# conditions = ['SHAM_merged', 'TAC_merged']
+ds = 'TAC'
+conditions = ['SHAM_merged', 'TAC_merged']
 # ds = 'HFpEF'
 # conditions = ['ctrl_merged', 'HFpEF_merged']
-ds = 'Diet'
-conditions = ['WT_CD_merged', 'WT_WD_merged']
+# ds = 'Diet'
+# conditions = ['WT_CD_merged', 'WT_WD_merged']
 
 three_prime_utr_bed = '/home/adrian/Data/genomes/mus_musculus/GRCm38_102/GRCm38.102.three_prime_utr.bed'
 bed_fields = [
@@ -120,31 +120,31 @@ df_out.to_csv(os.path.join(out_dir, f'three_prime_utr_stoichiometry_{conditions[
               sep='\t', index=False, float_format='%.6f')
 
 ### volcano plot ###
-xmax = 4
-ymax = 10
-thresh_log_pval = 2
-thresh_log2fc = 0.25
-reg_genes = {mod: {} for mod in mods}
-plt.figure(figsize=(10, 4))
-for mod_ind, this_mod in enumerate(mods):
-    this_mod_df = df_out[df_out['mod'] == this_mod]
-    vec_gene, vec_log2fc, vec_pval = this_mod_df[['gene', 'log2fc', 'pval']].values.T
-    vec_log_pval = -np.log10(np.float64(vec_pval))
-
-    mask_up = (vec_log_pval >= thresh_log_pval) * (vec_log2fc > thresh_log2fc)
-    mask_down = (vec_log_pval >= thresh_log_pval) * (vec_log2fc < -thresh_log2fc)
-
-    plt.subplot(1, 2, mod_ind+1)
-    plt.scatter(vec_log2fc, vec_log_pval, s=1, c='gray', alpha=0.5)
-    plt.scatter(vec_log2fc[mask_up], vec_log_pval[mask_up], s=3, c='red')
-    plt.scatter(vec_log2fc[mask_down], vec_log_pval[mask_down], s=3, c='blue')
-    plt.xlim([-xmax, xmax])
-    plt.ylim([0, ymax])
-    plt.xlabel(f'log2fc 3\' UTR stoichiometry ${{{dict_mod_display[this_mod]}}}$')
-    plt.ylabel('-log10(pval)')
-
-    reg_genes[this_mod]['up'] = vec_gene[mask_up]
-    reg_genes[this_mod]['down'] = vec_gene[mask_down]
+# xmax = 4
+# ymax = 10
+# thresh_log_pval = 2
+# thresh_log2fc = 0.25
+# reg_genes = {mod: {} for mod in mods}
+# plt.figure(figsize=(10, 4))
+# for mod_ind, this_mod in enumerate(mods):
+#     this_mod_df = df_out[df_out['mod'] == this_mod]
+#     vec_gene, vec_log2fc, vec_pval = this_mod_df[['gene', 'log2fc', 'pval']].values.T
+#     vec_log_pval = -np.log10(np.float64(vec_pval))
+#
+#     mask_up = (vec_log_pval >= thresh_log_pval) * (vec_log2fc > thresh_log2fc)
+#     mask_down = (vec_log_pval >= thresh_log_pval) * (vec_log2fc < -thresh_log2fc)
+#
+#     plt.subplot(1, 2, mod_ind+1)
+#     plt.scatter(vec_log2fc, vec_log_pval, s=1, c='gray', alpha=0.5)
+#     plt.scatter(vec_log2fc[mask_up], vec_log_pval[mask_up], s=3, c='red')
+#     plt.scatter(vec_log2fc[mask_down], vec_log_pval[mask_down], s=3, c='blue')
+#     plt.xlim([-xmax, xmax])
+#     plt.ylim([0, ymax])
+#     plt.xlabel(f'log2fc 3\' UTR stoichiometry ${{{dict_mod_display[this_mod]}}}$')
+#     plt.ylabel('-log10(pval)')
+#
+#     reg_genes[this_mod]['up'] = vec_gene[mask_up]
+#     reg_genes[this_mod]['down'] = vec_gene[mask_down]
 
     # reg_genes[this_mod]['up'] = [this_gene for this_gene in vec_gene[mask_up] if this_gene[:2]!='Gm']
     # reg_genes[this_mod]['down'] = [this_gene for this_gene in vec_gene[mask_down] if this_gene[:2]!='Gm']
