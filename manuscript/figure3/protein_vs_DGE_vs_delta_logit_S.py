@@ -77,6 +77,7 @@ abundance_dir = os.path.join(res_dir, 'DTU')
 logit_dir = os.path.join(res_dir, 'transcript_logit')
 gene_count_dir = os.path.join(res_dir, 'gene_counts')
 protein_dir = os.path.join(res_dir, 'protein_abundance')
+polyA_dir = os.path.join(res_dir, 'polyA')
 
 mods = ['m6A', 'psi']
 
@@ -238,7 +239,7 @@ from scipy.ndimage import zoom
 
 xymax = 0.5
 
-def get_binned_z(in_vec_x, in_vec_y, in_vec_z, bin_max=0.5, num_bins=10):
+def get_binned_z(in_vec_x, in_vec_y, in_vec_z, bin_max=0.5, num_bins=10, method='sum'):
     bin_edges = np.linspace(-bin_max, bin_max, num_bins + 1)
     bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
     grid_z = np.zeros((num_bins, num_bins))
@@ -252,7 +253,10 @@ def get_binned_z(in_vec_x, in_vec_y, in_vec_z, bin_max=0.5, num_bins=10):
             j_mask = (in_vec_x >= j_start) * (in_vec_x < j_end)
             binned_z = in_vec_z[i_mask*j_mask]
             if len(binned_z):
-                grid_z[bin_i, bin_j] = np.sum(binned_z)
+                if method == 'sum':
+                    grid_z[bin_i, bin_j] = np.sum(binned_z)
+                elif method == 'mean':
+                    grid_z[bin_i, bin_j] = np.nanmean(binned_z)
     grid_x, grid_y = np.meshgrid(bin_centers, bin_centers)
     return grid_x, grid_y, grid_z
 
@@ -310,6 +314,55 @@ cbar = plt.colorbar()
 cbar.set_ticks(np.linspace(0, vmax, 3))
 
 plt.savefig(os.path.join(img_out, f'contour_DGE_in_mod_plane_{ds}_FDR{thresh_fdr}.{FMT}'), **fig_kwargs)
+
+### polyA ###
+# df_polyA = pd.read_csv(
+#     os.path.join(polyA_dir, f'gene_polyA_log2fc_pval_{ds}.tsv'),
+#     sep='\t'
+# )
+#
+# gene_polyA = []
+# for this_gene in df_abundance['gene']:
+#     sub_df_polyA = df_polyA[df_polyA['gene'] == this_gene]
+#     if len(sub_df_polyA) == 1:
+#         gene_polyA.append([this_gene] + list(sub_df_polyA[['log2fc', 'pval']].values[0]))
+#     else:
+#         gene_polyA.append([this_gene, np.nan, np.nan])
+# df_gene_polyA = pd.DataFrame(gene_polyA, columns=['gene', 'log2fc_polyA', 'pval_polyA'])
+# df_abundance_mod_polyA = pd.merge(df_abundance_mod, df_gene_polyA, on=['gene'])
+#
+# df_polyA_up = df_abundance_mod_polyA[
+#     (df_abundance_mod_polyA['log2fc_polyA'] > 0.01)
+#     * (df_abundance_mod_polyA['pval_polyA'] < thresh_pval)
+# ]
+# vec_polyA_up_x, vec_polyA_up_y, vec_polyA_up_z = df_polyA_up[['delta_logit_S_m6A', 'delta_logit_S_psi', 'log2fc_polyA']].values.T
+# polyA_up_grid_x, polyA_up_grid_y, polyA_up_grid_z = get_binned_z(vec_polyA_up_x, vec_polyA_up_y, vec_polyA_up_z,
+#                                                                  xymax, method='mean')
+#
+# zoom_factor_polyA = 3
+# polyA_up_grid_x_zoom = zoom(polyA_up_grid_x, zoom_factor_polyA)
+# polyA_up_grid_y_zoom = zoom(polyA_up_grid_y, zoom_factor_polyA)
+# polyA_up_grid_z_zoom = zoom(polyA_up_grid_z, zoom_factor_polyA)
+#
+# plt.contourf(polyA_up_grid_x_zoom, polyA_up_grid_y_zoom, polyA_up_grid_z_zoom,
+#              vmin=0.1, vmax=0.8, levels=n_levels, cmap='Reds', alpha=0.5)
+#
+#
+# df_polyA_down = df_abundance_mod_polyA[
+#     (df_abundance_mod_polyA['log2fc_polyA'] < -0.01)
+#     * (df_abundance_mod_polyA['pval_polyA'] < thresh_pval)
+# ]
+# vec_polyA_down_x, vec_polyA_down_y, vec_polyA_down_z = df_polyA_down[['delta_logit_S_m6A', 'delta_logit_S_psi', 'log2fc_polyA']].values.T
+# polyA_down_grid_x, polyA_down_grid_y, polyA_down_grid_z = get_binned_z(vec_polyA_down_x, vec_polyA_down_y, vec_polyA_down_z,
+#                                                                  xymax, method='mean')
+#
+# polyA_down_grid_x_zoom = zoom(polyA_down_grid_x, zoom_factor_polyA)
+# polyA_down_grid_y_zoom = zoom(polyA_down_grid_y, zoom_factor_polyA)
+# polyA_down_grid_z_zoom = zoom(polyA_down_grid_z, zoom_factor_polyA)
+#
+# plt.contourf(polyA_down_grid_x_zoom, polyA_down_grid_y_zoom, polyA_down_grid_z_zoom,
+#              vmin=-0.8, vmax=0, levels=n_levels, cmap='Blues', alpha=0.5)
+
 
 # plt.pcolormesh(up_grid_x, up_grid_y, up_grid_z, vmin=-vmax, vmax=vmax, cmap='bwr')
 # plt.pcolormesh(down_grid_x, down_grid_y, down_grid_z, vmin=-vmax, vmax=vmax, cmap='bwr')
