@@ -19,9 +19,9 @@ mpl.rcParams['xtick.major.size'] = 1.5
 mpl.rcParams['ytick.major.size'] = 1.5
 mpl.rcParams['lines.linewidth'] = 0.5
 mpl.rcParams['font.family'] = 'Arial'
-FMT = 'png'
+FMT = 'svg'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200,
-                  # transparent=True
+                  transparent=True
                   )
 #######################################################################
 import matplotlib.pyplot as plt
@@ -41,16 +41,17 @@ dict_mod_code = {
 ########################################################################################################################
 ### define datasets ####################################################################################################
 ########################################################################################################################
-# ds = 'TAC'
-# conditions = ['SHAM_merged', 'TAC_merged']
+ds = 'TAC'
+conditions = ['SHAM_merged', 'TAC_merged']
 
 # ds = 'HFpEF'
 # conditions = ['ctrl_merged', 'HFpEF_merged']
 
-ds = 'Diet'
-conditions = ['WT_CD_merged', 'WT_WD_merged']
+# ds = 'Diet'
+# conditions = ['WT_CD_merged', 'WT_WD_merged']
 
-cond_colors = {this_cond: this_color for this_cond, this_color in zip(conditions, ['b', 'r'])}
+ds_colors = {'TAC': 'green', 'HFpEF': 'red', 'Diet': 'blue'}
+cond_colors = {this_cond: this_color for this_cond, this_color in zip(conditions, ['gray', ds_colors[ds]])}
 
 polyA_dir = f'/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/polyA'
 polyA_files = {this_cond: os.path.join(polyA_dir, f'{ds}_{this_cond}_polyA.txt') for this_cond in conditions}
@@ -66,10 +67,11 @@ df_polyA = {this_cond: pd.read_csv(polyA_files[this_cond], sep='\t', names=['rea
 dict_polyA = {this_cond: {k: v for k, v in df_polyA[this_cond][['read_id', 'polyA_len']].values}
               for this_cond in conditions}
 
-xmax = 500
-ymax = 0.25
-xticks = np.linspace(0, xmax, 5)
-yticks = np.arange(0, ymax+0.01, 0.1)
+xmax = 300
+ymax = 0.02
+# xticks = np.linspace(0, xmax, 5)
+xticks = np.arange(0, xmax+1, 100)
+yticks = np.arange(0, ymax+0.01, 0.01)
 
 bin_width = 1
 num_bins = np.int64(xmax / bin_width)
@@ -83,15 +85,15 @@ for this_cond in conditions:
     # plt.hist(dict_polyA[this_cond].values(), range=[0, 500], bins=50, label=this_cond, alpha=0.5, density=True)
     this_hist, _ = np.histogram(list(dict_polyA[this_cond].values()), bins=bin_edges)
     num_reads = np.sum(this_hist)
-    norm_hist = this_hist / num_reads
+    norm_hist = this_hist / num_reads / bin_width
     plt.plot(bin_centers, norm_hist, c=cond_colors[this_cond], label=this_cond.rstrip('_merged') + f' ({num_reads})')
 plt.legend()
-plt.xlabel('polyA length (bps)')
-plt.ylabel('Norm. Frequency')
+# plt.xlabel('polyA length (bps)')
+# plt.ylabel('Norm. Frequency')
 plt.xticks(xticks)
-# plt.yticks(yticks)
+plt.yticks(yticks)
 plt.xlim([0, xmax])
-# plt.ylim([0, ymax])
+plt.ylim([0, ymax])
 plt.savefig(os.path.join(img_out, f'hist_polyA_len_{ds}.{FMT}'), **fig_kwargs)
 
 ### linear and log ###
