@@ -28,11 +28,13 @@ import scipy
 in_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/transcript_logit'
 img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure2'
 
-ds = ['TAC', 'HFpEF', 'Diet']
+# ds = ['TAC', 'HFpEF', 'Diet']
+ds = ['TAC', 'HFpEF']
+
 ds_display = {
     'TAC': 'TAC /\nSHAM',
     'HFpEF': 'HFpEF /\nCtrl',
-    'Diet': 'WD /\nCD'
+    # 'Diet': 'WD /\nCD'
 }
 ds_color = {
     'TAC': 'g',
@@ -121,7 +123,7 @@ zoom_factor = 2
 num_bins = 20
 levels = np.linspace(0, 2, 5)
 ticks = np.linspace(-xmax, xmax, 3)
-plt.figure(figsize=(15*cm, 4*cm))
+plt.figure(figsize=(10*cm, 4*cm))
 for ds_ind, this_ds in enumerate(ds):
     plt.subplot(1, 3, ds_ind+1)
     plt.axvline(x=0, c='gray', ls='--', alpha=0.5)

@@ -58,17 +58,17 @@ ds_colors = {
 }
 
 sel_gene = 'Ttn'
-sel_mod = 'psi'
+sel_mod = 'm6A'
 sel_gene_row = df_gene[df_gene['gene'] == sel_gene].iloc[0]
 
 # ds = 'TAC'
 # conditions = ['SHAM_merged', 'TAC_merged']
 
-# ds = 'HFpEF'
-# conditions = ['ctrl_merged', 'HFpEF_merged']
+ds = 'HFpEF'
+conditions = ['ctrl_merged', 'HFpEF_merged']
 
-ds = 'Diet'
-conditions = ['WT_CD_merged', 'WT_WD_merged']
+# ds = 'Diet'
+# conditions = ['WT_CD_merged', 'WT_WD_merged']
 
 
 cond_df = {}
