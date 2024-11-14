@@ -86,8 +86,9 @@ def main():
     print(f'Total {total_num_reads_written} mod. reads written')
 
     pysam.merge('-f', '-o', os.path.join(args.out_dir, 'temp.merged.bam'), *out_sam_files)
-    pysam.sort('-o', os.path.join(args.out_dir, 'mAFiA.reads.bam'), os.path.join(args.out_dir, 'temp.merged.bam'))
-    pysam.index(os.path.join(args.out_dir, 'mAFiA.reads.bam'))
+    out_filename = args.out_filename if args.out_filename is not None else 'mAFiA.reads.bam'
+    pysam.sort('-o', os.path.join(args.out_dir, out_filename), os.path.join(args.out_dir, 'temp.merged.bam'))
+    pysam.index(os.path.join(args.out_dir, out_filename))
 
     for f in glob(os.path.join(args.out_dir, 'temp*')):
         os.remove(f)
