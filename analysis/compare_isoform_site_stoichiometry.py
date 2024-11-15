@@ -46,15 +46,23 @@ img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
 
 ds = 'HFpEF'
 conditions = ['ctrl', 'HFpEF']
+bambu_file = os.path.join(
+    '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/DTU',
+    'DTU_HFpEF_Laura_ENS102.tsv'
+)
 
-gene = 'Arpp19'
-transcripts = ['ENSMUST00000007800', 'ENSMUST00000168166']
+df_bambu = pd.read_csv(bambu_file, sep='\t')
+
+gene = 'Fus'
+
+transcripts = list(df_bambu[df_bambu['mgi_symbol'] == gene]['ensembl_transcript_id'])
+transcripts.sort()
 transcript_color = ['b', 'g']
 
 cond_tx_dfs = []
 for this_cond in conditions:
     for this_transcript in transcripts:
-        this_filename = os.path.join(data_dir, ds, gene, f'{this_transcript}_{this_cond}.mAFiA.bed')
+        this_filename = os.path.join(data_dir, ds, 'isoforms', gene, f'{this_transcript}_{this_cond}.mAFiA.bed')
         this_df = pd.read_csv(this_filename, sep='\t', dtype={'chrom': str})
         this_df = this_df[this_df['coverage'] >= thresh_coverage]
         this_df.rename(columns={
@@ -77,10 +85,10 @@ df_expanded = pd.concat(df_expanded)
 # xticks = [f'{this_cond}\n{this_transcript}' for this_cond in conditions for this_transcript in transcripts]
 yticks = np.arange(0, df_expanded['modRatio'].max(), 25)
 
-plt.figure(figsize=(5*cm, 4*cm))
+plt.figure(figsize=(9*cm, 4*cm))
 sns.stripplot(data=df_expanded, x='condition', y='modRatio', hue='transcript',
               dodge=True, palette=transcript_color, size=3, rasterized=True)
-plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+plt.legend(title=gene, loc='lower right', bbox_to_anchor=(1.0, 1.0))
 plt.yticks(yticks)
-plt.title(gene)
-plt.savefig(os.path.join(img_out, f'strip_plot_isoforms_mod_ratio_{gene}_cov{thresh_coverage}.{FMT}'), **fig_kwargs)
+# plt.title(gene)
+# plt.savefig(os.path.join(img_out, f'strip_plot_isoforms_mod_ratio_{gene}_cov{thresh_coverage}.{FMT}'), **fig_kwargs)
