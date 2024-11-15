@@ -53,7 +53,7 @@ bambu_file = os.path.join(
 
 df_bambu = pd.read_csv(bambu_file, sep='\t')
 
-gene = 'Fus'
+gene = 'Mfn2'
 
 transcripts = list(df_bambu[df_bambu['mgi_symbol'] == gene]['ensembl_transcript_id'])
 transcripts.sort()
