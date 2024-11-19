@@ -32,10 +32,10 @@ dict_mod_display = {
     'psi': '\psi'
 }
 
-# ds = 'TAC'
-# conditions = ['SHAM_merged', 'TAC_merged']
-ds = 'HFpEF'
-conditions = ['ctrl_merged', 'HFpEF_merged']
+ds = 'TAC'
+conditions = ['SHAM_merged', 'TAC_merged']
+# ds = 'HFpEF'
+# conditions = ['ctrl_merged', 'HFpEF_merged']
 
 base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart'
 polyA_file = os.path.join(base_dir, f'polyA/gene_polyA_log2fc_pval_{ds}.tsv')
@@ -80,8 +80,8 @@ display_genes = 10
 reg_genes = {}
 reg_genes['up'] = vec_gene[mask_up]
 reg_genes['down'] = vec_gene[mask_down]
-reg_genes['up'] = [this_gene for this_gene in vec_gene[mask_up] if this_gene[:2]!='Gm']
-reg_genes['down'] = [this_gene for this_gene in vec_gene[mask_down] if this_gene[:2]!='Gm']
+reg_genes['up'] = [this_gene for this_gene in vec_gene[mask_up] if this_gene[:2] not in ['Gm', 'mt']]
+reg_genes['down'] = [this_gene for this_gene in vec_gene[mask_down] if this_gene[:2] not in ['Gm', 'mt']]
 plt.text(-xmax*margin, ymax*margin, '\n'.join(reg_genes['down'][:display_genes]), c='blue', ha='left', va='top')
 plt.text(xmax*margin, ymax*margin, '\n'.join(reg_genes['up'][:display_genes]), c='red', ha='right', va='top')
 plt.text(xmax*margin, ymax+0.1, f"{len(reg_genes['up'])} up", ha='right', va='bottom', c='red')

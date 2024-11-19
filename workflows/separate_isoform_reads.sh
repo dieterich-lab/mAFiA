@@ -14,7 +14,7 @@ ds=HFpEF
 conditions="ctrl HFpEF"
 bambu="/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/DTU/DTU_HFpEF_Laura_ENS102.tsv"
 
-gene=Mfn2
+gene=Plekhm2
 
 gene_gtf=`grep $gene /biodb/genomes/mus_musculus/GRCm38_102/genes.gtf`
 chrom=`echo $gene_gtf | cut -d' ' -f1`
