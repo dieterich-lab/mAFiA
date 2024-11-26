@@ -112,13 +112,13 @@ for mod_ind, this_mod in enumerate(mods):
     mod_df = df_merged[df_merged['name'] == this_mod]
     vec_x, vec_y = mod_df[[f'modRatio_{this_ds}' for this_ds in ds]].values.T
     delta_logit_S = get_logit(vec_y) - get_logit(vec_x)
-
+    mean_val = np.mean(delta_logit_S[~np.isnan(delta_logit_S) * ~np.isinf(delta_logit_S)])
     plt.subplot(1, 2, mod_ind+1)
     plt.hist(delta_logit_S, bins=60, range=[-bin_max, bin_max])
     plt.axvline(x=0, c='r', ls='--')
     plt.xticks(xticks)
     plt.xlim([-bin_max, bin_max])
-    plt.title(f'N = {len(vec_x)}')
+    plt.title(f'N = {len(vec_x)}\nmean = {mean_val:.3f}')
 
 plt.savefig(os.path.join(img_out, f"hist_delta_logit_S_{'_'.join(ds)}.{FMT}"), **fig_kwargs)
 

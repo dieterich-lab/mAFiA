@@ -63,6 +63,34 @@ for this_ds in ds:
 
 df_merged = reduce(lambda left, right: pd.merge(left, right, on=['gene', 'mod']), list(dfs.values()))
 
+### split by mod and ds ###
+vmax = 0.5
+# fig = plt.figure()
+fig, axes = plt.subplots(figsize=(10*cm, 12*cm), nrows=1, ncols=4)
+for mod_ind, this_mod in enumerate(mods):
+    mod_df_merged = df_merged[df_merged['mod'] == this_mod]
+    for ds_ind, this_ds in enumerate(ds):
+        ds_mod_df_merged = mod_df_merged.sort_values(f'num_sites_{this_ds}', ascending=False)[:num_gene_mods]
+        ds_mod_df_merged.sort_values(f'delta_logit_{this_ds}', ascending=False, inplace=True)
+
+        vec_gene = ds_mod_df_merged['gene'].values
+        vec_delta_logit = ds_mod_df_merged[f'delta_logit_{this_ds}'].values
+
+        subplot_ind = mod_ind*2+ds_ind+1
+        plt.subplot(1, 4, subplot_ind)
+        im = plt.imshow(vec_delta_logit[:, np.newaxis], aspect=0.5, origin='upper', vmin=-vmax, vmax=vmax, cmap='seismic')
+        plt.xticks([0], [this_ds])
+        plt.yticks(np.arange(num_gene_mods), vec_gene)
+        plt.gca().xaxis.tick_top()
+
+fig.subplots_adjust(top=1, bottom=0.05)
+cbar_ax = fig.add_axes([0.25, 0.01, 0.5, 0.02])
+cbar = fig.colorbar(im, cax=cbar_ax, orientation='horizontal')
+cbar.set_ticks(np.linspace(-vmax, vmax, 5))
+plt.savefig(os.path.join(img_out, f'heatmap_delta_logit_S_split.{FMT}'), **fig_kwargs)
+
+########################################################################################################################
+
 vec_gene_mod = [f'{gene}, ${dict_mod_display[mod]}$' for gene, mod in df_merged[['gene', 'mod']].values]
 mat_delta_logit = df_merged[[f'delta_logit_{this_ds}' for this_ds in ds]].values
 
