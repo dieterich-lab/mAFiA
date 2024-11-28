@@ -16,7 +16,7 @@ mpl.rcParams['ytick.major.size'] = 1.5
 mpl.rcParams['lines.linewidth'] = 0.5
 mpl.rcParams['font.family'] = 'Arial'
 FMT = 'svg'
-fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
+fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200, transparent=True)
 #######################################################################
 import matplotlib.pyplot as plt
 
@@ -40,7 +40,9 @@ os.makedirs(img_out, exist_ok=True)
 
 conditions = ['SHAM', 'TAC']
 
-for cond in conditions:
+plt.figure(figsize=(4 * cm, 4 * cm))
+
+for cond_ind, cond in enumerate(conditions):
 
     miCLIP_file = os.path.join(miCLIP_dir, f'nochr_predicted_m6A_{cond}.bed')
     mAFiA_file = os.path.join(mAFiA_dir, f'{cond}_merged', 'chrALL.mAFiA.sites.bed')
@@ -70,6 +72,8 @@ for cond in conditions:
         f_out.write(f'coverage\tmiCLiP_sites\n')
         f_out.write(f'{len(df_merged_thresh)}\t{len(df_miCLIP)}\n')
 
+    df_merged_thresh.to_csv(os.path.join(miCLIP_dir, f'mAFiA_miCLIP_overlap_{cond}.tsv'), sep='\t', index=False)
+
 
     # plt.figure(figsize=(5, 5))
     # plt.scatter(df_merged_thresh['score'], df_merged_thresh['modRatio'], s=1)
@@ -87,15 +91,19 @@ for cond in conditions:
         binned_modRatios.append(
             df_merged_thresh[(df_merged_thresh['score'] >= bin_start) * (df_merged_thresh['score'] < bin_end)]['modRatio'].values)
 
-    plt.figure(figsize=(4*cm, 4*cm))
+    plt.subplot(2, 1, cond_ind+1)
     plt.boxplot(binned_modRatios, positions=bin_centers, widths=0.05, whis=0.3, showfliers=False)
     plt.xlim([bin_min, bin_max])
-    plt.xticks(bin_edges, np.round(bin_edges, 1))
+    if cond_ind == 0:
+        plt.xticks(bin_edges, [])
+    else:
+        plt.xticks(bin_edges, np.round(bin_edges, 1))
     plt.yticks(np.arange(0, 101, 25))
+    # plt.text(0.1, 0.1, cond)
     # plt.xlabel('miCLIP score', fontsize=12)
     # plt.ylabel('mAFiA stoichiometry', fontsize=12)
     # plt.title(cond, fontsize=15)
-    plt.savefig(os.path.join(img_out, f'boxplot_mAFiA_miCLIP_{cond}.{FMT}'), **fig_kwargs)
+plt.savefig(os.path.join(img_out, f'boxplot_mAFiA_miCLIP.{FMT}'), **fig_kwargs)
 
 ### compare miCLIP diff. sites to mAFiA KS sites ###
 from matplotlib_venn import venn2
