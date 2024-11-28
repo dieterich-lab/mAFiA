@@ -68,9 +68,12 @@ vmax = 0.5
 # fig = plt.figure()
 fig, axes = plt.subplots(figsize=(10*cm, 12*cm), nrows=1, ncols=4)
 for mod_ind, this_mod in enumerate(mods):
-    mod_df_merged = df_merged[df_merged['mod'] == this_mod]
+    # mod_df_merged = df_merged[df_merged['mod'] == this_mod]
     for ds_ind, this_ds in enumerate(ds):
+        df_ds = dfs[this_ds]
+        mod_df_merged = df_ds[df_ds['mod'] == this_mod]
         ds_mod_df_merged = mod_df_merged.sort_values(f'num_sites_{this_ds}', ascending=False)[:num_gene_mods]
+        # ds_mod_df_merged = mod_df_merged.sort_values(f'pval_{this_ds}', ascending=True)[:num_gene_mods]
         ds_mod_df_merged.sort_values(f'delta_logit_{this_ds}', ascending=False, inplace=True)
 
         vec_gene = ds_mod_df_merged['gene'].values
