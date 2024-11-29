@@ -62,7 +62,7 @@ for this_ds, this_cond in zip(ds, conditions):
     ]
     df_res.rename(columns={
         'coverage': f'coverage_{this_ds}',
-        'confidence': f'confiednece_{this_ds}',
+        'confidence': f'confidence_{this_ds}',
         'modRatio': f'modRatio_{this_ds}'
     }, inplace=True)
     dfs.append(df_res)
