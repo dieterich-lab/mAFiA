@@ -23,7 +23,7 @@ fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200, transparent=True)
 data_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/protein_abundance'
 proteome_file = os.path.join(data_dir, 'TACOMA_differential_proteome_analysis_TAC_vs_SHAM_benjamini_hochberg.tsv')
 
-img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure4'
+img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/_figure4'
 
 df_proteome = pd.read_csv(proteome_file, sep='\t')
 df_proteome = df_proteome[df_proteome['tp'] == 'Combined']

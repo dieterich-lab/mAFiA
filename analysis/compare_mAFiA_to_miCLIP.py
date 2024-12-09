@@ -32,7 +32,7 @@ bed6_fields = [
 miCLIP_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/miCLIP'
 mAFiA_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/TAC'
 
-img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
+img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure4'
 os.makedirs(img_out, exist_ok=True)
 
 # cond = 'SHAM'

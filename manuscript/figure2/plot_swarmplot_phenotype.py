@@ -8,7 +8,7 @@ gr = 1.618
 dpi = 1200
 mpl.rcParams['figure.dpi'] = dpi
 mpl.rcParams['savefig.dpi'] = dpi
-mpl.rcParams['font.size'] = 5
+mpl.rcParams['font.size'] = 6
 mpl.rcParams['legend.fontsize'] = 5
 mpl.rcParams['xtick.labelsize'] = 5
 mpl.rcParams['ytick.labelsize'] = 5
@@ -44,10 +44,10 @@ cond_palette = {
     'HFpEF': ['gray', 'red']
 }
 
-plt.figure(figsize=(9*cm, 6*cm))
+plt.figure(figsize=(6*cm, 6*cm))
 for cond_ind, (this_cond, this_df_cond) in enumerate(df_condition.items()):
 
-    plt.subplot(2, 3, 3*cond_ind+1)
+    plt.subplot(2, 2, 2*cond_ind+1)
     sns.stripplot(data=this_df_cond, x='Condition', y='Ejection Fraction',
                   hue='Condition', palette=cond_palette[this_cond], size=2)
     sns.barplot(data=this_df_cond, x='Condition', y='Ejection Fraction',
@@ -55,11 +55,13 @@ for cond_ind, (this_cond, this_df_cond) in enumerate(df_condition.items()):
     plt.ylim([0, 100])
     plt.yticks([0, 50, 100])
     plt.xlabel(None)
-    plt.ylabel(None)
-    if cond_ind == 0:
-        plt.title('Ejection Fraction (%)')
+    plt.ylabel('Ejection Fraction (%)')
+    # if cond_ind == 1:
+    #     plt.xlabel('Ejection Fraction (%)')
+    # else:
+    #     plt.xlabel(None)
 
-    plt.subplot(2, 3, 3*cond_ind+2)
+    plt.subplot(2, 2, 2*cond_ind+2)
     sns.stripplot(data=this_df_cond, x='Condition', y='HW.BW (mg/g)',
                   hue='Condition', palette=cond_palette[this_cond], size=2)
     sns.barplot(data=this_df_cond, x='Condition', y='HW.BW (mg/g)',
@@ -67,22 +69,24 @@ for cond_ind, (this_cond, this_df_cond) in enumerate(df_condition.items()):
     plt.ylim([3, 8])
     # plt.xticks(range(2), [])
     plt.xlabel(None)
-    plt.ylabel(None)
-    if cond_ind == 0:
-        plt.title('HW/BW (mg/g)')
+    plt.ylabel('HW/BW (mg/g)')
 
-    plt.subplot(2, 3, 3*cond_ind+3)
-    sns.stripplot(data=this_df_cond, x='Condition', y='E/E`',
-                  hue='Condition', palette=cond_palette[this_cond], size=2)
-    sns.barplot(data=this_df_cond, x='Condition', y='E/E`',
-                  hue='Condition', palette=cond_palette[this_cond], width=0.5, alpha=0.5)
-    plt.ylim([-50, -10])
-    # plt.xticks(range(2), [])
-    plt.xlabel(None)
-    plt.ylabel(None)
-    if cond_ind == 0:
-        plt.title('E/E\'')
-
+    # if cond_ind == 1:
+    #     plt.xlabel('HW/BW (mg/g)')
+    # else:
+    #     plt.xlabel(None)
 plt.savefig(os.path.join(img_out, f'mouse_phenotype.{FMT}'), **fig_kwargs)
+
+plt.figure(figsize=(4*cm, 4*cm))
+this_cond = 'HFpEF'
+sns.stripplot(data=this_df_cond, x='Condition', y='E/E`',
+              hue='Condition', palette=cond_palette[this_cond], size=2)
+sns.barplot(data=this_df_cond, x='Condition', y='E/E`',
+              hue='Condition', palette=cond_palette[this_cond], width=0.5, alpha=0.5)
+plt.ylim([-50, -10])
+# plt.xticks(range(2), [])
+plt.xlabel(None)
+plt.ylabel('E/E\'')
+plt.savefig(os.path.join(img_out, f'HFpEF_E_E_prime.{FMT}'), **fig_kwargs)
 
 

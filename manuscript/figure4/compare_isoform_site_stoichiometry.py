@@ -48,7 +48,7 @@ dict_mod_display = {
 }
 
 data_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/mouse_heart'
-img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
+img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure4'
 
 ds = 'HFpEF'
 conditions = ['ctrl', 'HFpEF']

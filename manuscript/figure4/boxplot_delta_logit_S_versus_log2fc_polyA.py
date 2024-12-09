@@ -44,7 +44,7 @@ base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA
 stoichiometry_file = os.path.join(base_dir, 'transcript_logit', f'delta_logitS_{ds}.tsv')
 polyA_file = os.path.join(base_dir, f'polyA/gene_polyA_log2fc_pval_{ds}.tsv')
 
-img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
+img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure4'
 os.makedirs(img_out, exist_ok=True)
 
 thresh_pval = 0.05

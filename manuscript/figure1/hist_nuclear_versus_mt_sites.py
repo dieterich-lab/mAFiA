@@ -57,10 +57,10 @@ img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure2'
 thresh_conf = 80
 thresh_cov = 50
 
-# ds = 'TAC'
-# condition = 'TAC_merged'
-ds = 'HFpEF'
-condition = 'HFpEF_merged'
+ds = 'TAC'
+condition = 'SHAM_merged'
+# ds = 'HFpEF'
+# condition = 'HFpEF_merged'
 
 in_filename = os.path.join(res_dir, ds, condition, 'chrALL.mAFiA.sites.bed')
 out_filename = os.path.join(res_dir, ds, condition, f'protein_coding.conf{thresh_conf}_cov{thresh_cov}.chrALL.mAFiA.sites.bed')

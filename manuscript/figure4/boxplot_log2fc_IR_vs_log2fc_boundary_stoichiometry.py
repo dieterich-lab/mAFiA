@@ -145,7 +145,7 @@ def get_df_irf_merged_thresh():
 res_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart'
 irfinder_dir = os.path.join(res_dir, 'IRFinder')
 
-img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
+img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure4'
 os.makedirs(img_out, exist_ok=True)
 
 mods = ['m6A', 'psi']

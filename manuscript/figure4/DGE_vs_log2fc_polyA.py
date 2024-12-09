@@ -72,7 +72,7 @@ def plot_prob_diff(norm_pos, norm_neg, mod_name, bin_centers, bin_width, ymax=No
         plt.yticks(np.round(np.linspace(-ymax, ymax, 5), 2))
 
 
-img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure3'
+img_out = '/home/adrian/img_out/manuscript_psico_mAFiA/figure4'
 
 res_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart'
 abundance_dir = os.path.join(res_dir, 'DTU')
