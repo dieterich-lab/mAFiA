@@ -21,11 +21,12 @@ mpl.rcParams['xtick.major.size'] = 1.5
 mpl.rcParams['ytick.major.size'] = 1.5
 mpl.rcParams['lines.linewidth'] = 0.5
 mpl.rcParams['font.family'] = 'Arial'
-# FMT = 'svg'
-# fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200, transparent=True)
-FMT = 'png'
-fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
+FMT = 'svg'
+fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200, transparent=True)
+# FMT = 'png'
+# fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
+from scipy.stats import mannwhitneyu
 
 
 def plot_distribution(vec_mod, vec_mask, thresh_mask, mod_name, bin_max, ymax=None):
@@ -148,6 +149,7 @@ binned_y = [
     [x for x in vec_dge[vec_polyA > 0] if ~np.isnan(x) and ~np.isinf(x)],
 ]
 num_genes = [len(this_bin) for this_bin in binned_y]
+pval = mannwhitneyu(binned_y[0], binned_y[1])[1]
 plt.boxplot(binned_y,
             positions=[-0.5, 0.5],
             widths=0.25,
@@ -158,6 +160,6 @@ plt.xticks([-0.5, 0.5],
 # plt.yticks(yticks)
 plt.xlabel('Delta polyA')
 plt.ylabel('DGE')
-plt.title(ds)
+plt.title(f'p-value: {pval:.2E}')
 plt.savefig(os.path.join(img_out, f'boxplot_DGE_vs_log2fc_polyA_{ds}_pval{thresh_pval}.{FMT}'),
             **fig_kwargs)

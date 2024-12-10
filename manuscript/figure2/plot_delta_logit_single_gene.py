@@ -58,7 +58,7 @@ ds_colors = {
 }
 
 sel_gene = 'Ttn'
-sel_mod = 'm6A'
+sel_mod = 'psi'
 sel_gene_row = df_gene[df_gene['gene'] == sel_gene].iloc[0]
 
 # ds = 'TAC'
@@ -103,7 +103,7 @@ df_merged['delta_logit'] = logit1 - logit0
 vec_delta_logit = df_merged['delta_logit'].values
 vec_delta_logit = vec_delta_logit[~np.isinf(vec_delta_logit) * ~np.isnan(vec_delta_logit)]
 
-xlim = [-2, 2]
+xlim = [-3, 3]
 bin_width = 0.25
 num_bins = int((xlim[1] - xlim[0]) / bin_width)
 
@@ -128,7 +128,7 @@ plt.xlim(xlim)
 plt.yticks(yticks)
 # plt.text(0.01, 0.95, f'mean: {mean_delta:.3f}\np-val: {pval:.3E}',
 #          ha='left', va='top', transform=plt.gca().transAxes)
-plt.text(0.05, 0.9, f'mean: {mean_delta:.3f}',
+plt.text(0.05, 0.9, rf'$\langle logit(S) \rangle$ = {mean_delta:.3f}',
          ha='left', va='top', transform=plt.gca().transAxes)
 plt.savefig(os.path.join(img_out, f"delta_logit_{sel_gene}_{sel_mod}_{ds}.{FMT}"), **fig_kwargs)
 

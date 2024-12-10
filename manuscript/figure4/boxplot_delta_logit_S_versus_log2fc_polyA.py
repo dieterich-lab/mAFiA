@@ -23,6 +23,7 @@ mpl.rcParams['font.family'] = 'Arial'
 FMT = 'svg'
 fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200, transparent=True)
 #######################################################################
+from scipy.stats import mannwhitneyu
 
 def get_logit(in_val):
     return np.log2(in_val / (1.0 - in_val))
@@ -35,10 +36,11 @@ dict_mod_display = {
 
 ds = 'TAC'
 conditions = ['SHAM_merged', 'TAC_merged']
+ylim = [-0.5, 0.5]
+
 # ds = 'HFpEF'
 # conditions = ['ctrl_merged', 'HFpEF_merged']
-# ds = 'Diet'
-# conditions = ['WT_CD_merged', 'WT_WD_merged']
+# ylim = [-0.5, 0.0]
 
 base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart'
 stoichiometry_file = os.path.join(base_dir, 'transcript_logit', f'delta_logitS_{ds}.tsv')
@@ -76,8 +78,6 @@ for this_mod in mods:
     )
 vec_log2fc_polyA = np.array([df_polyA.set_index('gene').loc[this_gene]['log2fc'] for this_gene in common_genes])
 
-# ylim = [-0.5, 0.0]
-ylim = [-0.5, 0.5]
 yticks = np.round(np.linspace(*ylim, 3), 2)
 plt.figure(figsize=(9*cm, 4*cm))
 for mod_ind, this_mod in enumerate(mods):
@@ -90,6 +90,7 @@ for mod_ind, this_mod in enumerate(mods):
         [x for x in vec_log2fc_polyA[(vec_log2fc_mod[this_mod] >= log2fc_bin_boundary)] if ~np.isnan(x) and ~np.isinf(x)],
     ]
     num_genes = [len(this_bin) for this_bin in binned_y]
+    pval = mannwhitneyu(binned_y[0], binned_y[1])[1]
     plt.subplot(1, 2, mod_ind+1)
     plt.boxplot(binned_y,
                 positions=[-0.5, 0.5],
@@ -102,6 +103,7 @@ for mod_ind, this_mod in enumerate(mods):
     plt.xticks([-0.5, 0.5],
                [rf'$\downarrow$ ({num_genes[0]})', rf'$\uparrow$ ({num_genes[1]})'])
     plt.yticks(yticks)
+    plt.title(f'p-value: {pval:.2E}')
     # plt.xlabel(r'$\langle$$\Delta$logit(S)$\rangle$')
     # if mod_ind == 0:
     #     plt.ylabel('log2fc polyA')

@@ -31,11 +31,11 @@ def smooth(y, box_pts=10):
 # ds = 'TAC'
 # conditions = ['SHAM_merged', 'TAC_merged']
 
-# ds = 'HFpEF'
-# conditions = ['ctrl_merged', 'HFpEF_merged']
+ds = 'HFpEF'
+conditions = ['ctrl_merged', 'HFpEF_merged']
 
-ds = 'Diet'
-conditions = ['WT_CD_merged', 'WT_WD_merged']
+# ds = 'Diet'
+# conditions = ['WT_CD_merged', 'WT_WD_merged']
 
 
 ds_colors = {
@@ -79,7 +79,7 @@ bin_edges = np.linspace(*hist_range, hist_num_bins+1)
 bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
 
 ymax = 0.08
-plt.figure(figsize=(5*cm, 2*cm))
+plt.figure(figsize=(6*cm, 3*cm))
 for mod_ind, this_mod in enumerate(mods):
     ax = plt.subplot(1, 2, mod_ind+1)
     all_norm_hist = []
