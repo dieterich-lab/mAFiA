@@ -10,6 +10,7 @@ input_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/Gm/Nm-Mut
 # sheet_name = 'S2_HeLa_full set rRNA_WT'
 sheet_name = 'S6_HepG2_mRNA_WT'
 df_in = pd.read_excel(input_file, sheet_name=sheet_name, skiprows=[0, 1])
+img_out = '/home/adrian/img_out/Gmorah'
 
 # ref_file = '/home/adrian/Data/TRR319_RMaP/Project_BaseCalling/Adrian/Gm/reference/rRNA_18S_28S.fasta'
 # ref = {}
@@ -17,49 +18,51 @@ df_in = pd.read_excel(input_file, sheet_name=sheet_name, skiprows=[0, 1])
 #     for record in SeqIO.parse(h_ref, 'fasta'):
 #         ref[record.id] = str(record.seq)
 
-motifs = [
-    'AAGAA',
-    'AAGAG',
-    'AAGAT',
-    'AAGCA',
-    'AGGAA',
-    'AGGAG',
-    'AGGCC',
-    'ATGGA',
-    'CAGAA',
-    'CAGAG',
-    'CAGCA',
-    'CAGCC',
-    'CAGCT',
-    'CAGGA',
-    'CAGGC',
-    'CAGGT',
-    'CTGAA',
-    'CTGAG',
-    'CTGCA',
-    'CTGCC',
-    'CTGCT',
-    'CTGGA',
-    'CTGTG',
-    'GAGAA',
-    'GAGAG',
+motifs_rmap_challenge = [
+    'GTGGC',
     'GAGCA',
+    'TGGCA',
+    'TTGAA',
     'GAGCC',
     'GAGCT',
-    'GAGGA',
+    'AGGCC',
+    'AAGCA',
+    'AAGAT',
+    'ATGGA',
+    'GAGAG',
     'GAGGC',
-    'GTGGA',
-    'GTGGC',
-    'TAGAG',
-    'TAGCG',
-    'TGGAA',
-    'TGGAG',
-    'TGGCA',
-    'TGGCC',
     'TGGCT',
+    'CAGGC',
+    'GTGGA',
+    'TGGCC',
     'TGGTG',
-    'TTGAA',
-    'TTGGA'
+    'CTGAG',
+    'CTGAA',
+    'AAGAG',
+    'CTGCA',
+    'CTGTG',
+    'TGGAA',
+    'CAGCT',
+    'CAGAG',
+    'CTGCC',
+    'AGGAA',
+    'CTGCT',
+    'CAGGA',
+    'GAGAA',
+    'CAGAA',
+    'CAGCC',
+    'CAGCA',
+    'GAGGA',
+    'TGGAG',
+    'CTGGA',
+    'AGGAG',
+    'AAGAA',
+    'CAGGT',
+    'TAGAG',
+    'TGGTG',
+    'ATGGA',
+    'TTGGA',
+    'TAGCG'
 ]
 
 ref_file = '/home/adrian/Data/GRCh38_102/GRCh38_102.fa'
@@ -131,3 +134,13 @@ df_out = pd.concat([
     df_out[~df_out['chrom'].str.isnumeric()].sort_values(by=['chrom', 'chromStart']),
 ])
 df_out.to_csv(out_bed_file, sep='\t', index=False)
+
+### site distribution ###
+plt.figure(figsize=(5, 5))
+plt.hist(df_bed['score'], range=[0, 100], bins=50, label='All')
+plt.hist(df_challenge['score'], range=[0, 100], bins=50, label='RMaP Challenge')
+plt.legend(loc='upper right', fontsize=10)
+plt.xlabel('S, Nm-Mut-Seq', fontsize=12)
+plt.ylabel('Site counts', fontsize=12)
+plt.title('HepG2 Gm', fontsize=15)
+plt.savefig(os.path.join(img_out, 'hist_stoichiometry_HepG2_mRNA_WT.png'), bbox_inches='tight')

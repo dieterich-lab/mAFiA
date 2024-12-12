@@ -18,7 +18,8 @@ MODEL=${HOME}/pytorch_models/HEK293_IVT_2_q50_10M/HEK293_IVT_2_q50_10M-epoch29.t
 #DATASET=JK_HEK293_DMSO_merged
 #WORKSPACE=/prj/TRR319_RMaP/Project_B01/Adrian/${DATASET}
 
-DATASET=rep1
+#DATASET=rep1
+DATASET=rep2
 WORKSPACE=/prj/TRR319_RMaP/Project_BaseCalling/Adrian/HepG2/${DATASET}
 
 mkdir -p ${WORKSPACE}
