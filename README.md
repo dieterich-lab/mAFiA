@@ -1,4 +1,4 @@
-**UPDATE JAN 2025**: mAFiA is now superseded by [Ψ-co-mAFiA](https://github.com/dieterich-lab/psi-co-mAFiA)
+# **UPDATE JAN 2025**: mAFiA is now superseded by [Ψ-co-mAFiA](https://github.com/dieterich-lab/psi-co-mAFiA)
 
 ![Logo](logo.png "mAFiA")
 
