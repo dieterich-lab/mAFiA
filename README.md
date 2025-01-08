@@ -1,8 +1,8 @@
+**UPDATE JAN 2025**: mAFiA is now superseded by [Ψ-co-mAFiA](https://github.com/dieterich-lab/psi-co-mAFiA)
+
 ![Logo](logo.png "mAFiA")
 
 # mAFiA - (Another) m<sup>6</sup>A Finding Algorithm
-
-**UPDATE JAN 2025**: mAFiA is now superseded by [Ψ-co-mAFiA](https://github.com/dieterich-lab/psi-co-mAFiA)
 
 Here we provide a brief walkthrough to run mAFiA, using the example of chromosome X.
 
