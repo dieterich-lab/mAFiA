@@ -17,8 +17,10 @@ mpl.rcParams['xtick.major.size'] = 1.5
 mpl.rcParams['ytick.major.size'] = 1.5
 mpl.rcParams['lines.linewidth'] = 0.5
 mpl.rcParams['font.family'] = 'Arial'
-FMT = 'svg'
-fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi, transparent=True)
+# FMT = 'svg'
+# fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi, transparent=True)
+FMT = 'png'
+fig_kwargs = dict(format=FMT, dpi=dpi)
 #######################################################################
 import matplotlib.pyplot as plt
 
@@ -26,7 +28,7 @@ mod = 'm6A'
 # mod = 'psi'
 
 thresh_confidence = 80
-thresh_coverage = 20
+thresh_coverage = 10
 
 
 def import_mAFiA(ds, thresh_conf=80.0, thresh_cov=50):
@@ -106,7 +108,7 @@ ticks = np.linspace(0, 100, 5)
 xylim = [-1, 101]
 
 overlapping_sites = []
-fig_scatter, axs = plt.subplots(nrows=1, ncols=len(all_ds), figsize=(4*len(all_ds)*cm, 3.5*cm))
+fig_scatter, axs = plt.subplots(nrows=1, ncols=len(all_ds), figsize=(4*len(all_ds)*cm, 4*cm))
 for ind, this_ds in enumerate(all_ds):
     df_mafia = import_mAFiA(this_ds, thresh_conf=thresh_confidence, thresh_cov=thresh_coverage)
     scatter_x, scatter_y = scatter_mafia_vs_ref(df_reference, df_mafia)
@@ -121,10 +123,12 @@ for ind, this_ds in enumerate(all_ds):
     axs[ind].set_yticks(ticks)
     # axs[ind].set_xlabel(ref_name)
     # axs[ind].set_ylabel(ds_names[this_ds])
-    # if ind==0:
-    #     axs[ind].set_ylabel('$\psi$-co-mAFiA')
-    # axs[ind].set_title(ds_names[this_ds])
+    if ind == 0:
+        axs[ind].set_ylabel('$S_{HEK293-IVT-WT}$')
+    axs[ind].set_title(ds_names[this_ds])
 # fig_scatter.suptitle(mod, fontsize=15)
+plt.subplots_adjust(bottom=0.2)
+fig_scatter.supxlabel(f'$S_{{{ref_name}}}$')
 fig_scatter.savefig(os.path.join(img_out, f'IVT_vs_{ref_name}_{mod}_conf{thresh_confidence}_cov{thresh_coverage}.{FMT}'),
                     **fig_kwargs)
 

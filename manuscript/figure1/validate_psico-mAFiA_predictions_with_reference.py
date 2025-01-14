@@ -18,24 +18,35 @@ mpl.rcParams['xtick.major.size'] = 1.5
 mpl.rcParams['ytick.major.size'] = 1.5
 mpl.rcParams['lines.linewidth'] = 0.5
 mpl.rcParams['font.family'] = 'Arial'
-FMT = 'svg'
-fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi, transparent=True)
+# FMT = 'svg'
+# fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi, transparent=True)
+FMT = 'png'
+fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi)
 #######################################################################
 import matplotlib.pyplot as plt
 
 THRESH_CONF = 80
-THRESH_COV = 20
+THRESH_COV = 10
+
+# pred_ds = 'HEK293_WT'
+# pred_ds = 'METTL3_KO'
+# pred_ds = 'TRUB1_OE'
 pred_ds = 'HEK293_WT'
+comp_ds = 'HEK293_WT'
+comp_ds = 'PRAISE'
+
 bid_seq_calibrated = False
+
 restrict_motifs = None
+# restrict_motifs = 'GUUCN'
 
-comp_ds = 'BID-Seq'
-mod_type = 'psi'
-pt_size = 3
-
+# comp_ds = 'PRAISE'
 # comp_ds = 'GLORI'
+
 # mod_type = 'm6A'
 # pt_size = 0.2
+mod_type = 'psi'
+pt_size = 3
 
 mods = ['m6A', 'psi']
 dict_mod_display = {
@@ -136,8 +147,8 @@ def scatter_plot(df_in, key_x, key_y, mod_type, fig_name, corr=None):
     plt.ylim([-1, 101])
     plt.xticks(np.linspace(0, 100, 5))
     plt.yticks(np.linspace(0, 100, 5))
-    # plt.xlabel("$S_{{{}}}$".format('-'.join(key_x.split('_')[1:])), fontsize=10)
-    # plt.ylabel("$S_{{{}}}$".format('-'.join(key_y.split('_')[1:])), fontsize=10)
+    plt.xlabel("$S_{{{}}}$".format('-'.join(key_x.split('_')[1:])), fontsize=10)
+    plt.ylabel("$S_{{{}}}$".format('-'.join(key_y.split('_')[1:])), fontsize=10)
     if corr is not None:
         if restrict_motifs:
             title = f'{restrict_motifs}\n{len(df_in)} {mod_type} sites\nconf$\geq${THRESH_CONF}%, corr. {corr:.2f}'
@@ -229,14 +240,14 @@ if restrict_motifs:
 else:
     df_comp_pred_sel = df_comp_pred_sel
 corr, num_sites = calc_correlation(df_comp_pred_sel)
-with open(os.path.join(img_out, f'corr_{mod_type}_pred_vs_{comp_ds}_conf{THRESH_CONF}_cov{THRESH_COV}.txt'), 'w') as f_out:
+with open(os.path.join(img_out, f'corr_{mod_type}_{pred_ds}_vs_{comp_ds}_conf{THRESH_CONF}_cov{THRESH_COV}.txt'), 'w') as f_out:
     f_out.write('num_sites' + '\t' + 'correlation' + '\n')
     f_out.write(str(num_sites) + '\t' + str(corr) + '\t' + '\n')
 # scatter_plot_by_motif(df_comp_pred_sel, f'modRatio_{comp_ds}', f'modRatio_{pred_ds}', mod_type, motifs, num_rows, num_cols, f'{mod_type}_pred_vs_{comp_ds}_conf{THRESH_CONF}_cov{THRESH_COV}.png')
 if restrict_motifs:
-    out_filename = f'{mod_type}_pred_vs_{comp_ds}_combined_conf{THRESH_CONF}_cov{THRESH_COV}_restrict_motifs_{restrict_motifs}.png'
+    out_filename = f'{mod_type}_{pred_ds}_vs_{comp_ds}_combined_conf{THRESH_CONF}_cov{THRESH_COV}_restrict_motifs_{restrict_motifs}.png'
 else:
-    out_filename = f'{mod_type}_pred_vs_{comp_ds}_combined_conf{THRESH_CONF}_cov{THRESH_COV}.{FMT}'
+    out_filename = f'{mod_type}_{pred_ds}_vs_{comp_ds}_combined_conf{THRESH_CONF}_cov{THRESH_COV}.{FMT}'
 scatter_plot(df_comp_pred_sel, f'modRatio_{comp_ds}', f'modRatio_{pred_ds}', mod_type, out_filename, corr=corr)
 
 ### histogram of deltaS ###
