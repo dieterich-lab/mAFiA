@@ -8,16 +8,13 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 
-mod_tags = {
-    'm6A': ('N', 0, 21891),
-    'psi': ('N', 0, 17802)
-}
 dict_mod_display = {
     'm6A': 'm^6A',
     'psi': '\psi'
 }
 
 thresh_valid_reads = 1000
+
 
 def get_mean_logit(in_probs):
     if len(in_probs) == 0:
@@ -35,7 +32,15 @@ def get_mean_logit_mod_level(in_read):
     return mod_mean_logit
 
 
-base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1'
+########################################################################################################################
+### R002 ###############################################################################################################
+########################################################################################################################
+# mod_tags = {
+#     'm6A': ('N', 0, 21891),
+#     'psi': ('N', 0, 17802)
+# }
+
+# base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1'
 
 # ds = 'WT'
 # bam_file = os.path.join(base_dir, 'HEK293/WT_P2/chrALL.mAFiA.reads.bam')
@@ -49,9 +54,26 @@ base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA
 # ds = 'TRUB1KD'
 # bam_file = os.path.join(base_dir, 'NanoSPA/HEK_siTRUB1_input_merged/chrALL.mAFiA.reads.bam')
 
-ds = 'TRUB1OE'
-bam_file = os.path.join(base_dir, 'HEK293_TRUB1_OE/merged/chrALL.mAFiA.reads.bam')
+# ds = 'TRUB1OE'
+# bam_file = os.path.join(base_dir, 'HEK293_TRUB1_OE/merged/chrALL.mAFiA.reads.bam')
 
+########################################################################################################################
+### R004 ###############################################################################################################
+########################################################################################################################
+mod_tags = {
+    'm6A': ('A', 0, 'a'),
+    'psi': ('T', 0, 17802)
+}
+
+base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling_RNA004/Isabel/20250224_HEK293_psU_kds_RTA/Dorado_082'
+
+# ds = 'HEK293_ctrl_R004'
+# bam_file = os.path.join(base_dir, 'HEK293_ctrl_RTA/calls_2025-02-26_T06-44-51.bam')
+
+ds = 'HEK293_TRUB1_kd'
+bam_file = os.path.join(base_dir, 'HEK293_TRUB1_kd_RTA/calls_2025-02-26_T06-43-59.bam')
+
+########################################################################################################################
 img_out = '/home/adrian/img_out/single_read_cross_talk'
 os.makedirs(img_out, exist_ok=True)
 
@@ -59,9 +81,10 @@ os.makedirs(img_out, exist_ok=True)
 # df_gene = pd.read_csv(gene_bed, sep='\t')
 
 single_read_mean_logit = []
-with pysam.AlignmentFile(bam_file, 'rb') as bam:
-    for this_read in tqdm(bam.fetch()):
-        single_read_mean_logit.append(get_mean_logit_mod_level(this_read))
+with pysam.AlignmentFile(bam_file, 'rb', check_sq=False) as bam:
+    for this_read in tqdm(bam.fetch(until_eof=True)):
+        if this_read.modified_bases is not None:
+            single_read_mean_logit.append(get_mean_logit_mod_level(this_read))
 
 vec_m6A, vec_psi = np.vstack([
     (this_read_mean_logit['m6A'],  this_read_mean_logit['psi'])
