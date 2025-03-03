@@ -32,8 +32,8 @@ THRESH_COV = 10
 # pred_ds = 'METTL3_KO'
 # pred_ds = 'TRUB1_OE'
 pred_ds = 'HEK293_WT'
-comp_ds = 'HEK293_WT'
-comp_ds = 'PRAISE'
+# comp_ds = 'HEK293_WT'
+comp_ds = 'BACS'
 
 bid_seq_calibrated = False
 
