@@ -2,8 +2,27 @@ import os
 import pandas as pd
 import pysam
 import numpy as np
-import matplotlib
-matplotlib.use('TkAgg')
+import matplotlib as mpl
+#######################################################################
+cm = 1/2.54  # centimeters in inches
+gr = 1.618
+dpi = 1200
+mpl.rcParams['figure.dpi'] = dpi
+mpl.rcParams['savefig.dpi'] = dpi
+mpl.rcParams['font.size'] = 6
+mpl.rcParams['legend.fontsize'] = 5
+mpl.rcParams['xtick.labelsize'] = 5
+mpl.rcParams['ytick.labelsize'] = 5
+mpl.rcParams['xtick.major.size'] = 1.5
+mpl.rcParams['ytick.major.size'] = 1.5
+mpl.rcParams['lines.linewidth'] = 0.5
+mpl.rcParams['font.family'] = 'Arial'
+FMT = 'svg'
+fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi, transparent=True)
+# FMT = 'png'
+# fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi)
+#######################################################################
+mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
@@ -14,12 +33,13 @@ dict_mod_display = {
 }
 
 thresh_valid_reads = 1000
-
+num_top_locs = 5
 
 def get_mean_logit(in_probs):
     if len(in_probs) == 0:
         return np.nan
-    rescaled_probs = np.clip(np.array(in_probs) / 255.0, a_max=0.999, a_min=0.001)
+    top_probs = np.sort(in_probs)[-num_top_locs:]
+    rescaled_probs = np.clip(np.array(top_probs) / 255.0, a_max=0.999, a_min=0.001)
     logits = np.log2(rescaled_probs / (1-rescaled_probs))
     return np.mean(logits)
 
@@ -35,15 +55,15 @@ def get_mean_logit_mod_level(in_read):
 ########################################################################################################################
 ### R002 ###############################################################################################################
 ########################################################################################################################
-# mod_tags = {
-#     'm6A': ('N', 0, 21891),
-#     'psi': ('N', 0, 17802)
-# }
+mod_tags = {
+    'm6A': ('N', 0, 21891),
+    'psi': ('N', 0, 17802)
+}
 
-# base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1'
+base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1'
 
-# ds = 'WT'
-# bam_file = os.path.join(base_dir, 'HEK293/WT_P2/chrALL.mAFiA.reads.bam')
+ds = 'WT'
+bam_file = os.path.join(base_dir, 'HEK293/WT_P2/chrALL.mAFiA.reads.bam')
 
 # ds = 'M3KO'
 # bam_file = os.path.join(base_dir, 'HEK293T_Mettl3_KO/merged/chrALL.mAFiA.reads.bam')
@@ -60,18 +80,18 @@ def get_mean_logit_mod_level(in_read):
 ########################################################################################################################
 ### R004 ###############################################################################################################
 ########################################################################################################################
-mod_tags = {
-    'm6A': ('A', 0, 'a'),
-    'psi': ('T', 0, 17802)
-}
+# mod_tags = {
+#     'm6A': ('A', 0, 'a'),
+#     'psi': ('T', 0, 17802)
+# }
 
-base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling_RNA004/Isabel/20250224_HEK293_psU_kds_RTA/Dorado_082'
+# base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling_RNA004/Isabel/20250224_HEK293_psU_kds_RTA/Dorado_082'
 
 # ds = 'HEK293_ctrl_R004'
 # bam_file = os.path.join(base_dir, 'HEK293_ctrl_RTA/calls_2025-02-26_T06-44-51.bam')
 
-ds = 'HEK293_TRUB1_kd'
-bam_file = os.path.join(base_dir, 'HEK293_TRUB1_kd_RTA/calls_2025-02-26_T06-43-59.bam')
+# ds = 'HEK293_TRUB1_kd'
+# bam_file = os.path.join(base_dir, 'HEK293_TRUB1_kd_RTA/calls_2025-02-26_T06-43-59.bam')
 
 ########################################################################################################################
 img_out = '/home/adrian/img_out/single_read_cross_talk'
@@ -108,24 +128,27 @@ perc_ll = round(num_ll / num_total * 100, 2)
 xy_max = 10
 num_bins = 80
 mat_z, edges_x, edges_y = np.histogram2d(vec_m6A, vec_psi, bins=num_bins, range=[[-xy_max, xy_max], [-xy_max, xy_max]])
+np.savez(os.path.join(img_out, f'mean_logit_S_per_read_top{num_top_locs}_{ds}.npz'),
+         mat_z=mat_z, edges_x=edges_x, edges_y=edges_y)
 
-plt.figure(figsize=(4, 4))
+
+plt.figure(figsize=(4*cm, 4*cm))
 plt.axvline(x=0, c='red', ls='--')
 plt.axhline(y=0, c='red', ls='--')
 plt.imshow(np.log10(mat_z+1), extent=[-xy_max, xy_max, -xy_max, xy_max], origin='lower', vmax=2.5)
 ax = plt.gca()
-plt.text(0.1, 0.1, f'{perc_ll}%', c='r', fontsize=12, ha='left', va='bottom', transform=ax.transAxes)
-plt.text(0.1, 0.9, f'{perc_lh}%', c='r', fontsize=12, ha='left', va='top', transform=ax.transAxes)
-plt.text(0.9, 0.1, f'{perc_hl}%', c='r', fontsize=12, ha='right', va='bottom', transform=ax.transAxes)
-plt.text(0.9, 0.9, f'{perc_hh}%', c='r', fontsize=12, ha='right', va='top', transform=ax.transAxes)
+plt.text(0.1, 0.1, f'{perc_ll}%', c='r', ha='left', va='bottom', transform=ax.transAxes)
+plt.text(0.1, 0.9, f'{perc_lh}%', c='r', ha='left', va='top', transform=ax.transAxes)
+plt.text(0.9, 0.1, f'{perc_hl}%', c='r', ha='right', va='bottom', transform=ax.transAxes)
+plt.text(0.9, 0.9, f'{perc_hh}%', c='r', ha='right', va='top', transform=ax.transAxes)
 plt.xlim([-xy_max, xy_max])
 plt.ylim([-xy_max, xy_max])
 plt.xticks(np.linspace(-xy_max, xy_max, 5))
 plt.yticks(np.linspace(-xy_max, xy_max, 5))
 plt.xlabel(rf"$\langle$logit $p({{{dict_mod_display['m6A']}}})$$\rangle$ per read")
 plt.ylabel(rf"$\langle$logit $p({{{dict_mod_display['psi']}}})$$\rangle$ per read")
-plt.title(f'{ds}\n{num_valid_reads} valid reads')
-plt.savefig(os.path.join(img_out, f'mean_logit_S_per_read_{ds}.png'), bbox_inches='tight')
+plt.title(f'{ds}\n{num_valid_reads} valid reads\nTop {num_top_locs} locs')
+plt.savefig(os.path.join(img_out, f'mean_logit_S_per_read_top{num_top_locs}_{ds}.{FMT}'), **fig_kwargs)
 plt.close('all')
 
 # with pysam.AlignmentFile(bam_file, 'rb') as bam:
@@ -169,3 +192,37 @@ plt.close('all')
             # plt.title(f'{this_gene_id}\n{this_gene_name}')
             # plt.savefig(os.path.join(img_out, f'{this_gene_id}_{this_gene_name}.png'), bbox_inches='tight')
             # plt.close('all')
+
+### compare 2 ds ###
+# ds0 = 'WT'
+# ds1 = 'TRUB1OE'
+#
+# data0 = np.load(os.path.join(img_out, f'mean_logit_S_per_read_top{num_top_locs}_{ds0}.npz'))
+# data1 = np.load(os.path.join(img_out, f'mean_logit_S_per_read_top{num_top_locs}_{ds1}.npz'))
+#
+# plt.figure(figsize=(8*cm, 4*cm))
+#
+# plt.subplot(1, 2, 1)
+# bin_edges = data0['edges_x']
+# bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
+# pdf0 = data0['mat_z'].sum(axis=1)
+# pdf0 = pdf0 / pdf0.sum()
+# pdf1 = data1['mat_z'].sum(axis=1)
+# pdf1 = pdf1 / pdf1.sum()
+# plt.plot(bin_centers, pdf0, label=ds0)
+# plt.plot(bin_centers, pdf1, label=ds1)
+# plt.title('m6A')
+# plt.legend()
+#
+# plt.subplot(1, 2, 2)
+# bin_edges = data0['edges_y']
+# bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
+# pdf0 = data0['mat_z'].sum(axis=0)
+# pdf0 = pdf0 / pdf0.sum()
+# pdf1 = data1['mat_z'].sum(axis=0)
+# pdf1 = pdf1 / pdf1.sum()
+# plt.plot(bin_centers, pdf0, label=ds0)
+# plt.plot(bin_centers, pdf1, label=ds1)
+# plt.title('psi')
+# plt.legend()
+
