@@ -1,4 +1,5 @@
 from Bio import SeqIO
+from tqdm import tqdm
 import logomaker as lm
 import numpy as np
 import pandas as pd
@@ -25,6 +26,20 @@ fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi)
 #######################################################################
 import matplotlib.pyplot as plt
 import os
+
+
+def get_central_motif(in_df, span=2):
+    all_motifs = []
+    for _, this_row in tqdm(in_df.iterrows()):
+        this_chrom, this_chromStart, this_chromEnd, this_strand = this_row[
+            ['chrom', 'chromStart', 'chromEnd', 'strand']
+        ]
+        this_motif = ref[this_chrom][(this_chromStart-span):(this_chromStart+span+1)]
+        if this_strand == '-':
+            this_motif = this_motif.reverse_complement()
+        all_motifs.append(str(this_motif))
+    in_df['ref_motif'] = all_motifs
+    return in_df
 
 
 def plot_5mer_motif(in_mod_name, in_df, op, thresh_delta):
@@ -54,15 +69,21 @@ def plot_5mer_motif(in_mod_name, in_df, op, thresh_delta):
     this_fig.clf()
 
 
-chemistry = 'RNA002'
+chemistry = 'RNA004'
 
 ### RNA004 ###
 if chemistry == 'RNA004':
     base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling_RNA004/Isabel/20250224_HEK293_psU_kds_RTA/Dorado_082'
     ds_x = 'HEK293_ctrl_RTA'
+
     # ds_y = 'HEK293_TRUB1_kd_RTA'
+    # sel_motifs = ['GTTCA', 'GTTCC', 'GTTCG', 'GTTCT']
+
     # ds_y = 'HEK293_PUS1_kd_RTA'
+    # sel_motifs = ['GTG', 'GTA', 'ATA', 'ATG']
+
     ds_y = 'HEK293_PUS7_kd_RTA'
+    sel_motifs = ['TGTAG']
 
     display_x = ds_x.lstrip('HEK293_').rstrip('_RTA')
     display_y = ds_y.lstrip('HEK293_').rstrip('_RTA')
@@ -155,15 +176,28 @@ for mod_ind, mod_name in enumerate(mod_names):
     df_merged_filtered = df_merged[~((df_merged['frequency_x'] == 0.0) * (df_merged['frequency_y'] == 0.0))]
     df_merged_filtered['delta'] = df_merged_filtered['frequency_y'] - df_merged_filtered['frequency_x']
 
-    num_sites = len(df_merged_filtered)
-    mat_z, edges_x, edges_y = np.histogram2d(df_merged_filtered['frequency_y'], df_merged_filtered['frequency_x'],
+    if mod_name == '17802':
+        if ds_y == 'HEK293_PUS1_kd_RTA':
+            df_merged_filtered = get_central_motif(df_merged_filtered, span=1)
+        else:
+            df_merged_filtered = get_central_motif(df_merged_filtered, span=2)
+        df_merged_motif_filtered = df_merged_filtered[df_merged_filtered['ref_motif'].isin(sel_motifs)]
+    else:
+        df_merged_motif_filtered = df_merged_filtered
+
+    num_sites = len(df_merged_motif_filtered)
+    mat_z, edges_x, edges_y = np.histogram2d(df_merged_motif_filtered['frequency_y'], df_merged_motif_filtered['frequency_x'],
                                              bins=20, range=[[0, 100], [0, 100]])
     centers_x = 0.5 * (edges_x[1:] + edges_x[:-1])
     centers_y = centers_x
 
     xylim = [0, 100]
-    # plt.scatter(df_merged_filtered['frequency_x'], df_merged_filtered['frequency_y'], s=1)
-    fig1_axes[mod_ind, 0].imshow(np.log10(mat_z+1), extent=xylim+xylim, origin='lower', vmin=0, vmax=3)
+    if mod_name == '17802':
+        fig1_axes[mod_ind, 0].scatter(df_merged_motif_filtered['frequency_x'],
+                                      df_merged_motif_filtered['frequency_y'],
+                                      s=1)
+    else:
+        fig1_axes[mod_ind, 0].imshow(np.log10(mat_z+1), extent=xylim+xylim, origin='lower', vmin=0, vmax=3)
     fig1_axes[mod_ind, 0].plot([0, 100], [0, 100], 'r--')
     fig1_axes[mod_ind, 0].set_xticks(np.linspace(0, 100, 5))
     fig1_axes[mod_ind, 0].set_yticks(np.linspace(0, 100, 5))
@@ -174,7 +208,7 @@ for mod_ind, mod_name in enumerate(mod_names):
     # plt.savefig(os.path.join(img_out, f'scatter_{comp_mod_name}_{ds_x}_{ds_y}.png'), bbox_inches='tight')
     fig1_axes[mod_ind, 0].set_title(f'{num_sites} ${dict_mod_display[mod_name]}$ sites')
 
-    vec_delta = df_merged_filtered['delta']
+    vec_delta = df_merged_motif_filtered['delta']
     vec_delta_pos = vec_delta[vec_delta >= 0]
     vec_delta_neg = vec_delta[vec_delta < 0]
 
@@ -188,17 +222,16 @@ for mod_ind, mod_name in enumerate(mod_names):
     fig1_axes[mod_ind, 1].legend(loc='upper right')
     # plt.title(f'{ds_y} - {ds_x}')
 
-    if display_y.split('_')[1] == 'OE':
-        if mod_name == 'psi':
-            plot_5mer_motif(mod_name, df_merged_filtered, '>=', 25)
-        elif mod_name == 'm6A':
-            plot_5mer_motif(mod_name, df_merged_filtered, '<', -25)
-    elif display_y.split('_')[1] == 'kd':
-        if mod_name == '17802':
-            plot_5mer_motif(mod_name, df_merged_filtered, '<', -50)
-        elif mod_name == 'a':
-            plot_5mer_motif(mod_name, df_merged_filtered, '>=', 50)
-
+    # if display_y.split('_')[1] == 'OE':
+    #     if mod_name == 'psi':
+    #         plot_5mer_motif(mod_name, df_merged_filtered, '>=', 25)
+    #     elif mod_name == 'm6A':
+    #         plot_5mer_motif(mod_name, df_merged_filtered, '<', -25)
+    # elif display_y.split('_')[1] == 'kd':
+    #     if mod_name == '17802':
+    #         plot_5mer_motif(mod_name, df_merged_filtered, '<', -50)
+    #     elif mod_name == 'a':
+    #         plot_5mer_motif(mod_name, df_merged_filtered, '>=', 50)
 fig1.tight_layout()
 fig1.savefig(os.path.join(img_out, f'{display_x}_{display_y}.{FMT}'), **fig_kwargs)
 
