@@ -17,15 +17,19 @@ mpl.rcParams['xtick.major.size'] = 1.5
 mpl.rcParams['ytick.major.size'] = 1.5
 mpl.rcParams['lines.linewidth'] = 0.5
 mpl.rcParams['font.family'] = 'Arial'
-# FMT = 'svg'
-# fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi, transparent=True)
-FMT = 'png'
-fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi)
+FMT = 'svg'
+fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi, transparent=True)
+# FMT = 'png'
+# fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi)
 #######################################################################
 mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
+# img_out = '/home/adrian/img_out/single_read_cross_talk'
+# os.makedirs(img_out, exist_ok=True)
+img_out = '/home/adrian/img_out/manuscript_bioinformatics_application_note'
+os.makedirs(img_out, exist_ok=True)
 
 dict_mod_display = {
     'm6A': 'm^6A',
@@ -104,8 +108,9 @@ bam_file = os.path.join(base_dir, 'HEK293/WT_P2/chrALL.mAFiA.reads.bam')
 # bam_file = os.path.join(base_dir, 'HEK293_TRUB1_kd_RTA/calls_2025-02-26_T06-43-59.bam')
 
 ########################################################################################################################
-img_out = '/home/adrian/img_out/single_read_cross_talk'
-os.makedirs(img_out, exist_ok=True)
+
+# outfile_name = os.path.join(img_out, f'boxplot_mean_occupancy_per_read_{ds}.{FMT}')
+outfile_name = os.path.join(img_out, f'figureS4.{FMT}')
 
 # gene_bed = '/home/adrian/Data/genomes/homo_sapiens/GRCh38_102/gene.ensembl_havana.GRCh38.102.bed'
 # df_gene = pd.read_csv(gene_bed, sep='\t')
@@ -137,45 +142,77 @@ for bin_i in range(len(bin_edges)-1):
     mask_psi = (vec_psi >= bin_start) * (vec_psi < bin_end)
     binned_m6A.append(vec_m6A[mask_psi])
 
-top_reads = 100
 
-flierprops = dict(marker='o', markerfacecolor='none', markersize=2, markeredgecolor='black')
+flierprops = dict(marker='o', markerfacecolor='none', markersize=2, markeredgecolor='gray',
+                  alpha=0.5, rasterized=True)
 
 xy_ticks = np.int32(bin_edges * 100)
 
-plt.figure(figsize=(8*cm, 5*cm))
-plt.subplot(1, 2, 1)
+plt.figure(figsize=(8*cm, 7*cm))
+plt.subplot(2, 2, 1)
 plt.boxplot(binned_psi, flierprops=flierprops)
 # plt.violinplot(binned_psi, quantiles=[[0.5]]*len(binned_psi))
-top_psi = [np.mean(np.sort(this_bin)[-top_reads:]) for this_bin in binned_psi]
-plt.plot(np.arange(1, len(bin_edges)), top_psi, c='r', ls='-')
-plt.plot(np.arange(1, len(bin_edges)), top_psi, 'r+', markersize=2, label=f'Top{top_reads} mean')
+# plt.plot(np.arange(1, len(bin_edges)), top_psi, c='r', ls='-')
+# plt.plot(np.arange(1, len(bin_edges)), top_psi, 'r+', markersize=2, label=f'N$\geq${thresh_top_reads}')
 # bin_sizes = [len(this_bin) for this_bin in binned_psi]
 # for bin_ind, this_bin_size in enumerate(bin_sizes):
 #     plt.text(bin_ind+0.5, 1.05, this_bin_size)
-plt.legend(loc='upper right')
+# plt.legend(loc='upper right')
 plt.ylim([-0.01, 1.05])
 plt.xticks(np.arange(len(bin_edges)) + 0.5, xy_ticks)
 plt.yticks(bin_edges, xy_ticks)
 plt.xlabel(f"N(${dict_mod_display['m6A']}$)")
 plt.ylabel(f"N(${dict_mod_display['psi']}$)")
-plt.subplot(1, 2, 2)
+plt.subplot(2, 2, 2)
 plt.boxplot(binned_m6A, flierprops=flierprops)
 # plt.violinplot(binned_m6A, quantiles=[[0.5]]*len(binned_m6A))
-top_m6A = [np.mean(np.sort(this_bin)[-100:]) for this_bin in binned_m6A]
-plt.plot(np.arange(1, len(bin_edges)), top_m6A, c='r', ls='-')
-plt.plot(np.arange(1, len(bin_edges)), top_m6A, 'r+', markersize=2, label=f'Top{top_reads} mean')
-plt.legend(loc='upper right')
+# plt.plot(np.arange(1, len(bin_edges)), top_m6A, c='r', ls='-')
+# plt.plot(np.arange(1, len(bin_edges)), top_m6A, 'r+', markersize=2, label=f'N$\geq${thresh_top_reads}')
+# plt.legend(loc='upper right')
 plt.ylim([-0.01, 1.05])
 plt.xticks(np.arange(len(bin_edges)) + 0.5, xy_ticks)
 plt.yticks(bin_edges, xy_ticks)
 plt.xlabel(f"N(${dict_mod_display['psi']}$)")
 plt.ylabel(f"N(${dict_mod_display['m6A']}$)")
 # plt.savefig(os.path.join(img_out, f'boxplot_mean_occupancy_per_read_top{num_top_locs}_{ds}.{FMT}'), **fig_kwargs)
-plt.suptitle(f'{ds}\nMin. {thresh_min_locs} locs per read')
-plt.tight_layout()
-plt.savefig(os.path.join(img_out, f'boxplot_mean_occupancy_per_read_{ds}.{FMT}'), **fig_kwargs)
+# plt.suptitle(f'{ds}\nMin. {thresh_min_locs} locs per read')
 
+# thresh_top_reads = 0.75
+# top_psi = [np.mean(this_bin[this_bin >= thresh_top_reads]) for this_bin in binned_psi]
+# top_m6A = [np.mean(this_bin[this_bin >= thresh_top_reads]) for this_bin in binned_m6A]
+top_reads = 100
+label = f'Top {top_reads}'
+top_psi = [np.mean(np.sort(this_bin)[-top_reads:]) for this_bin in binned_psi]
+top_m6A = [np.mean(np.sort(this_bin)[-top_reads:]) for this_bin in binned_m6A]
+
+# ylim = [0.79, 0.85]
+# yticks = np.linspace(*ylim, 3)
+top_color = 'k'
+# plt.figure(figsize=(8*cm, 4*cm))
+plt.subplot(2, 2, 3)
+plt.plot(np.arange(1, len(bin_edges)), top_psi, c=top_color, ls='-', label=label)
+plt.plot(np.arange(1, len(bin_edges)), top_psi, f'{top_color}o', markersize=2)
+plt.legend(loc='lower left')
+plt.xticks(np.arange(len(bin_edges)) + 0.5, xy_ticks)
+plt.ylim([-0.01, 1.05])
+plt.yticks(bin_edges, xy_ticks)
+plt.xlabel(f"N(${dict_mod_display['m6A']}$)")
+plt.ylabel(f"N(${dict_mod_display['psi']}$)")
+# plt.ylim(ylim)
+plt.subplot(2, 2, 4)
+plt.plot(np.arange(1, len(bin_edges)), top_m6A, c=top_color, ls='-', label=label)
+plt.plot(np.arange(1, len(bin_edges)), top_m6A, f'{top_color}o', markersize=2)
+plt.legend(loc='lower left')
+plt.xticks(np.arange(len(bin_edges)) + 0.5, xy_ticks)
+plt.ylim([-0.01, 1.05])
+plt.yticks(bin_edges, xy_ticks)
+plt.xlabel(f"N(${dict_mod_display['psi']}$)")
+plt.ylabel(f"N(${dict_mod_display['m6A']}$)")
+# plt.ylim(ylim)
+# plt.suptitle(f'N$\geq${int(thresh_top_reads*100)}%')
+plt.tight_layout()
+# plt.savefig(os.path.join(img_out, f'boxplot_mean_occupancy_per_read_{ds}_above{thresh_top_reads}.{FMT}'), **fig_kwargs)
+plt.savefig(outfile_name, **fig_kwargs)
 
 # plt.figure(figsize=(5*cm, 5*cm))
 # plt.scatter(vec_m6A, vec_psi)
