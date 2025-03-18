@@ -82,14 +82,14 @@ if chemistry == 'RNA004':
         'TAACT', 'AAACA', 'TGACC', 'TAACA', 'AAACC', 'TAACC'
     ]
 
-    ds_y = 'HEK293_TRUB1_kd_RTA'
-    sel_psi_motifs = ['GTTCA', 'GTTCC', 'GTTCG', 'GTTCT']
+    # ds_y = 'HEK293_TRUB1_kd_RTA'
+    # sel_psi_motifs = ['GTTCA', 'GTTCC', 'GTTCG', 'GTTCT']
 
     # ds_y = 'HEK293_PUS1_kd_RTA'
     # sel_psi_motifs = ['GTG', 'GTA', 'ATA', 'ATG']
 
-    # ds_y = 'HEK293_PUS7_kd_RTA'
-    # sel_psi_motifs = ['TGTAG']
+    ds_y = 'HEK293_PUS7_kd_RTA'
+    sel_psi_motifs = ['TGTAG']
 
     display_x = ds_x.lstrip('HEK293_').rstrip('_RTA')
     display_y = ds_y.lstrip('HEK293_').rstrip('_RTA')
@@ -211,7 +211,7 @@ for mod_ind, mod_name in enumerate(mod_names):
                                       df_merged_motif_filtered['frequency_y'],
                                       s=1)
     else:
-        fig1_axes[mod_ind, 0].imshow(np.log10(mat_z+1), extent=xylim+xylim, origin='lower', vmin=0, vmax=3)
+        fig1_axes[mod_ind, 0].imshow(np.log10(mat_z+1), extent=xylim+xylim, origin='lower', vmin=0, vmax=4)
     fig1_axes[mod_ind, 0].plot([0, 100], [0, 100], 'r--')
     fig1_axes[mod_ind, 0].set_xticks(np.linspace(0, 100, 5))
     fig1_axes[mod_ind, 0].set_yticks(np.linspace(0, 100, 5))
