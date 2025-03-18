@@ -76,14 +76,20 @@ if chemistry == 'RNA004':
     base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling_RNA004/Isabel/20250224_HEK293_psU_kds_RTA/Dorado_082'
     ds_x = 'HEK293_ctrl_RTA'
 
-    # ds_y = 'HEK293_TRUB1_kd_RTA'
-    # sel_motifs = ['GTTCA', 'GTTCC', 'GTTCG', 'GTTCT']
+    sel_m6A_motifs = [
+        'GGACT', 'GGACA', 'GAACT', 'AGACT', 'GGACC', 'TGACT',
+        'AAACT', 'GAACA', 'AGACA', 'AGACC', 'GAACC', 'TGACA',
+        'TAACT', 'AAACA', 'TGACC', 'TAACA', 'AAACC', 'TAACC'
+    ]
+
+    ds_y = 'HEK293_TRUB1_kd_RTA'
+    sel_psi_motifs = ['GTTCA', 'GTTCC', 'GTTCG', 'GTTCT']
 
     # ds_y = 'HEK293_PUS1_kd_RTA'
-    # sel_motifs = ['GTG', 'GTA', 'ATA', 'ATG']
+    # sel_psi_motifs = ['GTG', 'GTA', 'ATA', 'ATG']
 
-    ds_y = 'HEK293_PUS7_kd_RTA'
-    sel_motifs = ['TGTAG']
+    # ds_y = 'HEK293_PUS7_kd_RTA'
+    # sel_psi_motifs = ['TGTAG']
 
     display_x = ds_x.lstrip('HEK293_').rstrip('_RTA')
     display_y = ds_y.lstrip('HEK293_').rstrip('_RTA')
@@ -167,8 +173,8 @@ elif chemistry == 'RNA002':
     ]
     df_y.rename(columns={'modRatio': 'frequency'}, inplace=True)
 
-fig1 = plt.figure(figsize=(10 * cm, 10 * cm))
-fig1_axes = fig1.subplots(2, 2)
+
+mod_df_merged_motif_filtered = {}
 for mod_ind, mod_name in enumerate(mod_names):
     df_x_mod = df_x[df_x['name'] == mod_name]
     df_y_mod = df_y[df_y['name'] == mod_name]
@@ -181,10 +187,18 @@ for mod_ind, mod_name in enumerate(mod_names):
             df_merged_filtered = get_central_motif(df_merged_filtered, span=1)
         else:
             df_merged_filtered = get_central_motif(df_merged_filtered, span=2)
-        df_merged_motif_filtered = df_merged_filtered[df_merged_filtered['ref_motif'].isin(sel_motifs)]
-    else:
-        df_merged_motif_filtered = df_merged_filtered
+        df_merged_motif_filtered = df_merged_filtered[df_merged_filtered['ref_motif'].isin(sel_psi_motifs)]
+    elif mod_name == 'a':
+        df_merged_filtered = get_central_motif(df_merged_filtered, span=2)
+        df_merged_motif_filtered = df_merged_filtered[df_merged_filtered['ref_motif'].isin(sel_m6A_motifs)]
 
+    mod_df_merged_motif_filtered[mod_name] = df_merged_motif_filtered
+
+
+fig1 = plt.figure(figsize=(10 * cm, 10 * cm))
+fig1_axes = fig1.subplots(2, 2)
+for mod_ind, mod_name in enumerate(mod_names):
+    df_merged_motif_filtered = mod_df_merged_motif_filtered[mod_name]
     num_sites = len(df_merged_motif_filtered)
     mat_z, edges_x, edges_y = np.histogram2d(df_merged_motif_filtered['frequency_y'], df_merged_motif_filtered['frequency_x'],
                                              bins=20, range=[[0, 100], [0, 100]])
@@ -234,5 +248,4 @@ for mod_ind, mod_name in enumerate(mod_names):
     #         plot_5mer_motif(mod_name, df_merged_filtered, '>=', 50)
 fig1.tight_layout()
 fig1.savefig(os.path.join(img_out, f'{display_x}_{display_y}.{FMT}'), **fig_kwargs)
-
 plt.close('all')
