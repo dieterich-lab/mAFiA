@@ -17,19 +17,19 @@ mpl.rcParams['xtick.major.size'] = 1.5
 mpl.rcParams['ytick.major.size'] = 1.5
 mpl.rcParams['lines.linewidth'] = 0.5
 mpl.rcParams['font.family'] = 'Arial'
-FMT = 'svg'
-fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi, transparent=True)
-# FMT = 'png'
-# fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi)
-#######################################################################
+# FMT = 'svg'
+# fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi, transparent=True)
+FMT = 'png'
+fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi)
+######################################################################
 mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-# img_out = '/home/adrian/img_out/single_read_cross_talk'
-# os.makedirs(img_out, exist_ok=True)
-img_out = '/home/adrian/img_out/manuscript_bioinformatics_application_note'
+img_out = '/home/adrian/img_out/single_read_cross_talk'
 os.makedirs(img_out, exist_ok=True)
+# img_out = '/home/adrian/img_out/manuscript_bioinformatics_application_note'
+# os.makedirs(img_out, exist_ok=True)
 
 dict_mod_display = {
     'm6A': 'm^6A',
@@ -74,10 +74,10 @@ mod_tags = {
     'psi': ('N', 0, 17802)
 }
 
-base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1'
-
-ds = 'WT'
-bam_file = os.path.join(base_dir, 'HEK293/WT_P2/chrALL.mAFiA.reads.bam')
+# base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1'
+#
+# ds = 'WT'
+# bam_file = os.path.join(base_dir, 'HEK293/WT_P2/chrALL.mAFiA.reads.bam')
 
 # ds = 'M3KO'
 # bam_file = os.path.join(base_dir, 'HEK293T_Mettl3_KO/merged/chrALL.mAFiA.reads.bam')
@@ -94,23 +94,23 @@ bam_file = os.path.join(base_dir, 'HEK293/WT_P2/chrALL.mAFiA.reads.bam')
 ########################################################################################################################
 ### R004 ###############################################################################################################
 ########################################################################################################################
-# mod_tags = {
-#     'm6A': ('A', 0, 'a'),
-#     'psi': ('T', 0, 17802)
-# }
+mod_tags = {
+    'm6A': ('A', 0, 'a'),
+    'psi': ('T', 0, 17802)
+}
 
-# base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling_RNA004/Isabel/20250224_HEK293_psU_kds_RTA/Dorado_082'
+base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling_RNA004/Isabel/20250224_HEK293_psU_kds_RTA/Dorado_082'
 
-# ds = 'HEK293_ctrl_R004'
-# bam_file = os.path.join(base_dir, 'HEK293_ctrl_RTA/calls_2025-02-26_T06-44-51.bam')
+ds = 'HEK293_ctrl_R004'
+bam_file = os.path.join(base_dir, 'HEK293_ctrl_RTA/calls_2025-02-26_T06-44-51.bam')
 
 # ds = 'HEK293_TRUB1_kd'
 # bam_file = os.path.join(base_dir, 'HEK293_TRUB1_kd_RTA/calls_2025-02-26_T06-43-59.bam')
 
 ########################################################################################################################
 
-# outfile_name = os.path.join(img_out, f'boxplot_mean_occupancy_per_read_{ds}.{FMT}')
-outfile_name = os.path.join(img_out, f'figureS4.{FMT}')
+outfile_name = os.path.join(img_out, f'boxplot_mean_occupancy_per_read_{ds}.{FMT}')
+# outfile_name = os.path.join(img_out, f'figureS4.{FMT}')
 
 # gene_bed = '/home/adrian/Data/genomes/homo_sapiens/GRCh38_102/gene.ensembl_havana.GRCh38.102.bed'
 # df_gene = pd.read_csv(gene_bed, sep='\t')

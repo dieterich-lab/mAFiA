@@ -1,7 +1,11 @@
 #!/bin/sh
 
-annot_bed="/home/adrian/Data/genomes/mus_musculus/mm10/mm10_annot.sorted.bed"
-region_sizes="/home/adrian/Data/genomes/mus_musculus/mm10/region_sizes.txt"
+#annot_bed="/home/adrian/Data/genomes/mus_musculus/mm10/mm10_annot.sorted.bed"
+#region_sizes="/home/adrian/Data/genomes/mus_musculus/mm10/region_sizes.txt"
+
+annot_bed="/home/adrian/Data/metaPlotR/hg38_annot.sorted.bed"
+region_sizes="/home/adrian/Data/metaPlotR/region_sizes.txt"
+
 metaPlotR="/home/adrian/git/metaPlotR"
 
 ########################################################################################################################
@@ -14,21 +18,23 @@ metaPlotR="/home/adrian/git/metaPlotR"
 #ds="TAC"
 #conditions="SHAM TAC"
 
-ds="CM"
-conditions="WT M3KO"
+#ds="CM"
+#conditions="WT M3KO"
 
 #res_dir="/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/metaPlotR"
 ########################################################################################################################
 
 #res_dir="/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/polyA"
-res_dir="/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/metaPlotR"
+#res_dir="/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/mouse_heart/metaPlotR"
+res_dir="/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/WT_P2/metaPlotR"
 
 #polyAs="below_50 above_150"
 thresholds="0.0 50.0"
 
-for this_cond in ${conditions}
-do
-  file_prefix="${ds}_${this_cond}"
+#for this_cond in ${conditions}
+#do
+#  file_prefix="${ds}_${this_cond}"
+  file_prefix="WT"
   for thresh_modRatio in ${thresholds}
   do
     for this_mod in "m6A" "psi"
@@ -43,4 +49,4 @@ do
       rm ${in_bed}.sorted ${in_bed}.sorted.annot
     done
   done
-done
+#done
