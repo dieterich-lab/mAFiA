@@ -17,10 +17,10 @@ mpl.rcParams['xtick.major.size'] = 1.5
 mpl.rcParams['ytick.major.size'] = 1.5
 mpl.rcParams['lines.linewidth'] = 0.5
 mpl.rcParams['font.family'] = 'Arial'
-# FMT = 'svg'
-# fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi, transparent=True)
-FMT = 'png'
-fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi)
+FMT = 'svg'
+fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi, transparent=True)
+# FMT = 'png'
+# fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=dpi)
 ######################################################################
 mpl.use('TkAgg')
 import matplotlib.pyplot as plt
@@ -74,10 +74,10 @@ mod_tags = {
     'psi': ('N', 0, 17802)
 }
 
-# base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1'
-#
-# ds = 'WT'
-# bam_file = os.path.join(base_dir, 'HEK293/WT_P2/chrALL.mAFiA.reads.bam')
+base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1'
+
+ds = 'WT'
+bam_file = os.path.join(base_dir, 'HEK293/WT_P2/chrALL.mAFiA.reads.bam')
 
 # ds = 'M3KO'
 # bam_file = os.path.join(base_dir, 'HEK293T_Mettl3_KO/merged/chrALL.mAFiA.reads.bam')
@@ -94,24 +94,20 @@ mod_tags = {
 ########################################################################################################################
 ### R004 ###############################################################################################################
 ########################################################################################################################
-mod_tags = {
-    'm6A': ('A', 0, 'a'),
-    'psi': ('T', 0, 17802)
-}
-
-base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling_RNA004/Isabel/20250224_HEK293_psU_kds_RTA/Dorado_082'
-
-ds = 'HEK293_ctrl_R004'
-bam_file = os.path.join(base_dir, 'HEK293_ctrl_RTA/calls_2025-02-26_T06-44-51.bam')
+# mod_tags = {
+#     'm6A': ('A', 0, 'a'),
+#     'psi': ('T', 0, 17802)
+# }
+#
+# base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling_RNA004/Isabel/20250224_HEK293_psU_kds_RTA/Dorado_082'
+#
+# ds = 'HEK293_ctrl_R004'
+# bam_file = os.path.join(base_dir, 'HEK293_ctrl_RTA/calls_2025-02-26_T06-44-51.bam')
 
 # ds = 'HEK293_TRUB1_kd'
 # bam_file = os.path.join(base_dir, 'HEK293_TRUB1_kd_RTA/calls_2025-02-26_T06-43-59.bam')
 
 ########################################################################################################################
-
-outfile_name = os.path.join(img_out, f'boxplot_mean_occupancy_per_read_{ds}.{FMT}')
-# outfile_name = os.path.join(img_out, f'figureS4.{FMT}')
-
 # gene_bed = '/home/adrian/Data/genomes/homo_sapiens/GRCh38_102/gene.ensembl_havana.GRCh38.102.bed'
 # df_gene = pd.read_csv(gene_bed, sep='\t')
 
@@ -148,6 +144,9 @@ flierprops = dict(marker='o', markerfacecolor='none', markersize=2, markeredgeco
 
 xy_ticks = np.int32(bin_edges * 100)
 
+outfile_name = os.path.join(img_out, f'boxplot_mean_occupancy_per_read_{ds}.{FMT}')
+# outfile_name = os.path.join(img_out, f'figureS4.{FMT}')
+
 plt.figure(figsize=(8*cm, 7*cm))
 plt.subplot(2, 2, 1)
 plt.boxplot(binned_psi, flierprops=flierprops)
@@ -181,9 +180,9 @@ plt.ylabel(f"N(${dict_mod_display['m6A']}$)")
 # top_psi = [np.mean(this_bin[this_bin >= thresh_top_reads]) for this_bin in binned_psi]
 # top_m6A = [np.mean(this_bin[this_bin >= thresh_top_reads]) for this_bin in binned_m6A]
 top_reads = 100
-label = f'Top {top_reads}'
-top_psi = [np.mean(np.sort(this_bin)[-top_reads:]) for this_bin in binned_psi]
-top_m6A = [np.mean(np.sort(this_bin)[-top_reads:]) for this_bin in binned_m6A]
+label = f'Median, top {top_reads}'
+top_psi = [np.median(np.sort(this_bin)[-top_reads:]) for this_bin in binned_psi]
+top_m6A = [np.median(np.sort(this_bin)[-top_reads:]) for this_bin in binned_m6A]
 
 # ylim = [0.79, 0.85]
 # yticks = np.linspace(*ylim, 3)
