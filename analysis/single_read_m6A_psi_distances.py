@@ -181,16 +181,20 @@ for mod_type in ['m6A', 'psi', 'cross']:
                      if this_read_mod_distances[mod_type][0] is not None]
     avg_hist_dist_all = np.mean(np.vstack(hist_dist_all), axis=0)
     norm_hist_dist_all = avg_hist_dist_all / np.sum(avg_hist_dist_all)
+    cdf_from_center_all = [np.sum(norm_hist_dist_all[(int(dist_num_bins/2)-i-1):(int(dist_num_bins/2)+i+1)]) for i in range(int(dist_num_bins/2))]
+    quartile_all = dist_bin_centers[np.where(np.array(cdf_from_center_all) >= 0.50)[0][0] + int(dist_num_bins / 2)]
 
     hist_dist_thresh = [this_read_mod_distances[mod_type][1] for this_read_mod_distances in single_read_mod_distances
                         if this_read_mod_distances[mod_type][1] is not None]
     avg_hist_dist_thresh = np.mean(np.vstack(hist_dist_thresh), axis=0)
     norm_hist_dist_thresh = avg_hist_dist_thresh / np.sum(avg_hist_dist_thresh)
+    cdf_from_center_thresh = [np.sum(norm_hist_dist_thresh[(int(dist_num_bins/2)-i-1):(int(dist_num_bins/2)+i+1)]) for i in range(int(dist_num_bins/2))]
+    quartile_thresh = dist_bin_centers[np.where(np.array(cdf_from_center_thresh) >= 0.50)[0][0] + int(dist_num_bins / 2)]
 
     plt.figure(figsize=(4 * cm, 4 * cm))
-    plt.plot(dist_bin_centers, norm_hist_dist_all, c='b', label=f"${dict_mod_display[mod_type]}$ all")
+    plt.plot(dist_bin_centers, norm_hist_dist_all, c='b', label=f"${dict_mod_display[mod_type]}$ all\n$d_{{{50}}}$={int(quartile_all)}nts")
     plt.plot(dist_bin_centers, norm_hist_dist_thresh, c='r',
-             label=f"${dict_mod_display[mod_type]}$ P$\geq${THRESH_PROB}")
+             label=f"${dict_mod_display[mod_type]}$ P$\geq${THRESH_PROB}\n$d_{{{50}}}$={int(quartile_thresh)}nts")
     if mod_type == 'cross':
         plt.xticks(np.linspace(-dist_bin_max, dist_bin_max, 5))
         plt.xlim([-dist_bin_max, dist_bin_max])
