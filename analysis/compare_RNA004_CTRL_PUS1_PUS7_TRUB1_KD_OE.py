@@ -69,11 +69,20 @@ def plot_5mer_motif(in_mod_name, in_df, op, thresh_delta):
     this_fig.clf()
 
 
+ref_file = '/home/adrian/Data/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa'
+ref = {}
+for record in SeqIO.parse(ref_file, "fasta"):
+    ref[record.id] = record.seq
+
+
 chemistry = 'RNA004'
+thresh_cov = 50
 
 ### RNA004 ###
 if chemistry == 'RNA004':
-    base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling_RNA004/Isabel/20250224_HEK293_psU_kds_RTA/Dorado_082'
+    # base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling_RNA004/Isabel/20250224_HEK293_psU-KD_RTA/Dorado_082'
+    base_dir = '/home/adrian/Data/TRR319_RMaP_BaseCalling_RNA004/Isabel/20250317_SS_HEK293_psU-OE_RNA004/Dorado_082'
+
     ds_x = 'HEK293_ctrl_RTA'
 
     sel_m6A_motifs = [
@@ -82,13 +91,16 @@ if chemistry == 'RNA004':
         'TAACT', 'AAACA', 'TGACC', 'TAACA', 'AAACC', 'TAACC'
     ]
 
-    # ds_y = 'HEK293_TRUB1_kd_RTA'
+    # ds_y = 'HEK293_TRUB1-KD_RTA'
+    # ds_y = 'HEK293_TRUB1-OE_RTA'
     # sel_psi_motifs = ['GTTCA', 'GTTCC', 'GTTCG', 'GTTCT']
 
-    # ds_y = 'HEK293_PUS1_kd_RTA'
+    # ds_y = 'HEK293_PUS1-KD_RTA'
+    # ds_y = 'HEK293_PUS1-OE_RTA'
     # sel_psi_motifs = ['GTG', 'GTA', 'ATA', 'ATG']
 
-    ds_y = 'HEK293_PUS7_kd_RTA'
+    # ds_y = 'HEK293_PUS7-KD_RTA'
+    ds_y = 'HEK293_PUS7-OE_RTA'
     sel_psi_motifs = ['TGTAG']
 
     display_x = ds_x.lstrip('HEK293_').rstrip('_RTA')
@@ -103,13 +115,8 @@ elif chemistry == 'RNA002':
     display_x = 'WT'
     display_y = 'TRUB1_OE'
 
-img_out = '/home/adrian/img_out/HEK293_psU_kds'
+img_out = '/home/adrian/img_out/HEK293_psU_OEs'
 os.makedirs(img_out, exist_ok=True)
-
-ref_file = '/home/adrian/Data/genomes/homo_sapiens/GRCh38_102/GRCh38_102.fa'
-ref = {}
-for record in SeqIO.parse(ref_file, "fasta"):
-    ref[record.id] = record.seq
 
 if chemistry == 'RNA004':
     bed_fields = [
@@ -135,6 +142,9 @@ if chemistry == 'RNA004':
                        usecols=[0, 1, 2, 3, 4, 5, 10], names=bed_fields,
                        dtype={'chrom': str})
 
+    df_x = df_x[df_x['score'] >= thresh_cov]
+    df_y = df_y[df_y['score'] >= thresh_cov]
+
 elif chemistry == 'RNA002':
     bed_fields = [
         'chrom',
@@ -155,7 +165,6 @@ elif chemistry == 'RNA002':
         'psi': '\psi'
     }
 
-    thresh_cov = 10
     thresh_conf = 80.0
 
     df_x = pd.read_csv(os.path.join(base_dir, ds_x, 'chrALL.mAFiA.sites.bed'),
@@ -183,7 +192,7 @@ for mod_ind, mod_name in enumerate(mod_names):
     df_merged_filtered['delta'] = df_merged_filtered['frequency_y'] - df_merged_filtered['frequency_x']
 
     if mod_name == '17802':
-        if ds_y == 'HEK293_PUS1_kd_RTA':
+        if ds_y in ['HEK293_PUS1_kd_RTA', 'HEK293_PUS1-OE_RTA']:
             df_merged_filtered = get_central_motif(df_merged_filtered, span=1)
         else:
             df_merged_filtered = get_central_motif(df_merged_filtered, span=2)
@@ -247,5 +256,5 @@ for mod_ind, mod_name in enumerate(mod_names):
     #     elif mod_name == 'a':
     #         plot_5mer_motif(mod_name, df_merged_filtered, '>=', 50)
 fig1.tight_layout()
-fig1.savefig(os.path.join(img_out, f'{display_x}_{display_y}.{FMT}'), **fig_kwargs)
+fig1.savefig(os.path.join(img_out, f'{display_x}_{display_y}_cov{thresh_cov}.{FMT}'), **fig_kwargs)
 plt.close('all')
