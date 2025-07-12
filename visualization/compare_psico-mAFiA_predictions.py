@@ -1,35 +1,35 @@
 import pandas as pd
 from collections import Counter
 import numpy as np
+from scipy.stats import pearsonr, chisquare
 import os
 from tqdm import tqdm
 import matplotlib as mpl
-mpl.use('TkAgg')
 #######################################################################
-# cm = 1/2.54  # centimeters in inches
-# gr = 1.618
-# # mpl.rcParams['figure.dpi'] = 600
-# # mpl.rcParams['savefig.dpi'] = 600
-# mpl.rcParams['font.size'] = 5
-# mpl.rcParams['legend.fontsize'] = 5
-# mpl.rcParams['xtick.labelsize'] = 5
-# mpl.rcParams['ytick.labelsize'] = 5
-# mpl.rcParams['xtick.major.size'] = 1.5
-# mpl.rcParams['ytick.major.size'] = 1.5
-# mpl.rcParams['lines.linewidth'] = 0.5
-# mpl.rcParams['font.family'] = 'Arial'
-# FMT = 'pdf'
-# fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
+cm = 1/2.54  # centimeters in inches
+gr = 1.618
+# mpl.rcParams['figure.dpi'] = 600
+# mpl.rcParams['savefig.dpi'] = 600
+mpl.rcParams['font.size'] = 5
+mpl.rcParams['legend.fontsize'] = 5
+mpl.rcParams['xtick.labelsize'] = 5
+mpl.rcParams['ytick.labelsize'] = 5
+mpl.rcParams['xtick.major.size'] = 1.5
+mpl.rcParams['ytick.major.size'] = 1.5
+mpl.rcParams['lines.linewidth'] = 0.5
+mpl.rcParams['font.family'] = 'Arial'
+FMT = 'svg'
+fig_kwargs = dict(format=FMT, bbox_inches='tight', dpi=1200)
 #######################################################################
 import matplotlib.pyplot as plt
 
-THRESH_CONF = 80
+THRESH_CONF = 50
 THRESH_COV = 20
-pred_ds = 'CM_IVT'
+pred_ds = 'HEK293_WT_rep1'
 bid_seq_calibrated = False
 restrict_motifs = None
-comp_ds = 'CM_WT'
-mod_type = 'psi'
+comp_ds = 'HEK293_WT_rep2'
+mod_type = 'm6A'
 
 mods = ['m6A', 'psi']
 dict_mod_display = {
@@ -40,9 +40,9 @@ dict_mod_display = {
 dict_ds = {
     'RNA004_HEK293_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/RNA004/dorado/RNA004_HEK293_WT_RTA.mAFiA.bed',
 
-    'HEK293_WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/WT_P2/chrALL.mAFiA.sites.bed',
+    'HEK293_WT_rep2': '/home/achan/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/WT_P2/chrALL.mAFiA.sites.bed',
+    'HEK293_WT_rep1': '/home/achan/prj/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/100WT/chrALL.mAFiA.sites.bed',
 
-    '100WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/100WT/chrALL.mAFiA.sites.bed',
     '75WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/75WT/chrALL.mAFiA.sites.bed',
     '50WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/50WT/chrALL.mAFiA.sites.bed',
     '25WT': '/home/adrian/Data/TRR319_RMaP_BaseCalling/Adrian/results/psico-mAFiA_v1/HEK293/25WT/chrALL.mAFiA.sites.bed',
@@ -129,13 +129,13 @@ if bid_seq_calibrated:
 elif comp_ds in ['GLORI', 'BID-Seq', 'BID-Seq_mouse_heart', 'PRAISE', 'BACS']:
     df_comp.rename(columns={'score': 'modRatio'}, inplace=True)
 
-img_out = f'/home/adrian/img_out/psi-co-mAFiA/{pred_ds}_vs_{comp_ds}'
+img_out = f'/home/achan/img_out/m6A_psi_cross_talk/{pred_ds}_vs_{comp_ds}'
 os.makedirs(img_out, exist_ok=True)
 
-def scatter_plot(df_in, key_x, key_y, mod_type, fig_name, corr=None):
+def scatter_plot(df_in, key_x, key_y, mod_type, fig_name, corr=None, pval=None):
     plt.figure(figsize=(5, 5))
-    plt.plot(df_in[key_x], df_in[key_y], '.', alpha=0.5)
-    plt.plot([0, 100], [0, 100], linestyle='--', c='r', alpha=0.5)
+    plt.plot(df_in[key_x], df_in[key_y], '.', alpha=0.5, rasterized=True)
+    plt.plot([0, 100], [0, 100], linestyle='--', c='r', alpha=0.5, rasterized=True)
     plt.xlim([-1, 101])
     plt.ylim([-1, 101])
     plt.xticks(np.linspace(0, 100, 5))
@@ -144,9 +144,9 @@ def scatter_plot(df_in, key_x, key_y, mod_type, fig_name, corr=None):
     plt.ylabel("$S_{{{}}}$".format('-'.join(key_y.split('_')[1:])), fontsize=10)
     if corr is not None:
         if restrict_motifs:
-            title = f'{restrict_motifs}\n{len(df_in)} {mod_type} sites\nconf$\geq${THRESH_CONF}%, corr. {corr:.2f}'
+            title = f'{restrict_motifs}\n{len(df_in)} {mod_type} sites\nC={corr:.3f}, RMS={pval:.3f}'
         else:
-            title = f'{len(df_in)} {mod_type} sites\nconf$\geq${THRESH_CONF}%, corr. {corr:.2f}'
+            title = f'{len(df_in)} {mod_type} sites\nC={corr:.3f}, RMS={pval:.3f}'
     else:
         title = f'{len(df_in)} {mod_type} sites\nconf$\geq${THRESH_CONF}%'
     plt.suptitle(title, fontsize=12)
@@ -222,8 +222,10 @@ elif mod_type=='psi':
 def calc_correlation(in_df):
     in_array = in_df[[f'modRatio_{pred_ds}', f'modRatio_{comp_ds}']].values
     out_num_sites = len(in_array)
-    out_corr = np.corrcoef(in_array.T)[0, 1]
-    return round(out_corr, 3), out_num_sites
+    # out_corr = np.corrcoef(in_array.T)[0, 1]
+    out_corr, out_pval = pearsonr(in_array[:, 0], in_array[:, 1])
+    out_rms = np.sqrt(np.mean((in_array[:, 0] - in_array[:, 1])**2))
+    return out_corr, out_rms, out_num_sites
 
 ### compare to Bid-Seq ###
 df_comp_pred = pd.merge(df_comp, df_pred, on=['chrom', 'chromStart', 'chromEnd', 'name', 'strand', 'ref5mer'], suffixes=[f'_{comp_ds}', f'_{pred_ds}'])
@@ -232,16 +234,16 @@ if restrict_motifs:
     df_comp_pred_sel = df_comp_pred_sel[df_comp_pred_sel['ref5mer'].isin(motifs)]
 else:
     df_comp_pred_sel = df_comp_pred_sel
-corr, num_sites = calc_correlation(df_comp_pred_sel)
+corr, pval, num_sites = calc_correlation(df_comp_pred_sel)
 # with open(os.path.join(img_out, f'corr_{mod_type}_pred_vs_{comp_ds}_conf{THRESH_CONF}_cov{THRESH_COV}.txt'), 'w') as f_out:
 #     f_out.write('num_sites' + '\t' + 'correlation' + '\n')
 #     f_out.write(str(num_sites) + '\t' + str(corr) + '\t' + '\n')
 # scatter_plot_by_motif(df_comp_pred_sel, f'modRatio_{comp_ds}', f'modRatio_{pred_ds}', mod_type, motifs, num_rows, num_cols, f'{mod_type}_pred_vs_{comp_ds}_conf{THRESH_CONF}_cov{THRESH_COV}.png')
 if restrict_motifs:
-    out_filename = f'{mod_type}_pred_vs_{comp_ds}_combined_conf{THRESH_CONF}_cov{THRESH_COV}_restrict_motifs_{restrict_motifs}.png'
+    out_filename = f'{mod_type}_{pred_ds}_vs_{comp_ds}_combined_conf{THRESH_CONF}_cov{THRESH_COV}_restrict_motifs_{restrict_motifs}.{FMT}'
 else:
-    out_filename = f'{mod_type}_pred_vs_{comp_ds}_combined_conf{THRESH_CONF}_cov{THRESH_COV}.png'
-scatter_plot(df_comp_pred_sel, f'modRatio_{comp_ds}', f'modRatio_{pred_ds}', mod_type, out_filename, corr=corr)
+    out_filename = f'{mod_type}_{pred_ds}_vs_{comp_ds}_combined_conf{THRESH_CONF}_cov{THRESH_COV}.{FMT}'
+scatter_plot(df_comp_pred_sel, f'modRatio_{comp_ds}', f'modRatio_{pred_ds}', mod_type, out_filename, corr=corr, pval=pval)
 
 ### histogram of deltaS ###
 # bin_max = 100
